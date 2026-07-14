@@ -77,30 +77,30 @@ Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| VESL-01 | TBD | Pending |
-| VESL-02 | TBD | Pending |
-| CLAS-01 | TBD | Pending |
-| CLAS-02 | TBD | Pending |
-| CLAS-03 | TBD | Pending |
-| CLAS-04 | TBD | Pending |
-| CLAS-05 | TBD | Pending |
-| DETM-01 | TBD | Pending |
-| DETM-02 | TBD | Pending |
-| DETM-03 | TBD | Pending |
-| RSON-01 | TBD | Pending |
-| RSON-02 | TBD | Pending |
-| RSON-03 | TBD | Pending |
-| CHRT-01 | TBD | Pending |
-| CHRT-02 | TBD | Pending |
-| SCEN-01 | TBD | Pending |
-| SCEN-02 | TBD | Pending |
-| SCEN-03 | TBD | Pending |
+| VESL-01 | Phase 1 - Domain Foundations | Pending |
+| VESL-02 | Phase 4 - Interactive Chart Sandbox | Pending |
+| CLAS-01 | Phase 2 - COLREGS Rules Engine | Pending |
+| CLAS-02 | Phase 2 - COLREGS Rules Engine | Pending |
+| CLAS-03 | Phase 2 - COLREGS Rules Engine | Pending |
+| CLAS-04 | Phase 2 - COLREGS Rules Engine | Pending |
+| CLAS-05 | Phase 4 - Interactive Chart Sandbox | Pending |
+| DETM-01 | Phase 2 - COLREGS Rules Engine | Pending |
+| DETM-02 | Phase 2 - COLREGS Rules Engine | Pending |
+| DETM-03 | Phase 4 - Interactive Chart Sandbox | Pending |
+| RSON-01 | Phase 4 - Interactive Chart Sandbox | Pending |
+| RSON-02 | Phase 2 - COLREGS Rules Engine | Pending |
+| RSON-03 | Phase 4 - Interactive Chart Sandbox | Pending |
+| CHRT-01 | Phase 4 - Interactive Chart Sandbox | Pending |
+| CHRT-02 | Phase 4 - Interactive Chart Sandbox | Pending |
+| SCEN-01 | Phase 5 - Save, Share & Gallery | Pending |
+| SCEN-02 | Phase 3 - Persistence & API Layer | Pending |
+| SCEN-03 | Phase 5 - Save, Share & Gallery | Pending |
 
 **Coverage:**
 - v1 requirements: 18 total
-- Mapped to phases: 0 (pending roadmap creation)
-- Unmapped: 18 ⚠️ (expected prior to roadmap step)
+- Mapped to phases: 18/18
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-07-14*
-*Last updated: 2026-07-14 after initial definition*
+*Last updated: 2026-07-14 after roadmap creation (18/18 v1 requirements mapped to 5 phases)*
