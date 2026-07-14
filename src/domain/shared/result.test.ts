@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assertUnreachable, err, ok, type Result } from "./result";
+import { assertUnreachable, err, ok, type Result } from "./result.js";
 
 describe("ok", () => {
   it("returns a success result narrowing value to T with no cast", () => {

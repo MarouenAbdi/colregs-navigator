@@ -3,7 +3,7 @@ import {
   PositionSchema,
   VesselSchema,
   VesselTypeSchema,
-} from "./vessel";
+} from "./vessel.js";
 
 const validVessel = {
   position: { x: 0, y: 0 },
