@@ -25,11 +25,15 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Depends on**: Nothing (first phase)
 **Requirements**: VESL-01
 **Success Criteria** (what must be TRUE):
-  1. A `Vessel` value object models position, heading, speed, and all four vessel types (power-driven, sailing, fishing, restricted-in-ability-to-maneuver) with validated construction
+  1. A `Vessel` value object models position, heading, speed, and all five vessel types (power-driven, sailing, fishing, not-under-command, restricted-in-ability-to-maneuver) with validated construction
   2. Bearing, relative-bearing, and CPA/TCPA functions return textbook-correct results against a fixture suite (e.g., a reciprocal-heading-but-off-axis-bearing case is correctly NOT flagged head-on)
-  3. Compass/math/screen-space angle converters are pure, independently unit-tested functions with no DOM dependency
-  4. Degenerate inputs (identical position, zero speed, exact boundary angles) have explicit, tested, defined behavior rather than crashing or returning NaN
-**Plans**: TBD
+  3. Compass/math angle converters are pure, independently unit-tested functions with no DOM dependency (screen-space conversion is explicitly deferred to Phase 4)
+  4. Degenerate inputs (identical position, zero speed, exact boundary angles, near-zero relative velocity, negative TCPA) have explicit, tested, defined behavior rather than crashing or returning NaN
+**Plans**: 3 plans
+Plans:
+- [ ] 01-01-PLAN.md — Project toolchain, shared Result<T> degenerate-case union, Vessel/Position Zod value objects
+- [ ] 01-02-PLAN.md — bearing() and relativeBearing() geometry functions with fixture suite
+- [ ] 01-03-PLAN.md — cpa()/tcpa() vector math and compass/math angle-convert utilities
 
 ### Phase 2: COLREGS Rules Engine
 **Goal**: Given any two-vessel scenario, the system correctly classifies the encounter and determines give-way/stand-on with a transparent reasoning trail — the project's core value — validated against textbook fixtures before any UI exists.
@@ -85,7 +89,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Domain Foundations | 0/TBD | Not started | - |
+| 1. Domain Foundations | 0/3 | Not started | - |
 | 2. COLREGS Rules Engine | 0/TBD | Not started | - |
 | 3. Persistence & API Layer | 0/TBD | Not started | - |
 | 4. Interactive Chart Sandbox | 0/TBD | Not started | - |
