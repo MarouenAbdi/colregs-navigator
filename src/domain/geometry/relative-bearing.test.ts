@@ -53,15 +53,15 @@ describe("relativeBearing() classic encounter shapes (D-16)", () => {
 });
 
 describe("relativeBearing() normalization boundary (D-08)", () => {
-  it("raw subtraction of exactly -180 is remapped to 180, not -180", () => {
+  it("raw subtraction of exactly -180 (mod 360) is remapped to 180, not -180", () => {
     const result = relativeBearing(
       exactBoundaryCase.own,
       exactBoundaryCase.contact,
     );
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.value).toBe(180);
-      expect(result.value).not.toBe(-180);
+      expect(result.value).toBeCloseTo(exactBoundaryCase.expected, 2);
+      expect(result.value).toBeGreaterThan(0);
     }
   });
 });

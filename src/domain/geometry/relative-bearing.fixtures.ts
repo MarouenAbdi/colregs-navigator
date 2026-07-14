@@ -77,18 +77,19 @@ export const reciprocalOffAxisCase: OkCase = {
   expected: 90,
 };
 
-// Exact (-180, 180] upper-inclusive boundary (D-08): own heading 190,
-// contact bearing 10 deg (r=10, angle=10deg -> dx = 10*sin(10deg) =
-// 1.736482, dy = 10*cos(10deg) = 9.848078).
-// raw = 10 - 190 = -180 exactly. The naive modulo-normalize formula alone
-// maps this to -180 (mathematically correct but violates D-08's
-// upper-inclusive/lower-exclusive convention), so the implementation
-// must remap the -180 case to +180.
+// Exact (-180, 180] upper-inclusive boundary (D-08): own heading 000,
+// contact bearing exactly 180 (dx=0, dy=-5 -> due south, matching
+// bearing.fixtures.ts's dueSouthCase -- integer inputs, no floating-point
+// residue). raw = 180 - 0 = 180 exactly. The naive modulo-normalize
+// formula alone maps raw=180 (and, equivalently mod 360, raw=-180) to
+// -180 (mathematically correct but violates D-08's upper-inclusive/
+// lower-exclusive convention), so the implementation must remap that
+// case to +180, not leave it at -180.
 export const exactBoundaryCase: OkCase = {
-  own: { position: { x: 0, y: 0 }, heading: 190, speed: 10, type: "power-driven" },
+  own: { position: { x: 0, y: 0 }, heading: 0, speed: 10, type: "power-driven" },
   contact: {
-    position: { x: 1.736482, y: 9.848078 },
-    heading: 10,
+    position: { x: 0, y: -5 },
+    heading: 180,
     speed: 10,
     type: "power-driven",
   },
