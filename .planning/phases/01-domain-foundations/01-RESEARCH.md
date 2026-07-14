@@ -162,9 +162,12 @@ src/
         ├── cpa.ts
         ├── cpa.fixtures.ts
         ├── cpa.test.ts
-        ├── angle-convert.ts        # compass/math/screen-space converters
+        ├── angle-convert.ts        # compass/math converters
         ├── angle-convert.fixtures.ts
-        └── angle-convert.test.ts
+        ├── angle-convert.test.ts
+        ├── screen-convert.ts       # screenToChart()/chartToScreen() pure coordinate converters
+        ├── screen-convert.fixtures.ts
+        └── screen-convert.test.ts
 ```
 This matches CLAUDE.md's "flat and pragmatic" folder guidance and D-14's fixture co-location rule. Exact naming/grouping beyond fixture co-location is explicitly Claude's discretion per CONTEXT.md — the above is a recommendation, not a mandate.
 
@@ -399,19 +402,21 @@ export const coincidentPositionCase: { a: Position; b: Position } = {
 |---|-------|---------|---------------|
 | A1 | The epsilon threshold for "V·V ≈ 0" (D-06) should be a small absolute value (e.g. `1e-9`) rather than a relative/scaled threshold | Pattern 3 / Code Examples | Low — this is explicitly left to fixture-driven implementation discretion; wrong choice only affects boundary-case classification of near-parallel courses, easily caught and adjusted via the fixture suite itself |
 | A2 | Negative TCPA should be returned as a raw signed `ok()` value rather than clamped to zero or tagged as a new degenerate reason | Common Pitfalls, Pitfall 2 | Medium — if the planner/implementer picks a different convention (e.g., clamping), Phase 2's Rule 7 risk-of-collision logic (which likely needs to distinguish "closing" from "already separating") may need to re-derive this signal a different way; better to decide explicitly now with a fixture than discover the gap mid-Phase-2 |
-| A3 | Recommended file/folder names (`vessel.ts`, `bearing.ts`, `cpa.ts`, `angle-convert.ts`, `shared/result.ts`) | Recommended Project Structure | Low — CONTEXT.md explicitly leaves this to Claude's discretion; any reasonable flat naming satisfies D-14's only hard constraint (fixture co-location) |
+| A3 | Recommended file/folder names (`vessel.ts`, `bearing.ts`, `cpa.ts`, `angle-convert.ts`, `screen-convert.ts`, `shared/result.ts`) | Recommended Project Structure | Low — CONTEXT.md explicitly leaves this to Claude's discretion; any reasonable flat naming satisfies D-14's only hard constraint (fixture co-location) |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **What should `cpa()`/`tcpa()` return for a negative TCPA (vessels already diverging)?**
    - What we know: The raw vector formula can mathematically produce a negative time; D-06/D-07 cover two other degenerate cases but not this one.
    - What's unclear: Whether this counts as a normal `ok()` result (just a signed number) or needs its own tagged reason.
    - Recommendation: Treat as `ok()` with the raw signed value (consistent with D-04's "return raw, unrounded" philosophy for bearing), and add an explicit fixture for it under Success Criterion 4's "explicit, tested, defined behavior" mandate. Confirm with the user only if the planner considers this a meaningful ambiguity — otherwise proceed with this recommendation.
+   - **RESOLVED:** Negative TCPA is returned as a normal `ok({ tcpaMinutes, dcpaNm })` result with the raw signed (negative) `tcpaMinutes` value — not clamped to 0, not tagged as a separate `DegenerateCaseReason`. See Plan 01-03 Task 1 (`src/domain/geometry/cpa.ts`), which implements this exact behavior and fixture-tests it (`negativeTcpaCase`).
 
 2. **Exact epsilon value for the `V·V ≈ 0` comparison (D-06).**
    - What we know: Must be "approximately zero," not exact-equality, per D-06's own wording.
    - What's unclear: No specific numeric threshold is locked anywhere.
    - Recommendation: Pick a small constant (e.g. `1e-9` for squared-knots units) during implementation and document it inline; validate via a fixture with a *near*-parallel (not exactly parallel) course to confirm the threshold doesn't misclassify a genuinely-closing encounter as "no-closure."
+   - **RESOLVED:** Epsilon is locked at `NEAR_ZERO_RELATIVE_VELOCITY_SQ = 1e-9` (squared-knots units), defined as a named module-scope constant. See Plan 01-03 Task 1 (`src/domain/geometry/cpa.ts`), which fixture-tests both an epsilon-just-below case (`epsilonJustBelowCase`, ~5e-10, asserts `no-closure`) and an epsilon-just-above case (`epsilonJustAboveCase`, ~5e-8, asserts a computed `ok()` result).
 
 ## Environment Availability
 
@@ -460,7 +465,7 @@ Not applicable — there is no injection surface (no SQL, no HTML rendering, no 
 **Confidence breakdown:**
 - Standard stack: HIGH — versions verified live against npm registry, exactly matching CLAUDE.md's prior locked research; no drift
 - Architecture: HIGH — Zod/Vitest API shapes verified via Context7 against the exact library versions in use; `Result<T>` pattern is standard TypeScript, not library-dependent
-- Pitfalls: HIGH for atan2/Zod-chaining/jsdom pitfalls (verified/cited); MEDIUM for the negative-TCPA and epsilon-threshold items, which are genuinely open implementation decisions rather than researchable facts
+- Pitfalls: HIGH for atan2/Zod-chaining/jsdom pitfalls (verified/cited); MEDIUM for the negative-TCPA and epsilon-threshold items, which were open implementation decisions during research and are now resolved explicitly in Plan 01-03 (see "Open Questions (RESOLVED)" above)
 
 **Research date:** 2026-07-14
 **Valid until:** 2026-10-14 (stable domain — Zod/Vitest/TypeScript are mature libraries with slow-moving APIs relevant to this phase; 90-day validity is conservative)
