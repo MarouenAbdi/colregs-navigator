@@ -117,3 +117,7 @@ None - no external service configuration required.
 ---
 *Phase: 01-domain-foundations*
 *Completed: 2026-07-14*
+
+## Self-Check: PASSED
+
+All 6 created source/test files verified present on disk; all 4 task commits (`52ac653`, `9e60170`, `8c7e631`, `fd3811d`) and the metadata commit (`f0c2f87`) verified present in git log. Full verification suite (`npx vitest run src/domain/geometry/bearing.test.ts src/domain/geometry/relative-bearing.test.ts`) re-run and confirmed: 2 test files, 15 tests, all passing.
