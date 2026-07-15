@@ -8,7 +8,12 @@
 
 import type { Vessel } from "../vessel/vessel.js";
 import type { DoubtBoundary, EncounterType, VesselLabel } from "./types.js";
-import { crossingCase, headOnCase } from "../geometry/relative-bearing.fixtures.js";
+import {
+  coincidentPropagationCase as relativeBearingCoincidentPropagationCase,
+  crossingCase,
+  headOnCase,
+} from "../geometry/relative-bearing.fixtures.js";
+import { parallelNoClosureCase } from "../geometry/cpa.fixtures.js";
 
 interface ClassificationCase {
   vesselA: Vessel;
@@ -20,6 +25,12 @@ interface ClassificationCase {
   expectedStandOn: VesselLabel | null;
   expectedDoubt: boolean;
   expectedDoubtBoundary?: DoubtBoundary;
+}
+
+interface PropagationCase {
+  vesselA: Vessel;
+  vesselB: Vessel;
+  expectedReason: "coincident-position" | "invalid-input";
 }
 
 // vesselA is being overtaken (heading 000, speed 8); vesselB approaches
@@ -254,6 +265,114 @@ export const justOutsideHeadOnSectorCase: ClassificationCase = {
     type: "power-driven",
   },
   expectedEncounterType: "crossing",
+  expectedGiveWay: "vesselA",
+  expectedStandOn: "vesselB",
+  expectedDoubt: false,
+};
+
+// --- Task 2: Rule 18 interaction matrix + Stage 0 propagation -----------
+
+// Same positions as crossingResidualBasicCase, but vesselA is 'fishing' and
+// vesselB is 'power-driven'. Geometric baseline: giveWay='vesselA'(fishing),
+// standOn='vesselB'(power-driven). rule18Overrides('fishing','power-driven')
+// = true (fishing outranks power-driven) -> OVERRIDE, verdict flips.
+export const crossingRule18OverrideCase: ClassificationCase = {
+  vesselA: { position: { x: 0, y: 0 }, heading: 0, speed: 10, type: "fishing" },
+  vesselB: {
+    position: { x: 5, y: 0 },
+    heading: 270,
+    speed: 10,
+    type: "power-driven",
+  },
+  expectedEncounterType: "crossing",
+  expectedGiveWay: "vesselB",
+  expectedStandOn: "vesselA",
+  expectedDoubt: false,
+};
+
+// Same positions, reversed types: vesselA is 'power-driven', vesselB is
+// 'fishing'. Geometric baseline: giveWay='vesselA'(power-driven),
+// standOn='vesselB'(fishing). rule18Overrides('power-driven','fishing') =
+// false (power-driven does not outrank fishing) -> no override, baseline
+// already correct (a power-driven vessel already gives way to fishing).
+export const crossingRule18NonOverrideCase: ClassificationCase = {
+  vesselA: {
+    position: { x: 0, y: 0 },
+    heading: 0,
+    speed: 10,
+    type: "power-driven",
+  },
+  vesselB: { position: { x: 5, y: 0 }, heading: 270, speed: 10, type: "fishing" },
+  expectedEncounterType: "crossing",
+  expectedGiveWay: "vesselA",
+  expectedStandOn: "vesselB",
+  expectedDoubt: false,
+};
+
+// Same positions as headOnGenuineCase, but vesselA is 'sailing' and
+// vesselB is 'power-driven'. Baseline (head-on) is giveWay=null/standOn=
+// null. Priorities differ (sailing=3, power-driven=4) -> Stage 6 assigns
+// giveWay='vesselB' (power-driven, higher number/lower rank), standOn=
+// 'vesselA' (sailing).
+export const headOnRule18OverrideCase: ClassificationCase = {
+  vesselA: { position: { x: 0, y: 0 }, heading: 0, speed: 10, type: "sailing" },
+  vesselB: {
+    position: { x: 0, y: 5 },
+    heading: 180,
+    speed: 10,
+    type: "power-driven",
+  },
+  expectedEncounterType: "head-on",
+  expectedGiveWay: "vesselB",
+  expectedStandOn: "vesselA",
+  expectedDoubt: true,
+  expectedDoubtBoundary: "near-head-on-boundary",
+};
+
+// Same positions as headOnGenuineCase, but vesselA is 'not-under-command'
+// and vesselB is 'restricted-in-ability-to-maneuver'. Priorities are equal
+// (both 1) -> no override -- the mutual obligation stands even between two
+// special-status vessels (Rule 18 gives no ranking between them, DETM-02).
+export const headOnNucRiatmTieCase: ClassificationCase = {
+  vesselA: {
+    position: { x: 0, y: 0 },
+    heading: 0,
+    speed: 10,
+    type: "not-under-command",
+  },
+  vesselB: {
+    position: { x: 0, y: 5 },
+    heading: 180,
+    speed: 10,
+    type: "restricted-in-ability-to-maneuver",
+  },
+  expectedEncounterType: "head-on",
+  expectedGiveWay: null,
+  expectedStandOn: null,
+  expectedDoubt: true,
+  expectedDoubtBoundary: "near-head-on-boundary",
+};
+
+// Reuse Phase 1's coincidentPropagationCase vessels directly (identical
+// positions). classifyEncounter() must propagate relativeBearing()'s own
+// 'coincident-position' failure unchanged -- no re-wrapping.
+export const stage0CoincidentPropagationCase: PropagationCase = {
+  vesselA: relativeBearingCoincidentPropagationCase.own,
+  vesselB: relativeBearingCoincidentPropagationCase.contact,
+  expectedReason: "coincident-position",
+};
+
+// Reuse Phase 1's parallelNoClosureCase vessels directly. relativeBearing
+// (A,B) = 90, relativeBearing(B,A) = -90 (270 raw, normalized). cpa()
+// returns a degenerate parallel/matching-course result -- per D-07, this
+// must NOT propagate as a classifyEncounter() failure; it is consumed by
+// riskOfCollision() as "no risk" and the dispatch proceeds to a normal
+// crossing classification.
+export const noClosureDoesNotPropagateCase: ClassificationCase = {
+  vesselA: parallelNoClosureCase.vesselA,
+  vesselB: parallelNoClosureCase.vesselB,
+  expectedEncounterType: "crossing",
+  expectedRiskOfCollision: false,
   expectedGiveWay: "vesselA",
   expectedStandOn: "vesselB",
   expectedDoubt: false,

@@ -2,15 +2,21 @@ import { describe, expect, it } from "vitest";
 import { classifyEncounter } from "./classify-encounter.js";
 import {
   crossingResidualBasicCase,
+  crossingRule18NonOverrideCase,
+  crossingRule18OverrideCase,
   doubtBandJustOverOvertakingBoundaryCase,
   doubtBandNearOvertakingBoundaryCase,
   headOnBoundaryInclusiveCase,
   headOnGenuineCase,
+  headOnNucRiatmTieCase,
   headOnPitfall2OneSidedCase,
+  headOnRule18OverrideCase,
   justOutsideHeadOnSectorCase,
+  noClosureDoesNotPropagateCase,
   overtakingBothDirectionsCase,
   overtakingHysteresisHoldsCase,
   overtakingHysteresisReleasesCase,
+  stage0CoincidentPropagationCase,
 } from "./classify-encounter.fixtures.js";
 
 describe("classifyEncounter() overtaking direction (Rule 13)", () => {
@@ -201,6 +207,84 @@ describe("classifyEncounter() doubt band (D-09-D-12)", () => {
     if (result.ok) {
       expect(result.value.encounterType).toBe("crossing");
       expect(result.value.doubt).toBe(false);
+    }
+  });
+});
+
+describe("classifyEncounter() Rule 18 override (DETM-02)", () => {
+  it("flips give-way for a fishing/power-driven crossing encounter (fishing outranks power-driven)", () => {
+    const result = classifyEncounter(
+      crossingRule18OverrideCase.vesselA,
+      crossingRule18OverrideCase.vesselB,
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.giveWay).toBe("vesselB");
+      expect(result.value.standOn).toBe("vesselA");
+    }
+  });
+
+  it("does NOT flip give-way for the reverse power-driven/fishing assignment (baseline already correct)", () => {
+    const result = classifyEncounter(
+      crossingRule18NonOverrideCase.vesselA,
+      crossingRule18NonOverrideCase.vesselB,
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.giveWay).toBe("vesselA");
+      expect(result.value.standOn).toBe("vesselB");
+    }
+  });
+
+  it("assigns give-way/stand-on for a head-on encounter when vessel-type priority differs", () => {
+    const result = classifyEncounter(
+      headOnRule18OverrideCase.vesselA,
+      headOnRule18OverrideCase.vesselB,
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.encounterType).toBe("head-on");
+      expect(result.value.giveWay).toBe("vesselB");
+      expect(result.value.standOn).toBe("vesselA");
+    }
+  });
+
+  it("keeps giveWay/standOn both null for the co-equal NUC/RIATM head-on tie", () => {
+    const result = classifyEncounter(
+      headOnNucRiatmTieCase.vesselA,
+      headOnNucRiatmTieCase.vesselB,
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.giveWay).toBeNull();
+      expect(result.value.standOn).toBeNull();
+    }
+  });
+});
+
+describe("classifyEncounter() Stage 0 geometry propagation", () => {
+  it("propagates relativeBearing()'s coincident-position failure unchanged", () => {
+    const result = classifyEncounter(
+      stage0CoincidentPropagationCase.vesselA,
+      stage0CoincidentPropagationCase.vesselB,
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toBe("coincident-position");
+    }
+  });
+
+  it("does NOT propagate cpa()'s parallel/matching-course result as a failure (D-07) -- classification proceeds normally", () => {
+    const result = classifyEncounter(
+      noClosureDoesNotPropagateCase.vesselA,
+      noClosureDoesNotPropagateCase.vesselB,
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.encounterType).toBe("crossing");
+      expect(result.value.riskOfCollision).toBe(false);
+      expect(result.value.giveWay).toBe("vesselA");
+      expect(result.value.standOn).toBe("vesselB");
     }
   });
 });
