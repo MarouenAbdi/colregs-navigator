@@ -79,4 +79,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-14 after initialization*
+*Last updated: 2026-07-15 after Phase 1 (Domain Foundations) completion — internal domain layer only (Vessel value object, geometry primitives), no user-facing capability shipped yet; Active requirements remain unvalidated until their owning UI/persistence phases land.*
