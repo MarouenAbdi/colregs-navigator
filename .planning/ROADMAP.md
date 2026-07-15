@@ -65,7 +65,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 02-01-PLAN.md — Domain types (types.ts) + isolated Rule 7 risk gate and Rule 18 priority-tier primitives
+- [x] 02-01-PLAN.md — Domain types (types.ts) + isolated Rule 7 risk gate and Rule 18 priority-tier primitives
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -123,7 +123,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Domain Foundations | 3/3 | Complete    | 2026-07-15 |
-| 2. COLREGS Rules Engine | 0/2 | Not started | - |
+| 2. COLREGS Rules Engine | 1/2 | In Progress|  |
 | 3. Persistence & API Layer | 0/TBD | Not started | - |
 | 4. Interactive Chart Sandbox | 0/TBD | Not started | - |
 | 5. Save, Share & Gallery | 0/TBD | Not started | - |
