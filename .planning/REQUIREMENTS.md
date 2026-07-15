@@ -9,7 +9,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Vessel Model
 
-- [ ] **VESL-01**: User can set each vessel's position, heading, speed, and vessel type (power-driven, sailing, fishing, restricted-in-ability-to-maneuver) for two vessels
+- [x] **VESL-01**: User can set each vessel's position, heading, speed, and vessel type (power-driven, sailing, fishing, restricted-in-ability-to-maneuver) for two vessels
 - [ ] **VESL-02**: User can drag/adjust a vessel's position and heading directly on the chart
 
 ### Classification
@@ -77,7 +77,7 @@ Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| VESL-01 | Phase 1 - Domain Foundations | Pending |
+| VESL-01 | Phase 1 - Domain Foundations | Complete |
 | VESL-02 | Phase 4 - Interactive Chart Sandbox | Pending |
 | CLAS-01 | Phase 2 - COLREGS Rules Engine | Pending |
 | CLAS-02 | Phase 2 - COLREGS Rules Engine | Pending |
