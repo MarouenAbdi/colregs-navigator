@@ -13,7 +13,7 @@ This roadmap builds COLREGS Navigator as a stack of horizontal technical layers,
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Domain Foundations** - Geometry primitives and vessel value objects, fixture-tested in isolation
+- [x] **Phase 1: Domain Foundations** - Geometry primitives and vessel value objects, fixture-tested in isolation (completed 2026-07-15)
 - [ ] **Phase 2: COLREGS Rules Engine** - Encounter classification, give-way/stand-on determination, and the reasoning trail
 - [ ] **Phase 3: Persistence & API Layer** - Prisma schema, repository, application use cases, and thin tRPC routers
 - [ ] **Phase 4: Interactive Chart Sandbox** - SVG chart with live drag-and-classify, reasoning overlay, and visual role coding
@@ -41,8 +41,8 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 01-02-PLAN.md — bearing() and relativeBearing() geometry functions with fixture suite
-- [ ] 01-03-PLAN.md — cpa()/tcpa() vector math and compass/math angle-convert utilities
+- [x] 01-02-PLAN.md — bearing() and relativeBearing() geometry functions with fixture suite
+- [x] 01-03-PLAN.md — cpa()/tcpa() vector math and compass/math angle-convert utilities
 
 **Cross-cutting constraints:**
 
@@ -114,7 +114,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Domain Foundations | 1/3 | In Progress|  |
+| 1. Domain Foundations | 3/3 | Complete   | 2026-07-15 |
 | 2. COLREGS Rules Engine | 0/TBD | Not started | - |
 | 3. Persistence & API Layer | 0/TBD | Not started | - |
 | 4. Interactive Chart Sandbox | 0/TBD | Not started | - |
