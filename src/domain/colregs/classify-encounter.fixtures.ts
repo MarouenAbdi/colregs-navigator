@@ -116,6 +116,35 @@ export const overtakingHysteresisReleasesCase: ClassificationCase = {
   expectedDoubt: false,
 };
 
+// WR-01 regression: sticky-overtaking hysteresis with the current bearing
+// drifted close to the 112.5 deg overtaking/crossing boundary.
+// relativeBearing(A,B) = 110, relativeBearing(B,A) = -70. |110| >= |-70| so
+// the direction tie-break selects vesselB as the overtaking vessel; the
+// triggering bearing for the doubt check is 110, and |110 - 112.5| = 2.5
+// <= 5 -> doubt band. cpa(A,B): dcpaNm ~= 0.9397 (under threshold), tcpa
+// positive -> Rule 7 gate holds, so hysteresis takes the sticky path.
+export const overtakingHysteresisNearBoundaryCase: ClassificationCase = {
+  vesselA: {
+    position: { x: 0, y: 0 },
+    heading: 0,
+    speed: 8,
+    type: "power-driven",
+  },
+  vesselB: {
+    position: { x: 0.9396926207859084, y: -0.3420201433256687 },
+    heading: 0,
+    speed: 15,
+    type: "power-driven",
+  },
+  previous: "overtaking",
+  expectedEncounterType: "overtaking",
+  expectedRiskOfCollision: true,
+  expectedGiveWay: "vesselB",
+  expectedStandOn: "vesselA",
+  expectedDoubt: true,
+  expectedDoubtBoundary: "near-overtaking-crossing-boundary",
+};
+
 // Genuine head-on: reuse Phase 1's headOnCase vessels directly (D-16 cross-
 // phase reuse). Both relativeBearing directions = 0. Same vessel type on
 // both sides -> Rule 18 has no tie-break preference -> mutual obligation

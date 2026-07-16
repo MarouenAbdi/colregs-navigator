@@ -15,6 +15,7 @@ import {
   noClosureDoesNotPropagateCase,
   overtakingBothDirectionsCase,
   overtakingHysteresisHoldsCase,
+  overtakingHysteresisNearBoundaryCase,
   overtakingHysteresisReleasesCase,
   overtakingRule18NoOverrideCase,
   stage0CoincidentPropagationCase,
@@ -93,6 +94,25 @@ describe("classifyEncounter() hysteresis (D-01-D-04)", () => {
       expect(ruleIds).toContain("Rule 7");
       expect(ruleIds).toContain("Rule 13(d)");
       expect(ruleIds).not.toContain("Rule 15");
+    }
+  });
+
+  it("WR-01 regression: raises doubt in the sticky path when the current bearing has drifted close to the 112.5 deg boundary", () => {
+    const result = classifyEncounter(
+      overtakingHysteresisNearBoundaryCase.vesselA,
+      overtakingHysteresisNearBoundaryCase.vesselB,
+      overtakingHysteresisNearBoundaryCase.previous,
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.encounterType).toBe("overtaking");
+      expect(result.value.riskOfCollision).toBe(true);
+      expect(result.value.giveWay).toBe("vesselB");
+      expect(result.value.standOn).toBe("vesselA");
+      expect(result.value.doubt).toBe(true);
+      expect(result.value.doubtBoundary).toBe(
+        "near-overtaking-crossing-boundary",
+      );
     }
   });
 

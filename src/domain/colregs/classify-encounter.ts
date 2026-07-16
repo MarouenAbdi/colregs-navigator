@@ -104,14 +104,29 @@ export function classifyEncounter(
       text: "Overtaking situation persists (once overtaking, always overtaking until finally past and clear) -- previous classification was overtaking and Rule 7 risk of collision still holds.",
       facts: {},
     });
+    let stickyTriggeringBearing: number;
     if (Math.abs(rbAtoB) >= Math.abs(rbBtoA)) {
       giveWay = "vesselB";
       standOn = "vesselA";
+      stickyTriggeringBearing = rbAtoB;
     } else {
       giveWay = "vesselA";
       standOn = "vesselB";
+      stickyTriggeringBearing = rbBtoA;
     }
-    doubt = false;
+    // WR-01: mirror Stage 3's doubt-band check against the same 112.5 deg
+    // boundary, using the larger-magnitude bearing (the one driving the
+    // direction tie-break above). Hysteresis intentionally skips the
+    // >112.5 threshold test itself (that is the whole point of "sticky"),
+    // but a current bearing that has drifted close to the boundary is
+    // still worth flagging as doubtful, same as a freshly-derived
+    // classification would.
+    doubt =
+      Math.abs(Math.abs(stickyTriggeringBearing) - OVERTAKING_BOUNDARY_DEGREES) <=
+      DOUBT_BAND_DEGREES;
+    if (doubt) {
+      doubtBoundary = "near-overtaking-crossing-boundary";
+    }
   } else {
     // Stage 3: Rule 13, both directions (Pitfall 1: two independent checks,
     // never a single bearing reused for both).
