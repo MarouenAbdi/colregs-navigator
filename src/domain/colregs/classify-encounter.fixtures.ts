@@ -116,6 +116,35 @@ export const overtakingHysteresisReleasesCase: ClassificationCase = {
   expectedDoubt: false,
 };
 
+// WR-02 regression: both bOvertakesA and aOvertakesB are simultaneously
+// true -- vesselA and vesselB are positioned on the same line, each heading
+// directly away from the other (A heading 180 away from B to its north, B
+// heading 0 away from A to its south). relativeBearing(A,B) = 180,
+// relativeBearing(B,A) = 180 -- both exceed the 112.5 deg abaft-the-beam
+// threshold. `bOvertakesA` wins the dispatch tie-break (documented at the
+// Stage 3 dispatch site). cpa(A,B): tcpaMinutes is negative (closest
+// approach already passed) -> Rule 7 gate reports no risk, confirming this
+// tie-break only arises for genuinely diverging vessels.
+export const overtakingBothTrueDivergingCase: ClassificationCase = {
+  vesselA: {
+    position: { x: 0, y: 0 },
+    heading: 180,
+    speed: 10,
+    type: "power-driven",
+  },
+  vesselB: {
+    position: { x: 0, y: 10 },
+    heading: 0,
+    speed: 10,
+    type: "power-driven",
+  },
+  expectedEncounterType: "overtaking",
+  expectedRiskOfCollision: false,
+  expectedGiveWay: "vesselB",
+  expectedStandOn: "vesselA",
+  expectedDoubt: false,
+};
+
 // WR-01 regression: sticky-overtaking hysteresis with the current bearing
 // drifted close to the 112.5 deg overtaking/crossing boundary.
 // relativeBearing(A,B) = 110, relativeBearing(B,A) = -70. |110| >= |-70| so

@@ -14,6 +14,7 @@ import {
   justOutsideHeadOnSectorCase,
   noClosureDoesNotPropagateCase,
   overtakingBothDirectionsCase,
+  overtakingBothTrueDivergingCase,
   overtakingHysteresisHoldsCase,
   overtakingHysteresisNearBoundaryCase,
   overtakingHysteresisReleasesCase,
@@ -71,6 +72,20 @@ describe("classifyEncounter() overtaking direction (Rule 13)", () => {
       expect(result.value.giveWay).toBe("vesselA");
       expect(result.value.standOn).toBe("vesselB");
       expect(result.value.doubt).toBe(false);
+    }
+  });
+
+  it("WR-02 regression: both vessels simultaneously satisfy the abaft-the-beam test (diverging vessels) -- bOvertakesA precedence wins and Rule 7 reports no risk", () => {
+    const result = classifyEncounter(
+      overtakingBothTrueDivergingCase.vesselA,
+      overtakingBothTrueDivergingCase.vesselB,
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.encounterType).toBe("overtaking");
+      expect(result.value.riskOfCollision).toBe(false);
+      expect(result.value.giveWay).toBe("vesselB");
+      expect(result.value.standOn).toBe("vesselA");
     }
   });
 });

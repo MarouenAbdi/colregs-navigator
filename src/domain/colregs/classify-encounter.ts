@@ -135,6 +135,15 @@ export function classifyEncounter(
     if (bOvertakesA || aOvertakesB) {
       encounterType = "overtaking";
       const triggeringBearing = bOvertakesA ? rbAtoB : rbBtoA;
+      // WR-02: bOvertakesA and aOvertakesB CAN both be true simultaneously
+      // (e.g. two vessels heading directly apart along the same line, each
+      // seeing the other dead astern of its own beam). `bOvertakesA` wins
+      // the tie deliberately, not by oversight: this geometry only arises
+      // for genuinely diverging vessels, which Rule 7's riskOfCollision
+      // gate has already excluded from any real give-way consequence (see
+      // overtakingBothTrueDivergingCase) -- there is no closing encounter
+      // where both conditions can hold at once, so the tie-break's outcome
+      // is geometrically inert in practice.
       if (bOvertakesA) {
         giveWay = "vesselB";
         standOn = "vesselA";
