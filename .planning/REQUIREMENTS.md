@@ -14,22 +14,22 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Classification
 
-- [ ] **CLAS-01**: App classifies the encounter as head-on, crossing, or overtaking per COLREGS Rules 12–15, using relative bearing (not heading difference alone)
-- [ ] **CLAS-02**: App evaluates overtaking before head-on/crossing, per Rule 13's explicit precedence, and does not flip an established overtaking situation to crossing as bearing drifts
-- [ ] **CLAS-03**: App gates classification on risk of collision (Rule 7) so diverging/parallel vessels are not given a confident give-way verdict
-- [ ] **CLAS-04**: App treats near-boundary cases (22.5°-abaft-the-beam, reciprocal-heading) as an explicit doubt/ambiguous state rather than a hard cutoff
+- [x] **CLAS-01**: App classifies the encounter as head-on, crossing, or overtaking per COLREGS Rules 12–15, using relative bearing (not heading difference alone)
+- [x] **CLAS-02**: App evaluates overtaking before head-on/crossing, per Rule 13's explicit precedence, and does not flip an established overtaking situation to crossing as bearing drifts
+- [x] **CLAS-03**: App gates classification on risk of collision (Rule 7) so diverging/parallel vessels are not given a confident give-way verdict
+- [x] **CLAS-04**: App treats near-boundary cases (22.5°-abaft-the-beam, reciprocal-heading) as an explicit doubt/ambiguous state rather than a hard cutoff
 - [ ] **CLAS-05**: Classification updates live as vessel position/heading/speed change (no manual submit step)
 
 ### Determination
 
-- [ ] **DETM-01**: App determines which vessel is give-way and which is stand-on, per Rules 13/14/15/17
-- [ ] **DETM-02**: App applies the Rule 18 vessel-type hierarchy (power-driven, sailing, fishing, restricted-in-ability-to-maneuver) as an override layer on top of the geometric baseline, treating "not under command" and "restricted in ability to maneuver" as co-equal status
+- [x] **DETM-01**: App determines which vessel is give-way and which is stand-on, per Rules 13/14/15/17
+- [x] **DETM-02**: App applies the Rule 18 vessel-type hierarchy (power-driven, sailing, fishing, restricted-in-ability-to-maneuver) as an override layer on top of the geometric baseline, treating "not under command" and "restricted in ability to maneuver" as co-equal status
 - [ ] **DETM-03**: Give-way and stand-on vessels are visually distinguished on the chart (e.g. color/icon coding)
 
 ### Reasoning
 
 - [ ] **RSON-01**: App displays a reasoning trail showing the specific rule(s) applied and the geometric logic (relative bearing, closing angle) that produced the verdict
-- [ ] **RSON-02**: The reasoning trail is produced as a byproduct of the same rule-evaluation logic that determines the verdict (not reverse-engineered after the fact)
+- [x] **RSON-02**: The reasoning trail is produced as a byproduct of the same rule-evaluation logic that determines the verdict (not reverse-engineered after the fact)
 - [ ] **RSON-03**: App visually overlays the geometric reasoning directly on the chart (relative bearing line, and the overtaking boundary arc where relevant)
 
 ### Chart & Visualization
@@ -79,16 +79,16 @@ Populated during roadmap creation.
 |-------------|-------|--------|
 | VESL-01 | Phase 1 - Domain Foundations | Complete |
 | VESL-02 | Phase 4 - Interactive Chart Sandbox | Pending |
-| CLAS-01 | Phase 2 - COLREGS Rules Engine | Pending |
-| CLAS-02 | Phase 2 - COLREGS Rules Engine | Pending |
-| CLAS-03 | Phase 2 - COLREGS Rules Engine | Pending |
-| CLAS-04 | Phase 2 - COLREGS Rules Engine | Pending |
+| CLAS-01 | Phase 2 - COLREGS Rules Engine | Complete |
+| CLAS-02 | Phase 2 - COLREGS Rules Engine | Complete |
+| CLAS-03 | Phase 2 - COLREGS Rules Engine | Complete |
+| CLAS-04 | Phase 2 - COLREGS Rules Engine | Complete |
 | CLAS-05 | Phase 4 - Interactive Chart Sandbox | Pending |
-| DETM-01 | Phase 2 - COLREGS Rules Engine | Pending |
-| DETM-02 | Phase 2 - COLREGS Rules Engine | Pending |
+| DETM-01 | Phase 2 - COLREGS Rules Engine | Complete |
+| DETM-02 | Phase 2 - COLREGS Rules Engine | Complete |
 | DETM-03 | Phase 4 - Interactive Chart Sandbox | Pending |
 | RSON-01 | Phase 4 - Interactive Chart Sandbox | Pending |
-| RSON-02 | Phase 2 - COLREGS Rules Engine | Pending |
+| RSON-02 | Phase 2 - COLREGS Rules Engine | Complete |
 | RSON-03 | Phase 4 - Interactive Chart Sandbox | Pending |
 | CHRT-01 | Phase 4 - Interactive Chart Sandbox | Pending |
 | CHRT-02 | Phase 4 - Interactive Chart Sandbox | Pending |
@@ -103,4 +103,4 @@ Populated during roadmap creation.
 
 ---
 *Requirements defined: 2026-07-14*
-*Last updated: 2026-07-14 after roadmap creation (18/18 v1 requirements mapped to 5 phases)*
+*Last updated: 2026-07-16 after Phase 2 (COLREGS Rules Engine) completion — CLAS-01–04, DETM-01/02, RSON-02 validated*
