@@ -16,6 +16,7 @@ import {
   overtakingBothDirectionsCase,
   overtakingHysteresisHoldsCase,
   overtakingHysteresisReleasesCase,
+  overtakingRule18NoOverrideCase,
   stage0CoincidentPropagationCase,
 } from "./classify-encounter.fixtures.js";
 
@@ -258,6 +259,21 @@ describe("classifyEncounter() Rule 18 override (DETM-02)", () => {
     if (result.ok) {
       expect(result.value.giveWay).toBeNull();
       expect(result.value.standOn).toBeNull();
+    }
+  });
+
+  it("CR-01 regression: does NOT apply Rule 18 to an overtaking encounter -- the overtaking vessel keeps give-way even though it outranks the vessel being overtaken", () => {
+    const result = classifyEncounter(
+      overtakingRule18NoOverrideCase.vesselA,
+      overtakingRule18NoOverrideCase.vesselB,
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.encounterType).toBe("overtaking");
+      expect(result.value.giveWay).toBe("vesselB");
+      expect(result.value.standOn).toBe("vesselA");
+      const ruleIds = result.value.trail.map((entry) => entry.ruleId);
+      expect(ruleIds).toContain("Rule 13(a)");
     }
   });
 });

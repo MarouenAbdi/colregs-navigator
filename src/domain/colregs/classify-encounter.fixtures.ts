@@ -353,6 +353,34 @@ export const headOnNucRiatmTieCase: ClassificationCase = {
   expectedDoubtBoundary: "near-head-on-boundary",
 };
 
+// CR-01 regression: same geometry as overtakingBothDirectionsCase (vesselB
+// overtaking vesselA, bearing 150 deg abaft A's beam), but vesselA is
+// 'power-driven' and vesselB (the overtaking vessel) is 'fishing'.
+// rule18Overrides('fishing', 'power-driven') = true (fishing outranks
+// power-driven), so a Stage 6 dispatch that applied Rule 18 uniformly would
+// incorrectly flip give-way onto vesselA. Real COLREGS Rule 13(a) overrides
+// Rules 4-18 for overtaking: the overtaking vessel (vesselB, fishing) must
+// keep give-way regardless of vessel type.
+export const overtakingRule18NoOverrideCase: ClassificationCase = {
+  vesselA: {
+    position: { x: 0, y: 0 },
+    heading: 0,
+    speed: 8,
+    type: "power-driven",
+  },
+  vesselB: {
+    position: { x: 0.5, y: -0.8660254 },
+    heading: 0,
+    speed: 15,
+    type: "fishing",
+  },
+  expectedEncounterType: "overtaking",
+  expectedRiskOfCollision: true,
+  expectedGiveWay: "vesselB",
+  expectedStandOn: "vesselA",
+  expectedDoubt: false,
+};
+
 // Reuse Phase 1's coincidentPropagationCase vessels directly (identical
 // positions). classifyEncounter() must propagate relativeBearing()'s own
 // 'coincident-position' failure unchanged -- no re-wrapping.

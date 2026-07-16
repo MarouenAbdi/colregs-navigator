@@ -231,8 +231,17 @@ export function classifyEncounter(
         });
       }
     }
+  } else if (encounterType === "overtaking") {
+    // overtaking: Rule 13(a) applies "notwithstanding anything contained in
+    // Rules 4 to 18" -- the overtaking vessel always gives way, vessel type
+    // is irrelevant. Do not call rule18Overrides() here.
+    trail.push({
+      ruleId: "Rule 13(a)",
+      text: "Rule 18 does not apply to an overtaking situation: Rule 13(a) overrides Rules 4-18, so the overtaking vessel gives way regardless of vessel type.",
+      facts: { vesselAType: vesselA.type, vesselBType: vesselB.type },
+    });
   } else {
-    // crossing/overtaking: giveWay/standOn are non-null vessel labels here.
+    // crossing: giveWay/standOn are non-null vessel labels here.
     const giveWayVessel = giveWay === "vesselA" ? vesselA : vesselB;
     const standOnVessel = standOn === "vesselA" ? vesselA : vesselB;
     if (rule18Overrides(giveWayVessel.type, standOnVessel.type)) {
