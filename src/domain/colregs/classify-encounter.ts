@@ -198,10 +198,14 @@ export function classifyEncounter(
           facts: { relativeBearingAtoB: rbAtoB, relativeBearingBtoA: rbBtoA },
         });
 
-        // Stage 5: Rule 15, residual. Dispatch order guarantees rbAtoB is
-        // never exactly 0/undefined-boundary here -- Stage 4 already
-        // excluded the head-on sector, and Stage 3 already excluded the
-        // overtaking sector.
+        // Stage 5: Rule 15, residual. WR-03: rbAtoB CAN be exactly 0 here --
+        // Stage 4's head-on exclusion requires BOTH |rbAtoB| <= 5 AND
+        // |rbBtoA| <= 5, so a one-sided dead-ahead bearing (rbAtoB === 0
+        // with a non-reciprocal rbBtoA) survives to this stage (see
+        // deadAheadNonReciprocalCase). In that case `rbAtoB > 0` evaluates
+        // false and falls to the `else` branch below -- an arbitrary but
+        // pinned-down tie-break for a bow-on bearing that is genuinely
+        // neither port nor starboard, not a guaranteed-unreachable case.
         encounterType = "crossing";
         if (rbAtoB > 0) {
           giveWay = "vesselA";

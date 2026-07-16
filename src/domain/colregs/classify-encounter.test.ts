@@ -4,6 +4,7 @@ import {
   crossingResidualBasicCase,
   crossingRule18NonOverrideCase,
   crossingRule18OverrideCase,
+  deadAheadNonReciprocalCase,
   doubtBandJustOverOvertakingBoundaryCase,
   doubtBandNearOvertakingBoundaryCase,
   headOnBoundaryInclusiveCase,
@@ -185,6 +186,21 @@ describe("classifyEncounter() crossing residual (Rule 15)", () => {
       expect(result.value.encounterType).toBe("crossing");
       expect(result.value.giveWay).toBe("vesselA");
       expect(result.value.standOn).toBe("vesselB");
+      expect(result.value.doubt).toBe(false);
+    }
+  });
+
+  it("WR-03 regression: rbAtoB exactly 0 with a non-reciprocal rbBtoA survives Stage 4's head-on exclusion and pins the Stage 5 tie-break", () => {
+    const result = classifyEncounter(
+      deadAheadNonReciprocalCase.vesselA,
+      deadAheadNonReciprocalCase.vesselB,
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.encounterType).toBe("crossing");
+      expect(result.value.riskOfCollision).toBe(false);
+      expect(result.value.giveWay).toBe("vesselB");
+      expect(result.value.standOn).toBe("vesselA");
       expect(result.value.doubt).toBe(false);
     }
   });

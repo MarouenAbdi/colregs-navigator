@@ -328,6 +328,33 @@ export const justOutsideHeadOnSectorCase: ClassificationCase = {
   expectedDoubt: false,
 };
 
+// WR-03 regression: rbAtoB is exactly 0 (vesselB dead ahead of vesselA) but
+// rbBtoA is non-reciprocal (60 deg -- a genuine crossing course), so Stage
+// 4's head-on exclusion (which requires BOTH bearings within +/-5 deg) does
+// NOT catch this case; it survives to Stage 5's residual crossing dispatch.
+// relativeBearing(A,B) = 0, relativeBearing(B,A) = 60. `rbAtoB > 0`
+// evaluates false, so the current (pinned-down, arbitrary) tie-break falls
+// to the else branch: giveWay = 'vesselB', standOn = 'vesselA'.
+export const deadAheadNonReciprocalCase: ClassificationCase = {
+  vesselA: {
+    position: { x: 0, y: 0 },
+    heading: 0,
+    speed: 10,
+    type: "power-driven",
+  },
+  vesselB: {
+    position: { x: 0, y: 10 },
+    heading: 120,
+    speed: 10,
+    type: "power-driven",
+  },
+  expectedEncounterType: "crossing",
+  expectedRiskOfCollision: false,
+  expectedGiveWay: "vesselB",
+  expectedStandOn: "vesselA",
+  expectedDoubt: false,
+};
+
 // --- Task 2: Rule 18 interaction matrix + Stage 0 propagation -----------
 
 // Same positions as crossingResidualBasicCase, but vesselA is 'fishing' and
