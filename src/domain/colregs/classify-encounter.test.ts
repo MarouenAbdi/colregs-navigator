@@ -167,6 +167,9 @@ describe("classifyEncounter() head-on (Rule 14, Pitfall 2)", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.value.encounterType).toBe("head-on");
+      expect(result.value.riskOfCollision).toBe(
+        headOnGenuineCase.expectedRiskOfCollision,
+      );
       expect(result.value.giveWay).toBeNull();
       expect(result.value.standOn).toBeNull();
       expect(result.value.doubt).toBe(true);
