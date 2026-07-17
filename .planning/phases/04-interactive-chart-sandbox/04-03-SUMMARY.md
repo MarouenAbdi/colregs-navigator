@@ -137,6 +137,10 @@ None - no external service configuration required.
 - The jsdom ResizeObserver/Pointer-Capture polyfill pattern established in this plan's test files should be reused as-is by any sibling plan (04-04/04-05) that renders `ChartPanel` or its own Pointer-Events components in tests.
 - No blockers identified for downstream plans.
 
+## Self-Check: PASSED
+
+All 7 claimed files found on disk; all 4 commit hashes (fb59014, 1ecef91, cfd26c1, 15c4da4) found in git log.
+
 ---
 *Phase: 04-interactive-chart-sandbox*
 *Completed: 2026-07-17*
