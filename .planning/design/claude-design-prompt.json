@@ -1,0 +1,140 @@
+{
+  "prompt_type": "design_brief",
+  "target_tool": "claude.ai/design",
+
+  "project": {
+    "name": "COLREGS Navigator",
+    "one_liner": "A maritime collision-avoidance rules engine and visualizer: place two vessels on a nautical chart, and it classifies the encounter under the real International Regulations for Preventing Collisions at Sea (COLREGS Rules 11-18), states which vessel must give way, and shows the exact rule and geometry behind that verdict.",
+    "type": "Software engineering portfolio project (built for job interviews), not a commercial product",
+    "current_build_state": "Core interactive sandbox is live: drag-to-position vessels on an SVG chart, live COLREGS classification, reasoning-trail panel with rule citations. Save/share links and a curated gallery of classic encounters are the next phase, not yet built.",
+    "tech_stack": "Next.js 16 / React 19 / TypeScript / Tailwind CSS v4, hand-rolled SVG chart (no canvas/game-engine library), tRPC + Prisma + Postgres backend. Whatever visual system this brief produces must be realistically implementable in Tailwind CSS + plain SVG/CSS — no dependency on a component or animation library the project hasn't already chosen."
+  },
+
+  "audience_and_goal": {
+    "primary_audience": "Technical recruiters and engineering hiring managers skimming a portfolio link, plus interviewers who will spend a few minutes actually using it",
+    "attention_budget": "3-5 seconds to decide 'this looks like serious, senior-level work' before they either dig in or bounce",
+    "success_definition": [
+      "Within seconds, a visitor understands what the tool does and that it's not a toy CRUD app",
+      "The interactive demo (drag a vessel, watch the verdict update) reads as the hero moment, not a buried feature",
+      "The visual language signals precision and domain authority (navigation/maritime instrumentation), not generic 'AI-generated startup landing page'",
+      "Engineering depth is visible, not just claimed: rule citations, live reasoning trail, and clean data visualization should be front and center"
+    ],
+    "explicitly_not_the_goal": "This is not a consumer maritime app and not a sales page — no pricing, no signup funnel, no marketing fluff. The 'conversion' being optimized for is a recruiter thinking 'I want to talk to whoever built this.'"
+  },
+
+  "brand_personality": {
+    "keywords": ["precise", "authoritative", "calm-under-complexity", "instrument-grade", "modern", "quietly confident"],
+    "tone_analogy": "Somewhere between an ECDIS/chart-plotter bridge display and a modern SaaS analytics dashboard (think Stripe or Linear-level visual polish) — nautical instrumentation aesthetic, not cartoon-nautical (no rope borders, anchors-as-clipart, or pirate/beach vibes)",
+    "avoid": ["generic AI-startup gradient blobs", "novelty/whimsical maritime theming", "cluttered dashboard-with-everything look", "stock photography of ships"]
+  },
+
+  "visual_direction": {
+    "concept": "Modern chart-plotter / bridge-display aesthetic: a dark or deep-navy 'navigation display' mode for the hero/marketing surface, transitioning into the cleaner light 'chart paper' mode already built for the working sandbox tool itself.",
+    "motifs_to_explore": [
+      "Subtle nautical chart graticule / grid lines as background texture (already used sparingly in the built sandbox)",
+      "Compass rose or bearing-ring as a hero graphic element, functioning almost like a logo mark",
+      "Radar-sweep or bearing-line animation as a tasteful hero-section motion accent (restrained, not distracting)",
+      "Monospace numeric readouts (bearing°, speed in knots, distance) styled like instrument-panel digits, for authenticity",
+      "Vessel icons as clean geometric wedge/hull shapes (already the built convention) rather than illustrated ship icons"
+    ],
+    "two_display_modes": {
+      "instrument_dark": "For hero/landing/marketing surfaces aimed at first impressions — deep navy/charcoal background, high-contrast readouts, glowing accent color, feels like a bridge display at night",
+      "chart_light": "For the actual working sandbox tool — already implemented as a clean, minimal, off-white 'chart paper' surface (slate-50 background, white panel surfaces, teal accent) so the tool itself stays highly legible and non-fatiguing during real use"
+    }
+  },
+
+  "color_system": {
+    "note_to_designer": "Two color layers exist. The chrome/brand palette below is open for a bolder redesign. The domain-semantic overlay colors are LOCKED — they already carry real meaning in the shipped app (give-way vs. stand-on vessel, doubt/ambiguous verdicts) and must not be changed or reused for anything else, or the app's own visual logic breaks.",
+    "chrome_palette_open_to_redesign": {
+      "current_baseline": {
+        "background": "slate-50 #F8FAFC",
+        "surface": "white #FFFFFF",
+        "border_grid": "slate-200 #E2E8F0",
+        "accent": "teal-600 #0D9488"
+      },
+      "ask": "Propose a more distinctive, memorable chrome palette for the hero/marketing surface (dark instrument-panel mode) that still complements the locked domain colors below rather than competing with them. Teal is a reasonable anchor to keep or evolve, but not mandatory."
+    },
+    "domain_semantic_colors_LOCKED_do_not_change": {
+      "give_way_vessel_hull": "red-500 #EF4444",
+      "stand_on_vessel_hull": "green-500 #22C55E",
+      "mutual_obligation_hull": "slate-400 #94A3B8 (deliberately not amber, to avoid clashing with the doubt signal below)",
+      "doubt_or_ambiguous_overlay": "amber-500 #F59E0B, dashed stroke",
+      "bearing_line_normal": "slate-600 #475569, solid stroke"
+    }
+  },
+
+  "typography": {
+    "current_baseline": "System UI sans stack for all UI text; monospace for numeric geometric readouts (bearing, speed, distance) so digits align in tabular columns. Only two weights used: 400 and 600.",
+    "ask": "A hero/display typeface pairing is open for exploration for the marketing surface (e.g. a distinctive display face for headlines, paired with the existing clean sans for body/UI) as long as it's a normal web font (Google Fonts or similar, no paid/exotic license needed) and doesn't fight the instrument-panel monospace numerals."
+  },
+
+  "layout_and_key_screens": [
+    {
+      "screen": "Hero / landing moment",
+      "purpose": "First thing a recruiter sees. Must communicate the concept and domain-depth in one glance.",
+      "must_include": [
+        "A strong, specific headline (not generic 'AI-powered app' copy) that states the real mechanic: place two vessels, get a COLREGS verdict with cited rule and geometry",
+        "A live or near-live preview of the actual sandbox chart (not a mockup screenshot) as the dominant visual element",
+        "A short credibility strip: e.g. 'Rules 11-18 of the actual International Regulations for Preventing Collisions at Sea' — the real-world grounding is a selling point"
+      ]
+    },
+    {
+      "screen": "Interactive sandbox (already built, may get a visual refresh)",
+      "purpose": "The core loop and demo centerpiece: chart panel (SVG, drag-to-position/rotate vessels), control panel (speed/vessel-type), reasoning-trail panel (verdict banner + rule citations + geometry)",
+      "constraint": "Must stay highly legible and low-fatigue for real interactive use — this is the 'chart_light' display mode, not the dramatic dark hero mode"
+    },
+    {
+      "screen": "Gallery of classic encounters (Phase 5, not yet built)",
+      "purpose": "A curated set of 5-8 textbook COLREGS scenarios (clean head-on, classic crossing, overtaking) a visitor can browse and load with one click",
+      "must_include": "Small preview thumbnails of each scenario's chart geometry, not just text list items"
+    },
+    {
+      "screen": "Shared scenario view (Phase 5, not yet built)",
+      "purpose": "Read/replay view when someone opens a shared link — same visual language as the sandbox, always shows a freshly computed verdict"
+    }
+  ],
+
+  "signature_moments_to_nail": [
+    "The verdict banner: large, confident, immediate ('Crossing — Vessel A gives way') — this is the single most important UI element in the whole app",
+    "The reasoning trail: an ordered list of rule-citation + geometric-fact steps that reads like a legible audit trail, not a debug log",
+    "Live drag interaction: dragging a vessel and watching the verdict, hull colors, and bearing line update with zero lag or flicker should feel satisfying and precise"
+  ],
+
+  "motion": {
+    "philosophy": "Restrained and purposeful, instrument-panel smoothness rather than playful bounce. Motion should reinforce precision (smooth interpolation of bearing lines/hull rotation during drag) not decorate.",
+    "acceptable": ["smooth live updates during drag with no jank", "a subtle radar-sweep or bearing-line animation as a hero-section idle accent", "gentle fade/slide on verdict changes"],
+    "avoid": ["bouncy/elastic easing", "confetti or celebratory effects", "anything that delays the user seeing the live verdict"]
+  },
+
+  "content_voice": {
+    "tone": "Precise, matter-of-fact, technically confident — written the way a ship's officer or a well-documented engineering spec would write, not marketing copy",
+    "example_headline_style": "'Two vessels. One rulebook. See exactly who must give way and why.' rather than 'Revolutionize your maritime workflow!'",
+    "example_error_copy_already_established": "'Unable to classify' / 'Vessel A and Vessel B are at the same position — drag one apart to resume live classification.'"
+  },
+
+  "technical_constraints": {
+    "must_be_buildable_with": "Tailwind CSS v4 utility classes + plain SVG + CSS, no canvas/WebGL, no heavyweight animation or 3D libraries",
+    "accessibility": "Color is never the sole signal for give-way/stand-on/mutual/doubt states — pair every color cue with a text badge (GW/SO/MUTUAL) or stroke-style difference (solid vs. dashed), already an established convention",
+    "responsiveness": "Should degrade gracefully to a usable single-column layout on tablet/mobile for a recruiter briefly checking on a phone, even though the primary use case is desktop"
+  },
+
+  "inspiration_references": [
+    "ECDIS / marine chart-plotter bridge displays (instrument authenticity)",
+    "Aviation glass-cockpit UI (precision readouts, restrained color use)",
+    "Modern developer-tool SaaS polish (Stripe, Linear, Vercel) for the chrome/typography/spacing quality bar",
+    "Real nautical chart cartography (graticule lines, chart symbol conventions) for texture, used sparingly as an accent not as decoration"
+  ],
+
+  "deliverables_requested": [
+    "A hero/landing page visual direction (dark instrument-panel mode) with headline treatment and a way to showcase the live sandbox as the centerpiece",
+    "A refreshed or validated chrome color palette + type pairing, respecting the locked domain-semantic colors",
+    "Component styling direction for: verdict banner, reasoning-trail entries, vessel role badges (GW/SO/MUTUAL), gallery scenario cards",
+    "Any reusable motif (compass rose, bearing-ring mark) that could double as a lightweight logo/favicon for the project"
+  ],
+
+  "non_negotiables": [
+    "Never change the meaning-bearing colors (red=give-way, green=stand-on, slate=mutual, amber=doubt) or reuse them for non-domain UI chrome",
+    "Never obscure or shrink the reasoning trail / rule citations in favor of pure decoration — explainability is this project's entire thesis",
+    "No stock ship photography, no cartoon/pirate maritime theming, no generic AI-startup gradient-blob aesthetic"
+  ]
+}
