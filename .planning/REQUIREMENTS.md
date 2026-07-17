@@ -28,7 +28,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Reasoning
 
-- [ ] **RSON-01**: App displays a reasoning trail showing the specific rule(s) applied and the geometric logic (relative bearing, closing angle) that produced the verdict
+- [x] **RSON-01**: App displays a reasoning trail showing the specific rule(s) applied and the geometric logic (relative bearing, closing angle) that produced the verdict
 - [x] **RSON-02**: The reasoning trail is produced as a byproduct of the same rule-evaluation logic that determines the verdict (not reverse-engineered after the fact)
 - [ ] **RSON-03**: App visually overlays the geometric reasoning directly on the chart (relative bearing line, and the overtaking boundary arc where relevant)
 
@@ -87,7 +87,7 @@ Populated during roadmap creation.
 | DETM-01 | Phase 2 - COLREGS Rules Engine | Complete |
 | DETM-02 | Phase 2 - COLREGS Rules Engine | Complete |
 | DETM-03 | Phase 4 - Interactive Chart Sandbox | Pending |
-| RSON-01 | Phase 4 - Interactive Chart Sandbox | Pending |
+| RSON-01 | Phase 4 - Interactive Chart Sandbox | Complete |
 | RSON-02 | Phase 2 - COLREGS Rules Engine | Complete |
 | RSON-03 | Phase 4 - Interactive Chart Sandbox | Pending |
 | CHRT-01 | Phase 4 - Interactive Chart Sandbox | Pending |
