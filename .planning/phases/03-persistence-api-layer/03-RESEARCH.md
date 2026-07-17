@@ -521,22 +521,25 @@ model Scenario {
 
 **If empty:** N/A — see table above; four assumptions logged, all low-to-medium risk, none blocking.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **What should `scenario.get`/`gallery.list` return when `classifyEncounter()` returns `{ ok: false }` for a row that WAS found?**
    - What we know: D-10 locks the `NOT_FOUND` `TRPCError` for a missing row. `classifyEncounter()` returns `Result<ClassificationResult>`, which is domain-internal and explicitly not meant to cross the tRPC boundary (D-10's own rationale).
    - What's unclear: A genuinely degenerate stored scenario (coincident positions — not currently prevented by `VesselSchema`/`PositionSchema`, since positions are unconstrained per Phase 1's "unbounded plane" design note) would make the read use case receive `!ok`. There's no CONTEXT.md decision on whether to (a) reject such input at `scenario.create` time (validate `classifyEncounter()` succeeds before persisting, even though the verdict itself is discarded — a "dry run" validation), (b) surface a distinct tRPC error code (e.g. `UNPROCESSABLE_CONTENT`) at read time, or (c) let the API return a response shape that includes a nullable/degenerate verdict field the (future, Phase 4) client must handle.
    - Recommendation: Favor option (a) — validate at `scenario.create` time by calling `classifyEncounter()` once (discarding the result, never storing it) purely to reject genuinely un-classifiable input with a `BAD_REQUEST` `TRPCError` at write time. This keeps `scenario.get`'s contract simple (a found row can always be classified) and matches the "fail fast at the boundary" idiom already used for Zod validation. This needs an explicit planning decision, not an implicit implementation choice.
+   - **RESOLVED:** Plan 03-02 Task 2 adopted option (a) — `createScenario` calls `classifyEncounter()` as a dry run (result discarded, never persisted) and rejects with `TRPCError({ code: 'BAD_REQUEST' })` on `!ok`, so `scenario.get`/`gallery.list` can assume a found row is always classifiable (with a defensive `INTERNAL_SERVER_ERROR` fallback for the theoretically-unreachable read-time failure).
 
 2. **Should `@trpc/react-query`/`TRPCReactProvider` client-side scaffold be built in this phase or deferred to Phase 4?**
    - What we know: This phase's 4 success criteria only mention routers (`scenario`/`gallery`), not any client consumption. ROADMAP.md assigns the interactive chart/UI to Phase 4.
    - What's unclear: Whether "thin adapters... expose create/get/list operations" implies the client wiring must exist and be demonstrably callable end-to-end in this phase (e.g. via a smoke-test page), or whether router-level tests (via `createCallerFactory`) are sufficient proof this phase is "done."
    - Recommendation: Build only the server-side scaffold (routers + `createTRPCContext` + route handler) and verify via `createCallerFactory`-based Vitest integration tests, per this phase's stated scope ("No UI (Phase 4/5)"). Install `@trpc/react-query`/`@tanstack/react-query` as dependencies now (cheap, avoids a second install later) but defer building `TRPCReactProvider`/`layout.tsx` wiring to Phase 4 unless the planner decides a minimal smoke-test page adds meaningful verification value now.
+   - **RESOLVED:** Plans 03-01 and 03-03 adopted the recommendation — `@trpc/react-query`/`@tanstack/react-query` are installed as dependencies now, but `TRPCReactProvider`/`layout.tsx` client wiring is explicitly deferred to Phase 4; Phase 3 verifies routers via `createCallerFactory`-based Vitest integration tests only (Plan 03-03).
 
 3. **Does `VesselTypeSchema`'s 5-value string union need a Postgres-level enum, or is a plain `String` column sufficient?**
    - What we know: CLAUDE.md's Claude's Discretion item explicitly calls out confirming the Prisma columns reuse Phase 1's exact 5-value kebab-case union (D-12 there) rather than redefining it.
    - What's unclear: Prisma supports native Postgres `enum` types (`enum VesselType { ... }` in `schema.prisma`, compiled to a Postgres `CREATE TYPE`), which would give DB-level enforcement, versus a plain `String` column that only Zod validates at the tRPC input boundary (not enforced if a row were ever written outside the Zod-validated path).
    - Recommendation: Use a plain `String` column (not a Postgres native enum) for `vesselAType`/`vesselBType`. Rationale: the *only* write path is `scenario.create`'s Zod-validated tRPC input (D-11) — there's no raw-SQL or admin-tool write path in this project's scope that would bypass Zod, so a native Postgres enum adds a second place (migration + schema) that must stay in sync with `VesselTypeSchema` for no additional real-world safety in this project's actual usage pattern. A `String` column is also one less thing to migrate if Phase 2's 5-value union ever changes.
+   - **RESOLVED:** Plan 03-01's schema task adopted the recommendation — `vesselAType`/`vesselBType` are plain `String` columns, not a native Postgres enum.
 
 ## Environment Availability
 
