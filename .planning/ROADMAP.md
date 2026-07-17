@@ -110,7 +110,23 @@ Plans:
   4. A reasoning trail panel shows the specific rule citation and the geometric logic (relative bearing, closing angle) behind the current verdict, updating live alongside the chart
   5. The chart visually overlays the geometric reasoning directly on the canvas (relative bearing line, and the overtaking boundary arc where relevant)
 
-**Plans**: TBD
+**Plans**: 6 plans
+Plans:
+**Wave 1**
+
+- [ ] 04-01-PLAN.md — Tailwind v4 + RTL/jsdom environment, Next.js App Router scaffolding, shared sandbox prop contracts
+- [ ] 04-02-PLAN.md — resolveDoubtGeometry() pure domain helper (TDD)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 04-03-PLAN.md — ChartPanel (SVG rendering + hull/rotate-handle drag hooks)
+- [ ] 04-04-PLAN.md — ControlPanel (speed + vessel-type form controls)
+- [ ] 04-05-PLAN.md — ReasoningPanel (verdict banner, full trail, doubt caveat)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 04-06-PLAN.md — SandboxContainer wiring (state, applyVesselUpdate choke point, default scenario, Reset CTA) + app/page.tsx
+
 **UI hint**: yes
 
 ### Phase 5: Save, Share & Gallery
@@ -137,5 +153,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Domain Foundations | 3/3 | Complete    | 2026-07-15 |
 | 2. COLREGS Rules Engine | 2/2 | Complete   | 2026-07-15 |
 | 3. Persistence & API Layer | 3/3 | Complete   | 2026-07-17 |
-| 4. Interactive Chart Sandbox | 0/TBD | Not started | - |
+| 4. Interactive Chart Sandbox | 0/6 | Not started | - |
 | 5. Save, Share & Gallery | 0/TBD | Not started | - |
