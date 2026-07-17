@@ -43,6 +43,32 @@ const HULL_FILL_CLASS: Record<VesselRole, string> = {
   mutual: "fill-slate-400",
 };
 
+// Bigger hull + a stalk-mounted rotate handle set well clear of the bow
+// tip (04-HUMAN-UAT.md Gap 1 follow-up: the first fix separated two
+// invisible hit-rects/circles by a numeric margin, but users still found
+// drag/rotate "tricky" -- an invisible padded hit-rect is inherently
+// bigger than the vessel it represents, so any margin between it and a
+// neighboring hit-target is guesswork, not a guarantee the gesture starts
+// only "on the vessel"). This revision removes the hull's separate
+// invisible hit-rect entirely: pointer handlers now live directly on the
+// visible, solid-filled hull polygon below, so hit-testing follows the
+// polygon's actual painted shape (SVG's default
+// `pointer-events: visiblePainted` -- any fill other than "none" is
+// hit-testable, not just a bounding box), not a padded rectangle. The
+// rotate handle keeps an invisible WCAG 2.5.5 (44px) hit-circle, pushed
+// far enough beyond the enlarged bow tip that the two regions cannot
+// overlap regardless of hull width.
+const HULL_BOW_Y = -28;
+const HULL_STERN_Y = 20;
+const HULL_HALF_WIDTH = 18;
+const HULL_POINTS = `0,${HULL_BOW_Y} ${HULL_HALF_WIDTH},${HULL_STERN_Y} ${-HULL_HALF_WIDTH},${HULL_STERN_Y}`;
+const HULL_BADGE_Y = HULL_STERN_Y + 14;
+
+const ROTATE_HANDLE_CY = -58;
+const ROTATE_HANDLE_HIT_R = 22; // WCAG 2.5.5 minimum touch target, 44px diameter
+const ROTATE_HANDLE_VISIBLE_R = 7;
+const ROTATE_STALK_Y2 = ROTATE_HANDLE_CY + ROTATE_HANDLE_VISIBLE_R;
+
 const ROLE_BADGE_TEXT: Record<VesselRole, string> = {
   "give-way": "GW",
   "stand-on": "SO",
@@ -143,52 +169,71 @@ interface VesselGroupProps {
 function VesselGroup({ label, vessel, screen, role, hullDrag, rotateDrag }: VesselGroupProps) {
   return (
     <g transform={`translate(${screen.screenX},${screen.screenY}) rotate(${vessel.heading})`}>
-      {/* Invisible hull hit-shape, 44x44px minimum (UI-SPEC Spacing Scale
-          exception) -- rendered before the visible polygon so it sits
-          underneath (does not visually cover it) but still receives the
-          drag gesture. Top edge is pinned to the bow tip (y=-10), NOT
-          centered on the vessel origin (y=-22) -- a centered hit-rect
-          reached 12px past the bow into the rotate handle's own hit-circle
-          below, so paint order gave the rotate gesture priority over most
-          of the visible hull's upper half, making position-drag unreliable
-          right where users naturally grab the vessel (bug found during
-          Phase 4 human UAT -- component tests never caught it because
-          jsdom stubs setPointerCapture/hasPointerCapture and dispatch
-          events directly to a testid'd node, bypassing real paint-order
-          hit-testing entirely). */}
-      <rect
+      {/* Rotate-handle stalk: a thin, non-interactive connector from the
+          bow tip to the rotate handle, signaling "this dot is a heading
+          control attached to the vessel" rather than an unrelated nearby
+          UI element. No pointer handlers -- purely decorative, so it can
+          never intercept a hull-drag or rotate-drag gesture. */}
+      <line
+        x1={0}
+        y1={HULL_BOW_Y}
+        x2={0}
+        y2={ROTATE_STALK_Y2}
+        stroke="#94A3B8" // slate-400
+        strokeWidth={1.5}
+      />
+      {/* Hull: the visible, solid-filled polygon IS the hit target --
+          pointer handlers are attached directly to it. SVG's default
+          `pointer-events: visiblePainted` hit-tests a shape's actual
+          painted area whenever its fill is anything other than "none";
+          a solid Tailwind fill class qualifies, so a drag gesture can
+          only start when the pointer is genuinely over the visible hull,
+          never over the empty chart or the (now well-separated) rotate
+          handle. Bigger than the original hull (36px wide x 48px tall,
+          vs. 12x18) per UAT feedback that the icons were also too small
+          to comfortably grab. */}
+      <polygon
         data-testid={`hull-hit-${label}`}
-        x={-22}
-        y={-10}
-        width={44}
-        height={44}
-        fill="transparent"
+        points={HULL_POINTS}
+        className={HULL_FILL_CLASS[role]}
         onPointerDown={hullDrag.onPointerDown}
         onPointerMove={hullDrag.onPointerMove}
         onPointerUp={hullDrag.onPointerUp}
       />
-      {/* Hull shape, local/unrotated, bow pointing up/-y. */}
-      <polygon points="0,-10 6,8 -6,8" className={HULL_FILL_CLASS[role]} />
-      <text x={0} y={24} textAnchor="middle" className="text-[14px] font-semibold fill-current">
+      <text
+        x={0}
+        y={HULL_BADGE_Y}
+        textAnchor="middle"
+        className="text-[14px] font-semibold fill-current"
+      >
         {ROLE_BADGE_TEXT[role]}
       </text>
       {/* Rotate handle: invisible 44px-diameter hit-circle (WCAG 2.5.5 AA)
-          underneath a visible r=6 handle beyond the bow tip. Centered at
-          cy=-34 (not -20) so the hit-circle's bottom edge (-34+22=-12)
-          clears the hull hit-rect's top edge (-10) with a 2px margin --
-          see the hull-hit-rect comment above for why this separation is
-          required. */}
+          underneath a small visible teal ring. Centered well beyond the
+          enlarged hull's bow tip (HULL_BOW_Y) so the two hit regions
+          cannot overlap regardless of hull width -- unlike the hull, this
+          handle keeps a padded circular hit target (rather than exactly
+          matching its small visible ring) since it is a deliberately
+          separate, isolated control with nothing else nearby to
+          misfire against. */}
       <circle
         data-testid={`rotate-hit-${label}`}
         cx={0}
-        cy={-34}
-        r={22}
+        cy={ROTATE_HANDLE_CY}
+        r={ROTATE_HANDLE_HIT_R}
         fill="transparent"
         onPointerDown={rotateDrag.onPointerDown}
         onPointerMove={rotateDrag.onPointerMove}
         onPointerUp={rotateDrag.onPointerUp}
       />
-      <circle cx={0} cy={-34} r={6} stroke="#0D9488" strokeWidth={2} fill="white" />
+      <circle
+        cx={0}
+        cy={ROTATE_HANDLE_CY}
+        r={ROTATE_HANDLE_VISIBLE_R}
+        stroke="#0D9488"
+        strokeWidth={2}
+        fill="white"
+      />
     </g>
   );
 }
