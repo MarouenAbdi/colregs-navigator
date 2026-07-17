@@ -14,7 +14,7 @@ This roadmap builds COLREGS Navigator as a stack of horizontal technical layers,
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Domain Foundations** - Geometry primitives and vessel value objects, fixture-tested in isolation (completed 2026-07-15)
-- [ ] **Phase 2: COLREGS Rules Engine** - Encounter classification, give-way/stand-on determination, and the reasoning trail
+- [x] **Phase 2: COLREGS Rules Engine** - Encounter classification, give-way/stand-on determination, and the reasoning trail (completed 2026-07-15)
 - [ ] **Phase 3: Persistence & API Layer** - Prisma schema, repository, application use cases, and thin tRPC routers
 - [ ] **Phase 4: Interactive Chart Sandbox** - SVG chart with live drag-and-classify, reasoning overlay, and visual role coding
 - [ ] **Phase 5: Save, Share & Gallery** - Shareable scenario links and a curated gallery of classic encounters
@@ -61,7 +61,15 @@ Plans:
   4. Give-way/stand-on determination applies the Rule 18 vessel-type hierarchy as an override on the geometric baseline, treating not-under-command and restricted-in-ability-to-maneuver as co-equal statuses
   5. Every classification result carries an ordered reasoning trail (rule id + matched geometric facts) produced by the same evaluation path as the verdict — never a separate, reverse-engineered explanation function
 
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+**Wave 1**
+
+- [x] 02-01-PLAN.md — Domain types (types.ts) + isolated Rule 7 risk gate and Rule 18 priority-tier primitives
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [x] 02-02-PLAN.md — classifyEncounter() dispatch (Rules 7/13/14/15/18) with reasoning trail and full fixture suite
 
 ### Phase 3: Persistence & API Layer
 
@@ -115,7 +123,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Domain Foundations | 3/3 | Complete    | 2026-07-15 |
-| 2. COLREGS Rules Engine | 0/TBD | Not started | - |
+| 2. COLREGS Rules Engine | 2/2 | Complete   | 2026-07-15 |
 | 3. Persistence & API Layer | 0/TBD | Not started | - |
 | 4. Interactive Chart Sandbox | 0/TBD | Not started | - |
 | 5. Save, Share & Gallery | 0/TBD | Not started | - |

@@ -60,6 +60,7 @@ Given any two-vessel encounter, correctly classify it under COLREGS and clearly 
 | Explainability is a first-class feature (rule citation + geometric reasoning shown, not just verdict) | Directly showcases domain-model transparency and reasoning, which is the whole point of the rules-engine architecture | — Pending |
 | Scenarios are saveable/shareable via link, backed by Postgres/Prisma/tRPC; no auth | Exercises the full backend stack end-to-end while keeping scope minimal — no user accounts needed for a link-shareable tool | — Pending |
 | Framed as a general maritime showcase, no employer/company tie-in | User's explicit choice — safest and most portable framing for a public portfolio piece | — Pending |
+| Rule 18's vessel-type hierarchy must never override Rule 13 overtaking verdicts | Rule 13(a) explicitly states it applies "notwithstanding anything contained in Rules 4 to 18" — a code-review pass on Phase 2 caught an initial implementation that applied Rule 18 uniformly to crossing AND overtaking, which would have produced a legally incorrect give-way verdict; fixed and regression-tested before phase close | Fixed in Phase 2 |
 
 ## Evolution
 
@@ -79,4 +80,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-15 after Phase 1 (Domain Foundations) completion — internal domain layer only (Vessel value object, geometry primitives), no user-facing capability shipped yet; Active requirements remain unvalidated until their owning UI/persistence phases land.*
+*Last updated: 2026-07-16 after Phase 2 (COLREGS Rules Engine) completion — the core `classifyEncounter()` rules engine (head-on/crossing/overtaking classification, Rule 7 risk gate, Rule 18 vessel-type hierarchy, reasoning trail) is implemented and fixture-tested (100/100 tests passing), still internal-only with no UI/persistence wired up yet. A critical Rule 18/overtaking precedence bug (Rule 13(a) requires overtaking to override Rules 4–18) was caught by code review and fixed before close, with a regression test added; two review-fix items remain flagged for human maintainer sign-off (see 02-HUMAN-UAT.md). Active requirements remain unvalidated until their owning UI/persistence phases (3–5) land.*
