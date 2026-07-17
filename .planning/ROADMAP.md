@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Domain Foundations** - Geometry primitives and vessel value objects, fixture-tested in isolation (completed 2026-07-15)
 - [x] **Phase 2: COLREGS Rules Engine** - Encounter classification, give-way/stand-on determination, and the reasoning trail (completed 2026-07-15)
-- [ ] **Phase 3: Persistence & API Layer** - Prisma schema, repository, application use cases, and thin tRPC routers
+- [x] **Phase 3: Persistence & API Layer** - Prisma schema, repository, application use cases, and thin tRPC routers (completed 2026-07-17)
 - [ ] **Phase 4: Interactive Chart Sandbox** - SVG chart with live drag-and-classify, reasoning overlay, and visual role coding
 - [ ] **Phase 5: Save, Share & Gallery** - Shareable scenario links and a curated gallery of classic encounters
 
@@ -83,7 +83,19 @@ Plans:
   3. Retrieving a persisted scenario always re-runs `classifyEncounter()` against the stored inputs at read time — the stored verdict is never read back as-is
   4. `scenario` and `gallery` tRPC routers expose create/get/list operations as thin adapters (Zod-validated input, one application-layer call, typed response), with no classification logic in router handlers
 
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+**Wave 1**
+
+- [x] 03-01-PLAN.md — Docker Postgres, Prisma schema/config, initial migration, PrismaClient singleton
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [x] 03-02-PLAN.md — Scenario repository + application-layer re-derive-on-read service (SCEN-02)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [x] 03-03-PLAN.md — scenario/gallery tRPC routers, route handler, end-to-end integration tests
 
 ### Phase 4: Interactive Chart Sandbox
 
@@ -124,6 +136,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Domain Foundations | 3/3 | Complete    | 2026-07-15 |
 | 2. COLREGS Rules Engine | 2/2 | Complete   | 2026-07-15 |
-| 3. Persistence & API Layer | 0/TBD | Not started | - |
+| 3. Persistence & API Layer | 3/3 | Complete   | 2026-07-17 |
 | 4. Interactive Chart Sandbox | 0/TBD | Not started | - |
 | 5. Save, Share & Gallery | 0/TBD | Not started | - |
