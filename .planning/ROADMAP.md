@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Domain Foundations** - Geometry primitives and vessel value objects, fixture-tested in isolation (completed 2026-07-15)
 - [x] **Phase 2: COLREGS Rules Engine** - Encounter classification, give-way/stand-on determination, and the reasoning trail (completed 2026-07-15)
 - [x] **Phase 3: Persistence & API Layer** - Prisma schema, repository, application use cases, and thin tRPC routers (completed 2026-07-17)
-- [ ] **Phase 4: Interactive Chart Sandbox** - SVG chart with live drag-and-classify, reasoning overlay, and visual role coding
+- [x] **Phase 4: Interactive Chart Sandbox** - SVG chart with live drag-and-classify, reasoning overlay, and visual role coding (completed 2026-07-17)
 - [ ] **Phase 5: Save, Share & Gallery** - Shareable scenario links and a curated gallery of classic encounters
 
 ## Phase Details
@@ -110,7 +110,23 @@ Plans:
   4. A reasoning trail panel shows the specific rule citation and the geometric logic (relative bearing, closing angle) behind the current verdict, updating live alongside the chart
   5. The chart visually overlays the geometric reasoning directly on the canvas (relative bearing line, and the overtaking boundary arc where relevant)
 
-**Plans**: TBD
+**Plans**: 6 plans
+Plans:
+**Wave 1**
+
+- [x] 04-01-PLAN.md — Tailwind v4 + RTL/jsdom environment, Next.js App Router scaffolding, shared sandbox prop contracts
+- [x] 04-02-PLAN.md — resolveDoubtGeometry() pure domain helper (TDD)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [x] 04-03-PLAN.md — ChartPanel (SVG rendering + hull/rotate-handle drag hooks)
+- [x] 04-04-PLAN.md — ControlPanel (speed + vessel-type form controls)
+- [x] 04-05-PLAN.md — ReasoningPanel (verdict banner, full trail, doubt caveat)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [x] 04-06-PLAN.md — SandboxContainer wiring (state, applyVesselUpdate choke point, default scenario, Reset CTA) + app/page.tsx
+
 **UI hint**: yes
 
 ### Phase 5: Save, Share & Gallery
@@ -137,5 +153,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Domain Foundations | 3/3 | Complete    | 2026-07-15 |
 | 2. COLREGS Rules Engine | 2/2 | Complete   | 2026-07-15 |
 | 3. Persistence & API Layer | 3/3 | Complete   | 2026-07-17 |
-| 4. Interactive Chart Sandbox | 0/TBD | Not started | - |
+| 4. Interactive Chart Sandbox | 6/6 | Complete   | 2026-07-17 |
 | 5. Save, Share & Gallery | 0/TBD | Not started | - |
