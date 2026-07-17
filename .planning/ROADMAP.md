@@ -119,9 +119,9 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 04-03-PLAN.md — ChartPanel (SVG rendering + hull/rotate-handle drag hooks)
-- [ ] 04-04-PLAN.md — ControlPanel (speed + vessel-type form controls)
-- [ ] 04-05-PLAN.md — ReasoningPanel (verdict banner, full trail, doubt caveat)
+- [x] 04-03-PLAN.md — ChartPanel (SVG rendering + hull/rotate-handle drag hooks)
+- [x] 04-04-PLAN.md — ControlPanel (speed + vessel-type form controls)
+- [x] 04-05-PLAN.md — ReasoningPanel (verdict banner, full trail, doubt caveat)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -153,5 +153,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Domain Foundations | 3/3 | Complete    | 2026-07-15 |
 | 2. COLREGS Rules Engine | 2/2 | Complete   | 2026-07-15 |
 | 3. Persistence & API Layer | 3/3 | Complete   | 2026-07-17 |
-| 4. Interactive Chart Sandbox | 2/6 | In Progress|  |
+| 4. Interactive Chart Sandbox | 5/6 | In Progress|  |
 | 5. Save, Share & Gallery | 0/TBD | Not started | - |
