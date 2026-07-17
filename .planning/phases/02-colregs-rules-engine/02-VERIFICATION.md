@@ -1,23 +1,25 @@
 ---
 phase: 02-colregs-rules-engine
 verified: 2026-07-16T11:30:00Z
-status: human_needed
+status: passed
 score: 8/8 must-haves verified
 overrides_applied: 0
 human_verification:
   - test: "Confirm Rule 13(a) precedence over Rule 18 (CR-01 fix) is the legally correct COLREGS interpretation for this project's scope"
     expected: "An overtaking vessel always gives way regardless of vessel type, per Rule 13(a)'s 'notwithstanding anything contained in Rules 4 to 18, inclusive' language. classifyEncounter() must never apply Rule 18's vessel-type hierarchy to an 'overtaking' encounterType."
     why_human: "This is a maritime-law/domain-correctness judgment on the project's core value proposition ('if this reasoning is wrong, nothing else matters'). The code-review-fix step (02-REVIEW-FIX.md, commit 6c72cf7) explicitly flagged this as 'requires human verification' rather than closing it as a routine fix. The verifier independently confirmed the code change matches the cited Rule 13(a) text and is covered by a passing regression test (CR-01 regression, classify-encounter.test.ts:319-332), but a maintainer sign-off on the legal interpretation itself is what the executor asked for and grep/test inspection cannot substitute for that judgment call."
+    resolved: "Confirmed correct by maintainer 2026-07-17."
   - test: "Confirm the sticky-overtaking hysteresis path should now raise doubt near the 112.5deg boundary (WR-01 fix) rather than always reporting doubt:false"
     expected: "overtakingHysteresisNearBoundaryCase (bearing 110deg while sticky) reports doubt:true, doubtBoundary:'near-overtaking-crossing-boundary' -- confirm this is the intended UX/domain behavior, not just an internally-consistent code change."
     why_human: "Same class of judgment as above -- 02-REVIEW-FIX.md explicitly flagged this fix (commit ba7f0ae) as 'requires human verification' because it changes previously-always-false output to sometimes-true. The verifier confirmed the change is internally consistent with Stage 3's doubt logic and is regression-tested, but the original design intent (was doubt:false in the sticky path deliberate simplification, per the reviewer's WR-01 alternative fix option?) is a product/domain call, not a code-correctness one."
+    resolved: "Confirmed correct by maintainer 2026-07-17."
 ---
 
 # Phase 2: COLREGS Rules Engine Verification Report
 
 **Phase Goal:** Given any two-vessel scenario, the system correctly classifies the encounter and determines give-way/stand-on with a transparent reasoning trail — the project's core value — validated against textbook fixtures before any UI exists.
 **Verified:** 2026-07-16T11:30:00Z
-**Status:** human_needed
+**Status:** passed
 **Re-verification:** No — initial verification
 
 ## Goal Achievement
@@ -109,19 +111,21 @@ All 7 requirement IDs declared in `02-01-PLAN.md`/`02-02-PLAN.md` frontmatter ar
 
 No TBD/FIXME/XXX/TODO/HACK/PLACEHOLDER markers found in any Phase 2 file (`grep` scan of `src/domain/colregs/` returned zero matches).
 
-### Human Verification Required
+### Human Verification Required — RESOLVED 2026-07-17
 
 ### 1. Rule 13(a) precedence over Rule 18 for overtaking (CR-01 fix)
 
 **Test:** Review `classify-encounter.ts`'s Stage 6 `overtaking` branch (lines 262-270) and confirm that an overtaking vessel must always give way regardless of vessel type, per Rule 13(a)'s "notwithstanding anything contained in Rules 4 to 18, inclusive" language.
 **Expected:** Sign-off that this is the legally/domain-correct behavior for the project's stated scope (Rules 7, 13-15, 18).
 **Why human:** This is a maritime-law interpretation directly tied to the project's stated core value ("if this reasoning is wrong, nothing else matters"). The executor's own `02-REVIEW-FIX.md` explicitly marked this fix `requires human verification` rather than closing it routinely. The verifier confirmed the code matches the cited rule text and passes a dedicated regression test, but the legal-interpretation sign-off itself was explicitly deferred to a human by the workflow, and code inspection cannot substitute for that judgment.
+**Resolution:** Confirmed correct by maintainer 2026-07-17.
 
 ### 2. Doubt flag in sticky-overtaking hysteresis path (WR-01 fix)
 
 **Test:** Review whether `overtakingHysteresisNearBoundaryCase` correctly reporting `doubt:true` when the sticky path's current bearing drifts near the 112.5deg boundary is the intended behavior, versus the reviewer's alternative suggestion of leaving the sticky path's doubt hardcoded to `false` with a documenting comment.
 **Expected:** Sign-off that raising doubt in the sticky path (rather than suppressing it) is the desired UX/domain behavior.
 **Why human:** `02-REVIEW-FIX.md` explicitly flagged this as `requires human verification` because it changes previously-always-`false` output to sometimes-`true`, a behavior change to what a maintainer sees/relies on, not a pure bug fix with one obviously-correct answer.
+**Resolution:** Confirmed correct by maintainer 2026-07-17.
 
 ### Gaps Summary
 
