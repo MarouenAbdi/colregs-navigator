@@ -12,18 +12,17 @@ Given any two-vessel encounter, correctly classify it under COLREGS and clearly 
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] User can place two vessels on a chart-style sandbox, setting position, heading, speed, and vessel type — Validated in Phase 4 (Interactive Chart Sandbox)
+- [x] User can drag/adjust vessel position and heading and see the encounter classification update live — Validated in Phase 4 (Interactive Chart Sandbox)
+- [x] App classifies the encounter as head-on, crossing, or overtaking per COLREGS Rules 11–18 — Logic validated in Phase 2 (COLREGS Rules Engine); user-facing/visible validation completed in Phase 4 once a UI existed to exercise it
+- [x] App determines give-way vs. stand-on vessel, including vessel-type-based responsibilities (power-driven, sailing, fishing, restricted-in-ability-to-maneuver) per Rule 18 — Logic validated in Phase 2; visual give-way/stand-on distinction (color + role badges) validated in Phase 4
+- [x] App displays a reasoning trail: the specific rule citation plus the geometric logic (relative bearing, closing angle) that produced the verdict — Validated in Phase 4 (Interactive Chart Sandbox); the reasoning panel renders both rule citations/prose AND each trail entry's raw geometric facts (relative bearing, TCPA, DCPA), not verdict-only
+- [x] Visual chart rendering shows vessel positions, headings, and encounter geometry clearly — Validated in Phase 4 (Interactive Chart Sandbox)
 
 ### Active
 
-- [ ] User can place two vessels on a chart-style sandbox, setting position, heading, speed, and vessel type
-- [ ] User can drag/adjust vessel position and heading and see the encounter classification update live
-- [ ] App classifies the encounter as head-on, crossing, or overtaking per COLREGS Rules 11–18
-- [ ] App determines give-way vs. stand-on vessel, including vessel-type-based responsibilities (power-driven, sailing, fishing, restricted-in-ability-to-maneuver) per Rule 18
-- [ ] App displays a reasoning trail: the specific rule citation plus the geometric logic (relative bearing, closing angle) that produced the verdict
 - [ ] User can save a scenario and get a shareable link (no login required)
 - [ ] User can browse a curated gallery of preset classic encounters (e.g. textbook head-on, classic crossing, overtaking case)
-- [ ] Visual chart rendering shows vessel positions, headings, and encounter geometry clearly
 
 ### Out of Scope
 
@@ -61,6 +60,7 @@ Given any two-vessel encounter, correctly classify it under COLREGS and clearly 
 | Scenarios are saveable/shareable via link, backed by Postgres/Prisma/tRPC; no auth | Exercises the full backend stack end-to-end while keeping scope minimal — no user accounts needed for a link-shareable tool | — Pending |
 | Framed as a general maritime showcase, no employer/company tie-in | User's explicit choice — safest and most portable framing for a public portfolio piece | — Pending |
 | Rule 18's vessel-type hierarchy must never override Rule 13 overtaking verdicts | Rule 13(a) explicitly states it applies "notwithstanding anything contained in Rules 4 to 18" — a code-review pass on Phase 2 caught an initial implementation that applied Rule 18 uniformly to crossing AND overtaking, which would have produced a legally incorrect give-way verdict; fixed and regression-tested before phase close | Fixed in Phase 2 |
+| SVG drag/rotate hit-targets must hit-test the actual visible shape, not a padded invisible proxy | Live human UAT on Phase 4 found dragging/rotating vessels "tricky" across two rounds of fixes — the root cause was that both the hull-drag rect and the rotate-handle circle used separate, independently-sized invisible hit-shapes, so their boundaries never matched what the user visually saw or could be reliably kept apart by picking numeric margins. The fix was structural, not numeric: attach pointer handlers directly to the visible, solid-filled shape itself (SVG's default `pointer-events: visiblePainted` hit-tests the real painted area for any non-`none` fill) so a gesture only starts where the pointer is genuinely over what the user sees. Relevant precedent if Phase 5 or later work adds more draggable/clickable chart elements. | Fixed in Phase 4 (commits `3bf6f24`, `f559e98`) |
 
 ## Evolution
 
@@ -80,4 +80,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-17 after Phase 3 (Persistence & API Layer) completion — Prisma/Postgres persistence, the application-layer service, and the tRPC `scenario`/`gallery` routers are implemented and integration-tested end-to-end (115/115 tests passing). SCEN-02 (retrieving a scenario always re-runs `classifyEncounter()` against stored raw inputs — the verdict is never trusted from storage) is now Complete. This phase ships the backend plumbing only, with no UI yet: SCEN-01 (user-facing save/share) and the remaining Active requirement bullets stay unvalidated until their owning UI phases (4–5) land. One non-blocking finding carried forward from code review: the tRPC `errorFormatter`'s Prisma-error-redaction claim doesn't match its implementation (03-REVIEW.md CR-01) — flagged for a future phase, not a Phase 3 blocker.*
+*Last updated: 2026-07-17 after Phase 4 (Interactive Chart Sandbox) completion — the interactive SVG sandbox is live: drag-to-position and rotate-to-heading vessel manipulation, live COLREGS classification with no submit step, color/badge give-way/stand-on coding, and a reasoning-trail panel rendering both rule citations and the underlying geometric facts (relative bearing, TCPA, DCPA). This is the first end-to-end demoable phase — `/` now renders a fully interactive scenario, not just backend plumbing. All Phase 4 requirements (VESL-02, CLAS-05, DETM-03, RSON-01, RSON-03, CHRT-01, CHRT-02) validated: 22 test files / 146 tests passing, `tsc`/`next build` clean, and 3 human-UAT items confirmed live in-browser after fixing a real hit-testing design defect surfaced during that testing (see Key Decisions). Non-blocking findings carried forward from code review (04-REVIEW.md, 0 Critical/4 Warning/3 Info — e.g. `ChartPanel` not yet visually flagging the degenerate/coincident-position case, silent revert on invalid speed input) are flagged for cleanup before Phase 5, not phase blockers. Remaining Active requirements (save/share link, curated gallery) are Phase 5's scope.*
