@@ -1,7 +1,7 @@
 ---
 phase: 4
 slug: interactive-chart-sandbox
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-07-17
@@ -24,6 +24,8 @@ created: 2026-07-17
 | Font | System UI sans stack (Tailwind `font-sans` default: `ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica Neue, Arial`) for all UI text. `font-mono` (Tailwind default monospace stack) for numeric geometric readouts (bearing°, speed kn, distance) so digits align in tabular columns. |
 
 **shadcn decision rationale:** `components.json` not found; tech stack is Next.js/React so the shadcn gate applies. However, initializing shadcn requires an external interactive step (visit ui.shadcn.com/create, configure a preset, paste the string back) not available in this single-shot research pass. Neither CLAUDE.md's exhaustive locked-stack research nor 04-CONTEXT.md/04-RESEARCH.md mention shadcn anywhere, despite CLAUDE.md justifying every other dependency choice explicitly — a strong signal it was deliberately not selected. This phase's UI surface is small (one numeric speed input, one vessel-type select, one reset button) sitting alongside a hand-rolled SVG chart that is the actual design-effort center per D-05 (minimal/schematic, no decorative chrome). Revisit before Phase 5 (gallery + save/share) if that phase's larger form/list/card surface area would benefit more from a component library.
+
+**Visual hierarchy:** The Display-size verdict banner (28px/600, top of the reasoning panel — e.g. "Crossing — Vessel A gives way") is the primary visual anchor on the sandbox screen; the chart's color-coded vessel hulls are the secondary anchor, reinforcing the same verdict spatially. Everything else (form controls, trail detail entries, grid) is tertiary and intentionally understated per D-05's minimal/schematic chart style — the eye should land on "what's the verdict" before "what are the exact numbers."
 
 ---
 
@@ -131,11 +133,11 @@ Resolves CONTEXT.md's two open "Claude's discretion" color items: the mutual-obl
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS (FLAG resolved — visual hierarchy sentence added above)
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** APPROVED (2026-07-17)
