@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Domain Foundations** - Geometry primitives and vessel value objects, fixture-tested in isolation (completed 2026-07-15)
 - [x] **Phase 2: COLREGS Rules Engine** - Encounter classification, give-way/stand-on determination, and the reasoning trail (completed 2026-07-15)
-- [ ] **Phase 3: Persistence & API Layer** - Prisma schema, repository, application use cases, and thin tRPC routers
+- [x] **Phase 3: Persistence & API Layer** - Prisma schema, repository, application use cases, and thin tRPC routers (completed 2026-07-17)
 - [ ] **Phase 4: Interactive Chart Sandbox** - SVG chart with live drag-and-classify, reasoning overlay, and visual role coding
 - [ ] **Phase 5: Save, Share & Gallery** - Shareable scenario links and a curated gallery of classic encounters
 
@@ -95,7 +95,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 03-03-PLAN.md — scenario/gallery tRPC routers, route handler, end-to-end integration tests
+- [x] 03-03-PLAN.md — scenario/gallery tRPC routers, route handler, end-to-end integration tests
 
 ### Phase 4: Interactive Chart Sandbox
 
@@ -136,6 +136,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Domain Foundations | 3/3 | Complete    | 2026-07-15 |
 | 2. COLREGS Rules Engine | 2/2 | Complete   | 2026-07-15 |
-| 3. Persistence & API Layer | 2/3 | In Progress|  |
+| 3. Persistence & API Layer | 3/3 | Complete   | 2026-07-17 |
 | 4. Interactive Chart Sandbox | 0/TBD | Not started | - |
 | 5. Save, Share & Gallery | 0/TBD | Not started | - |
