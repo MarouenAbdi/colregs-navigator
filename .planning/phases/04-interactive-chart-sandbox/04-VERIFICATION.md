@@ -1,9 +1,11 @@
 ---
 phase: 04-interactive-chart-sandbox
 verified: 2026-07-17T20:50:19Z
-status: human_needed
+status: passed
 score: 19/19 must-haves verified
 overrides_applied: 0
+human_verification_resolved: 2026-07-17T22:55:00Z
+human_verification_source: 04-HUMAN-UAT.md
 human_verification:
   - test: "Drag a vessel's hull around the chart with the mouse/trackpad for several seconds"
     expected: "The vessel follows the pointer smoothly with no visible lag, jank, or flicker; the reasoning trail and bearing line update continuously in step with the drag"
@@ -20,8 +22,10 @@ human_verification:
 
 **Phase Goal:** Users can interactively set up a two-vessel encounter on a chart and see live, visually-explained classification as they drag — the main interaction loop and demo centerpiece.
 **Verified:** 2026-07-17T20:50:19Z
-**Status:** human_needed
+**Status:** passed
 **Re-verification:** No — initial verification
+
+**Human verification resolved 2026-07-17T22:55:00Z** (see `04-HUMAN-UAT.md`): all 3 items confirmed by the user in a live browser session. Item 1 (drag smoothness) and item 3 (rotate-handle boundary behavior) surfaced a genuine hit-area design defect during that testing — the hull and rotate-handle hit targets used padded invisible shapes rather than hit-testing their actual visible geometry, which made gestures misfire near their shared boundary. Fixed across three iterations (commits `3746a98`, `3bf6f24`, `f559e98`) and re-confirmed by the user ("all clear"). Item 2 (color legibility) passed with no issues.
 
 ## Goal Achievement
 
