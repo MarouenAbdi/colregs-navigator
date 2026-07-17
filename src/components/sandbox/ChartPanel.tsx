@@ -132,6 +132,7 @@ function buildGridLines(containerSize: ContainerSize): React.ReactNode[] {
 }
 
 interface VesselGroupProps {
+  label: VesselLabel;
   vessel: Vessel;
   screen: { screenX: number; screenY: number };
   role: VesselRole;
@@ -139,7 +140,7 @@ interface VesselGroupProps {
   rotateDrag: DragHandlers;
 }
 
-function VesselGroup({ vessel, screen, role, hullDrag, rotateDrag }: VesselGroupProps) {
+function VesselGroup({ label, vessel, screen, role, hullDrag, rotateDrag }: VesselGroupProps) {
   return (
     <g transform={`translate(${screen.screenX},${screen.screenY}) rotate(${vessel.heading})`}>
       {/* Invisible hull hit-shape, 44x44px minimum (UI-SPEC Spacing Scale
@@ -147,6 +148,7 @@ function VesselGroup({ vessel, screen, role, hullDrag, rotateDrag }: VesselGroup
           underneath (does not visually cover it) but still receives the
           drag gesture. */}
       <rect
+        data-testid={`hull-hit-${label}`}
         x={-22}
         y={-22}
         width={44}
@@ -164,6 +166,7 @@ function VesselGroup({ vessel, screen, role, hullDrag, rotateDrag }: VesselGroup
       {/* Rotate handle: invisible 44px-diameter hit-circle (WCAG 2.5.5 AA)
           underneath a visible r=6 handle just beyond the bow tip. */}
       <circle
+        data-testid={`rotate-hit-${label}`}
         cx={0}
         cy={-20}
         r={22}
@@ -272,6 +275,7 @@ export function ChartPanel({
         <g>{buildGridLines(containerSize)}</g>
         <g>
           <path
+            data-testid="cone-vesselA"
             d={conePathA}
             stroke={doubtVessel === "vesselA" ? DOUBT_STROKE : CONE_DEFAULT_STROKE}
             strokeWidth={1}
@@ -280,6 +284,7 @@ export function ChartPanel({
             fillOpacity={0.1}
           />
           <path
+            data-testid="cone-vesselB"
             d={conePathB}
             stroke={doubtVessel === "vesselB" ? DOUBT_STROKE : CONE_DEFAULT_STROKE}
             strokeWidth={1}
@@ -292,6 +297,7 @@ export function ChartPanel({
             it must not inherit either vessel's rotation. */}
         <g>
           <line
+            data-testid="bearing-line"
             x1={screenA.screenX}
             y1={screenA.screenY}
             x2={screenB.screenX}
@@ -301,8 +307,22 @@ export function ChartPanel({
             strokeDasharray={bearingDashArray}
           />
         </g>
-        <VesselGroup vessel={vesselA} screen={screenA} role={roleA} hullDrag={hullDragA} rotateDrag={rotateDragA} />
-        <VesselGroup vessel={vesselB} screen={screenB} role={roleB} hullDrag={hullDragB} rotateDrag={rotateDragB} />
+        <VesselGroup
+          label="vesselA"
+          vessel={vesselA}
+          screen={screenA}
+          role={roleA}
+          hullDrag={hullDragA}
+          rotateDrag={rotateDragA}
+        />
+        <VesselGroup
+          label="vesselB"
+          vessel={vesselB}
+          screen={screenB}
+          role={roleB}
+          hullDrag={hullDragB}
+          rotateDrag={rotateDragB}
+        />
       </svg>
     </div>
   );
