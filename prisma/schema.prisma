@@ -1,0 +1,42 @@
+// D-06: deliberately NO verdict/encounterType/giveWay/standOn column anywhere
+// in the model below, and none should ever be added. The schema's inability
+// to store a derived verdict is the primary enforcement mechanism for
+// SCEN-02's "always re-derive on read" guarantee.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Deliberately no connection string field here -- Prisma 7 wires
+  // DATABASE_URL via prisma.config.ts, not the schema.
+}
+
+model Scenario {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  vesselAPosX    Float
+  vesselAPosY    Float
+  vesselAHeading Float
+  vesselASpeed   Float
+  // Plain String, not a native Postgres enum -- the only write path is
+  // scenario.create's Zod-validated tRPC input (VesselTypeSchema), so a
+  // second enum definition to keep in sync would add no real-world safety
+  // (Open Question 3, RESEARCH.md).
+  vesselAType String
+
+  vesselBPosX    Float
+  vesselBPosY    Float
+  vesselBHeading Float
+  vesselBSpeed   Float
+  vesselBType    String
+
+  // Gallery fields (D-08/D-09) -- schema support only, no seed data this
+  // phase (D-07). Unused/null/default until Phase 5.
+  isCurated    Boolean @default(false)
+  displayOrder Int?
+  rationale    String?
+}
