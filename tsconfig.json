@@ -5,7 +5,39 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    // Rule 1 (04-01): the plan specified "preserve", but Next.js 16.2.10's
+    // own `next build` tsconfig writer mandatorily overwrites this to
+    // "react-jsx" on every run ("next.js uses the React automatic
+    // runtime") -- verified by two consecutive `next build` runs. Setting
+    // "preserve" here would just be silently reverted on the next build,
+    // producing a permanently dirty working tree. Locking to the value
+    // Next.js itself requires.
+    "jsx": "react-jsx",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "allowJs": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "app",
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
