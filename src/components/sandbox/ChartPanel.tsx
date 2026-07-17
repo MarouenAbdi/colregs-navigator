@@ -44,20 +44,20 @@ const HULL_FILL_CLASS: Record<VesselRole, string> = {
 };
 
 // Bigger hull + a stalk-mounted rotate handle set well clear of the bow
-// tip (04-HUMAN-UAT.md Gap 1 follow-up: the first fix separated two
-// invisible hit-rects/circles by a numeric margin, but users still found
-// drag/rotate "tricky" -- an invisible padded hit-rect is inherently
-// bigger than the vessel it represents, so any margin between it and a
-// neighboring hit-target is guesswork, not a guarantee the gesture starts
-// only "on the vessel"). This revision removes the hull's separate
-// invisible hit-rect entirely: pointer handlers now live directly on the
-// visible, solid-filled hull polygon below, so hit-testing follows the
-// polygon's actual painted shape (SVG's default
-// `pointer-events: visiblePainted` -- any fill other than "none" is
-// hit-testable, not just a bounding box), not a padded rectangle. The
-// rotate handle keeps an invisible WCAG 2.5.5 (44px) hit-circle, pushed
-// far enough beyond the enlarged bow tip that the two regions cannot
-// overlap regardless of hull width.
+// tip (04-HUMAN-UAT.md Gap 1 follow-up: separating two invisible padded
+// hit-shapes by a numeric margin still left drag/rotate feeling
+// imprecise -- a padded invisible shape is inherently bigger than the
+// control it represents, so its boundary never quite matches what the
+// user visually sees). Both the hull and the rotate handle now attach
+// their pointer handlers directly to their own visible, solid-filled
+// shape: SVG's default `pointer-events: visiblePainted` hit-tests a
+// shape's actual painted area whenever its fill is anything other than
+// "none", so a gesture can only start when the pointer is genuinely over
+// the thing the user sees, never a padded box/circle around it. No
+// separate WCAG-sized invisible hit-circle remains for the rotate handle
+// -- its own visible ring is the entire hit target, enlarged slightly
+// (r=10, up from a decorative r=7) to stay comfortably grabbable now that
+// it alone defines the click area.
 const HULL_BOW_Y = -28;
 const HULL_STERN_Y = 20;
 const HULL_HALF_WIDTH = 18;
@@ -65,8 +65,7 @@ const HULL_POINTS = `0,${HULL_BOW_Y} ${HULL_HALF_WIDTH},${HULL_STERN_Y} ${-HULL_
 const HULL_BADGE_Y = HULL_STERN_Y + 14;
 
 const ROTATE_HANDLE_CY = -58;
-const ROTATE_HANDLE_HIT_R = 22; // WCAG 2.5.5 minimum touch target, 44px diameter
-const ROTATE_HANDLE_VISIBLE_R = 7;
+const ROTATE_HANDLE_VISIBLE_R = 10;
 const ROTATE_STALK_Y2 = ROTATE_HANDLE_CY + ROTATE_HANDLE_VISIBLE_R;
 
 const ROLE_BADGE_TEXT: Record<VesselRole, string> = {
@@ -208,31 +207,24 @@ function VesselGroup({ label, vessel, screen, role, hullDrag, rotateDrag }: Vess
       >
         {ROLE_BADGE_TEXT[role]}
       </text>
-      {/* Rotate handle: invisible 44px-diameter hit-circle (WCAG 2.5.5 AA)
-          underneath a small visible teal ring. Centered well beyond the
-          enlarged hull's bow tip (HULL_BOW_Y) so the two hit regions
-          cannot overlap regardless of hull width -- unlike the hull, this
-          handle keeps a padded circular hit target (rather than exactly
-          matching its small visible ring) since it is a deliberately
-          separate, isolated control with nothing else nearby to
-          misfire against. */}
+      {/* Rotate handle: the visible teal-ringed circle IS the hit target --
+          same principle as the hull polygon above. No separate padded
+          invisible hit-circle; `fill="white"` is a real paint (not
+          "none"), so pointer-events hit-tests exactly this circle's
+          drawn area. Centered well beyond the enlarged hull's bow tip
+          (HULL_BOW_Y) so the two hit regions cannot overlap regardless
+          of hull width. */}
       <circle
         data-testid={`rotate-hit-${label}`}
-        cx={0}
-        cy={ROTATE_HANDLE_CY}
-        r={ROTATE_HANDLE_HIT_R}
-        fill="transparent"
-        onPointerDown={rotateDrag.onPointerDown}
-        onPointerMove={rotateDrag.onPointerMove}
-        onPointerUp={rotateDrag.onPointerUp}
-      />
-      <circle
         cx={0}
         cy={ROTATE_HANDLE_CY}
         r={ROTATE_HANDLE_VISIBLE_R}
         stroke="#0D9488"
         strokeWidth={2}
         fill="white"
+        onPointerDown={rotateDrag.onPointerDown}
+        onPointerMove={rotateDrag.onPointerMove}
+        onPointerUp={rotateDrag.onPointerUp}
       />
     </g>
   );
