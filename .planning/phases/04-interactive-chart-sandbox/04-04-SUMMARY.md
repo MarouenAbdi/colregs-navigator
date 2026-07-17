@@ -134,3 +134,7 @@ None - no external service configuration required. (Note: a live Postgres instan
 ---
 *Phase: 04-interactive-chart-sandbox*
 *Completed: 2026-07-17*
+
+## Self-Check: PASSED
+
+All created files verified present (`ControlPanel.tsx`, `ControlPanel.test.tsx`, this `SUMMARY.md`). All three commit hashes (`a343ff6`, `f7c7f8a`, `b7a0269`) verified present in `git log --oneline --all`. Working tree clean.
