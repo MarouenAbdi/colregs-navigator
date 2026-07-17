@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Domain Foundations** - Geometry primitives and vessel value objects, fixture-tested in isolation (completed 2026-07-15)
 - [x] **Phase 2: COLREGS Rules Engine** - Encounter classification, give-way/stand-on determination, and the reasoning trail (completed 2026-07-15)
 - [x] **Phase 3: Persistence & API Layer** - Prisma schema, repository, application use cases, and thin tRPC routers (completed 2026-07-17)
-- [ ] **Phase 4: Interactive Chart Sandbox** - SVG chart with live drag-and-classify, reasoning overlay, and visual role coding
+- [x] **Phase 4: Interactive Chart Sandbox** - SVG chart with live drag-and-classify, reasoning overlay, and visual role coding (completed 2026-07-17)
 - [ ] **Phase 5: Save, Share & Gallery** - Shareable scenario links and a curated gallery of classic encounters
 
 ## Phase Details
@@ -125,7 +125,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 04-06-PLAN.md — SandboxContainer wiring (state, applyVesselUpdate choke point, default scenario, Reset CTA) + app/page.tsx
+- [x] 04-06-PLAN.md — SandboxContainer wiring (state, applyVesselUpdate choke point, default scenario, Reset CTA) + app/page.tsx
 
 **UI hint**: yes
 
@@ -153,5 +153,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Domain Foundations | 3/3 | Complete    | 2026-07-15 |
 | 2. COLREGS Rules Engine | 2/2 | Complete   | 2026-07-15 |
 | 3. Persistence & API Layer | 3/3 | Complete   | 2026-07-17 |
-| 4. Interactive Chart Sandbox | 5/6 | In Progress|  |
+| 4. Interactive Chart Sandbox | 6/6 | Complete   | 2026-07-17 |
 | 5. Save, Share & Gallery | 0/TBD | Not started | - |
