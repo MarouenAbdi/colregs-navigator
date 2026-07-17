@@ -91,7 +91,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 03-02-PLAN.md — Scenario repository + application-layer re-derive-on-read service (SCEN-02)
+- [x] 03-02-PLAN.md — Scenario repository + application-layer re-derive-on-read service (SCEN-02)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -136,6 +136,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Domain Foundations | 3/3 | Complete    | 2026-07-15 |
 | 2. COLREGS Rules Engine | 2/2 | Complete   | 2026-07-15 |
-| 3. Persistence & API Layer | 1/3 | In Progress|  |
+| 3. Persistence & API Layer | 2/3 | In Progress|  |
 | 4. Interactive Chart Sandbox | 0/TBD | Not started | - |
 | 5. Save, Share & Gallery | 0/TBD | Not started | - |
