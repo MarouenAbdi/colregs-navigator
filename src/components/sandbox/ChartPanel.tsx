@@ -146,11 +146,20 @@ function VesselGroup({ label, vessel, screen, role, hullDrag, rotateDrag }: Vess
       {/* Invisible hull hit-shape, 44x44px minimum (UI-SPEC Spacing Scale
           exception) -- rendered before the visible polygon so it sits
           underneath (does not visually cover it) but still receives the
-          drag gesture. */}
+          drag gesture. Top edge is pinned to the bow tip (y=-10), NOT
+          centered on the vessel origin (y=-22) -- a centered hit-rect
+          reached 12px past the bow into the rotate handle's own hit-circle
+          below, so paint order gave the rotate gesture priority over most
+          of the visible hull's upper half, making position-drag unreliable
+          right where users naturally grab the vessel (bug found during
+          Phase 4 human UAT -- component tests never caught it because
+          jsdom stubs setPointerCapture/hasPointerCapture and dispatch
+          events directly to a testid'd node, bypassing real paint-order
+          hit-testing entirely). */}
       <rect
         data-testid={`hull-hit-${label}`}
         x={-22}
-        y={-22}
+        y={-10}
         width={44}
         height={44}
         fill="transparent"
@@ -164,18 +173,22 @@ function VesselGroup({ label, vessel, screen, role, hullDrag, rotateDrag }: Vess
         {ROLE_BADGE_TEXT[role]}
       </text>
       {/* Rotate handle: invisible 44px-diameter hit-circle (WCAG 2.5.5 AA)
-          underneath a visible r=6 handle just beyond the bow tip. */}
+          underneath a visible r=6 handle beyond the bow tip. Centered at
+          cy=-34 (not -20) so the hit-circle's bottom edge (-34+22=-12)
+          clears the hull hit-rect's top edge (-10) with a 2px margin --
+          see the hull-hit-rect comment above for why this separation is
+          required. */}
       <circle
         data-testid={`rotate-hit-${label}`}
         cx={0}
-        cy={-20}
+        cy={-34}
         r={22}
         fill="transparent"
         onPointerDown={rotateDrag.onPointerDown}
         onPointerMove={rotateDrag.onPointerMove}
         onPointerUp={rotateDrag.onPointerUp}
       />
-      <circle cx={0} cy={-20} r={6} stroke="#0D9488" strokeWidth={2} fill="white" />
+      <circle cx={0} cy={-34} r={6} stroke="#0D9488" strokeWidth={2} fill="white" />
     </g>
   );
 }
