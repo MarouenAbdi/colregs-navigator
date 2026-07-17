@@ -466,17 +466,19 @@ See Architecture Patterns 1-5 above — each includes a verified, sourced code e
 | A2 | Reusing the Prisma cuid directly as the shareId is sufficient and no shorter/obfuscated slug is needed | User Constraints / Standard Stack | If a stakeholder later wants a shorter URL for aesthetic/marketing reasons, this becomes a schema migration (new unique column) rather than a config change — low risk since CONTEXT.md's Claude's-discretion note already anticipated and accepted this as a non-decision for this phase. |
 | A3 | `SandboxContainer`'s `handleReset()` should continue resetting to the hardcoded default fixture even when the page was loaded via `initialScenario` (i.e., Reset does NOT re-seed from the loaded scenario) | Architecture Patterns, Pattern 1 | CONTEXT.md does not explicitly address this interaction between D-02 (seed from saved scenario) and Phase 4's existing Reset button. If the intended UX is "Reset returns to the scenario this page loaded," not "Reset returns to the app's global default," this needs a one-line change (`handleReset` should reference `seedA`/`seedB` instead of the fixture) — flagged as an Open Question below. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should "Reset Scenario" on a `/s/[shareId]` page reset to the loaded scenario, or to the global default fixture?**
    - What we know: Phase 4's `handleReset()` currently hardcodes `crossingResidualBasicCase`. D-02 only specifies the *initial* load behavior, not Reset's behavior when a scenario was loaded from a share/gallery link.
    - What's unclear: Whether a user who has been dragging vessels around on a shared/gallery scenario expects "Reset" to snap back to *that* scenario's original values, or to the app's unrelated default demo scenario.
    - Recommendation: Snap back to the loaded scenario's original values (`seedA`/`seedB`) when `initialScenario` was provided, falling back to `crossingResidualBasicCase` only on the plain `/` route — this matches user intuition ("reset what I was looking at") better than resetting to an unrelated scenario. Low-risk, cheap to implement either way; confirm with a quick discuss-phase note or make the call during planning.
+   - **Resolved:** Recommendation adopted verbatim in 05-03-PLAN.md Task 1 (Assumption A3) — `handleReset` now derives from `seedA`/`seedB` instead of the hardcoded fixture.
 
 2. **Should the gallery list page show a mini-chart SVG preview per card, or stay text+badge only?**
    - What we know: CONTEXT.md leaves this entirely to Claude's discretion, with a strong steer toward "keep it simple" if no preview is built, and "SVG-first, no canvas" if one is.
    - What's unclear: Whether a small static SVG preview (even a simplified one, not the full interactive `ChartPanel`) adds enough value for a 5-8-item gallery to justify the extra component surface.
    - Recommendation: Start text + encounter-type badge only (zero new rendering code); a mini-preview can be added later without any backend/routing changes since `gallery.list` already returns full vessel geometry.
+   - **Resolved:** Recommendation adopted verbatim in 05-04-PLAN.md Task 1 — gallery cards render an encounter-type badge plus rationale text only, no chart preview.
 
 ## Environment Availability
 
