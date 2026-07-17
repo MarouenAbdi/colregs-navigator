@@ -34,6 +34,11 @@
     "src",
     "app",
     "next-env.d.ts",
+    // Rule 3 (04-01): tsc must see this file's `@testing-library/jest-dom/vitest`
+    // side-effect import to pick up its global `Assertion` matcher-type
+    // augmentation (e.g. `toBeInTheDocument`) when type-checking any *.test.tsx
+    // file under src/ -- otherwise `tsc --noEmit` fails on every jest-dom matcher.
+    "vitest.setup.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
