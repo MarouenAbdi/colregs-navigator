@@ -114,8 +114,8 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 04-01-PLAN.md — Tailwind v4 + RTL/jsdom environment, Next.js App Router scaffolding, shared sandbox prop contracts
-- [ ] 04-02-PLAN.md — resolveDoubtGeometry() pure domain helper (TDD)
+- [x] 04-01-PLAN.md — Tailwind v4 + RTL/jsdom environment, Next.js App Router scaffolding, shared sandbox prop contracts
+- [x] 04-02-PLAN.md — resolveDoubtGeometry() pure domain helper (TDD)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -153,5 +153,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Domain Foundations | 3/3 | Complete    | 2026-07-15 |
 | 2. COLREGS Rules Engine | 2/2 | Complete   | 2026-07-15 |
 | 3. Persistence & API Layer | 3/3 | Complete   | 2026-07-17 |
-| 4. Interactive Chart Sandbox | 0/6 | Not started | - |
+| 4. Interactive Chart Sandbox | 2/6 | In Progress|  |
 | 5. Save, Share & Gallery | 0/TBD | Not started | - |
