@@ -406,17 +406,19 @@ function hullColor(label: VesselLabel, result: ClassificationResult): string {
 | A3 | The slate/blue "mutual obligation" third hull color and the colorblind secondary-cue pairing are this research's own recommendations to fill a gap CONTEXT.md's D-02 left as discretion — not verified against any accessibility standard (e.g. WCAG contrast ratios were not checked) | Code Examples | Low — cosmetic; easy to adjust in review, does not affect correctness of the underlying classification logic |
 | A4 | Tailwind v4's exact current patch (4.3.3) vs. CLAUDE.md's stated 4.3.2 is treated as a safe patch-level bump | Standard Stack | Low — patch version, but planner should re-run `npm view tailwindcss version` at actual install time since more time may have passed |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Exact default D-06 scenario (positions/headings/speeds/types)**
    - What we know: CONTEXT.md leaves this to Claude's discretion; must be a "clean, unambiguous classic encounter (not a doubt-boundary case)" per D-06, and Phase 1/2 already has "classic encounter shapes" fixtures (head-on/crossing/overtaking) in `*.fixtures.ts` files.
    - What's unclear: which of the three (head-on/crossing/overtaking) reads best as the *initial* demo state, and the exact numeric values.
    - Recommendation: planner should pull a known-good, doubt-free fixture directly from `src/domain/colregs/classify-encounter.fixtures.ts` (already exists, already tested) rather than inventing new numbers — a classic crossing encounter (per STATE.md's own phrasing "e.g. a textbook crossing") is a reasonable default since it's the only one of the three with a non-null, single give-way vessel that isn't also the "sticky" overtaking special case.
+   - RESOLVED: 04-06-PLAN.md uses `crossingResidualBasicCase` from `classify-encounter.fixtures.ts` verbatim as the default D-06 scenario, exactly per this recommendation.
 
 2. **Where exactly does the doubt-geometry-resolution helper (Pitfall 3) live?**
    - What we know: the domain layer's `facts` shape is intentionally per-stage, not normalized; something needs to resolve "which vessel/bearing triggered this doubt" for rendering.
    - What's unclear: whether this belongs as a small new pure function in `src/domain/colregs/` (tested like the rest of the domain layer) or as a UI-adjacent utility in `src/components/sandbox/`.
    - Recommendation: given the project's Clean Architecture rule ("`src/domain/` never imports from `src/server/`/Next.js/tRPC/Prisma" but the reverse — components importing FROM domain — is fine and expected), a small pure function in `src/domain/colregs/` (e.g. `resolveDoubtGeometry.ts`) is consistent with existing patterns and gets the same unit-test rigor as the rest of the rules engine. Planner should decide during plan authoring; either location is architecturally valid.
+   - RESOLVED: 04-02-PLAN.md placed `resolveDoubtGeometry` in `src/domain/colregs/resolve-doubt-geometry.ts`, exactly per this recommendation.
 
 ## Environment Availability
 
