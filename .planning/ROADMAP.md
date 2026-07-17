@@ -140,7 +140,22 @@ Plans:
   2. User can browse a curated gallery page of 5-8 classic textbook encounters (clean head-on, crossing, and overtaking cases) with brief rationale text per entry
   3. Opening a shared link or a gallery entry loads the exact saved scenario and displays a freshly-recomputed verdict, never a stale cached one (per Phase 3's re-derive-on-read guarantee)
 
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+**Wave 1**
+
+- [ ] 05-01-PLAN.md — tRPC client provider + server-side caller wiring
+- [ ] 05-02-PLAN.md — Curated seed data (D-04 shape) + Prisma seed script
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 05-03-PLAN.md — SandboxContainer initialScenario/banner props + Save flow (SCEN-01)
+- [ ] 05-04-PLAN.md — /gallery listing page (SCEN-03)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 05-05-PLAN.md — /s/[shareId] detail page, Copy Link, end-to-end human verification
+
 **UI hint**: yes
 
 ## Progress
@@ -154,4 +169,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. COLREGS Rules Engine | 2/2 | Complete   | 2026-07-15 |
 | 3. Persistence & API Layer | 3/3 | Complete   | 2026-07-17 |
 | 4. Interactive Chart Sandbox | 6/6 | Complete   | 2026-07-17 |
-| 5. Save, Share & Gallery | 0/TBD | Not started | - |
+| 5. Save, Share & Gallery | 0/5 | Not started | - |
