@@ -6,3 +6,5 @@ coverage/
 .env
 generated/
 prisma/generated/
+.next/
+*.tsbuildinfo
