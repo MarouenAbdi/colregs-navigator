@@ -29,23 +29,35 @@ import { ArrowRight, CircleCheck } from "lucide-react";
 // UI-SPEC.md "Preview Card Dimensions": 8:5 (not square) aspect ratio,
 // framed to comfortably contain both fixture vessels + the range rings.
 const HERO_CONTAINER_SIZE = { width: 320, height: 200 };
-const HERO_VIEW_BOX = { minX: -3, minY: -2.5, width: 8, height: 5 };
 
-// UI-SPEC.md Executor Notes: the mock's two range rings, bearing sector,
-// and north reference line are centered on this fixed chart-canvas center
-// -- NOT on vessel A's own screen position, which sits off-center in this
-// viewBox (a ~40px/12.5%-of-canvas-width discrepancy from the mock).
+// The design source ("COLREGS Navigator (shadcn).dc.html") hardcodes this
+// exact card's two vessels at pixel positions hA=(150,210)/hB=(360,95) in
+// its 480x300 canvas -- which is just its own PX=80-pixels-per-NM sandbox
+// scale applied to the same real bearing/range this fixture reproduces
+// (061deg/2.99nm): dx=range*sin(61deg)*80=~210, dy=-range*cos(61deg)*80=~-115,
+// matching the mock's hB-hA delta to within rounding. This viewBox is
+// solved (not eyeballed) so heroPreviewVesselA/B's *real* NM coordinates
+// land on those exact screen pixels (scaled to this card's 320px width):
+// minX=-1.875, minY=-1.125 puts A at (100,140) and B at (~239.5,~62.7),
+// matching the mock's (150,210)/(360,95) scaled by 320/480 to sub-pixel
+// accuracy. Width/height (6 x 3.75) preserve the 8:5 aspect ratio and the
+// resulting uniform 320/6 = 200/3.75 = 53.33px-per-NM scale (no distortion
+// of the real bearing angle).
+const HERO_VIEW_BOX = { minX: -1.875, minY: -1.125, width: 6, height: 3.75 };
+
+// Range rings, bearing sector, and north reference line are centered on
+// this fixed chart-canvas center (matches the mock's rings, which are
+// centered on its 480x300 canvas center, not on either vessel).
 const HERO_CHART_CENTER = {
   screenX: HERO_CONTAINER_SIZE.width / 2,
   screenY: HERO_CONTAINER_SIZE.height / 2,
 };
 
-// 2.3 chart-units at this viewBox's scale, corrected down from a single
-// 120px ring (which would self-clip this 200px-tall canvas -- 120px
-// centered at screenY=100 spans y in [-20, 220]). 92px fits within the
-// 100px vertical half with an 8px margin.
-const HERO_OUTER_RING_RADIUS_PX = 2.3 * (HERO_CONTAINER_SIZE.width / HERO_VIEW_BOX.width);
-const HERO_INNER_RING_RADIUS_PX = HERO_OUTER_RING_RADIUS_PX * 0.6;
+// The mock's two range rings are hardcoded at r=115/r=60 on its 480px-wide
+// canvas -- reproduced here as the same fraction of this card's width
+// (115/480 and 60/480), not an arbitrary chart-unit formula.
+const HERO_OUTER_RING_RADIUS_PX = HERO_CONTAINER_SIZE.width * (115 / 480);
+const HERO_INNER_RING_RADIUS_PX = HERO_CONTAINER_SIZE.width * (60 / 480);
 
 // Domain-locked colors (UI-SPEC.md Color table) -- hardcoded per the
 // locked contract: the fixture's verdict is fixed at authoring time, so
