@@ -33,6 +33,12 @@ Both are plain `npx shadcn add` calls against the **shadcn official registry onl
 
 ---
 
+## Visual Focal Point
+
+**Primary visual anchor:** the two-tone Display headline ("Two vessels. One rulebook. **See who gives way — and why.**") — its 52px/800 size/weight and the white→accent color split make it the first thing the eye lands on in the left column, and per the Weight Resolution note in Typography below, weight 800 is reserved exclusively for this role so nothing else in the Hero competes with it for visual weight. **Secondary anchor:** the preview `Card` (mini-chart + rule banner + readout tiles) in the right column — it is the second thing the eye moves to, grounding the headline's claim with a concrete, illustrative example of the actual tool's output. Every other Hero element (eyebrow badge, body copy, CTAs, trust note) is deliberately subordinate to these two anchors in size, weight, and/or color saturation.
+
+---
+
 ## Spacing Scale
 
 Declared values (multiples of 4) — **identical to Phase 6's shared scale** (SCAF-06: one shared location, no redeclaration). Hero consumes these, does not redefine them:
@@ -55,27 +61,29 @@ Declared values (multiples of 4) — **identical to Phase 6's shared scale** (SC
 
 ## Typography
 
-**Body, Label, and Heading roles are unchanged from Phase 6** (SCAF-06 — reused, not redeclared). **Display is corrected from Phase 6's placeholder value**, below.
+**Body, Label, and Heading roles are unchanged from Phase 6** (SCAF-06 — reused, not redeclared), **except Body's weight is corrected below from 400 to 600 to satisfy this document's 2-weight-maximum contract (see Weight Resolution note).** **Display is corrected from Phase 6's placeholder value**, below.
 
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Label | 13px (Geist Mono for numeric/instrument text; Geist Sans for the eyebrow badge and UI micro-copy) | 600 | 1.4 |
-| Body | 16px | 400 | 1.5 |
+| Body | 16px | 600 | 1.5 |
 | Heading | 24px | 600 | 1.25 | *(no Hero-owned instance this phase — reserved for Sandbox/Gallery section titles)* |
 | Display | **52px** (corrected — see note) | **800** | **1.1** |
+
+**Weight resolution (2-weight maximum):** This document declares exactly two weights — **600** (Label, Body, Heading, and every Hero text element except the headline) and **800** (Display only). Phase 6's shipped baseline used 400+600; Hero's Display role additionally needs 800 to read as a true marketing-surface headline (see Correction note below), and three simultaneous weights (400/600/800) would exceed the 2-weight contract limit. Resolution: **400 is dropped from Hero's own scope** — Body copy, the trust note, and any other text that would otherwise be 400 are set to 600 instead. 800 is kept (rather than folding Display back to 600) because it is a direct pixel/stroke-weight measurement off `Main-Design.png` (see Correction note), it is the role that anchors the hero as its primary focal point (see Visual Focal Point above), and `claude-design-prompt.json`'s brief explicitly calls for "a distinctive display face" distinct from the rest of the UI — collapsing it to 600 would flatten that intended contrast. This 600/800 pairing is scoped to Hero's own text; it does not redeclare or override Phase 6's already-shipped 400/600 pairing for existing sandbox-tool UI outside this phase.
 
 **Correction note (Display role):** Phase 6's UI-SPEC registered Display as `48px/600/1.15` as an explicit, self-described **placeholder** ("no Phase-6-owned instance... Display = Hero's headline, Phase 7"). Direct pixel measurement of `Main-Design.png`'s actual headline (3-line block, baseline-to-baseline spacing ≈57px, ascender height ≈39–40px, both converted from the mock's confirmed 2× export scale) resolves to a real font-size of **~52px**, at a visibly heavier weight than 600 — the strokes are extrabold, not semibold. This is consistent with `claude-design-prompt.json`'s typography brief, which explicitly invites "a distinctive display face... for the marketing surface" for the Hero headline, distinct from the app's existing "only two weights used: 400 and 600" baseline (that baseline describes the already-shipped sandbox tool, not the new Hero). **This UI-SPEC's measured value supersedes Phase 6's 48/600 placeholder as Display's real, locked value** — do not use 48/600 for the Hero headline.
 
 Hero's concrete usage of these roles:
 
-- **Headline** ("Two vessels. One rulebook. See who gives way — and why."): Display role, 52px/800/1.1, two-tone color split — "Two vessels. One rulebook." in `--foreground` (white), "See who gives way — and why." in `--accent`/`--primary` (`#2dd4bf`). Responsive: scale down to **36px/800/1.15** below the 640px breakpoint (HERO-04's "scaled headline below 640px" requirement) — same weight/color treatment, smaller size only.
+- **Headline** ("Two vessels. One rulebook. See who gives way — and why."): Display role, 52px/800/1.1, two-tone color split — "Two vessels. One rulebook." in `--foreground` (white), "See who gives way — and why." in `--accent`/`--primary` (`#2dd4bf`). This is the Hero's primary visual anchor (see Visual Focal Point above). Responsive: below the 640px breakpoint (HERO-04), scale the **same Display role** fluidly via CSS `clamp()` rather than declaring a separate discrete size stop — e.g. `text-[clamp(2rem,8vw,3.25rem)]` (≈32px floor, 52px ceiling), same 800 weight and two-tone color treatment unchanged, unitless `line-height: 1.1` scales proportionally with the computed size automatically. This keeps the total declared font-size count at 4 (13/16/24/52) rather than introducing a 6th discrete value at 36px.
 - **Eyebrow badge** ("Collision-avoidance rules engine"): Label role, 13px/600, Geist Mono, `--accent` color, inside a pill-shaped `Badge variant="outline"` with a small solid accent-colored dot before the text.
-- **Body copy** (supporting paragraph): Body role, 16px/400/1.5, `--muted-foreground` color, max-width constrained to ~46-50 characters/line to match the mock's 4-line wrap.
-- **CTA labels** ("Open the sandbox", "Classic encounters"): Label-adjacent, 16px/600 (shadcn `Button` `size="lg"` default text treatment — not a new size, matches Body's 16px but at Label's 600 weight).
-- **Trust note** ("Grounded in Rules 11–18..."): Label role, 13px/400 (with "Rules 11-18" segment bolded to 600 inline), `--muted-foreground`, paired with a small `--accent`-colored checkmark/shield icon (16px).
-- **Preview card header row** ("Live classification" / "BRG-ring · 12 NM"): Label role, 13px, Geist Mono, `--muted-foreground` (with the "Live classification" text itself in `--foreground` for contrast against its accent dot).
-- **Preview card rule banner** ("Crossing — Vessel A gives way"): Body role, 16px/600 (bumped from Body's default 400 — this is a verdict-style statement, not paragraph copy), `--foreground`, next to a `Rule 15` `Badge` chip (13px/600 Label role, `--primary`/`--primary-foreground`).
-- **Preview card readout tiles** (RANGE/BEARING/CPA): two-tier — tile label ("RANGE") is Label role at 13px/600, `--muted-foreground`, Geist Mono, uppercase, letter-spaced; tile value ("2.99 NM") is a **new, Hero-introduced instrument-value size**: **18px/600, Geist Mono, `--foreground`**. This is the first instance of this "big mono instrument-value" pattern in the app — Phase 8 (Sandbox restyle) will reuse this exact 18px/600/mono convention for its own RANGE/BEARING/CPA/TCPA tiles rather than inventing a second one (SBOX-02 will consume this, not redeclare it).
+- **Body copy** (supporting paragraph): Body role, 16px/600/1.5 (weight corrected from 400 — see Weight resolution above), `--muted-foreground` color, max-width constrained to ~46-50 characters/line to match the mock's 4-line wrap.
+- **CTA labels** ("Open the sandbox", "Classic encounters"): Label-adjacent, 16px/600 (shadcn `Button` `size="lg"` default text treatment — not a new size, matches Body's 16px, and now also matches Body's 600 weight exactly).
+- **Trust note** ("Grounded in Rules 11–18..."): Label role, 13px/600 (weight corrected from 400 — see Weight resolution above; the whole note is now a single uniform weight, so emphasis on "Rules 11–18" is carried by color instead of weight — that segment set to `--foreground`, the rest to `--muted-foreground`), paired with a small `--accent`-colored checkmark/shield icon (16px).
+- **Preview card header row** ("Live classification" / "BRG-ring · 12 NM"): Label role, 13px/600, Geist Mono, `--muted-foreground` (with the "Live classification" text itself in `--foreground` for contrast against its accent dot).
+- **Preview card rule banner** ("Crossing — Vessel A gives way"): Body role, 16px/600, `--foreground` — this is now Body's own default weight (no separate "bump" needed now that Body is 600, not 400), next to a `Rule 15` `Badge` chip (13px/600 Label role, `--primary`/`--primary-foreground`).
+- **Preview card readout tiles** (RANGE/BEARING/CPA): two-tier, both tiers reuse the existing 4-size scale — tile label ("RANGE") is Label role at 13px/600, `--muted-foreground`, Geist Mono, uppercase, letter-spaced; tile value ("2.99 NM") reuses **Body role, 16px/600, Geist Mono, `--foreground`** (corrected — no longer a separate 18px "instrument-value" size; Body's role now covers both prose and mono-numeral instrument readouts at the same size/weight, distinguished only by `font-mono` vs. the default font-family). Phase 8 (Sandbox restyle) will reuse this exact 16px/600/mono convention for its own RANGE/BEARING/CPA/TCPA tiles rather than inventing a separate one (SBOX-02 will consume this, not redeclare it).
 - **Vessel circular labels** ("A"/"B") and **role pills** ("GW"/"SO"): Label role, 13px/600, white text, on solid-color circular/pill backgrounds (see Color section — domain-locked colors, not the accent).
 
 ---
@@ -117,7 +125,7 @@ All copy below is transcribed **verbatim** from `Main-Design.png` — do not par
 | Body copy | "Drop two ships on a nautical chart. The engine classifies the encounter under the real International Regulations for Preventing Collisions at Sea, names the give-way vessel, and shows the exact rule and geometry behind the verdict." |
 | Primary CTA | "Open the sandbox" + trailing `ArrowRight` icon → `<a href="#sandbox">`, `Button asChild size="lg"` (filled/default variant) |
 | Secondary CTA | "Classic encounters" → `<a href="#gallery">`, `Button asChild variant="outline" size="lg"` |
-| Trust note | "Grounded in **Rules 11–18** of the actual COLREGS — Steering & Sailing Rules, conduct in sight of one another." (checkmark/shield icon leading, "Rules 11–18" segment bolded to weight 600 inline, rest at 400) |
+| Trust note | "Grounded in **Rules 11–18** of the actual COLREGS — Steering & Sailing Rules, conduct in sight of one another." (checkmark/shield icon leading, single uniform weight 600 throughout; "Rules 11–18" segment set to `--foreground` for emphasis, rest set to `--muted-foreground` — emphasis carried by color, not weight) |
 | Preview card header (left) | "Live classification" (with a static, non-pulsing accent dot per CONTEXT.md D-01) |
 | Preview card header (right) | "BRG-ring · 12 NM" |
 | Preview card rule banner | `Rule 15` chip + "Crossing — Vessel A gives way" |
