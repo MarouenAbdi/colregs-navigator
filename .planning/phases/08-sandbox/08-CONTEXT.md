@@ -26,6 +26,12 @@ Phase 8 (Sandbox) restyles the existing interactive chart, controls, and reasoni
 ### Responsive stacking (below 900px, SBOX-05)
 - **D-06:** No mobile mock exists for this section (design image is desktop-only). Below 900px, the three panels stack in this order top-to-bottom: **Chart → Reasoning (instrument readouts + trail) → Controls** (vessel type/speed cards last). Matches the desktop visual priority (chart is the hero element, then the explanation, then the input controls).
 
+### Save/Share placement (surfaced by `08-RESEARCH.md`'s Open Question 1 / Pitfall S3, resolved post-research)
+- **D-07:** The design mock's captured Sandbox header only shows a "Reset scenario" button — no Save/Share button anywhere in the image. Since Save (`createScenario.mutate` → redirect to `/s/{shareId}`) is validated v1.0 functionality (SCEN-01) and this phase's own goal requires "zero regression to the underlying domain wiring or interaction model," it must not be silently dropped. Resolution: add a small icon button (e.g. link/share icon) next to "Reset scenario" in the header row — preserves the feature with minimal visual footprint, doesn't contradict the design's apparent minimalism.
+
+### Doubt/Rule 7 badge scope (surfaced by `08-RESEARCH.md`'s Open Question 2, resolved post-research)
+- **D-08:** The "Rule 7 / in doubt" badge/verdict treatment is generic — driven by `classification.doubt === true` — not specific to the "In doubt" preset chip's fixture. Applies identically whether doubt was reached via the chip or via a manual drag into a doubt band, matching Rule 7(a)'s "when in doubt" doctrine applying independent of cause.
+
 ### Claude's Discretion
 - Exact geometry/vessel values for the new `not-under-command` and near-doubt-boundary chip fixtures (D-01/D-03) — derive during planning, same precedent as Hero's D-07.
 - Exact wording of the status pill's risk-flagged (`riskOfCollision: true`) message (D-04) — the passing-clear message's wording is dictated by the design mock; the risk-true counterpart is not shown in the mock and needs original copy.
@@ -61,6 +67,9 @@ Phase 8 (Sandbox) restyles the existing interactive chart, controls, and reasoni
 - `.planning/research/PITFALLS.md` line 200 — hardcoded hex color literals in `ChartPanel.tsx` won't show up in a `dark:`/shadcn-token-name search; search specifically for hex-literal strings (`#[0-9A-Fa-f]{3,6}`) as a done-checklist item
 - `.planning/research/PITFALLS.md` line 228-236 — Sandbox-phase done-checklist: hit-testing regression check, `@theme` token registration check, hex-literal search, vessel-badge contrast check against the new dark chart background
 
+### Research
+- `.planning/phases/08-sandbox/08-RESEARCH.md` — Phase 8-specific research: worked geometry for the two new chip fixtures (§"The two genuinely new chip fixtures"), shadcn `Select`/`Slider` controlled-value API + test-rewrite pattern (§"Code Examples"), instrument-readout derivation recommendation (direct geometry calls, not trail-facts scanning), and the corrected/current state of `ChartPanel.tsx`'s hex-literal audit (Pitfall S1 — supersedes the milestone-wide `PITFALLS.md`'s now-partially-stale list) and the missing give-way/stand-on/mutual `@theme` tokens (Pitfall S2 — supersedes `08-CONTEXT.md`'s incorrect "already registered in Phase 6" claim above)
+
 ### Requirements & roadmap
 - `.planning/REQUIREMENTS.md` — SBOX-01 through SBOX-05, full acceptance criteria; also note the milestone-wide "nothing here touches `src/domain/` or `src/server/`" boundary that shaped D-03/D-05 above
 - `.planning/ROADMAP.md` §Phase 8 — success criteria, Phase 6 dependency (dark tokens, `ui/*` primitives)
@@ -79,7 +88,7 @@ Phase 8 (Sandbox) restyles the existing interactive chart, controls, and reasoni
 - `src/components/hero/hero-preview-geometry.ts` (Phase 7 precedent) — shows the established pattern of a pure, framework-free computation module separated from JSX presentation; the chip fixture data + label/rule mapping should follow the same shape
 
 ### Established Patterns
-- Semantic domain color tokens (give-way/stand-on/mutual) already registered under Tailwind v4 `@theme` in Phase 6 — reuse for role badges, chip active-state, and status pill coloring
+- **Correction (per `08-RESEARCH.md` Pitfall S2):** semantic domain color tokens (give-way/stand-on/mutual) are NOT already registered — a direct read of `app/globals.css` confirms only standard shadcn scaffold tokens exist today. This phase must add `--color-give-way`/`--color-stand-on`/`--color-mutual` (or equivalent) under Tailwind v4 `@theme` itself, then reuse them for role badges, chip active-state, and status pill coloring.
 - `SandboxContainer` → `ChartPanel`/`ControlPanel`/`ReasoningPanel` prop-drilling pattern (no zustand) — the chip row's selection state and click handler should follow the same lifted-state-in-container pattern, not introduce new shared state machinery
 - Feature-first component folders (per Phase 7's conventions doc) — split derived computation (chip fixture data, status-pill copy logic, instrument-readout derivation) into pure `.ts` modules separate from the restyled `.tsx` presentation components
 
