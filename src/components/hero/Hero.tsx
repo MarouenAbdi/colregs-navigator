@@ -136,56 +136,57 @@ export function Hero() {
   };
 
   return (
-    <section className="flex flex-col gap-8 py-8 min-[900px]:flex-row min-[900px]:items-center min-[900px]:gap-12 min-[900px]:py-12">
-      <div className="mx-auto flex max-w-6xl flex-1 flex-col gap-6 px-6">
-        <Badge variant="outline" className="w-fit gap-1.5 font-mono text-[13px] font-semibold text-accent">
-          <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
-          Collision-avoidance rules engine
-        </Badge>
+    <section className="relative overflow-hidden">
+      <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-[30px] px-5 pt-8 pb-11 min-[900px]:grid-cols-[1.05fr_0.95fr] min-[900px]:items-center min-[900px]:gap-[52px] min-[900px]:px-6 min-[900px]:pt-10 min-[900px]:pb-[68px]">
+        <div>
+          <Badge variant="outline" className="mb-6 h-auto w-fit gap-2 px-[11px] py-1 font-mono text-[11px] font-semibold text-accent">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
+            Collision-avoidance rules engine
+          </Badge>
 
-        <h1 className="text-[clamp(2rem,8vw,3.25rem)] leading-[1.1] font-extrabold">
-          <span className="text-foreground">Two vessels. One rulebook. </span>
-          <span className="text-accent">See who gives way — and why.</span>
-        </h1>
+          <h1 className="mb-5 text-[33px] leading-[1.05] font-bold tracking-[-0.03em] min-[640px]:text-[44px] min-[900px]:text-[54px]">
+            <span className="text-foreground">Two vessels. One rulebook. </span>
+            <span className="text-accent">See who gives way — and why.</span>
+          </h1>
 
-        <p className="max-w-[50ch] text-base font-semibold text-muted-foreground">
-          Drop two ships on a nautical chart. The engine classifies the encounter under the real International Regulations for Preventing Collisions at Sea, names the give-way vessel, and shows the exact rule and geometry behind the verdict.
-        </p>
+          <p className="mb-[30px] max-w-[470px] text-[16.5px] leading-[1.6] text-muted-foreground">
+            Drop two ships on a nautical chart. The engine classifies the encounter under the real International Regulations for Preventing Collisions at Sea, names the give-way vessel, and shows the exact rule and geometry behind the verdict.
+          </p>
 
-        <div className="flex flex-col gap-4 sm:flex-row">
-          <Button asChild size="lg">
-            <a href="#sandbox">
-              Open the sandbox
-              <ArrowRight aria-hidden="true" />
-            </a>
-          </Button>
-          <Button asChild variant="outline" size="lg">
-            <a href="#gallery">Classic encounters</a>
-          </Button>
+          <div className="mb-8 flex flex-row gap-3">
+            <Button asChild size="lg" className="h-10 gap-2 px-[18px] text-sm font-medium">
+              <a href="#sandbox">
+                Open the sandbox
+                <ArrowRight aria-hidden="true" />
+              </a>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="h-10 gap-2 px-[18px] text-sm font-medium">
+              <a href="#gallery">Classic encounters</a>
+            </Button>
+          </div>
+
+          <p className="flex max-w-[470px] items-center gap-[11px] border-t border-border pt-[18px] text-[13px] text-muted-foreground">
+            <CircleCheck className="h-4 w-4 text-accent" aria-hidden="true" />
+            <span className="text-muted-foreground">Grounded in </span>
+            <span className="font-semibold text-foreground">Rules 11–18</span>
+            <span className="text-muted-foreground">
+              {" "}
+              of the actual COLREGS — Steering &amp; Sailing Rules, conduct in sight of one another.
+            </span>
+          </p>
         </div>
 
-        <p className="flex items-center gap-1.5 text-[13px] font-semibold text-muted-foreground">
-          <CircleCheck className="h-4 w-4 text-accent" aria-hidden="true" />
-          <span className="text-muted-foreground">Grounded in </span>
-          <span className="text-foreground">Rules 11–18</span>
-          <span className="text-muted-foreground">
-            {" "}
-            of the actual COLREGS — Steering &amp; Sailing Rules, conduct in sight of one another.
-          </span>
-        </p>
-      </div>
-
-      <div className="mx-auto w-full max-w-6xl flex-1 px-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between font-mono text-[13px] font-semibold text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              {/* Static, non-pulsing dot per CONTEXT.md D-01 -- no animation classes. */}
-              <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
-              <span className="text-foreground">Live classification</span>
-            </span>
-            <span>BRG-ring · 12 NM</span>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
+        <div className="w-full">
+          <Card className="gap-3">
+            <CardHeader className="flex flex-row items-center justify-between font-mono text-[10.5px] font-semibold text-muted-foreground">
+              <span className="flex items-center gap-[7px]">
+                {/* Static, non-pulsing dot per CONTEXT.md D-01 -- no animation classes. */}
+                <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
+                <span className="text-foreground">Live classification</span>
+              </span>
+              <span>BRG-ring · 12 NM</span>
+            </CardHeader>
+            <CardContent className="flex flex-col">
             <div className="overflow-hidden rounded-md border border-border">
               <svg viewBox="0 0 320 200" width="100%" height="auto" role="img" aria-label="Illustrative encounter preview chart">
                 <defs>
@@ -300,39 +301,40 @@ export function Hero() {
               </svg>
             </div>
 
-            <div className="flex items-center gap-2 rounded-md border border-primary/30 bg-primary/10 px-3 py-2">
-              <Badge className="bg-primary text-primary-foreground">Rule 15</Badge>
-              <span className="text-base font-semibold text-foreground">{verdictText}</span>
+            <div className="mt-3 flex items-center gap-2.5 rounded-md border border-primary/30 bg-primary/10 px-3 py-2.5">
+              <Badge className="h-auto bg-primary px-[7px] py-[3px] text-[10px] text-primary-foreground">Rule 15</Badge>
+              <span className="text-[15px] font-semibold text-foreground">{verdictText}</span>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              <div className="rounded-md border border-border px-3 py-2">
-                <div className="font-mono text-[13px] font-semibold tracking-wide text-muted-foreground uppercase">
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              <div className="rounded-md border border-border px-[10px] py-[9px]">
+                <div className="font-mono text-[9.5px] font-semibold tracking-wide text-muted-foreground uppercase">
                   RANGE
                 </div>
-                <div className="font-mono text-base font-semibold text-foreground">
+                <div className="mt-[3px] font-mono text-[15px] font-semibold text-foreground">
                   {`${range.toFixed(2)} NM`}
                 </div>
               </div>
-              <div className="rounded-md border border-border px-3 py-2">
-                <div className="font-mono text-[13px] font-semibold tracking-wide text-muted-foreground uppercase">
+              <div className="rounded-md border border-border px-[10px] py-[9px]">
+                <div className="font-mono text-[9.5px] font-semibold tracking-wide text-muted-foreground uppercase">
                   BEARING
                 </div>
-                <div className="font-mono text-base font-semibold text-foreground">
+                <div className="mt-[3px] font-mono text-[15px] font-semibold text-foreground">
                   {`${Math.round(bearingDegrees).toString().padStart(3, "0")}°`}
                 </div>
               </div>
-              <div className="rounded-md border border-border px-3 py-2">
-                <div className="font-mono text-[13px] font-semibold tracking-wide text-muted-foreground uppercase">
+              <div className="rounded-md border border-border px-[10px] py-[9px]">
+                <div className="font-mono text-[9.5px] font-semibold tracking-wide text-muted-foreground uppercase">
                   CPA
                 </div>
-                <div className="font-mono text-base font-semibold text-foreground">
+                <div className="mt-[3px] font-mono text-[15px] font-semibold text-foreground">
                   {`${cpaResult.value.dcpaNm.toFixed(2)} NM`}
                 </div>
               </div>
             </div>
           </CardContent>
-        </Card>
+          </Card>
+        </div>
       </div>
     </section>
   );
