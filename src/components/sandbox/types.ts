@@ -36,3 +36,13 @@ export interface ReasoningPanelProps {
   classification: ClassificationResult; // always the LAST-GOOD result
   isDegenerate: boolean;
 }
+
+export interface SandboxContainerProps {
+  // When provided, seeds SandboxContainer's initial (and Reset-restored)
+  // vessels from a saved/shared scenario instead of the app's hardcoded
+  // default demo fixture (05-03 Task 1, Assumption A3).
+  initialScenario?: { vesselA: Vessel; vesselB: Vessel };
+  // When provided, renders a banner communicating that a saved/shared
+  // scenario is loaded (D-02).
+  banner?: { label: string; rationale?: string };
+}

@@ -2,8 +2,20 @@
   "compilerOptions": {
     "strict": true,
     "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    // Rule 3 (05-03): "NodeNext" required an `exports` map to resolve any
+    // package subpath. Next.js's own packages (e.g. `next/navigation`, the
+    // first bare `next/*` subpath import in this codebase) ship without an
+    // `exports` field, so `tsc --noEmit` failed with "Cannot find module
+    // 'next/navigation'" even though the file resolves fine at runtime
+    // (Vite/Next's bundler don't consult these fields for transpilation).
+    // Switched to "esnext"/"bundler" -- Next.js's own documented tsconfig
+    // recommendation for this exact project shape -- which is a strict
+    // superset: every existing relative "*.js"-suffixed import (the
+    // NodeNext convention already used throughout this codebase) still
+    // resolves identically under "bundler", it just additionally supports
+    // Next's exports-map-free package layout.
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "skipLibCheck": true,
     // Rule 1 (04-01): the plan specified "preserve", but Next.js 16.2.10's
