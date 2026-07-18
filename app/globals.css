@@ -46,6 +46,19 @@
     --radius-2xl: calc(var(--radius) * 1.8);
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
+    /* Phase 8 (Sandbox) -- domain-semantic + chart tokens (08-RESEARCH.md
+       Pitfall S2: these did not exist prior to this phase). give-way/
+       stand-on/mutual back the role badges + hull fills; rule-accent is the
+       *original* working-tool teal (#0D9488), deliberately distinct from
+       --primary (#2dd4bf, the redesigned brand accent) -- see globals.css's
+       .dark block comment below for the full rationale. */
+    --color-give-way: var(--give-way);
+    --color-stand-on: var(--stand-on);
+    --color-mutual: var(--mutual);
+    --color-rule-accent: var(--rule-accent);
+    --color-doubt: var(--doubt);
+    --color-geometry: var(--geometry);
+    --color-chart-surface: var(--chart-surface);
 }
 
 /*
@@ -90,6 +103,13 @@
     --sidebar-accent-foreground: #FAFAFA;
     --sidebar-border: #27272A;
     --sidebar-ring: #2dd4bf;
+    --give-way: #EF4444;
+    --stand-on: #22C55E;
+    --mutual: #94A3B8;
+    --rule-accent: #0D9488;
+    --doubt: #F59E0B;
+    --geometry: #475569;
+    --chart-surface: #0B0B0E;
 }
 
 .dark {
@@ -124,6 +144,13 @@
     --sidebar-accent-foreground: #FAFAFA;
     --sidebar-border: #27272A;
     --sidebar-ring: #2dd4bf;
+    --give-way: #EF4444;
+    --stand-on: #22C55E;
+    --mutual: #94A3B8;
+    --rule-accent: #0D9488;
+    --doubt: #F59E0B;
+    --geometry: #475569;
+    --chart-surface: #0B0B0E;
 }
 
 @layer base {
