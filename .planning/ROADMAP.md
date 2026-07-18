@@ -82,7 +82,28 @@ Plans:
   4. All existing Vitest/RTL tests exercising drag and control interactions pass after being updated for the shadcn/Radix primitive swap (e.g. native `<select>` → `Select`) — SBOX-04
   5. The Sandbox layout is responsive per the design's breakpoints (stacked single-column below 900px, stacked controls below 640px) — SBOX-05
 
-**Plans**: TBD
+**Plans**: 6 plans
+
+Plans:
+
+**Wave 1**
+
+- [ ] 08-01-PLAN.md — Foundations: 7 new @theme tokens, shadcn Select/Slider/Label, vessel-role.ts consolidation, types.ts widening, 4 new pure modules (chip-scenarios, instrument-readouts, status-pill, reasoning-trail-tag)
+
+**Wave 2** *(blocked on Wave 1 completion, 3 parallel plans)*
+
+- [ ] 08-02-PLAN.md — ChartPanel restyle: remaining hex-literal re-theme, hull/badge consolidation, "1 NM" scale-bar legend
+- [ ] 08-03-PLAN.md — ControlPanel restyle: Select/Slider swap, card header with role badge, HEADING readout, full test rewrite
+- [ ] 08-04-PLAN.md — ReasoningPanel split into VerdictBanner/InstrumentReadouts/ReasoningTrail cards, ReasoningPanel retired
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 08-05-PLAN.md — SandboxContainer restyle: header/layout/grid, 6-chip preset row wiring, CopyLinkButton restyle, full test rewrite
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 08-06-PLAN.md — Mandatory manual browser UAT checkpoint: drag/rotate hit-testing, visual fidelity, responsive breakpoints
+
 **UI hint**: yes
 
 ### Phase 9: Gallery
@@ -109,5 +130,5 @@ Plans:
 | 1-5 | v1.0 | 19/19 | Complete | 2026-07-18 |
 | 6. Scaffolding | v1.1 | 0/? | Not started | - |
 | 7. Hero | v1.1 | 0/? | Not started | - |
-| 8. Sandbox | v1.1 | 0/? | Not started | - |
+| 8. Sandbox | v1.1 | 0/6 | Not started | - |
 | 9. Gallery | v1.1 | 0/? | Not started | - |
