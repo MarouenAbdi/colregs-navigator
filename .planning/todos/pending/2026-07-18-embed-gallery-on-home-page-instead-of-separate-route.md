@@ -2,6 +2,7 @@
 created: 2026-07-18T01:57:55.164Z
 title: Embed gallery on home page instead of separate route
 area: ui
+resolves_phase: 9
 files:
   - app/gallery/page.tsx
   - app/page.tsx
