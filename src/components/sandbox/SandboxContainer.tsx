@@ -12,11 +12,13 @@
  */
 
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ChartPanel } from "./ChartPanel.js";
 import { ControlPanel } from "./ControlPanel.js";
 import { ReasoningPanel } from "./ReasoningPanel.js";
 import { classifyEncounter } from "../../domain/colregs/classify-encounter.js";
 import { crossingResidualBasicCase } from "../../domain/colregs/classify-encounter.fixtures.js";
+import { trpc } from "../../lib/trpc/client.js";
 import {
   VesselSchema,
   type Position,
@@ -31,6 +33,13 @@ import type {
 import type { SandboxContainerProps } from "./types.js";
 
 export function SandboxContainer({ initialScenario, banner }: SandboxContainerProps = {}) {
+  const router = useRouter();
+  // 05-03 Task 2: Save persists the current vesselA/vesselB via
+  // scenario.create (no login step, SCEN-01) and redirects to the
+  // resulting share URL on success.
+  const createScenario = trpc.scenario.create.useMutation({
+    onSuccess: ({ shareId }) => router.push(`/s/${shareId}`),
+  });
   // 05-03: when `initialScenario` is provided (saved/shared scenario), seed
   // from it instead of the app's hardcoded default demo fixture. When
   // absent (plain "/" route), falls back to the pre-existing default --
@@ -137,13 +146,23 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
       <header className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold">COLREGS Navigator</h1>
-          <button
-            type="button"
-            onClick={handleReset}
-            className="bg-teal-600 text-white px-4 py-2 rounded"
-          >
-            Reset Scenario
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => createScenario.mutate({ vesselA, vesselB })}
+              disabled={createScenario.isPending}
+              className="bg-teal-600 text-white px-4 py-2 rounded"
+            >
+              Save
+            </button>
+            <button
+              type="button"
+              onClick={handleReset}
+              className="bg-teal-600 text-white px-4 py-2 rounded"
+            >
+              Reset Scenario
+            </button>
+          </div>
         </div>
         {banner ? (
           <div className="bg-slate-100 text-slate-700 rounded px-3 py-2 text-sm">

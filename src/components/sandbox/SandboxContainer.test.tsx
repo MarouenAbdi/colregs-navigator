@@ -17,9 +17,37 @@ import { userEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SandboxContainer } from "./SandboxContainer.js";
 import { chartToScreen } from "../../domain/geometry/screen-convert.js";
-import { overtakingBothDirectionsCase } from "../../domain/colregs/classify-encounter.fixtures.js";
+import {
+  crossingResidualBasicCase,
+  overtakingBothDirectionsCase,
+} from "../../domain/colregs/classify-encounter.fixtures.js";
 import type { Position } from "../../domain/vessel/vessel.js";
 import type { VesselLabel } from "../../domain/colregs/types.js";
+
+// 05-03 Task 2: mock next/navigation's useRouter and the trpc client's
+// scenario.create mutation so Save's mutate-args + onSuccess-redirect +
+// isPending-disables-button behaviors can be asserted without a real
+// tRPC/HTTP round-trip.
+const mockPush = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
+
+const mockMutate = vi.fn();
+let mockIsPending = false;
+let capturedOnSuccess: ((data: { shareId: string }) => void) | undefined;
+vi.mock("../../lib/trpc/client.js", () => ({
+  trpc: {
+    scenario: {
+      create: {
+        useMutation: (options?: { onSuccess?: (data: { shareId: string }) => void }) => {
+          capturedOnSuccess = options?.onSuccess;
+          return { mutate: mockMutate, isPending: mockIsPending };
+        },
+      },
+    },
+  },
+}));
 
 // Mirrors ChartPanel.tsx's own fixed chart-space viewBox (private inside
 // ChartPanel) and this file's polyfilled container size -- same pattern
@@ -60,6 +88,10 @@ beforeEach(() => {
   if (!Element.prototype.releasePointerCapture) {
     Element.prototype.releasePointerCapture = () => {};
   }
+  mockPush.mockClear();
+  mockMutate.mockClear();
+  mockIsPending = false;
+  capturedOnSuccess = undefined;
 });
 
 // Rule 3 (blocking, see ControlPanel.test.tsx): vitest.config.ts sets
@@ -241,5 +273,38 @@ describe("SandboxContainer", () => {
       />,
     );
     expect(screen.getByText("Loaded from a shared link.")).toBeInTheDocument();
+  });
+
+  // 05-03 Task 2: Save button wired to scenario.create + redirect (SCEN-01)
+  it("calls scenario.create's mutate with the current vesselA/vesselB when Save is clicked", async () => {
+    const user = userEvent.setup();
+    render(<SandboxContainer />);
+
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(mockMutate).toHaveBeenCalledWith({
+      vesselA: crossingResidualBasicCase.vesselA,
+      vesselB: crossingResidualBasicCase.vesselB,
+    });
+  });
+
+  it("redirects to /s/{shareId} when the mutation succeeds", async () => {
+    const user = userEvent.setup();
+    render(<SandboxContainer />);
+
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    expect(capturedOnSuccess).toBeDefined();
+    act(() => {
+      capturedOnSuccess?.({ shareId: "abc123" });
+    });
+
+    expect(mockPush).toHaveBeenCalledWith("/s/abc123");
+  });
+
+  it("disables the Save button while the mutation is pending", () => {
+    mockIsPending = true;
+    render(<SandboxContainer />);
+
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
   });
 });
