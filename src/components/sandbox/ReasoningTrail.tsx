@@ -136,9 +136,13 @@ export function ReasoningTrail({ classification }: ReasoningTrailProps) {
                   >
                     {tag}
                   </span>
-                  <div className="flex gap-2 items-baseline">
-                    <span className="text-sm font-semibold text-foreground">{entry.ruleId}</span>
-                    <span className="text-base font-semibold text-foreground">{entry.text}</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="shrink-0 whitespace-nowrap text-sm font-semibold text-foreground">
+                      {entry.ruleId}
+                    </span>
+                    <span className="min-w-0 text-base font-semibold text-foreground">
+                      {entry.text}
+                    </span>
                   </div>
                   <FactReadout facts={entry.facts} />
                 </div>
