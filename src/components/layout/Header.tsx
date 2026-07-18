@@ -1,5 +1,5 @@
 /**
- * Header (06-01) -- sticky page-shell chrome wired into app/layout.tsx.
+ * Header -- sticky page-shell chrome wired into app/layout.tsx.
  * Plain Server Component (no "use client" -- no state/event handlers),
  * matching this repo's existing default (app/gallery/page.tsx is already
  * an async Server Component with no client directive).
