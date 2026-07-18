@@ -17,8 +17,37 @@ import { userEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SandboxContainer } from "./SandboxContainer.js";
 import { chartToScreen } from "../../domain/geometry/screen-convert.js";
+import {
+  crossingResidualBasicCase,
+  overtakingBothDirectionsCase,
+} from "../../domain/colregs/classify-encounter.fixtures.js";
 import type { Position } from "../../domain/vessel/vessel.js";
 import type { VesselLabel } from "../../domain/colregs/types.js";
+
+// 05-03 Task 2: mock next/navigation's useRouter and the trpc client's
+// scenario.create mutation so Save's mutate-args + onSuccess-redirect +
+// isPending-disables-button behaviors can be asserted without a real
+// tRPC/HTTP round-trip.
+const mockPush = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
+
+const mockMutate = vi.fn();
+let mockIsPending = false;
+let capturedOnSuccess: ((data: { shareId: string }) => void) | undefined;
+vi.mock("../../lib/trpc/client.js", () => ({
+  trpc: {
+    scenario: {
+      create: {
+        useMutation: (options?: { onSuccess?: (data: { shareId: string }) => void }) => {
+          capturedOnSuccess = options?.onSuccess;
+          return { mutate: mockMutate, isPending: mockIsPending };
+        },
+      },
+    },
+  },
+}));
 
 // Mirrors ChartPanel.tsx's own fixed chart-space viewBox (private inside
 // ChartPanel) and this file's polyfilled container size -- same pattern
@@ -59,6 +88,10 @@ beforeEach(() => {
   if (!Element.prototype.releasePointerCapture) {
     Element.prototype.releasePointerCapture = () => {};
   }
+  mockPush.mockClear();
+  mockMutate.mockClear();
+  mockIsPending = false;
+  capturedOnSuccess = undefined;
 });
 
 // Rule 3 (blocking, see ControlPanel.test.tsx): vitest.config.ts sets
@@ -176,5 +209,102 @@ describe("SandboxContainer", () => {
 
     expect(screen.getByText(DEFAULT_VERDICT_TEXT)).toBeInTheDocument();
     expect(screen.queryByText("Unable to classify")).not.toBeInTheDocument();
+  });
+
+  // 05-03 Task 1: seed-from-saved-scenario (SCEN-01, D-02, Assumption A3)
+  it("seeds the initial classification from initialScenario vessels instead of the default crossing fixture", () => {
+    render(
+      <SandboxContainer
+        initialScenario={{
+          vesselA: overtakingBothDirectionsCase.vesselA,
+          vesselB: overtakingBothDirectionsCase.vesselB,
+        }}
+      />,
+    );
+
+    expect(screen.getByText(OVERTAKING_VERDICT_TEXT)).toBeInTheDocument();
+    expect(screen.queryByText(DEFAULT_VERDICT_TEXT)).not.toBeInTheDocument();
+  });
+
+  it("restores the passed-in initialScenario's own vessels (not the default) when Reset Scenario is clicked", () => {
+    const { container } = render(
+      <SandboxContainer
+        initialScenario={{
+          vesselA: overtakingBothDirectionsCase.vesselA,
+          vesselB: overtakingBothDirectionsCase.vesselB,
+        }}
+      />,
+    );
+
+    expect(screen.getByText(OVERTAKING_VERDICT_TEXT)).toBeInTheDocument();
+
+    // Drag vesselB onto vesselA's seeded position (0,0) -- a coincident-
+    // position degenerate input -- to move off the overtaking verdict.
+    dragHullTo(container, "vesselB", { x: 0, y: 0 });
+    expect(screen.getByText("Unable to classify")).toBeInTheDocument();
+    expect(screen.queryByText(OVERTAKING_VERDICT_TEXT)).not.toBeInTheDocument();
+
+    const resetButton = screen
+      .getAllByRole("button")
+      .find((button) => button.textContent === "Reset Scenario");
+    expect(resetButton).toBeDefined();
+    act(() => {
+      resetButton?.click();
+    });
+
+    expect(screen.getByText(OVERTAKING_VERDICT_TEXT)).toBeInTheDocument();
+    expect(screen.queryByText("Unable to classify")).not.toBeInTheDocument();
+  });
+
+  it("renders the banner label (and rationale, when provided) communicating a saved/shared scenario is loaded (D-02)", () => {
+    const { rerender } = render(
+      <SandboxContainer banner={{ label: "Viewing saved scenario — drag to explore" }} />,
+    );
+    expect(
+      screen.getByText("Viewing saved scenario — drag to explore"),
+    ).toBeInTheDocument();
+
+    rerender(
+      <SandboxContainer
+        banner={{
+          label: "Viewing saved scenario — drag to explore",
+          rationale: "Loaded from a shared link.",
+        }}
+      />,
+    );
+    expect(screen.getByText("Loaded from a shared link.")).toBeInTheDocument();
+  });
+
+  // 05-03 Task 2: Save button wired to scenario.create + redirect (SCEN-01)
+  it("calls scenario.create's mutate with the current vesselA/vesselB when Save is clicked", async () => {
+    const user = userEvent.setup();
+    render(<SandboxContainer />);
+
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(mockMutate).toHaveBeenCalledWith({
+      vesselA: crossingResidualBasicCase.vesselA,
+      vesselB: crossingResidualBasicCase.vesselB,
+    });
+  });
+
+  it("redirects to /s/{shareId} when the mutation succeeds", async () => {
+    const user = userEvent.setup();
+    render(<SandboxContainer />);
+
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    expect(capturedOnSuccess).toBeDefined();
+    act(() => {
+      capturedOnSuccess?.({ shareId: "abc123" });
+    });
+
+    expect(mockPush).toHaveBeenCalledWith("/s/abc123");
+  });
+
+  it("disables the Save button while the mutation is pending", () => {
+    mockIsPending = true;
+    render(<SandboxContainer />);
+
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
   });
 });

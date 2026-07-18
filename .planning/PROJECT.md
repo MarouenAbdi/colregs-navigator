@@ -18,11 +18,12 @@ Given any two-vessel encounter, correctly classify it under COLREGS and clearly 
 - [x] App determines give-way vs. stand-on vessel, including vessel-type-based responsibilities (power-driven, sailing, fishing, restricted-in-ability-to-maneuver) per Rule 18 — Logic validated in Phase 2; visual give-way/stand-on distinction (color + role badges) validated in Phase 4
 - [x] App displays a reasoning trail: the specific rule citation plus the geometric logic (relative bearing, closing angle) that produced the verdict — Validated in Phase 4 (Interactive Chart Sandbox); the reasoning panel renders both rule citations/prose AND each trail entry's raw geometric facts (relative bearing, TCPA, DCPA), not verdict-only
 - [x] Visual chart rendering shows vessel positions, headings, and encounter geometry clearly — Validated in Phase 4 (Interactive Chart Sandbox)
+- [x] User can save a scenario and get a shareable link (no login required) — Validated in Phase 5 (Save, Share & Gallery); confirmed end-to-end via live human verification
+- [x] User can browse a curated gallery of preset classic encounters (e.g. textbook head-on, classic crossing, overtaking case) — Validated in Phase 5 (Save, Share & Gallery); gallery page placement (currently its own `/gallery` route) has an open follow-up to embed it on the home page instead — tracked as a todo, not a validation gap
 
 ### Active
 
-- [ ] User can save a scenario and get a shareable link (no login required)
-- [ ] User can browse a curated gallery of preset classic encounters (e.g. textbook head-on, classic crossing, overtaking case)
+_None — all requirements validated as of Phase 5, the milestone's final phase._
 
 ### Out of Scope
 
@@ -38,6 +39,7 @@ Given any two-vessel encounter, correctly classify it under COLREGS and clearly 
 - **Domain source**: COLREGS (International Regulations for Preventing Collisions at Sea) — Rules 11–18 govern steering and sailing responsibilities between vessels in sight of one another. This is public, well-documented maritime law, not proprietary or company-specific.
 - **Why this domain was chosen**: evaluated against 9 other candidate ideas (music theory voice-leading validator, SAR search-pattern planner, escape-room solvability engine, ATC sequencing simulator, orbital mission planner, fairy chess engine, D&D encounter balancer, whiskey substitution engine, ER triage allocator) on memorability, backend/frontend depth, scope fit, and interview value. COLREGS Navigator scored highest: it's a domain almost nobody builds a portfolio project around, and the core logic (classify encounter → determine obligations under a real published rulebook) is a textbook case for a rules-engine/state-machine domain layer — letting Clean Architecture/DDD-lite actually earn its keep rather than being over-engineering for a CRUD app.
 - **Full engineering spec** (persona, workflow, practices) originally captured in `prompt.json` at repo root — see Constraints below for the concrete decisions pulled from it.
+- **Current state**: Milestone v1.0 complete — Phase 5 (Save, Share & Gallery) was the final phase; all 6 requirements validated across 5 phases / 19 plans.
 
 ## Constraints
 
@@ -61,6 +63,15 @@ Given any two-vessel encounter, correctly classify it under COLREGS and clearly 
 | Framed as a general maritime showcase, no employer/company tie-in | User's explicit choice — safest and most portable framing for a public portfolio piece | — Pending |
 | Rule 18's vessel-type hierarchy must never override Rule 13 overtaking verdicts | Rule 13(a) explicitly states it applies "notwithstanding anything contained in Rules 4 to 18" — a code-review pass on Phase 2 caught an initial implementation that applied Rule 18 uniformly to crossing AND overtaking, which would have produced a legally incorrect give-way verdict; fixed and regression-tested before phase close | Fixed in Phase 2 |
 | SVG drag/rotate hit-targets must hit-test the actual visible shape, not a padded invisible proxy | Live human UAT on Phase 4 found dragging/rotating vessels "tricky" across two rounds of fixes — the root cause was that both the hull-drag rect and the rotate-handle circle used separate, independently-sized invisible hit-shapes, so their boundaries never matched what the user visually saw or could be reliably kept apart by picking numeric margins. The fix was structural, not numeric: attach pointer handlers directly to the visible, solid-filled shape itself (SVG's default `pointer-events: visiblePainted` hit-tests the real painted area for any non-`none` fill) so a gesture only starts where the pointer is genuinely over what the user sees. Relevant precedent if Phase 5 or later work adds more draggable/clickable chart elements. | Fixed in Phase 4 (commits `3bf6f24`, `f559e98`) |
+| `next dev`/`next build` run via webpack (not Turbopack), with `resolve.extensionAlias` set in `next.config.ts` | Phase 5's final human-verify checkpoint was the first time anyone actually ran the dev server end-to-end — it failed immediately because neither Turbopack nor Next's default webpack resolves this codebase's `.js`-suffix-pointing-at-`.ts` relative-import convention (established Phase 1, ~98 imports across 37 files; tsc and Vitest both already resolve it fine, which is why the gap went unnoticed through 4 completed phases). Turbopack's own docs list `extensionAlias` as explicitly unsupported. User chose the smaller-blast-radius fix (2-file config change, keep the convention as-is) over rewriting all 98 imports to drop the `.js` suffix (bigger, cross-phase mechanical change, would have kept Turbopack) | Fixed in Phase 5 (commit `7beb689`) |
+
+## Next Milestone Goals
+
+Candidates for v1.1, carried forward from v1.0's deferred items (see `.planning/milestones/v1.0-REQUIREMENTS.md` for full v2 list and rationale):
+
+- Embed the gallery on the home page below the sandbox instead of its own `/gallery` route (user-requested during Phase 5 wrap-up; tracked as a todo at `.planning/todos/pending/2026-07-18-embed-gallery-on-home-page-instead-of-separate-route.md`)
+- RSON-V2-01: ambiguous/edge-case scenarios in the curated gallery (near-boundary head-on/crossing, Rule 17(a)(ii) doubt situations)
+- SCEN-V2-01: auto-generated social preview image (OG image) per shared scenario
 
 ## Evolution
 
@@ -80,4 +91,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-17 after Phase 4 (Interactive Chart Sandbox) completion — the interactive SVG sandbox is live: drag-to-position and rotate-to-heading vessel manipulation, live COLREGS classification with no submit step, color/badge give-way/stand-on coding, and a reasoning-trail panel rendering both rule citations and the underlying geometric facts (relative bearing, TCPA, DCPA). This is the first end-to-end demoable phase — `/` now renders a fully interactive scenario, not just backend plumbing. All Phase 4 requirements (VESL-02, CLAS-05, DETM-03, RSON-01, RSON-03, CHRT-01, CHRT-02) validated: 22 test files / 146 tests passing, `tsc`/`next build` clean, and 3 human-UAT items confirmed live in-browser after fixing a real hit-testing design defect surfaced during that testing (see Key Decisions). Non-blocking findings carried forward from code review (04-REVIEW.md, 0 Critical/4 Warning/3 Info — e.g. `ChartPanel` not yet visually flagging the degenerate/coincident-position case, silent revert on invalid speed input) are flagged for cleanup before Phase 5, not phase blockers. Remaining Active requirements (save/share link, curated gallery) are Phase 5's scope.*
+*Last updated: 2026-07-18 after Phase 5 (Save, Share & Gallery) completion — the milestone's final phase. Users can now Save a scenario (redirects to `/s/[shareId]`), share that link (Copy Link button), and browse a curated gallery of 6 textbook encounters at `/gallery`, each linking into the same detail route. All Phase 5 requirements (SCEN-01, SCEN-03) validated: 24 test files / 160 tests passing, `tsc --noEmit` clean, and the full flow confirmed end-to-end via live human verification in a browser. That verification surfaced and fixed a real, previously-undiscovered bug: `npm run dev`/`next build` had never actually resolved the codebase's `.js`-suffix-pointing-at-`.ts` import convention (established Phase 1) — see Key Decisions for the webpack/`extensionAlias` fix. The user also raised a genuine follow-up during that same session — moving the gallery from its own route onto the home page — captured as a todo, not a phase gap. Milestone v1.0 is now complete: all 6 requirements validated across 5 phases / 19 plans.*

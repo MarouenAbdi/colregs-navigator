@@ -10,6 +10,25 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: import.meta.dirname,
   },
+  // Rule 3 (blocking, 05-05): every relative import across src/ and app/
+  // (established Phase 1, ~98 imports across 37 files) writes an explicit
+  // ".js" specifier pointing at a sibling ".ts"/".tsx" source file — the
+  // standard TypeScript NodeNext/bundler convention, and how tsc and Vitest
+  // both already resolve these. Neither Turbopack nor Next's default webpack
+  // config remaps ".js" onto ".ts"/".tsx" automatically (Turbopack's docs
+  // explicitly list `extensionAlias` as an unsupported config option; a
+  // vanilla `next dev --webpack` run reproduces the identical "Module not
+  // found" failure), so `next dev`/`next build` fail on the very first
+  // cross-file import without this. Webpack (unlike Turbopack) does support
+  // `resolve.extensionAlias`, so the `dev`/`build` scripts run with
+  // `--webpack` and this remaps ".js" specifiers to try ".ts"/".tsx" first —
+  // zero changes needed to any of the 37 files using the convention.
+  webpack: (config) => {
+    config.resolve.extensionAlias = {
+      ".js": [".ts", ".tsx", ".js"],
+    };
+    return config;
+  },
   typescript: {
     // Rule 3 (blocking, 04-01): CLAUDE.md locks typescript@7.0.2, the new
     // Go-based ("tsgo") rewrite whose npm package no longer ships the

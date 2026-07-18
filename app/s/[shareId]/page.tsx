@@ -1,0 +1,35 @@
+import { notFound } from "next/navigation";
+import { TRPCError } from "@trpc/server";
+import { getCaller } from "../../../src/lib/trpc/server.js";
+import { rowToVessels } from "../../../src/server/application/scenario-service.js";
+import { buildScenarioBanner } from "../../../src/lib/trpc/banner.js";
+import { SandboxContainer } from "../../../src/components/sandbox/SandboxContainer.js";
+import { CopyLinkButton } from "../../../src/components/sandbox/CopyLinkButton.js";
+
+export default async function SharedScenarioPage({
+  params,
+}: {
+  params: Promise<{ shareId: string }>;
+}) {
+  const { shareId } = await params;
+
+  let scenario;
+  try {
+    scenario = await getCaller().scenario.get({ shareId });
+  } catch (err) {
+    if (err instanceof TRPCError && err.code === "NOT_FOUND") {
+      notFound();
+    }
+    throw err;
+  }
+
+  const initialScenario = rowToVessels(scenario);
+  const banner = buildScenarioBanner(scenario);
+
+  return (
+    <>
+      <SandboxContainer key={shareId} initialScenario={initialScenario} banner={banner} />
+      <CopyLinkButton />
+    </>
+  );
+}

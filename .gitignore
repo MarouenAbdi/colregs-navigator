@@ -8,3 +8,4 @@ generated/
 prisma/generated/
 .next/
 *.tsbuildinfo
+docker-compose.override.yml
