@@ -220,7 +220,7 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
             type="button"
             onClick={() => handleChipSelect(id)}
             aria-pressed={activeChipId === id}
-            className={`rounded-full border px-3 py-1.5 font-mono text-[13px] font-semibold transition-colors ${
+            className={`flex h-[30px] items-center rounded-full border px-[13px] font-sans text-[12.5px] font-medium transition-colors ${
               activeChipId === id
                 ? "border-rule-accent bg-rule-accent text-white"
                 : "border-border bg-card text-muted-foreground hover:text-foreground"

@@ -337,7 +337,7 @@ describe("SandboxContainer", () => {
     await user.click(screen.getByRole("button", { name: "Overtaking" }));
 
     const verdictHeading = screen.getByRole("heading", { name: "Overtaking" });
-    const verdictCard = verdictHeading.closest('[data-slot="card"]') as HTMLElement;
+    const verdictCard = verdictHeading.closest('[data-slot="verdict-banner"]') as HTMLElement;
     expect(verdictCard).not.toBeNull();
 
     // The "Overtaking" chip fixture documents vesselA as the give-way

@@ -10,8 +10,6 @@ import type { VerdictBannerProps } from "./types.js";
 import { getVesselRole, ROLE_BADGE_CLASSNAME, type VesselRole } from "./vessel-role.js";
 import { classifyingEntryIndex, ruleNumber } from "./reasoning-trail-tag.js";
 import type { ClassificationResult, VesselLabel } from "../../domain/colregs/types.js";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 
 const ENCOUNTER_TYPE_TITLE: Record<string, string> = {
   "head-on": "Head-on",
@@ -59,6 +57,17 @@ function verdictBannerDescription(classification: ClassificationResult): string 
   return `${VESSEL_LABEL_TEXT[classification.giveWay as VesselLabel]} gives way. Give-way vessel takes early, substantial action; stand-on vessel holds course and speed.`;
 }
 
+// The divider bar + rule badge fill isn't always teal -- it tracks the same
+// signal as the design source's `bannerAccent`: degenerate/doubt takes
+// priority (amber), then a mutual encounter (slate), else the standard
+// rule-accent teal. Matches app/globals.css's --doubt/--mutual/--rule-accent
+// tokens, not new one-off colors.
+function bannerAccentClassName(classification: ClassificationResult, isDegenerate: boolean): string {
+  if (isDegenerate || classification.doubt) return "bg-doubt";
+  if (classification.giveWay === null && classification.standOn === null) return "bg-mutual";
+  return "bg-rule-accent";
+}
+
 function RoleBadge({
   vesselLabel,
   classification,
@@ -69,44 +78,48 @@ function RoleBadge({
   const role = getVesselRole(vesselLabel, classification);
   return (
     <div
-      className={`flex flex-col items-center gap-0.5 rounded-lg border px-4 py-2 ${ROLE_BADGE_CLASSNAME[role]}`}
+      className={`flex flex-col items-end gap-0.5 rounded-lg border px-[11px] py-[7px] ${ROLE_BADGE_CLASSNAME[role]}`}
     >
-      <span className="text-xs font-normal">{VESSEL_LABEL_TEXT[vesselLabel]}</span>
-      <span className="font-mono text-sm font-bold uppercase">{ROLE_STATUS_TEXT[role]}</span>
+      <span className="text-[10px] opacity-80">{VESSEL_LABEL_TEXT[vesselLabel]}</span>
+      <span className="font-mono text-[12.5px] font-semibold">{ROLE_STATUS_TEXT[role]}</span>
     </div>
   );
 }
 
 export function VerdictBanner({ classification, isDegenerate }: VerdictBannerProps) {
+  const accent = bannerAccentClassName(classification, isDegenerate);
   return (
-    <Card className="relative overflow-hidden">
-      <span
-        aria-hidden="true"
-        className="absolute inset-y-3 left-3 w-1 rounded-full bg-rule-accent"
-      />
-      <CardContent className="flex flex-col items-start justify-between gap-4 pl-7 min-[640px]:flex-row min-[640px]:items-center">
-        <div className="flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-3">
-            {!isDegenerate ? (
-              <Badge className="h-auto w-fit bg-rule-accent px-2 py-0.5 font-mono text-[13px] text-background">
-                {bannerRuleBadge(classification)}
-              </Badge>
-            ) : null}
-            <h2 className="text-2xl font-semibold leading-[1.25] text-foreground">
-              {isDegenerate ? DEGENERATE_TITLE : ENCOUNTER_TYPE_TITLE[classification.encounterType]}
-            </h2>
-          </div>
-          <p className="text-base font-normal text-muted-foreground">
-            {isDegenerate ? DEGENERATE_DESCRIPTION : verdictBannerDescription(classification)}
-          </p>
-        </div>
+    <div
+      data-slot="verdict-banner"
+      className={`flex items-stretch gap-4 rounded-xl border px-[19px] py-[17px] shadow-sm max-sm:flex-wrap ${
+        isDegenerate ? "border-doubt/50 bg-doubt/10" : "border-border bg-card"
+      }`}
+    >
+      <div aria-hidden="true" className={`w-1 shrink-0 self-stretch rounded-full ${accent}`} />
 
-        <div className="flex shrink-0 gap-3">
-          {(["vesselA", "vesselB"] as const).map((vesselLabel) => (
-            <RoleBadge key={vesselLabel} vesselLabel={vesselLabel} classification={classification} />
-          ))}
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-3">
+          {!isDegenerate ? (
+            <span
+              className={`w-fit rounded-md px-2 py-0.5 font-mono text-[11px] font-semibold text-background ${accent}`}
+            >
+              {bannerRuleBadge(classification)}
+            </span>
+          ) : null}
+          <h2 className="text-2xl leading-[1.25] font-bold tracking-[-0.025em] text-foreground">
+            {isDegenerate ? DEGENERATE_TITLE : ENCOUNTER_TYPE_TITLE[classification.encounterType]}
+          </h2>
         </div>
-      </CardContent>
-    </Card>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          {isDegenerate ? DEGENERATE_DESCRIPTION : verdictBannerDescription(classification)}
+        </p>
+      </div>
+
+      <div className="flex shrink-0 gap-[9px] max-sm:w-full">
+        {(["vesselA", "vesselB"] as const).map((vesselLabel) => (
+          <RoleBadge key={vesselLabel} vesselLabel={vesselLabel} classification={classification} />
+        ))}
+      </div>
+    </div>
   );
 }

@@ -9,7 +9,7 @@
 
 import type { InstrumentReadoutsProps } from "./types.js";
 import { deriveInstrumentReadouts } from "./instrument-readouts.js";
-import { statusPillCopy } from "./status-pill.js";
+import { statusPillCopy, type StatusPillTone } from "./status-pill.js";
 import { Card, CardContent } from "@/components/ui/card";
 
 const PLACEHOLDER = "—";
@@ -32,24 +32,28 @@ function formatTcpa(tcpaMinutes: number | null): string {
 // Tone-to-Tailwind-utility mapping -- one step lighter than the give-way/
 // stand-on badge shade, per 08-UI-SPEC.md's Status Pill color table (plain
 // default-palette utilities, not new @theme tokens -- a distinct, one-off
-// convention from the give-way/stand-on badge shades).
-const STATUS_PILL_TONE_CLASSNAME: Record<"clear" | "risk", string> = {
+// convention from the give-way/stand-on badge shades). "opening" reuses
+// muted-foreground -- a neutral/informational tone, never red or green,
+// since it is not a risk verdict.
+const STATUS_PILL_TONE_CLASSNAME: Record<StatusPillTone, string> = {
   clear: "text-green-400 bg-green-400/10 border-green-400/35",
   risk: "text-red-400 bg-red-400/10 border-red-400/35",
+  opening: "text-muted-foreground bg-muted-foreground/10 border-muted-foreground/35",
 };
 
-const STATUS_PILL_DOT_CLASSNAME: Record<"clear" | "risk", string> = {
+const STATUS_PILL_DOT_CLASSNAME: Record<StatusPillTone, string> = {
   clear: "bg-green-400",
   risk: "bg-red-400",
+  opening: "bg-muted-foreground",
 };
 
 function Tile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-border px-2.5 py-2.25">
+    <div className="rounded-lg border border-border bg-chart-surface px-[11px] py-[10px]">
       <div className="font-mono text-[9.5px] font-semibold tracking-wide text-muted-foreground uppercase">
         {label}
       </div>
-      <div className="mt-0.75 font-mono text-[15px] font-semibold text-foreground">{value}</div>
+      <div className="mt-0.75 font-mono text-[17px] font-semibold text-foreground">{value}</div>
     </div>
   );
 }
@@ -64,7 +68,7 @@ export function InstrumentReadouts({
     vesselA,
     vesselB,
   );
-  const pill = statusPillCopy(classification.riskOfCollision, cpaNm);
+  const pill = statusPillCopy(classification.riskOfCollision, cpaNm, tcpaMinutes);
 
   return (
     <Card>

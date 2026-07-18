@@ -52,17 +52,20 @@ function VesselFormSection({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center gap-2">
-        <span className="flex h-5 w-5 items-center justify-center rounded bg-foreground text-[13px] font-semibold text-background">
+        <span className="flex h-6 w-6 items-center justify-center rounded-[7px] bg-foreground text-[13px] font-bold text-background">
           {letter}
         </span>
-        <h2 className="text-base font-semibold text-foreground">{heading}</h2>
+        <h2 className="text-sm font-semibold text-foreground">{heading}</h2>
         <Badge variant="outline" className={`ml-auto border ${ROLE_BADGE_CLASSNAME[role]}`}>
           {ROLE_BADGE_TEXT[role]}
         </Badge>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor={`${label}-type`} className="text-[13px] font-semibold text-muted-foreground uppercase">
+          <Label
+            htmlFor={`${label}-type`}
+            className="font-mono text-[11px] font-semibold text-muted-foreground uppercase"
+          >
             Type
           </Label>
           <Select value={vessel.type} onValueChange={(type) => onVesselTypeChange(label, type as VesselType)}>
@@ -81,12 +84,14 @@ function VesselFormSection({
 
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <Label className="text-[13px] font-semibold text-muted-foreground uppercase">Speed</Label>
+            <Label className="font-mono text-[11px] font-semibold text-muted-foreground uppercase">
+              Speed
+            </Label>
             {/* Only element in this restyled section allowed to use
                 --primary, per 08-UI-SPEC.md's Color section -- every other
                 accent need here uses the give-way/stand-on/mutual role
                 tokens instead. */}
-            <span className="font-mono text-base font-semibold text-primary">{`${vessel.speed} kn`}</span>
+            <span className="font-mono text-sm font-semibold text-primary">{`${vessel.speed} kn`}</span>
           </div>
           <Slider
             aria-label={`${heading} speed`}
@@ -98,9 +103,13 @@ function VesselFormSection({
           />
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <Label className="text-[13px] font-semibold text-muted-foreground uppercase">Heading</Label>
-          <span className="font-mono text-base font-semibold text-foreground">{formatHeading(vessel.heading)}</span>
+        <div className="flex items-center justify-between">
+          <Label className="font-mono text-[11px] font-semibold text-muted-foreground uppercase">
+            Heading
+          </Label>
+          <span className="font-mono text-sm font-semibold text-foreground">
+            {formatHeading(vessel.heading)}
+          </span>
         </div>
       </CardContent>
     </Card>

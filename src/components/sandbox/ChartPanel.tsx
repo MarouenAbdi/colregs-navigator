@@ -57,6 +57,15 @@ const HULL_STERN_Y = 20;
 const HULL_HALF_WIDTH = 18;
 const HULL_POINTS = `0,${HULL_BOW_Y} ${HULL_HALF_WIDTH},${HULL_STERN_Y} ${-HULL_HALF_WIDTH},${HULL_STERN_Y}`;
 const HULL_BADGE_Y = HULL_STERN_Y + 14;
+const BADGE_RECT_WIDTH = 30;
+const BADGE_RECT_HEIGHT = 18;
+
+// Per-vessel letter identifier (A/B), distinct from the role badge (GW/SO/
+// MUTUAL) -- matches the design source's `renderVessel()`, which stamps
+// both a role-color badge AND a separate dark letter circle per vessel.
+// Positioned opposite the role badge so the two never overlap.
+const LETTER_CIRCLE_X = -(HULL_HALF_WIDTH + 14);
+const LETTER_CIRCLE_R = 11;
 
 const ROTATE_HANDLE_CY = -58;
 const ROTATE_HANDLE_VISIBLE_R = 10;
@@ -166,8 +175,10 @@ function VesselGroup({ label, vessel, screen, role, hullDrag, rotateDrag }: Vess
         y1={HULL_BOW_Y}
         x2={0}
         y2={ROTATE_STALK_Y2}
-        className="stroke-mutual"
+        className="stroke-rule-accent"
         strokeWidth={1.5}
+        strokeDasharray="2 3"
+        opacity={0.6}
       />
       {/* Hull: the visible, solid-filled polygon IS the hit target --
           pointer handlers are attached directly to it. SVG's default
@@ -187,13 +198,35 @@ function VesselGroup({ label, vessel, screen, role, hullDrag, rotateDrag }: Vess
         onPointerMove={hullDrag.onPointerMove}
         onPointerUp={hullDrag.onPointerUp}
       />
+      <rect
+        x={-BADGE_RECT_WIDTH / 2}
+        y={HULL_BADGE_Y - BADGE_RECT_HEIGHT / 2}
+        width={BADGE_RECT_WIDTH}
+        height={BADGE_RECT_HEIGHT}
+        rx={4}
+        className={ROLE_HULL_FILL_CLASS[role]}
+      />
       <text
         x={0}
         y={HULL_BADGE_Y}
+        dy="0.35em"
         textAnchor="middle"
-        className="text-[14px] font-semibold fill-current"
+        className="text-[11px] font-semibold fill-white"
       >
         {ROLE_BADGE_TEXT[role]}
+      </text>
+
+      {/* Letter identifier (A/B) -- distinct from the role badge above,
+          always the same dark chip regardless of role. */}
+      <circle cx={LETTER_CIRCLE_X} cy={HULL_BADGE_Y} r={LETTER_CIRCLE_R} className="fill-card" />
+      <text
+        x={LETTER_CIRCLE_X}
+        y={HULL_BADGE_Y}
+        dy="0.35em"
+        textAnchor="middle"
+        className="text-[12px] font-bold fill-white"
+      >
+        {label === "vesselA" ? "A" : "B"}
       </text>
       {/* Rotate handle: the visible teal-ringed circle IS the hit target --
           same principle as the hull polygon above. No separate padded
