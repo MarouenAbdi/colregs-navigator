@@ -82,9 +82,9 @@ export function VerdictBanner({ classification, isDegenerate }: VerdictBannerPro
     <Card className="relative overflow-hidden">
       <span
         aria-hidden="true"
-        className="absolute inset-y-3 left-0 w-1 rounded-full bg-rule-accent"
+        className="absolute inset-y-3 left-3 w-1 rounded-full bg-rule-accent"
       />
-      <CardContent className="flex flex-col items-start justify-between gap-4 pl-4 min-[640px]:flex-row min-[640px]:items-center">
+      <CardContent className="flex flex-col items-start justify-between gap-4 pl-7 min-[640px]:flex-row min-[640px]:items-center">
         <div className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-3">
             {!isDegenerate ? (
