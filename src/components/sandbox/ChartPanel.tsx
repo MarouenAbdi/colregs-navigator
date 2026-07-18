@@ -37,6 +37,23 @@ const CHART_VIEW_BOX: ChartViewBox = { minX: -10, minY: -10, width: 20, height: 
 const GRID_STEP_CHART_UNITS = 2;
 const GRID_STROKE = "#27272A"; // border token -- dark-theme grid line (was slate-200, a light-canvas color)
 
+// Decorative fixed-pixel texture layer UNDER the nm-scale gridlines above --
+// independent of chart scale, matching the design source's own two-tier
+// grid (`sfine` 20px + `sgrid` 80px pattern, composited together). Reuses
+// the same fixed-pixel-pattern technique as HeroPreviewCard's `heroGrid`.
+const FINE_GRID_CELL_PX = 20;
+const FINE_GRID_STROKE = "rgba(120,120,130,.08)";
+
+// Range rings + N/E-W crosshair (design source: 960x640 viewBox, rings at
+// r=120/r=240 centered on the chart's own origin, crosshair spanning the
+// inner ring's diameter) -- expressed as a ratio of container width so they
+// stay correctly proportioned across container sizes, not a hardcoded px
+// literal tied to the design's own fixed 960px canvas.
+const RANGE_RING_STROKE = "rgba(45,212,191,.12)"; // primary teal -- matches HeroPreviewCard's own ring styling
+const RANGE_RING_INNER_RADIUS_RATIO = 120 / 960;
+const RANGE_RING_OUTER_RADIUS_RATIO = 240 / 960;
+const CROSSHAIR_STROKE = "#3F3F46"; // zinc-700, same as CONE_DEFAULT_STROKE below
+
 // Bigger hull + a stalk-mounted rotate handle set well clear of the bow
 // tip (04-HUMAN-UAT.md Gap 1 follow-up: separating two invisible padded
 // hit-shapes by a numeric margin still left drag/rotate feeling
@@ -52,11 +69,19 @@ const GRID_STROKE = "#27272A"; // border token -- dark-theme grid line (was slat
 // -- its own visible ring is the entire hit target, enlarged slightly
 // (r=10, up from a decorative r=7) to stay comfortably grabbable now that
 // it alone defines the click area.
+// Hull shape: the same concave 4-point kite/arrow as HeroPreviewCard's
+// HULL_PATH ("M 0,-13.8 L 8.43,10.73 L 0,5.37 L -8.43,10.73 Z", itself
+// transcribed from the design source's renderVessel()) -- NOT a flat-back
+// triangle. Scaled up by the same ratio across all four points (factor
+// 28/13.8 ≈ 2.029) to preserve this panel's deliberately bigger interactive
+// hit target (04-HUMAN-UAT.md Gap 1) while matching Hero's exact
+// bow/stern/notch/half-width proportions, not an arbitrarily-chosen shape.
 const HULL_BOW_Y = -28;
-const HULL_STERN_Y = 20;
-const HULL_HALF_WIDTH = 18;
-const HULL_POINTS = `0,${HULL_BOW_Y} ${HULL_HALF_WIDTH},${HULL_STERN_Y} ${-HULL_HALF_WIDTH},${HULL_STERN_Y}`;
-const HULL_BADGE_Y = HULL_STERN_Y + 14;
+const HULL_STERN_Y = 21.77;
+const HULL_NOTCH_Y = 10.9;
+const HULL_HALF_WIDTH = 17.1;
+const HULL_POINTS = `0,${HULL_BOW_Y} ${HULL_HALF_WIDTH},${HULL_STERN_Y} 0,${HULL_NOTCH_Y} ${-HULL_HALF_WIDTH},${HULL_STERN_Y}`;
+const HULL_BADGE_Y = HULL_STERN_Y + 13;
 const BADGE_RECT_WIDTH = 30;
 const BADGE_RECT_HEIGHT = 18;
 
@@ -297,6 +322,9 @@ export function ChartPanel({
 
   const screenA = chartToScreen(vesselA.position, containerSize, CHART_VIEW_BOX);
   const screenB = chartToScreen(vesselB.position, containerSize, CHART_VIEW_BOX);
+  const chartCenter = chartToScreen({ x: 0, y: 0 }, containerSize, CHART_VIEW_BOX);
+  const innerRingRadiusPx = containerSize.width * RANGE_RING_INNER_RADIUS_RATIO;
+  const outerRingRadiusPx = containerSize.width * RANGE_RING_OUTER_RADIUS_RATIO;
 
   const roleA = getVesselRole("vesselA", classification);
   const roleB = getVesselRole("vesselB", classification);
@@ -343,7 +371,48 @@ export function ChartPanel({
         height={containerSize.height}
         className="bg-chart-surface border border-border rounded"
       >
+        <defs>
+          <pattern
+            id="chart-fine-grid"
+            width={FINE_GRID_CELL_PX}
+            height={FINE_GRID_CELL_PX}
+            patternUnits="userSpaceOnUse"
+          >
+            <path
+              d={`M ${FINE_GRID_CELL_PX} 0 H 0 V ${FINE_GRID_CELL_PX}`}
+              fill="none"
+              stroke={FINE_GRID_STROKE}
+              strokeWidth={1}
+            />
+          </pattern>
+        </defs>
+        <rect width={containerSize.width} height={containerSize.height} fill="url(#chart-fine-grid)" />
         <g>{buildGridLines(containerSize)}</g>
+        <g stroke={RANGE_RING_STROKE} fill="none">
+          <circle cx={chartCenter.screenX} cy={chartCenter.screenY} r={innerRingRadiusPx} />
+          <circle cx={chartCenter.screenX} cy={chartCenter.screenY} r={outerRingRadiusPx} />
+        </g>
+        <g stroke={CROSSHAIR_STROKE} strokeWidth={1}>
+          <line
+            x1={chartCenter.screenX}
+            y1={chartCenter.screenY - innerRingRadiusPx}
+            x2={chartCenter.screenX}
+            y2={chartCenter.screenY + innerRingRadiusPx}
+          />
+          <line
+            x1={chartCenter.screenX - innerRingRadiusPx}
+            y1={chartCenter.screenY}
+            x2={chartCenter.screenX + innerRingRadiusPx}
+            y2={chartCenter.screenY}
+          />
+        </g>
+        <text
+          x={chartCenter.screenX + 4}
+          y={chartCenter.screenY - innerRingRadiusPx + 12}
+          className="fill-muted-foreground font-mono text-[11px]"
+        >
+          N
+        </text>
         <g>
           <path
             data-testid="cone-vesselA"
