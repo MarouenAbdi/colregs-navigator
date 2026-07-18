@@ -205,7 +205,7 @@ export function Hero() {
               <svg viewBox="0 0 320 200" width="100%" height="auto" role="img" aria-label="Illustrative encounter preview chart">
                 <defs>
                   <pattern id="heroGrid" width={20} height={20} patternUnits="userSpaceOnUse">
-                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1E293B" strokeWidth={1} />
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(120,120,130,0.14)" strokeWidth={1} />
                   </pattern>
                   <radialGradient
                     id="heroSectorGradient"
@@ -225,7 +225,7 @@ export function Hero() {
                   cx={HERO_CHART_CENTER.screenX}
                   cy={HERO_CHART_CENTER.screenY}
                   r={HERO_OUTER_RING_RADIUS_PX}
-                  stroke="#334155"
+                  stroke="rgba(45,212,191,0.16)"
                   fill="none"
                   strokeWidth={1}
                 />
@@ -233,7 +233,7 @@ export function Hero() {
                   cx={HERO_CHART_CENTER.screenX}
                   cy={HERO_CHART_CENTER.screenY}
                   r={HERO_INNER_RING_RADIUS_PX}
-                  stroke="#334155"
+                  stroke="rgba(45,212,191,0.16)"
                   fill="none"
                   strokeWidth={1}
                 />
@@ -245,7 +245,7 @@ export function Hero() {
                   y1={HERO_CHART_CENTER.screenY}
                   x2={HERO_CHART_CENTER.screenX}
                   y2={HERO_CHART_CENTER.screenY - HERO_OUTER_RING_RADIUS_PX}
-                  stroke="#334155"
+                  stroke="rgba(45,212,191,0.16)"
                   strokeWidth={1}
                 />
 
@@ -290,25 +290,44 @@ export function Hero() {
                   </text>
                 </g>
 
+                {/* Hull rotates with heading; the label circle and role
+                    badge below are deliberately SIBLING groups (not
+                    nested inside this rotated <g>) with their own plain
+                    translate -- matching the design source's renderVessel(),
+                    where only the hull path carries `rotate(hdg)` while the
+                    badge/label groups use position-only translates. Nesting
+                    them inside the rotated group (the previous approach)
+                    swings the labels around the vessel whenever heading
+                    isn't ~0, which is visibly wrong for non-upright headings
+                    like Vessel B's 280deg. */}
                 <g transform={`translate(${screenA.screenX} ${screenA.screenY}) rotate(${heroPreviewVesselA.heading})`}>
                   <polygon points="0,-9 6,7 -6,7" fill={VESSEL_A_HULL_COLOR} />
-                  <circle cx={0} cy={-16} r={7} fill="#18181B" stroke="#3F3F46" />
-                  <text x={0} y={-16} textAnchor="middle" dominantBaseline="middle" fill="#FFFFFF" fontSize={10} fontWeight={600}>
+                </g>
+                <g transform={`translate(${screenA.screenX - 11} ${screenA.screenY - 11})`}>
+                  <circle r={7} fill="#18181B" />
+                  <text textAnchor="middle" dominantBaseline="middle" fill="#FFFFFF" fontSize={10} fontWeight={600}>
                     A
                   </text>
-                  <circle cx={0} cy={16} r={7} fill={VESSEL_A_HULL_COLOR} />
-                  <text x={0} y={16} textAnchor="middle" dominantBaseline="middle" fill="#FFFFFF" fontSize={9} fontWeight={600}>
+                </g>
+                <g transform={`translate(${screenA.screenX + 12} ${screenA.screenY + 10})`}>
+                  <rect width={20} height={12} rx={3} fill={VESSEL_A_HULL_COLOR} />
+                  <text x={10} y={6} textAnchor="middle" dominantBaseline="middle" fill="#FFFFFF" fontSize={7.5} fontWeight={600}>
                     {vesselAPillText}
                   </text>
                 </g>
+
                 <g transform={`translate(${screenB.screenX} ${screenB.screenY}) rotate(${heroPreviewVesselB.heading})`}>
                   <polygon points="0,-9 6,7 -6,7" fill={VESSEL_B_HULL_COLOR} />
-                  <circle cx={0} cy={-16} r={7} fill="#18181B" stroke="#3F3F46" />
-                  <text x={0} y={-16} textAnchor="middle" dominantBaseline="middle" fill="#FFFFFF" fontSize={10} fontWeight={600}>
+                </g>
+                <g transform={`translate(${screenB.screenX - 11} ${screenB.screenY - 11})`}>
+                  <circle r={7} fill="#18181B" />
+                  <text textAnchor="middle" dominantBaseline="middle" fill="#FFFFFF" fontSize={10} fontWeight={600}>
                     B
                   </text>
-                  <circle cx={0} cy={16} r={7} fill={VESSEL_B_HULL_COLOR} />
-                  <text x={0} y={16} textAnchor="middle" dominantBaseline="middle" fill="#FFFFFF" fontSize={9} fontWeight={600}>
+                </g>
+                <g transform={`translate(${screenB.screenX + 12} ${screenB.screenY + 10})`}>
+                  <rect width={20} height={12} rx={3} fill={VESSEL_B_HULL_COLOR} />
+                  <text x={10} y={6} textAnchor="middle" dominantBaseline="middle" fill="#FFFFFF" fontSize={7.5} fontWeight={600}>
                     {vesselBPillText}
                   </text>
                 </g>
