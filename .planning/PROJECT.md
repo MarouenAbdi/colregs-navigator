@@ -12,6 +12,8 @@
 
 **Locked decisions:** Hero Direction A (not the alternate "bridge display" variant); dark-mode only, no light theme/toggle; design followed exactly (colors, spacing, breakpoints at 900px/640px) using shadcn/ui as the component primitive layer.
 
+**Progress:** Phase 6 (Scaffolding) complete — shadcn/ui installed (Radix base), dark-only design tokens locked in `app/globals.css`, Geist/Geist Mono fonts loaded app-wide, sticky Header/Footer page shell wraps every route. Human-verified in a real browser (dark render under light OS preference, 640px nav collapse, computed font-family, Source link). Next: Phase 7 (Hero).
+
 ## What This Is
 
 COLREGS Navigator is a maritime collision-avoidance rules engine and visualizer. Users place two vessels on a nautical-chart-style sandbox — setting each vessel's position, heading, speed, and type — and the app classifies the encounter (head-on, crossing, or overtaking) under the International Regulations for Preventing Collisions at Sea (COLREGS Rules 11–18), determines which vessel must give way, and explains the verdict with the specific rule citation and the geometric reasoning (relative bearing, closing angle) behind it. It's a portfolio project aimed at software engineering interviews, demonstrating domain modeling depth (DDD-lite, rules-engine/state-machine design) on an unusual, memorable subject.
@@ -107,4 +109,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-18 — Milestone v1.1 (UI Redesign) started. v1.0 shipped all 6 requirements across 5 phases / 19 plans (Save/Share/Gallery flow confirmed via live human verification; webpack `extensionAlias` fix for the `.js`-suffix import convention). v1.1 re-implements the entire front end against an imported Claude Design file using shadcn/ui, in 4 branch+PR phases (Scaffolding, Hero, Sandbox, Gallery) — no functional/REQ-ID changes, presentation layer only.*
+*Last updated: 2026-07-18 — Phase 6 (Scaffolding) complete: shadcn/ui, dark-only tokens, Geist fonts, Header/Footer shell (SCAF-01–06 validated). v1.0 shipped all 6 requirements across 5 phases / 19 plans (Save/Share/Gallery flow confirmed via live human verification; webpack `extensionAlias` fix for the `.js`-suffix import convention). v1.1 re-implements the entire front end against an imported Claude Design file using shadcn/ui, in 4 branch+PR phases (Scaffolding, Hero, Sandbox, Gallery) — no functional/REQ-ID changes, presentation layer only.*
