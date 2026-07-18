@@ -128,6 +128,12 @@ None - no external service configuration required. (The `.env`/Prisma-generate s
 - `app/page.tsx` now renders `<Hero />` above a real `#sandbox` anchor wrapping `SandboxContainer` unmodified -- Phase 8 (Sandbox restyle) can proceed against this same wrapper without any Hero-side rework.
 - No blockers for Plan 07-02 or Phase 8.
 
+## Self-Check: PASSED
+
+All 9 created/modified files verified present on disk; all 3 task commits
+(`6e244e8`, `ae6e7bc`, `d6a60cc`) plus the SUMMARY commit (`db9cfc0`)
+verified present in `git log --oneline --all`.
+
 ---
 *Phase: 07-hero*
 *Completed: 2026-07-18*
