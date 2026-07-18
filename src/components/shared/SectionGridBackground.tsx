@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 /**
  * SectionGridBackground -- decorative nautical-chart-style grid overlay,
  * shared across marketing sections. First real occupant of
@@ -6,15 +8,11 @@
  * from the Claude Design source, differing only in grid-line opacity and
  * Hero's extra radial glow -- a real second consumer, not a speculative one.
  *
- * Grid cadence (47px/48px), opacities (0.22 Hero / 0.18 Gallery), and the
- * glow's shape/position (900x500 ellipse at 74% 18%, teal at 8% alpha) are
- * lifted directly from the design source
- * ("COLREGS Navigator (shadcn).dc.html") to match pixel-for-pixel, not
- * approximated from the static screenshot.
- *
- * Render as the first child of a `relative overflow-hidden` section, with
- * the section's actual content given `relative` positioning (and a
- * z-index) so it paints above this absolutely-positioned overlay.
+ * The gradient definitions themselves (cadence, colors, glow shape) live in
+ * `.section-grid-overlay`/`.section-grid-overlay--glow` in app/globals.css,
+ * not here -- this component only selects the modifier class and sets the
+ * one value (opacity) that legitimately varies per call site, keeping the
+ * actual CSS out of the component file.
  */
 type SectionGridBackgroundProps = {
   /** Grid line opacity. Design: 0.22 for Hero, 0.18 for Gallery. */
@@ -24,10 +22,11 @@ type SectionGridBackgroundProps = {
 };
 
 export function SectionGridBackground({ opacity = 0.18, glow = false }: SectionGridBackgroundProps) {
-  const gridLayer = `repeating-linear-gradient(0deg, transparent 0 47px, rgba(63,63,70,${opacity}) 47px 48px), repeating-linear-gradient(90deg, transparent 0 47px, rgba(63,63,70,${opacity}) 47px 48px)`;
-  const backgroundImage = glow
-    ? `radial-gradient(900px 500px at 74% 18%, rgba(45,212,191,.08), transparent 60%), ${gridLayer}`
-    : gridLayer;
-
-  return <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ backgroundImage }} />;
+  return (
+    <div
+      aria-hidden="true"
+      className={glow ? "section-grid-overlay section-grid-overlay--glow" : "section-grid-overlay"}
+      style={{ "--grid-opacity": opacity } as CSSProperties}
+    />
+  );
 }

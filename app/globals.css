@@ -149,3 +149,25 @@
       }
   }
 }
+
+/* SectionGridBackground (src/components/shared/) -- the decorative
+   repeating-grid overlay shared by Hero (07-01) and, per the design
+   source, the future Gallery section (Phase 9). Defined here as plain
+   CSS rather than composed as a string inside the component: the
+   component only toggles the "--glow" modifier class and sets the one
+   opacity value that legitimately differs per call site. */
+.section-grid-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 47px, rgba(63, 63, 70, var(--grid-opacity, 0.18)) 47px 48px),
+    repeating-linear-gradient(90deg, transparent 0 47px, rgba(63, 63, 70, var(--grid-opacity, 0.18)) 47px 48px);
+}
+
+.section-grid-overlay--glow {
+  background-image:
+    radial-gradient(900px 500px at 74% 18%, rgba(45, 212, 191, 0.08), transparent 60%),
+    repeating-linear-gradient(0deg, transparent 0 47px, rgba(63, 63, 70, var(--grid-opacity, 0.18)) 47px 48px),
+    repeating-linear-gradient(90deg, transparent 0 47px, rgba(63, 63, 70, var(--grid-opacity, 0.18)) 47px 48px);
+}
