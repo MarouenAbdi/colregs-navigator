@@ -67,6 +67,14 @@ const VESSEL_A_HULL_COLOR = "#EF4444"; // red-500, give-way
 const VESSEL_B_HULL_COLOR = "#22C55E"; // green-500, stand-on
 const CONNECTOR_STROKE = "#475569"; // slate-600
 
+// The design source's renderVessel() draws the hull as a 4-point path with
+// a concave notch cut into the stern (`M0,-18s L11s,14s L0,7s L-11s,14s Z`,
+// s=1.15 for this card), not a plain flat-back triangle -- reproduced here
+// scaled to this card's canvas (s * 320/480 = 0.767).
+const HULL_PATH = "M 0,-13.8 L 8.43,10.73 L 0,5.37 L -8.43,10.73 Z";
+const HULL_STROKE = "rgba(250,250,250,0.85)";
+const HULL_STROKE_WIDTH = 1.15;
+
 const ENCOUNTER_TYPE_TITLE: Record<EncounterType, string> = {
   crossing: "Crossing",
   "head-on": "Head-on",
@@ -301,7 +309,7 @@ export function Hero() {
                     isn't ~0, which is visibly wrong for non-upright headings
                     like Vessel B's 280deg. */}
                 <g transform={`translate(${screenA.screenX} ${screenA.screenY}) rotate(${heroPreviewVesselA.heading})`}>
-                  <polygon points="0,-9 6,7 -6,7" fill={VESSEL_A_HULL_COLOR} />
+                  <path d={HULL_PATH} fill={VESSEL_A_HULL_COLOR} stroke={HULL_STROKE} strokeWidth={HULL_STROKE_WIDTH} />
                 </g>
                 <g transform={`translate(${screenA.screenX - 11} ${screenA.screenY - 11})`}>
                   <circle r={7} fill="#18181B" />
@@ -317,7 +325,7 @@ export function Hero() {
                 </g>
 
                 <g transform={`translate(${screenB.screenX} ${screenB.screenY}) rotate(${heroPreviewVesselB.heading})`}>
-                  <polygon points="0,-9 6,7 -6,7" fill={VESSEL_B_HULL_COLOR} />
+                  <path d={HULL_PATH} fill={VESSEL_B_HULL_COLOR} stroke={HULL_STROKE} strokeWidth={HULL_STROKE_WIDTH} />
                 </g>
                 <g transform={`translate(${screenB.screenX - 11} ${screenB.screenY - 11})`}>
                   <circle r={7} fill="#18181B" />
