@@ -106,3 +106,16 @@ None - no external service configuration required beyond the pre-existing local 
 - FOUND: app/gallery/page.tsx
 - FOUND: src/types/next-link.d.ts
 - FOUND commit: 5c90898
+
+## Post-Merge Reconciliation (orchestrator, Wave 2 merge)
+
+The sibling wave-2 plan (05-03) independently hit the same root cause — TypeScript's
+Node16/NodeNext resolver not falling back to filesystem lookup for exports-less `next/*`
+subpaths — via `next/navigation`, and fixed it project-wide by switching `tsconfig.json`'s
+`module`/`moduleResolution` to `esnext`/`bundler` (Next.js's own documented recommendation,
+verified against Context7). That supersedes this plan's narrower `next/link`-only ambient
+shim: `bundler` resolution resolves `next/link` natively, and the shim's hand-written
+`LinkProps` was strictly narrower than Next's real prop types (missing `replace`, `scroll`,
+`prefetch`, etc.), so keeping it would have shadowed better types with worse ones for no
+benefit. `src/types/next-link.d.ts` was deleted after the wave-2 merge. Re-verified clean:
+`npx tsc --noEmit` exits 0, full suite 157/157 passing.
