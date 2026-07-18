@@ -88,17 +88,17 @@ Plans:
 
 **Wave 1**
 
-- [ ] 08-01-PLAN.md — Foundations: 7 new @theme tokens, shadcn Select/Slider/Label, vessel-role.ts consolidation, types.ts widening, 4 new pure modules (chip-scenarios, instrument-readouts, status-pill, reasoning-trail-tag)
+- [x] 08-01-PLAN.md — Foundations: 7 new @theme tokens, shadcn Select/Slider/Label, vessel-role.ts consolidation, types.ts widening, 4 new pure modules (chip-scenarios, instrument-readouts, status-pill, reasoning-trail-tag)
 
 **Wave 2** *(blocked on Wave 1 completion, 3 parallel plans)*
 
-- [ ] 08-02-PLAN.md — ChartPanel restyle: remaining hex-literal re-theme, hull/badge consolidation, "1 NM" scale-bar legend
-- [ ] 08-03-PLAN.md — ControlPanel restyle: Select/Slider swap, card header with role badge, HEADING readout, full test rewrite
-- [ ] 08-04-PLAN.md — ReasoningPanel split into VerdictBanner/InstrumentReadouts/ReasoningTrail cards, ReasoningPanel retired
+- [x] 08-02-PLAN.md — ChartPanel restyle: remaining hex-literal re-theme, hull/badge consolidation, "1 NM" scale-bar legend
+- [x] 08-03-PLAN.md — ControlPanel restyle: Select/Slider swap, card header with role badge, HEADING readout, full test rewrite
+- [x] 08-04-PLAN.md — ReasoningPanel split into VerdictBanner/InstrumentReadouts/ReasoningTrail cards, ReasoningPanel retired
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 08-05-PLAN.md — SandboxContainer restyle: header/layout/grid, 6-chip preset row wiring, CopyLinkButton restyle, full test rewrite
+- [x] 08-05-PLAN.md — SandboxContainer restyle: header/layout/grid, 6-chip preset row wiring, CopyLinkButton restyle, full test rewrite
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
