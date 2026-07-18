@@ -54,35 +54,35 @@ None identified — this milestone's carried-forward v2 items (RSON-V2-01, SCEN-
 
 ## Traceability
 
-Populated during roadmap creation.
+Populated by roadmap creation — all 19 requirements mapped to their user-specified phases (6-9).
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCAF-01 | — | Pending |
-| SCAF-02 | — | Pending |
-| SCAF-03 | — | Pending |
-| SCAF-04 | — | Pending |
-| SCAF-05 | — | Pending |
-| SCAF-06 | — | Pending |
-| HERO-01 | — | Pending |
-| HERO-02 | — | Pending |
-| HERO-03 | — | Pending |
-| HERO-04 | — | Pending |
-| SBOX-01 | — | Pending |
-| SBOX-02 | — | Pending |
-| SBOX-03 | — | Pending |
-| SBOX-04 | — | Pending |
-| SBOX-05 | — | Pending |
-| GAL-01 | — | Pending |
-| GAL-02 | — | Pending |
-| GAL-03 | — | Pending |
-| GAL-04 | — | Pending |
+| SCAF-01 | Phase 6 | Pending |
+| SCAF-02 | Phase 6 | Pending |
+| SCAF-03 | Phase 6 | Pending |
+| SCAF-04 | Phase 6 | Pending |
+| SCAF-05 | Phase 6 | Pending |
+| SCAF-06 | Phase 6 | Pending |
+| HERO-01 | Phase 7 | Pending |
+| HERO-02 | Phase 7 | Pending |
+| HERO-03 | Phase 7 | Pending |
+| HERO-04 | Phase 7 | Pending |
+| SBOX-01 | Phase 8 | Pending |
+| SBOX-02 | Phase 8 | Pending |
+| SBOX-03 | Phase 8 | Pending |
+| SBOX-04 | Phase 8 | Pending |
+| SBOX-05 | Phase 8 | Pending |
+| GAL-01 | Phase 9 | Pending |
+| GAL-02 | Phase 9 | Pending |
+| GAL-03 | Phase 9 | Pending |
+| GAL-04 | Phase 9 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 19 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 19 ⚠️ (expected prior to roadmap creation)
+- Mapped to phases: 19/19 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-07-18*
-*Last updated: 2026-07-18 after initial definition for milestone v1.1*
+*Last updated: 2026-07-18 — traceability populated after ROADMAP.md creation for milestone v1.1 (Phases 6-9)*

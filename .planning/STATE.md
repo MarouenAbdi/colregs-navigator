@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI Redesign (shadcn)
 status: planning
-last_updated: "2026-07-18T10:05:42.394Z"
+last_updated: "2026-07-18T00:00:00.000Z"
 last_activity: 2026-07-18
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,35 +17,37 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-14)
+See: .planning/PROJECT.md (updated 2026-07-18)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Milestone complete
+**Current focus:** Phase 6 (Scaffolding) — v1.1 UI Redesign
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-07-18 — Milestone v1.1 started
+Phase: 6 of 9 (Scaffolding) — first phase of v1.1
+Plan: — of — in current phase
+Status: Ready to plan
+Last activity: 2026-07-18 — ROADMAP.md and traceability written for v1.1 (Phases 6-9)
+
+Progress: [░░░░░░░░░░] 0% (v1.1 milestone; v1.0's 19 plans/5 phases complete and archived)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 19
+- Total plans completed: 19 (all v1.0)
 - Average duration: - min
-- Total execution time: 0 hours
+- Total execution time: 0 hours (v1.1)
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1 | 3 | - | - |
-| 02 | 2 | - | - |
-| 03 | 3 | - | - |
-| 04 | 6 | - | - |
-| 05 | 5 | - | - |
+| 1-5 (v1.0) | 19 | - | - |
+| 6 (Scaffolding) | TBD | - | - |
+| 7 (Hero) | TBD | - | - |
+| 8 (Sandbox) | TBD | - | - |
+| 9 (Gallery) | TBD | - | - |
 
 **Recent Trend:**
 
@@ -61,16 +63,21 @@ Last activity: 2026-07-18 — Milestone v1.1 started
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- Roadmap: Horizontal Layers build order chosen — domain engine → persistence → API → UI → sharing/gallery. Nothing is end-to-end demoable until Phase 4; deliberate tradeoff to validate the highest-risk COLREGS logic in isolation first.
-- Roadmap: Granularity is "coarse" (3-5 phases) — merged research's proposed Persistence and tRPC API phases into a single Phase 3, since both are conventional, low-risk, HIGH-confidence patterns per research.
+- v1.1 is a full front-end redesign against an imported Claude Design file, 4 branch+PR phases (Scaffolding, Hero, Sandbox, Gallery), no REQ-ID changes.
+- Hero ships as Direction A only; Direction B not built.
+- `/gallery` route removed in favor of `/#gallery` embedded section, with a permanent redirect.
+- Dark-mode only, no light theme/toggle — matches the source design file's single palette.
+- shadcn CLI must be run with `--base radix` (not the new Base UI default) per research/STACK.md.
 
 ### Pending Todos
 
-- Embed gallery on home page instead of separate route (`.planning/todos/pending/2026-07-18-embed-gallery-on-home-page-instead-of-separate-route.md`)
+- Embed gallery on home page instead of separate route (`.planning/todos/pending/2026-07-18-embed-gallery-on-home-page-instead-of-separate-route.md`) — this todo is being closed by Phase 9 (Gallery) in this milestone.
 
 ### Blockers/Concerns
 
-- Phase 2 (Rules Engine) and Phase 4 (Interactive Chart) are flagged in research/SUMMARY.md as likely needing deeper research during planning (`--research-phase`): exact doubt-band width, Rule 7 risk-of-collision formula, and sector-boundary conventions for Phase 2; drag-gesture implementation details for Phase 4.
+- Phase 8 (Sandbox) carries the highest regression risk this milestone: restyling `ChartPanel`'s hull/rotate-handle hit-testing must not silently break drag/rotate (jsdom tests cannot detect this — mandatory manual browser UAT before merging Phase 8's PR, per research/PITFALLS.md Pitfall 1).
+- Phase 9 (Gallery) needs manual verification of the `/gallery` → `/#gallery` redirect from both a fresh tab and in-app navigation — native browser fragment-scroll behavior cannot be confirmed from docs alone (research/PITFALLS.md Pitfall 6).
+- Phase 6 (Scaffolding) must hardcode `className="dark"` on `<html>` and verify with OS/browser color-scheme set to light — shadcn's default scaffold half-wires a toggle that silently defaults to light mode if skipped (research/PITFALLS.md Pitfall 2).
 
 ## Deferred Items
 
@@ -78,10 +85,10 @@ Items acknowledged and carried forward from previous milestone close:
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| *(none)* | | | |
+| Functional/domain | RSON-V2-01 (ambiguous/edge-case gallery scenarios), SCEN-V2-01 (auto-generated OG image) | Deferred to v1.2+ | v1.0 milestone close |
 
 ## Session Continuity
 
-Last session: 2026-07-17T23:01:02.003Z
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-save-share-gallery/05-CONTEXT.md
+Last session: 2026-07-18T00:00:00.000Z
+Stopped at: ROADMAP.md, STATE.md, and REQUIREMENTS.md traceability written for v1.1 (Phases 6-9)
+Resume file: None
