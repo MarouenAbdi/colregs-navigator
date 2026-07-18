@@ -209,7 +209,7 @@ export function Hero() {
               <span>BRG-ring · 12 NM</span>
             </CardHeader>
             <CardContent className="flex flex-col">
-            <div className="overflow-hidden rounded-md border border-border">
+            <div className="overflow-hidden rounded-md border border-border bg-[#0B0B0E]">
               <svg viewBox="0 0 320 200" width="100%" height="auto" role="img" aria-label="Illustrative encounter preview chart">
                 <defs>
                   <pattern id="heroGrid" width={20} height={20} patternUnits="userSpaceOnUse">
@@ -285,14 +285,19 @@ export function Hero() {
                   strokeDasharray="3 3"
                 />
 
+                {/* Design's bearingLine() renders this chip at these exact,
+                    unscaled pixel values regardless of card size (Hero,
+                    wide, or gallery-thumbnail context all share the same
+                    rect/text geometry) -- not a hardcoded literal, this
+                    matches the design source verbatim. */}
                 <g transform={`translate(${connectorMidpoint.x} ${connectorMidpoint.y})`}>
-                  <rect x={-32} y={-11} width={64} height={22} rx={4} fill="#0F172A" />
+                  <rect x={-34} y={-11} width={68} height={22} rx={6} fill="#18181B" stroke="#27272A" />
                   <text
                     textAnchor="middle"
                     dominantBaseline="middle"
-                    fill="#F8FAFC"
-                    fontFamily="monospace"
-                    fontSize={11}
+                    fill="#D4D4D8"
+                    className="font-mono"
+                    fontSize={12}
                   >
                     {`${range.toFixed(2)} NM`}
                   </text>
