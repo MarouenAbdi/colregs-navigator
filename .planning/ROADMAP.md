@@ -149,8 +149,8 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 05-03-PLAN.md — SandboxContainer initialScenario/banner props + Save flow (SCEN-01)
-- [ ] 05-04-PLAN.md — /gallery listing page (SCEN-03)
+- [x] 05-03-PLAN.md — SandboxContainer initialScenario/banner props + Save flow (SCEN-01)
+- [x] 05-04-PLAN.md — /gallery listing page (SCEN-03)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -169,4 +169,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. COLREGS Rules Engine | 2/2 | Complete   | 2026-07-15 |
 | 3. Persistence & API Layer | 3/3 | Complete   | 2026-07-17 |
 | 4. Interactive Chart Sandbox | 6/6 | Complete   | 2026-07-17 |
-| 5. Save, Share & Gallery | 2/5 | In Progress|  |
+| 5. Save, Share & Gallery | 4/5 | In Progress|  |
