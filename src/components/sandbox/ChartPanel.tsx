@@ -17,7 +17,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ChartPanelProps } from "./types.js";
-import { getVesselRole, type VesselRole } from "./vessel-role.js";
+import { getVesselRole, ROLE_BADGE_TEXT, ROLE_HULL_FILL_CLASS, type VesselRole } from "./vessel-role.js";
 import {
   chartToScreen,
   type ChartViewBox,
@@ -36,12 +36,6 @@ const CHART_VIEW_BOX: ChartViewBox = { minX: -10, minY: -10, width: 20, height: 
 
 const GRID_STEP_CHART_UNITS = 2;
 const GRID_STROKE = "#27272A"; // border token -- dark-theme grid line (was slate-200, a light-canvas color)
-
-const HULL_FILL_CLASS: Record<VesselRole, string> = {
-  "give-way": "fill-red-500",
-  "stand-on": "fill-green-500",
-  mutual: "fill-slate-400",
-};
 
 // Bigger hull + a stalk-mounted rotate handle set well clear of the bow
 // tip (04-HUMAN-UAT.md Gap 1 follow-up: separating two invisible padded
@@ -67,12 +61,6 @@ const HULL_BADGE_Y = HULL_STERN_Y + 14;
 const ROTATE_HANDLE_CY = -58;
 const ROTATE_HANDLE_VISIBLE_R = 10;
 const ROTATE_STALK_Y2 = ROTATE_HANDLE_CY + ROTATE_HANDLE_VISIBLE_R;
-
-const ROLE_BADGE_TEXT: Record<VesselRole, string> = {
-  "give-way": "GW",
-  "stand-on": "SO",
-  mutual: "MUTUAL",
-};
 
 const BEARING_LINE_DEFAULT_STROKE = "#475569"; // slate-600
 const DOUBT_STROKE = "#F59E0B"; // amber-500
@@ -178,7 +166,7 @@ function VesselGroup({ label, vessel, screen, role, hullDrag, rotateDrag }: Vess
         y1={HULL_BOW_Y}
         x2={0}
         y2={ROTATE_STALK_Y2}
-        stroke="#94A3B8" // slate-400
+        className="stroke-mutual"
         strokeWidth={1.5}
       />
       {/* Hull: the visible, solid-filled polygon IS the hit target --
@@ -194,7 +182,7 @@ function VesselGroup({ label, vessel, screen, role, hullDrag, rotateDrag }: Vess
       <polygon
         data-testid={`hull-hit-${label}`}
         points={HULL_POINTS}
-        className={HULL_FILL_CLASS[role]}
+        className={ROLE_HULL_FILL_CLASS[role]}
         onPointerDown={hullDrag.onPointerDown}
         onPointerMove={hullDrag.onPointerMove}
         onPointerUp={hullDrag.onPointerUp}
@@ -219,7 +207,7 @@ function VesselGroup({ label, vessel, screen, role, hullDrag, rotateDrag }: Vess
         cx={0}
         cy={ROTATE_HANDLE_CY}
         r={ROTATE_HANDLE_VISIBLE_R}
-        stroke="#0D9488"
+        className="stroke-rule-accent"
         strokeWidth={2}
         fill="white"
         onPointerDown={rotateDrag.onPointerDown}
@@ -320,7 +308,7 @@ export function ChartPanel({
       <svg
         width={containerSize.width}
         height={containerSize.height}
-        className="bg-[#0B0B0E] border border-border rounded"
+        className="bg-chart-surface border border-border rounded"
       >
         <g>{buildGridLines(containerSize)}</g>
         <g>
@@ -374,6 +362,17 @@ export function ChartPanel({
           rotateDrag={rotateDragB}
         />
       </svg>
+      {/* "1 NM" scale-bar legend: tick width is the true on-screen pixel
+          length of 1 nautical mile for the current container size and the
+          fixed CHART_VIEW_BOX.width (20nm), so it stays accurate across
+          container sizes rather than being a hardcoded decorative width. */}
+      <div className="absolute bottom-2 left-2 flex items-center gap-1 font-mono text-[13px] font-semibold text-muted-foreground">
+        <span
+          className="h-px bg-border"
+          style={{ width: containerSize.width / CHART_VIEW_BOX.width }}
+        />
+        <span>1 NM</span>
+      </div>
     </div>
   );
 }
