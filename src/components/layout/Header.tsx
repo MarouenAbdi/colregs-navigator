@@ -20,7 +20,7 @@ const NAV_LINKS = [
 export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between px-6">
+      <div className="flex h-14 items-center justify-between px-6">
         <a href="#top" className="flex items-center gap-[11px] text-foreground">
           <svg
             width="26"
