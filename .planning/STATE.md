@@ -68,7 +68,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+- Embed gallery on home page instead of separate route (`.planning/todos/pending/2026-07-18-embed-gallery-on-home-page-instead-of-separate-route.md`)
 
 ### Blockers/Concerns
 
