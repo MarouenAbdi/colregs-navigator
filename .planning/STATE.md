@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI Redesign (shadcn)
-status: executing
-stopped_at: Phase 7 complete, ready to ship PR
-last_updated: "2026-07-18T19:15:00.000Z"
-last_activity: 2026-07-18 -- Quick task 260718-qgs completed (Header design-fidelity + convention fixes)
+status: "Phase 07 shipped — PR #8"
+stopped_at: Phase 7 complete (both plans, code review, Header quick-fix all done); next step is opening the PR for frontend-implementation/phase-7-hero → main
+last_updated: "2026-07-18T18:56:12.818Z"
+last_activity: 2026-07-18
 progress:
   total_phases: 4
   completed_phases: 2
@@ -27,8 +27,8 @@ See: .planning/PROJECT.md (updated 2026-07-18)
 
 Phase: 07 (hero) — COMPLETE, not yet shipped
 Plan: 2 of 2 complete; code review passed with fixes; Header.tsx corrected via quick task 260718-qgs
-Status: Ready to open PR for frontend-implementation/phase-7-hero → main
-Last activity: 2026-07-18 -- Quick task 260718-qgs completed (Header design-fidelity + convention fixes)
+Status: Phase 07 shipped — PR #8
+Last activity: 2026-07-18
 
 Progress: [█████░░░░░] 50% (v1.1 milestone: 2/4 phases complete — Scaffolding, Hero; v1.0's 19 plans/5 phases complete and archived)
 
