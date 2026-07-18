@@ -174,7 +174,7 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
       <header className="mb-8 flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-col gap-2">
-            <span className="font-mono text-[13px] font-semibold tracking-wide text-muted-foreground uppercase">
+            <span className="font-mono text-[13px] font-semibold tracking-wide text-primary uppercase">
               Interactive sandbox · night-display mode
             </span>
             <h1 className="text-2xl leading-[1.25] font-semibold text-foreground">

@@ -73,23 +73,25 @@ function RoleBadge({
 export function VerdictBanner({ classification, isDegenerate }: VerdictBannerProps) {
   return (
     <Card>
-      <CardContent className="flex flex-col gap-3">
-        {!isDegenerate ? (
-          <Badge className="h-auto w-fit bg-rule-accent px-2 py-0.5 text-[13px] text-white">
-            {bannerRuleBadge(classification)}
-          </Badge>
-        ) : null}
+      <CardContent className="flex flex-col items-start justify-between gap-4 min-[640px]:flex-row min-[640px]:items-center">
+        <div className="flex flex-col gap-3">
+          {!isDegenerate ? (
+            <Badge className="h-auto w-fit bg-rule-accent px-2 py-0.5 text-[13px] text-white">
+              {bannerRuleBadge(classification)}
+            </Badge>
+          ) : null}
 
-        <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-semibold leading-[1.25] text-foreground">
-            {isDegenerate ? DEGENERATE_TITLE : ENCOUNTER_TYPE_TITLE[classification.encounterType]}
-          </h2>
-          <p className="text-base font-semibold text-muted-foreground">
-            {isDegenerate ? DEGENERATE_DESCRIPTION : verdictBannerDescription(classification)}
-          </p>
+          <div className="flex flex-col gap-1">
+            <h2 className="text-2xl font-semibold leading-[1.25] text-foreground">
+              {isDegenerate ? DEGENERATE_TITLE : ENCOUNTER_TYPE_TITLE[classification.encounterType]}
+            </h2>
+            <p className="text-base font-semibold text-muted-foreground">
+              {isDegenerate ? DEGENERATE_DESCRIPTION : verdictBannerDescription(classification)}
+            </p>
+          </div>
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex shrink-0 gap-4">
           {(["vesselA", "vesselB"] as const).map((vesselLabel) => (
             <RoleBadge key={vesselLabel} vesselLabel={vesselLabel} classification={classification} />
           ))}
