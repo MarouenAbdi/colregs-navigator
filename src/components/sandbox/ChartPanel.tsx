@@ -368,6 +368,22 @@ export function ChartPanel({
   const bearingStroke = bearingDoubt ? DOUBT_STROKE : BEARING_LINE_DEFAULT_STROKE;
   const bearingDashArray = bearingDoubt ? "4 3" : undefined;
 
+  // Range tooltip: a chip centered on the bearing line's midpoint showing
+  // current distance in NM -- matches the design source's bearingLine()
+  // label chip (HeroPreviewCard's static preview already carries this same
+  // chip; ChartPanel's live version was missing it entirely). Chart-space
+  // position units are already NM (CHART_VIEW_BOX is a 20nm x 20nm box), so
+  // this is a plain Euclidean distance, same technique as
+  // instrument-readouts.ts's own rangeNm derivation.
+  const rangeNm = Math.hypot(
+    vesselB.position.x - vesselA.position.x,
+    vesselB.position.y - vesselA.position.y,
+  );
+  const bearingMidpoint = {
+    screenX: (screenA.screenX + screenB.screenX) / 2,
+    screenY: (screenA.screenY + screenB.screenY) / 2,
+  };
+
   // Overtaking-boundary cone doubt resolution: exactly one vessel's cone
   // (per resolveDoubtGeometry, Pitfall 3) swaps to dashed amber when the
   // overtaking/crossing-boundary doubt is active; the other stays static.
@@ -478,6 +494,22 @@ export function ChartPanel({
             strokeWidth={2}
             strokeDasharray={bearingDashArray}
           />
+        </g>
+        {/* Range tooltip: non-interactive chip at the bearing line's
+            midpoint, matching the design source's bearingLine() label
+            (`pointerEvents: none` there) -- must never intercept a drag
+            gesture aimed at the chart underneath it. */}
+        <g transform={`translate(${bearingMidpoint.screenX},${bearingMidpoint.screenY})`} pointerEvents="none">
+          <rect x={-34} y={-11} width={68} height={22} rx={6} className="fill-card stroke-border" />
+          <text
+            x={0}
+            y={4}
+            textAnchor="middle"
+            fill="#D4D4D8"
+            className="font-mono text-xs"
+          >
+            {`${rangeNm.toFixed(2)} NM`}
+          </text>
         </g>
         <VesselGroup
           label="vesselA"
