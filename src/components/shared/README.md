@@ -1,11 +1,14 @@
 # src/components/shared
 
-Structural placeholder created by Phase 6 (Scaffolding), satisfying SCAF-06's
-"shared cross-feature location" requirement.
+Created empty by Phase 6 (Scaffolding), satisfying SCAF-06's "shared
+cross-feature location" requirement. Per 06-RESEARCH.md's "don't
+pre-abstract" guidance, components only move here once a real second
+consumer appears -- nothing is placed speculatively.
 
-This directory is where cross-feature components, types, and design-token
-re-exports will live once Hero, Sandbox, and Gallery (Phases 7-9) reveal
-actual duplication across features. It is intentionally empty of components
-at Phase 6 -- per 06-RESEARCH.md's "don't pre-abstract" guidance, nothing is
-moved here speculatively; content is added only when a real second consumer
-of a component/type/token appears in a later phase.
+## Components
+
+- **`SectionGridBackground`** (Phase 7) -- the decorative repeating-grid
+  overlay (with an optional teal radial glow) behind marketing sections.
+  Used by Hero (07-01); Gallery (Phase 9) is the design's other confirmed
+  consumer of the same pattern, which is why this was extracted here
+  rather than left inline in `hero/`.

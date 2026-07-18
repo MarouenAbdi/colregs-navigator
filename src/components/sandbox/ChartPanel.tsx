@@ -35,7 +35,7 @@ import type { VesselLabel } from "../../domain/colregs/types.js";
 const CHART_VIEW_BOX: ChartViewBox = { minX: -10, minY: -10, width: 20, height: 20 };
 
 const GRID_STEP_CHART_UNITS = 2;
-const GRID_STROKE = "#E2E8F0"; // slate-200
+const GRID_STROKE = "#27272A"; // border token -- dark-theme grid line (was slate-200, a light-canvas color)
 
 const HULL_FILL_CLASS: Record<VesselRole, string> = {
   "give-way": "fill-red-500",
@@ -76,7 +76,7 @@ const ROLE_BADGE_TEXT: Record<VesselRole, string> = {
 
 const BEARING_LINE_DEFAULT_STROKE = "#475569"; // slate-600
 const DOUBT_STROKE = "#F59E0B"; // amber-500
-const CONE_DEFAULT_STROKE = "#CBD5E1"; // slate-300
+const CONE_DEFAULT_STROKE = "#3F3F46"; // zinc-700 -- dark-theme reference cone (was slate-300, a light-canvas color)
 
 const CONE_RADIUS_PX = 60;
 // Rule 13(b)'s "abaft the beam" cone, expressed as a relative-bearing
@@ -320,7 +320,7 @@ export function ChartPanel({
       <svg
         width={containerSize.width}
         height={containerSize.height}
-        className="bg-white border border-slate-200 rounded"
+        className="bg-[#0B0B0E] border border-border rounded"
       >
         <g>{buildGridLines(containerSize)}</g>
         <g>

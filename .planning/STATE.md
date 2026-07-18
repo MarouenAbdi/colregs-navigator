@@ -2,12 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI Redesign (shadcn)
-status: ready_to_plan
-stopped_at: Phase 06 complete (2/2) — ready to discuss Phase 7
-last_updated: 2026-07-18T12:15:00.462Z
-last_activity: 2026-07-18 -- Phase 06 execution started
+status: "Phase 07 shipped — PR #8"
+stopped_at: Phase 7 complete (both plans, code review, Header quick-fix all done); next step is opening the PR for frontend-implementation/phase-7-hero → main
+last_updated: "2026-07-18T18:56:12.818Z"
+last_activity: 2026-07-18
 progress:
-  percent: 0
+  total_phases: 4
+  completed_phases: 2
+  total_plans: 4
+  completed_plans: 4
+  percent: 50
 ---
 
 # Project State
@@ -17,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-18)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 7 — hero
+**Current focus:** Phase 07 — hero
 
 ## Current Position
 
-Phase: 7
-Plan: Not started
-Status: Ready to plan
+Phase: 07 (hero) — COMPLETE, not yet shipped
+Plan: 2 of 2 complete; code review passed with fixes; Header.tsx corrected via quick task 260718-qgs
+Status: Phase 07 shipped — PR #8
 Last activity: 2026-07-18
 
-Progress: [░░░░░░░░░░] 0% (v1.1 milestone; v1.0's 19 plans/5 phases complete and archived)
+Progress: [█████░░░░░] 50% (v1.1 milestone: 2/4 phases complete — Scaffolding, Hero; v1.0's 19 plans/5 phases complete and archived)
 
 ## Performance Metrics
 
@@ -66,6 +70,13 @@ Recent decisions affecting current work:
 - `/gallery` route removed in favor of `/#gallery` embedded section, with a permanent redirect.
 - Dark-mode only, no light theme/toggle — matches the source design file's single palette.
 - shadcn CLI must be run with `--base radix` (not the new Base UI default) per research/STACK.md.
+- Header.tsx (built Phase 6) was retroactively corrected against the actual Claude Design MCP source file (not just the reference screenshot) and Phase 7's conventions — see quick task 260718-qgs. Ground-truth design values (height, spacing, translucent backdrop-blur) can differ meaningfully from a static screenshot; prefer pulling the live design source when precision matters.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260718-qgs | Compare Header component against Claude Design source and fix styling deviations plus apply Phase 7 code conventions | 2026-07-18 | 1886ef5 | [260718-qgs-compare-header-component-against-claude-](./quick/260718-qgs-compare-header-component-against-claude-/) |
 
 ### Pending Todos
 
@@ -87,6 +98,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-18T00:00:00.000Z
-Stopped at: ROADMAP.md, STATE.md, and REQUIREMENTS.md traceability written for v1.1 (Phases 6-9)
-Resume file: None
+Last session: 2026-07-18T19:15:00.000Z
+Stopped at: Phase 7 complete (both plans, code review, Header quick-fix all done); next step is opening the PR for frontend-implementation/phase-7-hero → main
+Resume file: none — ready to ship
