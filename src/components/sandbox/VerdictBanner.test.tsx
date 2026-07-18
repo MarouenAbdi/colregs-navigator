@@ -43,7 +43,7 @@ const mutualClassification = classifyOrThrow(
 );
 
 describe("VerdictBanner", () => {
-  it("renders the give-way case: standalone title, description, Rule badge, GW/SO role badges", () => {
+  it("renders the give-way case: standalone title, description, Rule badge, GIVE WAY/STAND ON role badges", () => {
     render(<VerdictBanner classification={crossingClassification} isDegenerate={false} />);
     expect(screen.getByText("Crossing")).toBeInTheDocument();
     expect(
@@ -52,11 +52,11 @@ describe("VerdictBanner", () => {
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("Rule 15")).toBeInTheDocument();
-    expect(screen.getByText("GW")).toBeInTheDocument();
-    expect(screen.getByText("SO")).toBeInTheDocument();
+    expect(screen.getByText("GIVE WAY")).toBeInTheDocument();
+    expect(screen.getByText("STAND ON")).toBeInTheDocument();
   });
 
-  it("renders the mutual case: MUTUAL badges on both vessels, never GW/SO, Rule 7 badge", () => {
+  it("renders the mutual case: MUTUAL badges on both vessels, never GIVE WAY/STAND ON, Rule 7 badge", () => {
     render(<VerdictBanner classification={mutualClassification} isDegenerate={false} />);
     expect(screen.getByText("Head-on")).toBeInTheDocument();
     expect(
@@ -66,8 +66,8 @@ describe("VerdictBanner", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Rule 7")).toBeInTheDocument();
     expect(screen.getAllByText("MUTUAL")).toHaveLength(2);
-    expect(screen.queryByText("GW")).not.toBeInTheDocument();
-    expect(screen.queryByText("SO")).not.toBeInTheDocument();
+    expect(screen.queryByText("GIVE WAY")).not.toBeInTheDocument();
+    expect(screen.queryByText("STAND ON")).not.toBeInTheDocument();
   });
 
   it("renders the degenerate case: title/description replaced, rule badge suppressed, role badges persist", () => {
@@ -79,7 +79,7 @@ describe("VerdictBanner", () => {
       ),
     ).toBeInTheDocument();
     expect(screen.queryByText("Rule 15")).not.toBeInTheDocument();
-    expect(screen.getByText("GW")).toBeInTheDocument();
-    expect(screen.getByText("SO")).toBeInTheDocument();
+    expect(screen.getByText("GIVE WAY")).toBeInTheDocument();
+    expect(screen.getByText("STAND ON")).toBeInTheDocument();
   });
 });

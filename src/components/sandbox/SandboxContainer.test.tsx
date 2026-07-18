@@ -341,8 +341,8 @@ describe("SandboxContainer", () => {
     expect(verdictCard).not.toBeNull();
 
     // The "Overtaking" chip fixture documents vesselA as the give-way
-    // vessel (chip-scenarios.ts) -- its role badge must read "GW".
+    // vessel (chip-scenarios.ts) -- its role badge must read "GIVE WAY".
     const vesselABadgeContainer = within(verdictCard).getByText("Vessel A").parentElement;
-    expect(vesselABadgeContainer?.textContent).toContain("GW");
+    expect(vesselABadgeContainer?.textContent).toContain("GIVE WAY");
   });
 });

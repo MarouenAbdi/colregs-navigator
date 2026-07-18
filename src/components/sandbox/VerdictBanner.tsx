@@ -7,7 +7,7 @@
  */
 
 import type { VerdictBannerProps } from "./types.js";
-import { getVesselRole, ROLE_BADGE_TEXT, ROLE_BADGE_CLASSNAME } from "./vessel-role.js";
+import { getVesselRole, ROLE_BADGE_CLASSNAME, type VesselRole } from "./vessel-role.js";
 import { classifyingEntryIndex, ruleNumber } from "./reasoning-trail-tag.js";
 import type { ClassificationResult, VesselLabel } from "../../domain/colregs/types.js";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,6 +24,17 @@ const ENCOUNTER_TYPE_TITLE: Record<string, string> = {
 const VESSEL_LABEL_TEXT: Record<VesselLabel, string> = {
   vesselA: "Vessel A",
   vesselB: "Vessel B",
+};
+
+// Full-word status text is unique to this card's larger role box (per the
+// design reference) -- ChartPanel's hull label and ControlPanel's compact
+// header pill both need the short "GW"/"SO"/ROLE_BADGE_TEXT abbreviation
+// instead, so this is intentionally a local map, not folded into the
+// shared vessel-role.ts maps.
+const ROLE_STATUS_TEXT: Record<VesselRole, string> = {
+  "give-way": "GIVE WAY",
+  "stand-on": "STAND ON",
+  mutual: "MUTUAL",
 };
 
 const DEGENERATE_TITLE = "Unable to classify";
@@ -57,41 +68,40 @@ function RoleBadge({
 }) {
   const role = getVesselRole(vesselLabel, classification);
   return (
-    <div className="flex flex-col items-start gap-0.5">
-      <span className="text-[13px] font-normal text-muted-foreground">
-        {VESSEL_LABEL_TEXT[vesselLabel]}
-      </span>
-      <span
-        className={`w-fit rounded-full border px-2 py-0.5 font-mono text-[13px] font-semibold uppercase ${ROLE_BADGE_CLASSNAME[role]}`}
-      >
-        {ROLE_BADGE_TEXT[role]}
-      </span>
+    <div
+      className={`flex flex-col items-center gap-0.5 rounded-lg border px-4 py-2 ${ROLE_BADGE_CLASSNAME[role]}`}
+    >
+      <span className="text-xs font-normal">{VESSEL_LABEL_TEXT[vesselLabel]}</span>
+      <span className="font-mono text-sm font-bold uppercase">{ROLE_STATUS_TEXT[role]}</span>
     </div>
   );
 }
 
 export function VerdictBanner({ classification, isDegenerate }: VerdictBannerProps) {
   return (
-    <Card>
-      <CardContent className="flex flex-col items-start justify-between gap-4 min-[640px]:flex-row min-[640px]:items-center">
-        <div className="flex flex-col gap-3">
-          {!isDegenerate ? (
-            <Badge className="h-auto w-fit bg-rule-accent px-2 py-0.5 text-[13px] text-white">
-              {bannerRuleBadge(classification)}
-            </Badge>
-          ) : null}
-
-          <div className="flex flex-col gap-1">
+    <Card className="relative overflow-hidden">
+      <span
+        aria-hidden="true"
+        className="absolute inset-y-3 left-0 w-1 rounded-full bg-rule-accent"
+      />
+      <CardContent className="flex flex-col items-start justify-between gap-4 pl-4 min-[640px]:flex-row min-[640px]:items-center">
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-3">
+            {!isDegenerate ? (
+              <Badge className="h-auto w-fit bg-rule-accent px-2 py-0.5 font-mono text-[13px] text-background">
+                {bannerRuleBadge(classification)}
+              </Badge>
+            ) : null}
             <h2 className="text-2xl font-semibold leading-[1.25] text-foreground">
               {isDegenerate ? DEGENERATE_TITLE : ENCOUNTER_TYPE_TITLE[classification.encounterType]}
             </h2>
-            <p className="text-base font-semibold text-muted-foreground">
-              {isDegenerate ? DEGENERATE_DESCRIPTION : verdictBannerDescription(classification)}
-            </p>
           </div>
+          <p className="text-base font-normal text-muted-foreground">
+            {isDegenerate ? DEGENERATE_DESCRIPTION : verdictBannerDescription(classification)}
+          </p>
         </div>
 
-        <div className="flex shrink-0 gap-4">
+        <div className="flex shrink-0 gap-3">
           {(["vesselA", "vesselB"] as const).map((vesselLabel) => (
             <RoleBadge key={vesselLabel} vesselLabel={vesselLabel} classification={classification} />
           ))}
