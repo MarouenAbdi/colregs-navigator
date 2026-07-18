@@ -72,10 +72,15 @@ export function bearingSectorPath(bearingDegrees: number): string {
     x: HERO_CHART_CENTER.screenX + HERO_OUTER_RING_RADIUS_PX * Math.sin((bearingDegrees * Math.PI) / 180),
     y: HERO_CHART_CENTER.screenY - HERO_OUTER_RING_RADIUS_PX * Math.cos((bearingDegrees * Math.PI) / 180),
   };
+  // Sweep is clockwise from north (0deg) to bearingDegrees, so the swept
+  // angle is bearingDegrees itself (assumed normalized to [0, 360)) --
+  // matching ChartPanel.tsx's wedgePath(), which computes the same flag
+  // from its own start/end bearing difference rather than hardcoding it.
+  const largeArcFlag = bearingDegrees > 180 ? 1 : 0;
   return [
     `M ${HERO_CHART_CENTER.screenX} ${HERO_CHART_CENTER.screenY}`,
     `L ${northEdge.x} ${northEdge.y}`,
-    `A ${HERO_OUTER_RING_RADIUS_PX} ${HERO_OUTER_RING_RADIUS_PX} 0 0 1 ${bearingEdge.x} ${bearingEdge.y}`,
+    `A ${HERO_OUTER_RING_RADIUS_PX} ${HERO_OUTER_RING_RADIUS_PX} 0 ${largeArcFlag} 1 ${bearingEdge.x} ${bearingEdge.y}`,
     "Z",
   ].join(" ");
 }

@@ -108,7 +108,14 @@ export function HeroPreviewCard() {
     heroPreviewVesselB.position.y - heroPreviewVesselA.position.y,
   );
 
-  const giveWayLabel = VESSEL_LABEL_TEXT[classification.giveWay as VesselLabel];
+  if (classification.giveWay === null) {
+    // Rule 14 head-on situations have no single give-way vessel (both
+    // alter course), which this fixed crossing-encounter fixture never
+    // produces -- an explicit throw here (matching this function's other
+    // fixture-invariant checks above) instead of casting the null away.
+    throw new Error("Hero preview fixture classified as a mutual/no-giveWay encounter -- fixture is broken");
+  }
+  const giveWayLabel = VESSEL_LABEL_TEXT[classification.giveWay];
   const verdictText = `${ENCOUNTER_TYPE_TITLE[classification.encounterType]} — ${giveWayLabel} gives way`;
 
   const vesselAPillText = classification.giveWay === "vesselA" ? "GW" : "SO";
