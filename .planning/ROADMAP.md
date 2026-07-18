@@ -30,55 +30,73 @@ Branch names follow this project's standard `phase_branch_template` (`gsd/phase-
 ## Phase Details
 
 ### Phase 6: Scaffolding
+
 **Goal**: shadcn/ui is installed as the app's component-primitive layer, a single dark-only design-token theme is defined, Geist fonts load app-wide, and a Header/Main/Footer page shell wraps every route.
 **Depends on**: Nothing (first phase of v1.1, builds on the completed v1.0 app)
 **Requirements**: SCAF-01, SCAF-02, SCAF-03, SCAF-04, SCAF-05, SCAF-06
 **Success Criteria** (what must be TRUE):
+
   1. The app renders in dark theme regardless of the OS/browser color-scheme preference, with no unused light-theme/toggle machinery left half-wired (manual browser check with color-scheme set to light) — SCAF-02
   2. A sticky Header (logo, "Sandbox"/"Gallery" in-page anchor links, external "Source" link) renders above every page, collapsing nav links at the 640px breakpoint — SCAF-04
   3. A Footer matching the design's content and layout renders at the bottom of the page shell on every page — SCAF-05
   4. Geist and Geist Mono fonts are visibly applied app-wide (not the browser default fallback) — SCAF-03
   5. shadcn/ui is installed and configured (CLI init with `--base radix`, `@/*` path alias, `components/ui/`) as the component-primitive layer, and shared cross-feature components/types/design tokens live in one shared location (`src/components/shared/`) that later phases import from rather than duplicating — SCAF-01, SCAF-06
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 7: Hero
+
 **Goal**: A net-new Hero section (Direction A) renders above the Sandbox, giving visitors an immediate, honest preview of the product's core value before they reach the interactive tool.
 **Depends on**: Phase 6 (consumes its tokens, primitives, and page shell)
 **Requirements**: HERO-01, HERO-02, HERO-03, HERO-04
 **Success Criteria** (what must be TRUE):
+
   1. A Hero section (headline, supporting copy, "Open the sandbox" and "Classic encounters" CTAs) renders above the Sandbox on the home page, matching the design exactly — HERO-01
   2. The Hero's illustrative live-classification preview card (mini chart, rule badge, range/bearing/CPA readouts) renders as static/canned content, visibly not wired to the interactive Sandbox's live state — HERO-02
   3. Clicking each Hero CTA scrolls to `#sandbox` or `#gallery` respectively within the same page — HERO-03
   4. The Hero layout is responsive per the design's breakpoints (single-column below 900px, scaled headline below 640px) — HERO-04
+
 **Plans**: 2 plans
 Plans:
+**Wave 1**
+
 - [ ] 07-01-PLAN.md — Build Hero.tsx (headline/copy/CTAs + static SVG preview card), verified fixture, and page/CSS wiring
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 07-02-PLAN.md — Manual browser checkpoint: visual fidelity, static preview card, responsive breakpoints, CTA scroll
+
 **UI hint**: yes
 
 ### Phase 8: Sandbox
+
 **Goal**: The existing interactive chart, controls, and reasoning trail are restyled to match the design exactly, with zero regression to the underlying domain wiring or interaction model.
 **Depends on**: Phase 6 (dark tokens needed to re-theme `ChartPanel`'s hardcoded light-mode colors; `ui/*` primitives for Button/Card/Input/Select/Badge)
 **Requirements**: SBOX-01, SBOX-02, SBOX-03, SBOX-04, SBOX-05
 **Success Criteria** (what must be TRUE):
+
   1. The interactive chart matches the dark theme exactly, and dragging to reposition and dragging to rotate heading both still work correctly when manually tested in a real browser tab — not just via a green `npm test` run, since jsdom cannot detect a hit-testing regression on the hull/rotate-handle shapes — SBOX-01
   2. Vessel type/speed controls and the verdict banner are restyled using shadcn/ui form primitives (Select, Slider, Card, Badge) while producing identical classification results to before the restyle — SBOX-02
   3. The reasoning trail panel displays the same rule citations and geometric facts in the same order as before, restyled with numbered steps, colored tags/dots, and a connecting line — SBOX-03
   4. All existing Vitest/RTL tests exercising drag and control interactions pass after being updated for the shadcn/Radix primitive swap (e.g. native `<select>` → `Select`) — SBOX-04
   5. The Sandbox layout is responsive per the design's breakpoints (stacked single-column below 900px, stacked controls below 640px) — SBOX-05
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 9: Gallery
+
 **Goal**: The curated gallery of preset encounters is embedded as a section on the home page below the Sandbox, and the standalone `/gallery` route is removed in favor of a working `/#gallery` redirect.
 **Depends on**: Phase 6 (`ui/*` Card primitive, Header nav linking directly at `/#gallery`); independent of Phase 7/8
 **Requirements**: GAL-01, GAL-02, GAL-03, GAL-04
 **Success Criteria** (what must be TRUE):
+
   1. The curated gallery of preset encounters renders as a card grid embedded on the home page below the Sandbox, responsive at 3 → 2 → 1 columns matching the design exactly — GAL-01
   2. Clicking a gallery card loads that preset into a full scenario view (existing load-and-scroll behavior preserved, same `/s/[shareId]` navigation as before) — GAL-02
   3. Visiting the old `/gallery` URL issues a permanent redirect to `/#gallery` and lands the user scrolled to the Gallery section (not the top of the page), verified manually both from a fresh browser tab/bookmark navigation and via an in-app `<Link>` click — these are independent code paths that can fail separately — GAL-03
   4. The Gallery section is present in the initial server-rendered HTML (not client-fetched), so the `#gallery` anchor target exists at first paint and the redirect's scroll-to-anchor behavior works reliably — GAL-04
+
 **Plans**: TBD
 **UI hint**: yes
 
