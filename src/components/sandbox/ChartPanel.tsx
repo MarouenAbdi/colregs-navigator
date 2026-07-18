@@ -244,7 +244,7 @@ function VesselGroup({ label, vessel, screen, role, hullDrag, rotateDrag }: Vess
         <polygon
           data-testid={`hull-hit-${label}`}
           points={HULL_POINTS}
-          className={ROLE_HULL_FILL_CLASS[role]}
+          className={`cursor-grab active:cursor-grabbing ${ROLE_HULL_FILL_CLASS[role]}`}
           stroke={HULL_STROKE}
           strokeWidth={HULL_STROKE_WIDTH}
           onPointerDown={hullDrag.onPointerDown}
@@ -263,7 +263,7 @@ function VesselGroup({ label, vessel, screen, role, hullDrag, rotateDrag }: Vess
           cx={0}
           cy={ROTATE_HANDLE_CY}
           r={ROTATE_HANDLE_VISIBLE_R}
-          className="stroke-rule-accent"
+          className="cursor-grab stroke-rule-accent active:cursor-grabbing"
           strokeWidth={2}
           fill="white"
           onPointerDown={rotateDrag.onPointerDown}
