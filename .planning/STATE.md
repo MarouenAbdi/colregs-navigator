@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI Redesign (shadcn)
 status: executing
-stopped_at: Phase 7 UI-SPEC approved
-last_updated: "2026-07-18T16:04:34.311Z"
-last_activity: 2026-07-18 -- Phase 07 execution started
+stopped_at: Phase 7 complete, ready to ship PR
+last_updated: "2026-07-18T19:15:00.000Z"
+last_activity: 2026-07-18 -- Quick task 260718-qgs completed (Header design-fidelity + convention fixes)
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 2
-  percent: 25
+  completed_plans: 4
+  percent: 50
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-07-18)
 
 ## Current Position
 
-Phase: 07 (hero) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 07
-Last activity: 2026-07-18 -- Phase 07 execution started
+Phase: 07 (hero) — COMPLETE, not yet shipped
+Plan: 2 of 2 complete; code review passed with fixes; Header.tsx corrected via quick task 260718-qgs
+Status: Ready to open PR for frontend-implementation/phase-7-hero → main
+Last activity: 2026-07-18 -- Quick task 260718-qgs completed (Header design-fidelity + convention fixes)
 
-Progress: [░░░░░░░░░░] 0% (v1.1 milestone; v1.0's 19 plans/5 phases complete and archived)
+Progress: [█████░░░░░] 50% (v1.1 milestone: 2/4 phases complete — Scaffolding, Hero; v1.0's 19 plans/5 phases complete and archived)
 
 ## Performance Metrics
 
@@ -70,6 +70,13 @@ Recent decisions affecting current work:
 - `/gallery` route removed in favor of `/#gallery` embedded section, with a permanent redirect.
 - Dark-mode only, no light theme/toggle — matches the source design file's single palette.
 - shadcn CLI must be run with `--base radix` (not the new Base UI default) per research/STACK.md.
+- Header.tsx (built Phase 6) was retroactively corrected against the actual Claude Design MCP source file (not just the reference screenshot) and Phase 7's conventions — see quick task 260718-qgs. Ground-truth design values (height, spacing, translucent backdrop-blur) can differ meaningfully from a static screenshot; prefer pulling the live design source when precision matters.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260718-qgs | Compare Header component against Claude Design source and fix styling deviations plus apply Phase 7 code conventions | 2026-07-18 | 1886ef5 | [260718-qgs-compare-header-component-against-claude-](./quick/260718-qgs-compare-header-component-against-claude-/) |
 
 ### Pending Todos
 
@@ -91,6 +98,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-18T13:31:20.846Z
-Stopped at: Phase 7 UI-SPEC approved
-Resume file: .planning/phases/07-hero/07-UI-SPEC.md
+Last session: 2026-07-18T19:15:00.000Z
+Stopped at: Phase 7 complete (both plans, code review, Header quick-fix all done); next step is opening the PR for frontend-implementation/phase-7-hero → main
+Resume file: none — ready to ship
