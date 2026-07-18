@@ -23,6 +23,7 @@ import { heroPreviewVesselA, heroPreviewVesselB } from "./hero-preview-fixture.j
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { SectionGridBackground } from "@/components/shared/SectionGridBackground";
 import { ArrowRight, CircleCheck } from "lucide-react";
 
 // UI-SPEC.md "Preview Card Dimensions": 8:5 (not square) aspect ratio,
@@ -136,8 +137,9 @@ export function Hero() {
   };
 
   return (
-    <section className="relative overflow-hidden">
-      <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-[30px] px-5 pt-8 pb-11 min-[900px]:grid-cols-[1.05fr_0.95fr] min-[900px]:items-center min-[900px]:gap-[52px] min-[900px]:px-6 min-[900px]:pt-10 min-[900px]:pb-[68px]">
+    <section className="relative overflow-hidden bg-background">
+      <SectionGridBackground opacity={0.22} glow />
+      <div className="relative z-[1] mx-auto grid max-w-[1200px] grid-cols-1 gap-[30px] px-5 pt-8 pb-11 min-[900px]:grid-cols-[1.05fr_0.95fr] min-[900px]:items-center min-[900px]:gap-[52px] min-[900px]:px-6 min-[900px]:pt-10 min-[900px]:pb-[68px]">
         <div>
           <Badge variant="outline" className="mb-6 h-auto w-fit gap-2 px-[11px] py-1 font-mono text-[11px] font-semibold text-accent">
             <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
