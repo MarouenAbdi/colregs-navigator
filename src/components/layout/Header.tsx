@@ -23,8 +23,8 @@ const NAV_LINKS = [
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+      <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between px-6">
         <div className="flex items-center gap-2">
           <Compass className="h-5 w-5 text-accent" aria-hidden="true" />
           <span className="text-base">
@@ -36,7 +36,7 @@ export function Header() {
           </span>
         </div>
         <div className="flex items-center gap-6">
-          <nav className="hidden items-center gap-2 text-sm sm:flex">
+          <nav className="hidden items-center gap-1.5 text-sm sm:flex">
             {NAV_LINKS.map(({ href, label }) => (
               <a
                 key={href}
