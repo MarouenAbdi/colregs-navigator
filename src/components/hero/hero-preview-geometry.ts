@@ -1,0 +1,88 @@
+/**
+ * Pure, framework-free geometry for the Hero preview card's illustrative
+ * SVG chart. Every constant here is derived from the design source
+ * ("COLREGS Navigator (shadcn).dc.html", claude.ai/design project
+ * c265c047) to reproduce its exact layout, not eyeballed from the PNG --
+ * see each constant's comment for the derivation.
+ */
+import type { ChartViewBox, ContainerSize } from "../../domain/geometry/screen-convert.js";
+
+// UI-SPEC.md "Preview Card Dimensions": 8:5 (not square) aspect ratio,
+// framed to comfortably contain both fixture vessels + the range rings.
+export const HERO_CONTAINER_SIZE: ContainerSize = { width: 320, height: 200 };
+
+// The design hardcodes this card's two vessels at pixel positions
+// hA=(150,210)/hB=(360,95) on its 480x300 canvas -- its own
+// PX=80-pixels-per-NM sandbox scale applied to the same real
+// bearing/range this fixture reproduces (061deg/2.99nm). This viewBox is
+// solved (not eyeballed) so heroPreviewVesselA/B's *real* NM coordinates
+// land on those exact screen pixels, scaled to this card's 320px width:
+// minX=-1.875, minY=-1.125 puts A at (100,140) and B at (~239.5,~62.7),
+// matching the mock's (150,210)/(360,95) scaled by 320/480 to sub-pixel
+// accuracy. Width/height (6 x 3.75) preserve the 8:5 aspect ratio and a
+// uniform 320/6 = 200/3.75 = 53.33px-per-NM scale (no bearing distortion).
+export const HERO_VIEW_BOX: ChartViewBox = { minX: -1.875, minY: -1.125, width: 6, height: 3.75 };
+
+// Range rings, bearing sector, and north reference line are centered on
+// this fixed chart-canvas center (matches the mock's rings, which are
+// centered on its own canvas center, not on either vessel).
+export const HERO_CHART_CENTER = {
+  screenX: HERO_CONTAINER_SIZE.width / 2,
+  screenY: HERO_CONTAINER_SIZE.height / 2,
+};
+
+// The mock's two range rings are hardcoded at r=115/r=60 on its 480px-wide
+// canvas -- reproduced as the same fraction of this card's width.
+export const HERO_OUTER_RING_RADIUS_PX = HERO_CONTAINER_SIZE.width * (115 / 480);
+export const HERO_INNER_RING_RADIUS_PX = HERO_CONTAINER_SIZE.width * (60 / 480);
+
+// Domain-locked colors (UI-SPEC.md Color table): the fixture's verdict is
+// fixed at authoring time, so hull/pill *colors* may stay hardcoded, but
+// "GW"/"SO" *text* must still be derived from the classification result.
+export const VESSEL_A_HULL_COLOR = "#EF4444"; // red-500, give-way
+export const VESSEL_B_HULL_COLOR = "#22C55E"; // green-500, stand-on
+export const CONNECTOR_STROKE = "#475569"; // slate-600
+
+// The design's renderVessel() draws the hull as a 4-point path with a
+// concave notch cut into the stern (M0,-18s L11s,14s L0,7s L-11s,14s Z,
+// s=1.15 for this card), not a plain flat-back triangle -- scaled here to
+// this card's canvas (s * 320/480 = 0.767).
+export const HULL_PATH = "M 0,-13.8 L 8.43,10.73 L 0,5.37 L -8.43,10.73 Z";
+export const HULL_STROKE = "rgba(250,250,250,0.85)";
+export const HULL_STROKE_WIDTH = 1.15;
+
+const HEADING_VECTOR_LENGTH_PX = 70;
+
+export function headingVectorEndpoint(
+  screen: { screenX: number; screenY: number },
+  headingDegrees: number,
+): { x: number; y: number } {
+  const headingRadians = headingDegrees * (Math.PI / 180);
+  return {
+    x: screen.screenX + HEADING_VECTOR_LENGTH_PX * Math.sin(headingRadians),
+    y: screen.screenY - HEADING_VECTOR_LENGTH_PX * Math.cos(headingRadians),
+  };
+}
+
+// Bearing sector wedge: apex at the fixed chart-canvas center, one edge
+// running due north, the other along the real bearing to vesselB.
+export function bearingSectorPath(bearingDegrees: number): string {
+  const northEdge = { x: HERO_CHART_CENTER.screenX, y: HERO_CHART_CENTER.screenY - HERO_OUTER_RING_RADIUS_PX };
+  const bearingEdge = {
+    x: HERO_CHART_CENTER.screenX + HERO_OUTER_RING_RADIUS_PX * Math.sin((bearingDegrees * Math.PI) / 180),
+    y: HERO_CHART_CENTER.screenY - HERO_OUTER_RING_RADIUS_PX * Math.cos((bearingDegrees * Math.PI) / 180),
+  };
+  return [
+    `M ${HERO_CHART_CENTER.screenX} ${HERO_CHART_CENTER.screenY}`,
+    `L ${northEdge.x} ${northEdge.y}`,
+    `A ${HERO_OUTER_RING_RADIUS_PX} ${HERO_OUTER_RING_RADIUS_PX} 0 0 1 ${bearingEdge.x} ${bearingEdge.y}`,
+    "Z",
+  ].join(" ");
+}
+
+export function midpoint(
+  a: { screenX: number; screenY: number },
+  b: { screenX: number; screenY: number },
+): { x: number; y: number } {
+  return { x: (a.screenX + b.screenX) / 2, y: (a.screenY + b.screenY) / 2 };
+}
