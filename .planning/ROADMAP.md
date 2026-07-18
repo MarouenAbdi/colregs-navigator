@@ -51,7 +51,10 @@ Branch names follow this project's standard `phase_branch_template` (`gsd/phase-
   2. The Hero's illustrative live-classification preview card (mini chart, rule badge, range/bearing/CPA readouts) renders as static/canned content, visibly not wired to the interactive Sandbox's live state — HERO-02
   3. Clicking each Hero CTA scrolls to `#sandbox` or `#gallery` respectively within the same page — HERO-03
   4. The Hero layout is responsive per the design's breakpoints (single-column below 900px, scaled headline below 640px) — HERO-04
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 07-01-PLAN.md — Build Hero.tsx (headline/copy/CTAs + static SVG preview card), verified fixture, and page/CSS wiring
+- [ ] 07-02-PLAN.md — Manual browser checkpoint: visual fidelity, static preview card, responsive breakpoints, CTA scroll
 **UI hint**: yes
 
 ### Phase 8: Sandbox
