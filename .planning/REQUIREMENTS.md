@@ -26,10 +26,10 @@ This milestone is a presentation-layer re-implementation, not a new-feature mile
 ### Sandbox (restyle, same interaction model)
 
 - [ ] **SBOX-01**: The existing interactive chart (drag-to-reposition, drag-to-rotate heading) is restyled to the dark theme exactly per the design, with zero regression to existing hit-testing behavior (drag/rotate must still hit-test the real painted shape, verified manually in a browser, not just via jsdom tests)
-- [ ] **SBOX-02**: Vessel type/speed controls and the verdict banner are restyled using shadcn/ui form primitives (Select, Slider, Card, Badge) while preserving all existing classification behavior
+- [x] **SBOX-02**: Vessel type/speed controls and the verdict banner are restyled using shadcn/ui form primitives (Select, Slider, Card, Badge) while preserving all existing classification behavior
 - [ ] **SBOX-03**: The reasoning trail panel is restyled to match the design (numbered steps, colored tags/dots, connecting line) with no change to its underlying content/order
-- [ ] **SBOX-04**: Existing Vitest/RTL tests exercising drag and control interactions are updated for any shadcn/Radix primitive swap (e.g. native `<select>` → `Select`) and continue to pass
-- [ ] **SBOX-05**: Sandbox layout is responsive per the design's breakpoints (stacked single-column below 900px, stacked controls below 640px)
+- [x] **SBOX-04**: Existing Vitest/RTL tests exercising drag and control interactions are updated for any shadcn/Radix primitive swap (e.g. native `<select>` → `Select`) and continue to pass
+- [x] **SBOX-05**: Sandbox layout is responsive per the design's breakpoints (stacked single-column below 900px, stacked controls below 640px)
 
 ### Gallery
 
@@ -69,10 +69,10 @@ Populated by roadmap creation — all 19 requirements mapped to their user-speci
 | HERO-03 | Phase 7 | Pending |
 | HERO-04 | Phase 7 | Pending |
 | SBOX-01 | Phase 8 | Pending |
-| SBOX-02 | Phase 8 | Pending |
+| SBOX-02 | Phase 8 | Complete |
 | SBOX-03 | Phase 8 | Pending |
-| SBOX-04 | Phase 8 | Pending |
-| SBOX-05 | Phase 8 | Pending |
+| SBOX-04 | Phase 8 | Complete |
+| SBOX-05 | Phase 8 | Complete |
 | GAL-01 | Phase 9 | Pending |
 | GAL-02 | Phase 9 | Pending |
 | GAL-03 | Phase 9 | Pending |
