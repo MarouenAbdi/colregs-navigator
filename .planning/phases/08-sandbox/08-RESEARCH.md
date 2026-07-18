@@ -448,19 +448,22 @@ export const overtakingCase = {
 | A4 | Save/`CopyLinkButton` relocates somewhere in the restyled header (exact placement TBD) rather than being intentionally dropped from this milestone | Pitfall S3 | Medium — if wrongly assumed dropped, this silently regresses validated v1.0 SCEN-01 functionality, which the phase's own goal statement ("zero regression... to the interaction model") explicitly forbids. Must be resolved before implementation, not left ambiguous. |
 | A5 | The reasoning-trail should render ALL of `classification.trail`'s real entries (variable count) with a derived GEOMETRY/rule-id/VERDICT tag scheme, not hardcode 3 steps | Architecture Patterns Pattern 3 | Medium — if the design's literal "3 steps" badge is instead treated as a hard requirement, real trail content for non-crossing encounters would need to be silently collapsed/dropped, which risks violating SBOX-03's explicit "no change to content/order" requirement |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Where does the Save/Share (`CopyLinkButton`) CTA live in the restyled header?**
+   - RESOLVED: relocated into the restyled header per CONTEXT.md D-07 — implemented in plan 08-05 (Task 1: `SandboxContainer.tsx` header restyle, `CopyLinkButton.tsx`).
    - What we know: it exists today (`createScenario.mutate` + redirect to `/s/{shareId}`), is validated v1.0 (SCEN-01) functionality, and the design mock's captured Sandbox header only shows a "Reset scenario" button.
    - What's unclear: whether it's just scrolled out of the captured screenshot region, intentionally deferred to a secondary/icon-only affordance, or genuinely not part of this redesign's visual language.
    - Recommendation: confirm with the user/design source before implementation — do not silently drop it. If truly absent from the design, it likely still needs *some* accessible home (e.g. a small icon button near "Reset scenario", or inside a vessel-control card's overflow menu) to avoid a functional regression.
 
 2. **Is the "Rule 7" badge on the "In doubt" chip a literal per-scenario override, or does the design intend it more generally (e.g. shown whenever `doubt: true`, on ANY chip that happens to land in a doubt band)?**
+   - RESOLVED: derived generically from `classification.doubt` per CONTEXT.md D-08 — implemented in plan 08-04 (`bannerRuleBadge`/`trailStepTag` in `reasoning-trail-tag.ts`).
    - What we know: only the "In doubt" chip is explicitly labeled this way among the 6; the existing domain doubt logic (`doubtBoundary`) already fires for both the head-on and overtaking/crossing boundaries elsewhere in the app (e.g. dragging a vessel near either boundary manually, independent of any chip).
    - What's unclear: should ANY manually-dragged-into-doubt state also show a "Rule 7" verdict badge (replacing whatever rule badge would otherwise show), or is this literally hardcoded/special-cased to the "In doubt" chip's specific fixture only?
    - Recommendation: derive it generically from `classification.doubt` (not chip-specific) — this is simpler, more consistent, and automatically covers the manual-drag case too, matching the spirit of Rule 7(a)'s "when in doubt" doctrine applying regardless of how the doubt state was reached.
 
 3. **Does clicking a chip need to visually track "which chip is active" after a subsequent manual drag/form edit diverges from that chip's canonical values?**
+   - RESOLVED: `activeChipId` state tracked and cleared on manual drag/edit, per 08-UI-SPEC.md's Interaction Contract — implemented in plan 08-05 (Task 2).
    - What we know: D-01/D-02 only specify the load mechanics (full replace + hysteresis reset), not ongoing "active chip" tracking.
    - What's unclear: the design shows "Classic crossing" chip visually active/teal-filled in its captured (default) state — implying SOME active-state styling exists — but doesn't show what happens to that highlight after a manual drag.
    - Recommendation: track `activeChipId` state, clear it (deselect all chips) on any manual drag/heading/speed/type change that doesn't originate from a chip click — cheap to implement, avoids a stale/misleading highlight, no domain risk either way.
