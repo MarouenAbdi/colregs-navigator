@@ -140,4 +140,12 @@
        underneath the sticky Header. */
     scroll-padding-top: 64px;
     }
+  /* CONTEXT.md D-05: smooth-animated scroll for the Hero CTAs' same-page
+     #sandbox/#gallery anchor clicks, gated behind prefers-reduced-motion
+     so users who've opted out of animation still get an instant jump. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+      }
+  }
 }

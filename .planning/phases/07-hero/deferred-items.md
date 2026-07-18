@@ -1,22 +1,22 @@
 # Deferred Items — Phase 07 (Hero)
 
-## Pre-existing, out-of-scope test failures (not fixed by 07-01)
+## Resolved: local worktree environment gap (not a code issue)
 
-`npx vitest run` (full suite) shows 13 failing tests across 3 files, all
-requiring a live Postgres connection that isn't available in this worktree:
+Task 2's verification run initially showed 13 failing tests across 3 DB-
+dependent files (`scenario-repository.test.ts`, `scenario.test.ts`,
+`scenario-service.test.ts`), all failing with `SASL:
+SCRAM-SERVER-FIRST-MESSAGE: client password must be a string`. Root cause:
+this git worktree had no `.env` file (gitignored, not copied into fresh
+worktrees) and no generated Prisma client (fresh `npm install`), so any
+`DATABASE_URL` fallback used in ad-hoc verification pointed at the wrong
+Postgres port (`.env.example`'s documented `5432`, while this project's
+actual running `docker-compose` Postgres container is mapped to host port
+`5433`).
 
-- `src/server/db/scenario-repository.test.ts`
-- `src/server/api/routers/scenario.test.ts`
-- `src/server/application/scenario-service.test.ts`
-
-Failure mode: `SASL: SCRAM-SERVER-FIRST-MESSAGE: client password must be a
-string` (pg client auth against a DB that isn't running/reachable in this
-environment) and one downstream `TRPCError` code mismatch caused by the
-same root connection failure.
-
-These files belong to Phase 3/5 (Scenario CRUD, Save/Share/Gallery) and are
-entirely out of Hero's scope (07-01-PLAN.md's `files_modified` list does
-not include any `src/server/*` file). Per the executor's scope-boundary
-rule, pre-existing failures in unrelated files are logged here, not fixed.
-`npx vitest run src/components/hero` (the phase's own scoped verification
-command) passes with 0 failures.
+Fix (environment-only, no source change): ran `npx prisma generate` and
+copied the main checkout's local `.env` (`DATABASE_URL` on port `5433`)
+into this worktree. Both files are gitignored/build artifacts, not
+tracked. After the fix, the full suite passes 163/163 and `npm run build`
+succeeds end-to-end (`/gallery`'s static prerender included). No code in
+`src/server/*` needed any change — this was purely a fresh-worktree setup
+gap, unrelated to Hero's scope.
