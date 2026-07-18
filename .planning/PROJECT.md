@@ -65,6 +65,14 @@ _None — all requirements validated as of Phase 5, the milestone's final phase.
 | SVG drag/rotate hit-targets must hit-test the actual visible shape, not a padded invisible proxy | Live human UAT on Phase 4 found dragging/rotating vessels "tricky" across two rounds of fixes — the root cause was that both the hull-drag rect and the rotate-handle circle used separate, independently-sized invisible hit-shapes, so their boundaries never matched what the user visually saw or could be reliably kept apart by picking numeric margins. The fix was structural, not numeric: attach pointer handlers directly to the visible, solid-filled shape itself (SVG's default `pointer-events: visiblePainted` hit-tests the real painted area for any non-`none` fill) so a gesture only starts where the pointer is genuinely over what the user sees. Relevant precedent if Phase 5 or later work adds more draggable/clickable chart elements. | Fixed in Phase 4 (commits `3bf6f24`, `f559e98`) |
 | `next dev`/`next build` run via webpack (not Turbopack), with `resolve.extensionAlias` set in `next.config.ts` | Phase 5's final human-verify checkpoint was the first time anyone actually ran the dev server end-to-end — it failed immediately because neither Turbopack nor Next's default webpack resolves this codebase's `.js`-suffix-pointing-at-`.ts` relative-import convention (established Phase 1, ~98 imports across 37 files; tsc and Vitest both already resolve it fine, which is why the gap went unnoticed through 4 completed phases). Turbopack's own docs list `extensionAlias` as explicitly unsupported. User chose the smaller-blast-radius fix (2-file config change, keep the convention as-is) over rewriting all 98 imports to drop the `.js` suffix (bigger, cross-phase mechanical change, would have kept Turbopack) | Fixed in Phase 5 (commit `7beb689`) |
 
+## Next Milestone Goals
+
+Candidates for v1.1, carried forward from v1.0's deferred items (see `.planning/milestones/v1.0-REQUIREMENTS.md` for full v2 list and rationale):
+
+- Embed the gallery on the home page below the sandbox instead of its own `/gallery` route (user-requested during Phase 5 wrap-up; tracked as a todo at `.planning/todos/pending/2026-07-18-embed-gallery-on-home-page-instead-of-separate-route.md`)
+- RSON-V2-01: ambiguous/edge-case scenarios in the curated gallery (near-boundary head-on/crossing, Rule 17(a)(ii) doubt situations)
+- SCEN-V2-01: auto-generated social preview image (OG image) per shared scenario
+
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
