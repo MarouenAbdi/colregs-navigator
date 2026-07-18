@@ -249,18 +249,18 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
             classification={lastGoodClassification}
             isDegenerate={isDegenerate}
           />
-          <ReasoningTrail classification={lastGoodClassification} />
+          <ControlPanel
+            vesselA={vesselA}
+            vesselB={vesselB}
+            classification={lastGoodClassification}
+            onVesselSpeedChange={onVesselSpeedChange}
+            onVesselTypeChange={onVesselTypeChange}
+          />
         </div>
       </div>
 
-      <div className="mt-8">
-        <ControlPanel
-          vesselA={vesselA}
-          vesselB={vesselB}
-          classification={lastGoodClassification}
-          onVesselSpeedChange={onVesselSpeedChange}
-          onVesselTypeChange={onVesselTypeChange}
-        />
+      <div className="mt-4">
+        <ReasoningTrail classification={lastGoodClassification} />
       </div>
     </div>
   );
