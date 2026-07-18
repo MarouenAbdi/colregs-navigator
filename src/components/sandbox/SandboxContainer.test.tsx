@@ -17,6 +17,7 @@ import { userEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SandboxContainer } from "./SandboxContainer.js";
 import { chartToScreen } from "../../domain/geometry/screen-convert.js";
+import { overtakingBothDirectionsCase } from "../../domain/colregs/classify-encounter.fixtures.js";
 import type { Position } from "../../domain/vessel/vessel.js";
 import type { VesselLabel } from "../../domain/colregs/types.js";
 
@@ -176,5 +177,69 @@ describe("SandboxContainer", () => {
 
     expect(screen.getByText(DEFAULT_VERDICT_TEXT)).toBeInTheDocument();
     expect(screen.queryByText("Unable to classify")).not.toBeInTheDocument();
+  });
+
+  // 05-03 Task 1: seed-from-saved-scenario (SCEN-01, D-02, Assumption A3)
+  it("seeds the initial classification from initialScenario vessels instead of the default crossing fixture", () => {
+    render(
+      <SandboxContainer
+        initialScenario={{
+          vesselA: overtakingBothDirectionsCase.vesselA,
+          vesselB: overtakingBothDirectionsCase.vesselB,
+        }}
+      />,
+    );
+
+    expect(screen.getByText(OVERTAKING_VERDICT_TEXT)).toBeInTheDocument();
+    expect(screen.queryByText(DEFAULT_VERDICT_TEXT)).not.toBeInTheDocument();
+  });
+
+  it("restores the passed-in initialScenario's own vessels (not the default) when Reset Scenario is clicked", () => {
+    const { container } = render(
+      <SandboxContainer
+        initialScenario={{
+          vesselA: overtakingBothDirectionsCase.vesselA,
+          vesselB: overtakingBothDirectionsCase.vesselB,
+        }}
+      />,
+    );
+
+    expect(screen.getByText(OVERTAKING_VERDICT_TEXT)).toBeInTheDocument();
+
+    // Drag vesselB onto vesselA's seeded position (0,0) -- a coincident-
+    // position degenerate input -- to move off the overtaking verdict.
+    dragHullTo(container, "vesselB", { x: 0, y: 0 });
+    expect(screen.getByText("Unable to classify")).toBeInTheDocument();
+    expect(screen.queryByText(OVERTAKING_VERDICT_TEXT)).not.toBeInTheDocument();
+
+    const resetButton = screen
+      .getAllByRole("button")
+      .find((button) => button.textContent === "Reset Scenario");
+    expect(resetButton).toBeDefined();
+    act(() => {
+      resetButton?.click();
+    });
+
+    expect(screen.getByText(OVERTAKING_VERDICT_TEXT)).toBeInTheDocument();
+    expect(screen.queryByText("Unable to classify")).not.toBeInTheDocument();
+  });
+
+  it("renders the banner label (and rationale, when provided) communicating a saved/shared scenario is loaded (D-02)", () => {
+    const { rerender } = render(
+      <SandboxContainer banner={{ label: "Viewing saved scenario — drag to explore" }} />,
+    );
+    expect(
+      screen.getByText("Viewing saved scenario — drag to explore"),
+    ).toBeInTheDocument();
+
+    rerender(
+      <SandboxContainer
+        banner={{
+          label: "Viewing saved scenario — drag to explore",
+          rationale: "Loaded from a shared link.",
+        }}
+      />,
+    );
+    expect(screen.getByText("Loaded from a shared link.")).toBeInTheDocument();
   });
 });
