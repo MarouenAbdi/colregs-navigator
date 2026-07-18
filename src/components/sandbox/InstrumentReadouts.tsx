@@ -10,7 +10,7 @@
 import type { InstrumentReadoutsProps } from "./types.js";
 import { deriveInstrumentReadouts } from "./instrument-readouts.js";
 import { statusPillCopy, type StatusPillTone } from "./status-pill.js";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 const PLACEHOLDER = "—";
 
@@ -72,6 +72,11 @@ export function InstrumentReadouts({
 
   return (
     <Card>
+      <CardHeader>
+        <span className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
+          Instrument Readouts
+        </span>
+      </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-2">
           <Tile label="RANGE" value={`${rangeNm.toFixed(2)} NM`} />
@@ -80,15 +85,15 @@ export function InstrumentReadouts({
           <Tile label="TCPA" value={formatTcpa(tcpaMinutes)} />
         </div>
 
-        <span
-          className={`inline-flex w-fit items-center gap-1 rounded-full border px-2 py-1 font-sans text-[13px] font-semibold ${STATUS_PILL_TONE_CLASSNAME[pill.tone]}`}
+        <div
+          className={`flex items-center gap-2 rounded-lg border px-[11px] py-[9px] text-[12.5px] ${STATUS_PILL_TONE_CLASSNAME[pill.tone]}`}
         >
           <span
-            className={`h-1 w-1 rounded-full ${STATUS_PILL_DOT_CLASSNAME[pill.tone]}`}
+            className={`size-[7px] shrink-0 rounded-full ${STATUS_PILL_DOT_CLASSNAME[pill.tone]}`}
             aria-hidden="true"
           />
           {pill.text}
-        </span>
+        </div>
       </CardContent>
     </Card>
   );
