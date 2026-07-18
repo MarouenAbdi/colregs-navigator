@@ -1,8 +1,20 @@
+import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   plugins: [react()],
+  // Rule 3 (07-01, blocking): tsconfig.json's `@/*` path alias (added
+  // 06-01 for shadcn-adjacent code, e.g. `@/components/ui/button`) has no
+  // Vitest-side equivalent -- Vite/Vitest do not read tsconfig `paths` on
+  // their own, so any component importing via `@/*` (Hero.tsx, following
+  // Header.tsx's existing convention) fails to resolve under `vitest run`
+  // even though `tsc --noEmit` and `next build` both resolve it fine.
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
   test: {
     environment: "node", // default; explicit here since Success Criterion 3 depends on it
     include: ["src/**/*.test.{ts,tsx}"],
