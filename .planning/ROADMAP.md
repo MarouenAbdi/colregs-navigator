@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: COLREGS Rules Engine** - Encounter classification, give-way/stand-on determination, and the reasoning trail (completed 2026-07-15)
 - [x] **Phase 3: Persistence & API Layer** - Prisma schema, repository, application use cases, and thin tRPC routers (completed 2026-07-17)
 - [x] **Phase 4: Interactive Chart Sandbox** - SVG chart with live drag-and-classify, reasoning overlay, and visual role coding (completed 2026-07-17)
-- [ ] **Phase 5: Save, Share & Gallery** - Shareable scenario links and a curated gallery of classic encounters
+- [x] **Phase 5: Save, Share & Gallery** - Shareable scenario links and a curated gallery of classic encounters (completed 2026-07-18)
 
 ## Phase Details
 
@@ -154,7 +154,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 05-05-PLAN.md — /s/[shareId] detail page, Copy Link, end-to-end human verification
+- [x] 05-05-PLAN.md — /s/[shareId] detail page, Copy Link, end-to-end human verification
 
 **UI hint**: yes
 
@@ -169,4 +169,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. COLREGS Rules Engine | 2/2 | Complete   | 2026-07-15 |
 | 3. Persistence & API Layer | 3/3 | Complete   | 2026-07-17 |
 | 4. Interactive Chart Sandbox | 6/6 | Complete   | 2026-07-17 |
-| 5. Save, Share & Gallery | 4/5 | In Progress|  |
+| 5. Save, Share & Gallery | 5/5 | Complete   | 2026-07-18 |
