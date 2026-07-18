@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 /**
  * VerdictBanner tests (08-04 Task 1). Verifies the 3 behavior cases split
- * out of the retired ReasoningPanel: give-way (standalone title + Rule N
- * badge + GW/SO role badges), mutual (MUTUAL badges, Rule 7 badge, mutual
- * description), and degenerate (title/description replaced, rule badge
- * suppressed, role badges from the last-good classification persist).
+ * out of the former single combined reasoning aside: give-way (standalone
+ * title + Rule N badge + GW/SO role badges), mutual (MUTUAL badges, Rule 7
+ * badge, mutual description), and degenerate (title/description replaced,
+ * rule badge suppressed, role badges from the last-good classification
+ * persist).
  *
  * Fixtures are the REAL `classifyEncounter()` output against existing
  * domain fixtures (crossingResidualBasicCase / headOnNucRiatmTieCase) --

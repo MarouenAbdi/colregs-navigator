@@ -4,8 +4,8 @@
  * tag+tone derivation for all 3 tone buckets (GEOMETRY/RULE N/VERDICT),
  * the doubt-substitution override, empty-facts suppression, and both
  * doubt-caveat strings verbatim -- collectively covering every behavior
- * the retired `ReasoningPanel.test.tsx` asserted for the trail/fact-readout/
- * doubt-caveat portion of that file.
+ * the retired combined-aside test suite asserted for the trail/
+ * fact-readout/doubt-caveat portion of that file.
  */
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
@@ -14,7 +14,7 @@ import type { ClassificationResult } from "../../domain/colregs/types.js";
 
 afterEach(cleanup);
 
-// Mirrors the retired ReasoningPanel.test.tsx's 3-entry crossing fixture
+// Mirrors the retired combined-aside test suite's 3-entry crossing fixture
 // verbatim (Rule 7 / Rule 13(a)-(b) / Rule 15, giveWay: "vesselA").
 const crossingClassification: ClassificationResult = {
   encounterType: "crossing",
@@ -118,7 +118,9 @@ describe("ReasoningTrail", () => {
     expect(screen.getByText("GEOMETRY")).toBeInTheDocument();
     expect(screen.getByText("RULE 13")).toBeInTheDocument();
     expect(screen.getByText("RULE 14")).toBeInTheDocument();
-    expect(screen.getByText("Rule 7")).toBeInTheDocument();
+    // "Rule 7" appears twice: once as entry 0's own ruleId text, once as the
+    // doubt-substituted tag on the classifying entry (index 3).
+    expect(screen.getAllByText("Rule 7")).toHaveLength(2);
     expect(screen.getByText("VERDICT")).toBeInTheDocument();
     // The classifying index's own "RULE 15" tag must NOT appear -- it was
     // substituted by the doubt override.

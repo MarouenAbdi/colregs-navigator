@@ -1,7 +1,7 @@
 /**
  * VerdictBanner -- the full-width verdict card (SBOX-02): rule badge,
  * standalone title, one-line plain-English description, and per-vessel
- * role badges. Split out of the former single `ReasoningPanel` aside so
+ * role badges. Split out of the former single combined reasoning aside so
  * the design's exact card boundary can be expressed directly (08-UI-SPEC.md
  * Layout: "verdict banner ... is not nested inside the reasoning column").
  */
@@ -19,8 +19,8 @@ const ENCOUNTER_TYPE_TITLE: Record<string, string> = {
   overtaking: "Overtaking",
 };
 
-// Single remaining consumer of this label map after the ReasoningPanel
-// split -- the verdict banner's own 2-line role-badge stack.
+// Single remaining consumer of this label map after the 3-card split --
+// the verdict banner's own 2-line role-badge stack.
 const VESSEL_LABEL_TEXT: Record<VesselLabel, string> = {
   vesselA: "Vessel A",
   vesselB: "Vessel B",
