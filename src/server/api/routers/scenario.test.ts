@@ -6,10 +6,11 @@
  * just at the service-unit-test level already covered in Plan 02.
  */
 
-import { describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 import { createCallerFactory, createTRPCContext } from "../trpc.js";
 import { appRouter } from "./_app.js";
 import { headOnGenuineCase } from "../../../domain/colregs/classify-encounter.fixtures.js";
+import { prisma } from "../../db/client.js";
 
 const createCaller = createCallerFactory(appRouter);
 const caller = createCaller(createTRPCContext());
@@ -47,8 +48,41 @@ describe("appRouter (scenario + gallery) -- end-to-end integration", () => {
     ).rejects.toMatchObject({ code: "NOT_FOUND" });
   });
 
-  it("gallery.list resolves to [] when no curated scenarios exist", async () => {
-    const result = await caller.gallery.list();
-    expect(result).toEqual([]);
+  describe("gallery.list", () => {
+    // 05-02-PLAN.md Task 3: this replaces the now-stale assumption that an
+    // empty array is always returned when no curated scenarios exist --
+    // now that prisma/seed.ts (Task 2) populates the shared dev database
+    // with curated rows, that assumption no longer holds. This test
+    // creates and promotes its OWN row, then asserts containment (never
+    // exact array equality) so it passes regardless of whether the seed
+    // script has already run against the shared database.
+    let shareId: string;
+
+    afterAll(async () => {
+      if (shareId) {
+        await prisma.scenario.deleteMany({ where: { id: shareId } });
+      }
+    });
+
+    it("returns curated rows including one this test creates and promotes, with a fresh verdict", async () => {
+      const created = await caller.scenario.create({
+        vesselA: headOnGenuineCase.vesselA,
+        vesselB: headOnGenuineCase.vesselB,
+      });
+      shareId = created.shareId;
+
+      await prisma.scenario.update({
+        where: { id: shareId },
+        data: { isCurated: true, displayOrder: 999, rationale: "test rationale" },
+      });
+
+      const result = await caller.gallery.list();
+      const found = result.find((row) => row.id === shareId);
+
+      expect(found).toBeDefined();
+      expect(found?.isCurated).toBe(true);
+      expect(found?.rationale).toBe("test rationale");
+      expect(found?.verdict.encounterType).toBeDefined();
+    });
   });
 });
