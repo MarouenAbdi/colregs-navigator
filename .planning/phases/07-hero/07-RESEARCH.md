@@ -341,14 +341,14 @@ import { Button } from "@/components/ui/button";
 | A2 | `max-hero:` auto-generates for a custom-named `--breakpoint-*` token the same way it does for default breakpoints | Architecture Patterns, Pattern 4 / Pitfall H3 | Medium — if wrong, the "single-column below 900px" layout could silently produce no CSS for that utility (Pitfall 3-class failure); mitigated by the explicit verification step in Pitfall H3 and the zero-risk `max-[899px]:` fallback already provided |
 | A3 | Checkmark icon name (`CircleCheck`/`BadgeCheck` or similar) exists in the installed `lucide-react@1.25.0` | Standard Stack | Low — `Header.tsx` already established the precedent of verifying icon names against the installed version before committing to one; trivially swappable if the assumed name doesn't exist |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Exact pixel dimensions of the preview card's mini chart on the actual rendered page**
+1. **(RESOLVED — see 07-UI-SPEC.md "Preview Card Dimensions") Exact pixel dimensions of the preview card's mini chart on the actual rendered page**
    - What we know: the design mock shows it at a specific size within a ~360px-wide card column on desktop
    - What's unclear: the precise `HERO_CONTAINER_SIZE`/`viewBox` framing that best matches the mock's visual proportions (ring size relative to vessel triangles, tick spacing)
    - Recommendation: treat the `HERO_CONTAINER_SIZE = { width: 280, height: 280 }` / `HERO_VIEW_BOX` values in the Code Examples section as a starting point, tune visually against `Main-Design.png` during implementation — this is a visual-fit detail, not a correctness question, and doesn't block planning
 
-2. **Whether `--breakpoint-hero` should be registered in Phase 7 or deferred to arbitrary-value syntax throughout**
+2. **(RESOLVED — see Task 3's explicit runtime-verify-and-fallback step in 07-01-PLAN.md) Whether `--breakpoint-hero` should be registered in Phase 7 or deferred to arbitrary-value syntax throughout**
    - What we know: both approaches are Tailwind v4-native and verified working
    - What's unclear: whether Phase 8 (Sandbox) planning will actually reuse the same named token, or independently reach for its own arbitrary-value classes
    - Recommendation: register the token in Phase 7 (first phase to need 900px) per Pattern 4's reasoning, but this is a low-stakes DRY call either way — not a blocker
