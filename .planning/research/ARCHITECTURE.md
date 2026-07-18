@@ -1,8 +1,10 @@
 # Architecture Research
 
-**Domain:** Rules-engine-centric web app (maritime COLREGS collision-avoidance visualizer)
-**Researched:** 2026-07-14
-**Confidence:** HIGH (layering/dependency-direction patterns, verified against multiple Clean Architecture + Next.js/tRPC/Prisma reference implementations and official tRPC docs) / MEDIUM (COLREGS-specific module decomposition — sound application of standard rules-engine/specification patterns, but not an "industry convention" since no comparable open-source reference project exists)
+**Domain:** Next.js App Router + shadcn/ui integration into an existing DDD-lite/Clean-Architecture codebase (COLREGS Navigator v1.1 "UI Redesign (shadcn)")
+**Researched:** 2026-07-18
+**Confidence:** HIGH (shadcn/ui + Tailwind v4 conventions verified via Context7 `/websites/ui_shadcn`; folder/boundary recommendations grounded directly in the actual files read from this repo, not generic advice)
+
+> Note: this file supersedes the v1.0 `ARCHITECTURE.md` (2026-07-14, domain/rules-engine focus). That research remains valid for `src/domain/`/`src/server/`, which this milestone does not touch — see PROJECT.md's "zero change to domain logic" constraint. This file covers the v1.1-specific question: where shadcn/ui primitives, shared design tokens, a new page shell, Hero, and restyled Sandbox/Gallery fit into the existing `src/components/sandbox/` + `src/domain/` structure.
 
 ## Standard Architecture
 
@@ -10,330 +12,287 @@
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│  UI LAYER (Next.js App Router, React, Tailwind)                       │
-│  ┌────────────┐  ┌───────────────────┐  ┌────────────────────────┐    │
-│  │ Chart      │  │ Vessel Control     │  │ Reasoning Trail        │    │
-│  │ Canvas     │  │ Panel (drag/edit)  │  │ Panel (rule + geometry)│    │
-│  └─────┬──────┘  └─────────┬──────────┘  └───────────┬────────────┘    │
-│        └────────────────────┴──────────────┬─────────┘                │
-│                                    calls domain directly (live)        │
-│                                    calls tRPC client (persist/load)    │
-├──────────────────────────────────────┬────────────────────────────────┤
-│  INTERFACE ADAPTERS (tRPC routers)   │ calls, in-browser, no network   │
-│  ┌─────────────────────────────┐     │                                │
-│  │ scenario router / gallery    │     │                                │
-│  │ router — Zod-validated I/O   │     │                                │
-│  └──────────────┬───────────────┘     │                                │
-├─────────────────┼─────────────────────┼────────────────────────────────┤
-│  APPLICATION LAYER (use cases)        │                                │
-│  ┌─────────────────────────────┐      │                                │
-│  │ CreateScenario / GetScenario │      │                                │
-│  │ / ListPresets (orchestration)│◄─────┘  imports pure functions       │
-│  └──────────────┬───────────────┘         from domain layer            │
-├─────────────────┼──────────────────────────────────────────────────────┤
-│  DOMAIN LAYER — src/domain/colregs (pure TypeScript, zero deps)        │
-│  ┌───────────┐ ┌────────────┐ ┌───────────┐ ┌────────────────────┐    │
-│  │ Entities/ │ │ Geometry   │ │ Rules      │ │ classifyEncounter() │    │
-│  │ Value Obj │ │ (bearing,  │ │ (Rule 12-  │ │ orchestrator ->     │    │
-│  │ (Vessel,  │ │ CPA/TCPA)  │ │ 15, 18     │ │ ClassificationResult│    │
-│  │ Position) │ │            │ │ specs)     │ │ + ReasoningStep[]   │    │
-│  └───────────┘ └────────────┘ └───────────┘ └────────────────────┘    │
+│ app/  (Next.js App Router — routes only, thin)                       │
+│  layout.tsx  → Header + Footer (global chrome) + font vars + <html>  │
+│  page.tsx    → Hero + SandboxContainer + GallerySection (home)       │
+│  s/[shareId]/page.tsx → SandboxContainer(initialScenario) + banner   │
+│  gallery/page.tsx → redirect("/#gallery")  (route removed, shim)     │
 ├──────────────────────────────────────────────────────────────────────┤
-│  INFRASTRUCTURE LAYER                                                  │
-│  ┌────────────────────────────┐  ┌──────────────────────────────┐     │
-│  │ PrismaScenarioRepository    │  │ scenario-mapper.ts (row <->  │     │
-│  │ (implements domain-owned    │  │ domain entity translation)   │     │
-│  │ repository interface)       │  │                               │     │
-│  └──────────────┬───────────────┘  └──────────────────────────────┘     │
-├─────────────────┼────────────────────────────────────────────────────┤
-│  PostgreSQL (via Prisma)                                               │
+│ src/components/  (feature-first, presentation layer)                 │
+│  ui/        ← shadcn-owned primitives (generated, vendored, edited   │
+│               in place, never duplicated elsewhere)                  │
+│  layout/    ← Header, Footer, page-shell composition (NEW)           │
+│  shared/    ← cross-feature composed components + shared style maps  │
+│               (NEW — DRY location Hero/Sandbox/Gallery all check     │
+│               first before adding a new component)                   │
+│  hero/      ← Hero section (NEW)                                     │
+│  gallery/   ← GallerySection (NEW, replaces app/gallery/page.tsx)    │
+│  sandbox/   ← ChartPanel/ControlPanel/ReasoningPanel/                │
+│               SandboxContainer/CopyLinkButton (EXISTING, restyled)   │
+├──────────────────────────────────────────────────────────────────────┤
+│ src/lib/    ← cn() utility (NEW, shadcn convention) + trpc client     │
+│               (EXISTING) — cross-cutting infra, not domain           │
+├──────────────────────────────────────────────────────────────────────┤
+│ src/domain/  (pure TS, zero framework imports — UNTOUCHED this       │
+│               milestone: colregs/, geometry/, vessel/, shared/)      │
+├──────────────────────────────────────────────────────────────────────┤
+│ src/server/  (tRPC routers, Prisma repositories — UNTOUCHED)         │
 └──────────────────────────────────────────────────────────────────────┘
 ```
-
-The distinctive feature of this system (vs. a typical CRUD app) is the **dashed line on the left**: the domain layer is called from *two* places — directly from the browser for live/interactive classification, and from the application layer (server-side, via tRPC) for authoritative validation before persistence. Both call the *same* pure functions. This is only possible because the domain layer has zero framework, Node-only, or browser-only dependencies.
 
 ### Component Responsibilities
 
 | Component | Responsibility | Typical Implementation |
-|-----------|----------------|-------------------------|
-| Domain — Entities/Value Objects | Model `Vessel`, `Position`, `Heading`, `Speed`, `VesselType` as immutable, self-validating data with invariants (e.g., heading normalized 0–359°) | Plain TS classes or factory functions + Zod schemas for parsing at the boundary, but internal logic uses plain types, not Zod, to avoid coupling domain to a validation library's runtime |
-| Domain — Geometry | Pure trigonometry: bearing A→B, relative bearing, relative velocity vector, CPA/TCPA | Pure functions operating on Value Objects, no I/O, 100% unit-testable with fixed inputs/outputs |
-| Domain — Rules | Encode Rules 12–15 (encounter type) and Rule 18 (vessel-type precedence) as independent, composable predicates ("specifications") that both classify *and* produce a human-readable reasoning step | Specification-pattern objects/functions: `{ applies(ctx): boolean; explain(ctx): ReasoningStep }` |
-| Domain — `classifyEncounter()` | Orchestrates geometry + rules into a single `ClassificationResult` (encounter type, give-way/stand-on assignment, ordered reasoning trail with rule citations) | One pure function, the single entry point the rest of the app calls |
-| Application (use cases) | Orchestrate a single business operation server-side: validate input, re-run domain classification (never trust client-submitted verdicts), call repository, return DTO | Function-per-use-case (`createScenario(input, deps)`), dependencies injected as parameters/object, not imported directly |
-| Infrastructure (repositories) | Implement domain/application-defined repository interfaces using Prisma; translate between Prisma rows and domain entities | `PrismaScenarioRepository implements ScenarioRepository` |
-| Interface Adapters (tRPC routers) | Thin controllers: parse/validate input via Zod, call one application use case, return its result | `scenarioRouter`, `galleryRouter` merged into `appRouter` |
-| UI (React/Next.js) | Render chart, capture drag/edit interactions, call domain layer directly for live feedback, call tRPC client for persistence/loading | Client components import `classifyEncounter` from `domain/colregs` directly (no network round-trip) |
+|-----------|----------------|------------------------|
+| `src/components/ui/*` | shadcn/ui primitives (Button, Card, Badge, Input, Select, NavigationMenu, Separator) | CLI-generated via `npx shadcn@latest add <name>`; treated as vendored/open code — edit in place if needed, never fork into a second copy |
+| `src/components/layout/*` | Global page chrome: Header/Nav, Footer, optionally a `PageShell` wrapper | Composes `ui/*` primitives only; no domain imports; rendered once from `app/layout.tsx` so it's consistent across `/`, `/s/[shareId]` |
+| `src/components/shared/*` | Cross-feature composed pieces (e.g. a card treatment reused by Hero's preview card and Gallery's scenario cards; shared vessel-role display/style maps) | Composes `ui/*` primitives OR is a pure style/lookup module (`.ts`, no JSX) reused by 2+ feature folders |
+| `src/components/hero/*` | Hero section: headline, copy, CTAs, illustrative live-classification preview card | Calls `classifyEncounter()` from `src/domain/colregs/` directly against a fixed fixture — no tRPC, no server round-trip (it's illustrative, not the live sandbox) |
+| `src/components/sandbox/*` | Interactive chart/controls/reasoning trail (existing, restyled) | Unchanged prop contracts (`types.ts`); JSX/markup restyled to shadcn primitives; logic/hooks reused verbatim |
+| `src/components/gallery/*` | Embedded gallery section on the home page | Server Component, same `getCaller().gallery.list()` tRPC pattern currently in `app/gallery/page.tsx`, moved and reused |
 
 ## Recommended Project Structure
 
 ```
 src/
-├── domain/
-│   └── colregs/                        # Pure domain layer — zero framework deps, the highest-value test target
-│       ├── entities/
-│       │   ├── vessel.ts               # Vessel entity: id, position, heading, speed, type
-│       │   └── scenario.ts             # Scenario aggregate: two vessels + metadata
-│       ├── value-objects/
-│       │   ├── position.ts             # Position VO + distance/bearing helpers
-│       │   ├── heading.ts              # Heading VO (0–359°, normalization, delta)
-│       │   ├── speed.ts                # Speed VO (knots)
-│       │   └── vessel-type.ts          # VesselType enum + Rule 18 precedence ranking
-│       ├── geometry/
-│       │   ├── relative-bearing.ts     # bearing(A,B), relativeBearing(observer, target)
-│       │   ├── closing-vector.ts       # relative velocity, CPA, TCPA
-│       │   └── geometry.test.ts
-│       ├── rules/
-│       │   ├── rule-13-overtaking.ts   # Specification: overtaking sector (>112.5° abaft beam)
-│       │   ├── rule-14-head-on.ts      # Specification: reciprocal-course sector
-│       │   ├── rule-15-crossing.ts     # Specification: crossing sector + give-way side
-│       │   ├── rule-18-responsibility.ts # vessel-type-based precedence override
-│       │   └── rule-registry.ts        # ordered evaluation pipeline (first-match-wins)
-│       ├── classify-encounter.ts       # classifyEncounter(scenario) -> ClassificationResult
-│       ├── types.ts                    # EncounterType, GiveWayRole, ReasoningStep, ClassificationResult
-│       └── index.ts                    # public surface re-exported for app/server use
-│
-├── application/                        # Use cases — one file per operation, framework-agnostic
-│   ├── scenario/
-│   │   ├── create-scenario.ts          # validate -> classify (authoritative) -> persist
-│   │   ├── get-scenario.ts             # fetch -> reconstruct domain entity -> return DTO
-│   │   └── ports/
-│   │       └── scenario-repository.ts  # interface application/domain code depends on
-│   └── gallery/
-│       └── list-presets.ts             # returns curated Scenario[] (seeded, read-only)
-│
-├── infrastructure/
-│   ├── prisma/
-│   │   ├── client.ts                   # PrismaClient singleton
-│   │   └── prisma-scenario-repository.ts # implements ScenarioRepository
-│   └── mappers/
-│       └── scenario-mapper.ts          # Prisma row <-> domain Scenario entity
-│
-├── server/                             # tRPC — interface adapters
-│   ├── routers/
-│   │   ├── _app.ts
-│   │   ├── scenario.ts                 # thin controller calling application/scenario/*
-│   │   └── gallery.ts
-│   ├── trpc.ts                         # initTRPC, procedure helpers
-│   └── context.ts                      # per-request context (injects repositories)
-│
-├── app/                                 # Next.js App Router — UI
-│   ├── sandbox/
-│   │   ├── page.tsx
-│   │   └── _components/
-│   │       ├── chart-canvas.tsx
-│   │       ├── vessel-control-panel.tsx
-│   │       └── reasoning-trail.tsx
-│   ├── s/[id]/page.tsx                 # shared scenario view (server component, tRPC fetch)
-│   ├── gallery/page.tsx
-│   └── _hooks/
-│       └── use-live-classification.ts  # wraps classifyEncounter for React state, client-only
-│
-└── prisma/
-    └── schema.prisma
+├── components/
+│   ├── ui/                       # shadcn CLI output — DO NOT hand-edit structure, only content
+│   │   ├── button.tsx
+│   │   ├── card.tsx
+│   │   ├── badge.tsx
+│   │   ├── input.tsx
+│   │   ├── select.tsx
+│   │   ├── separator.tsx
+│   │   └── navigation-menu.tsx   # (add only the primitives actually used by the design)
+│   ├── layout/                   # NEW
+│   │   ├── Header.tsx
+│   │   └── Footer.tsx
+│   ├── shared/                   # NEW — DRY home, check here before adding anything new
+│   │   ├── vessel-role-styles.ts # consolidates ChartPanel's HULL_FILL_CLASS +
+│   │   │                         # ReasoningPanel's ROLE_BADGE/ROLE_BADGE_TEXT (currently duplicated)
+│   │   └── ScenarioCard.tsx       # (extract here ONLY once Hero's preview card and
+│   │                              # Gallery's scenario card are both built and shown
+│   │                              # to share a visual treatment — don't pre-abstract)
+│   ├── hero/                     # NEW
+│   │   ├── Hero.tsx               # markup only
+│   │   └── usePreviewClassification.ts  # calls domain classifyEncounter() against a fixture
+│   ├── gallery/                   # NEW
+│   │   └── GallerySection.tsx     # Server Component, moved from app/gallery/page.tsx
+│   └── sandbox/                   # EXISTING — see file-by-file notes below
+│       ├── ChartPanel.tsx
+│       ├── chart-rendering.ts     # NEW — extracted wedgePath/buildGridLines/CHART_VIEW_BOX
+│       ├── ControlPanel.tsx
+│       ├── ReasoningPanel.tsx
+│       ├── SandboxContainer.tsx
+│       ├── useSandboxState.ts     # NEW (optional) — extracted state/handlers from SandboxContainer
+│       ├── CopyLinkButton.tsx
+│       ├── vessel-role.ts         # EXISTING — extend, don't duplicate
+│       ├── types.ts               # EXISTING — reuse as-is
+│       └── hooks/
+│           ├── useHullDrag.ts     # EXISTING — reuse as-is, verbatim
+│           └── useRotateHandleDrag.ts  # EXISTING — reuse as-is, verbatim
+├── lib/
+│   ├── utils.ts                   # NEW — shadcn's cn() (clsx + tailwind-merge)
+│   └── trpc/                      # EXISTING — untouched
+├── domain/                        # UNTOUCHED this milestone
+└── server/                        # UNTOUCHED this milestone
 ```
 
 ### Structure Rationale
 
-- **`domain/colregs/`:** Isolated at the top level (not nested under `server/` or `app/`) precisely because it must be importable from *both* — a Next.js client component and a tRPC server procedure — without pulling in either's runtime. This is the load-bearing decision for the whole architecture: if classification logic ever imports `next/*`, `react`, or `@prisma/client`, live client-side re-classification breaks or requires duplicating logic.
-- **`rules/` as one file per rule:** Mirrors the regulation itself (Rule 13, 14, 15, 18) so a reviewer/interviewer can map code directly to the cited legal text — this is a deliberate readability/demo-value choice, not just a technical one.
-- **`application/` separate from `server/`:** Keeps tRPC (a transport concern) swappable. Use cases don't know they're being called over HTTP; they take plain arguments and injected dependencies. This also means use cases are unit-testable without spinning up a tRPC context.
-- **`infrastructure/` behind ports defined in `application/*/ports/`:** Dependency Inversion — the application layer defines what it needs (`ScenarioRepository`), infrastructure provides it. Domain and application never import `@prisma/client` directly.
-- **Feature-first grouping inside `application/`, `server/routers/`:** `scenario/` and `gallery/` are the two bounded contexts (modular-monolith style) — low coupling between them, each could become a separate package later without restructuring the domain.
+- **`components/ui/` is placed under `src/components/`, not at repo root or under `app/`.** This matches both shadcn's own convention (a project with a `src/` directory gets `src/components/ui`) and this repo's existing pattern of putting all React components under `src/components/`. It sits as a **sibling** to `sandbox/`, `hero/`, `gallery/`, `layout/` — never nested inside a feature folder — because `ui/` is the shadcn-vendored primitive layer every feature composes, not feature-owned code.
+- **`components/shared/` is new and deliberately separate from `components/ui/`.** `ui/` is "shadcn's code that you technically own but should keep close to upstream" (so future `npx shadcn add`/diffing stays clean); `shared/` is "this project's own cross-feature composition," which is exactly the DRY location the milestone constraint requires ("shared components, types, and design tokens live in ONE shared location... check the shared location first"). Conflating the two would make future shadcn re-syncs risky and blur ownership.
+- **Design tokens live in exactly one file: `app/globals.css`.** This is already the only global stylesheet in the repo (currently just `@import "tailwindcss";`). Tailwind v4 is CSS-first — there is no `tailwind.config.ts` in this project (confirmed: none exists) and none should be added; all theme customization (colors, radius, fonts) happens via `@theme inline` + `:root` CSS custom properties directly in this file, per shadcn's own Tailwind v4 theming docs. Do not create a second CSS file or a `tailwind.config.js` — that would violate the "one shared location" rule on day one.
+- **`src/lib/` (already exists) gets the new `utils.ts`, not a new top-level folder.** shadcn's default alias config expects `lib/utils`; this repo already has `src/lib/trpc/` as its "cross-cutting, non-domain, non-server infra" home, so `src/lib/utils.ts` (the `cn()` helper) is a natural, DRY-respecting fit — no new top-level directory needed.
+- **`sandbox/` keeps its current internal shape** (`hooks/`, `types.ts`, `vessel-role.ts` as its own pure-logic module) because it already implements the presentation/logic separation the milestone now mandates project-wide — it's the reference pattern to extend to `hero/` and `gallery/`, not to replace.
 
 ## Architectural Patterns
 
-### Pattern 1: Functional Core, Imperative Shell
+### Pattern 1: shadcn primitives via a new `@/*` path alias, scoped narrowly
 
-**What:** The domain layer (`domain/colregs/`) is a "functional core" — pure functions, immutable value objects, no side effects, no I/O. Everything else (React rendering, tRPC handling, Prisma queries) is the "imperative shell" that calls into the core and handles the messy edges (network, database, DOM).
-**When to use:** Ideal here because the core value proposition ("correctly classify and explain") is a pure computation — deterministic given (position, heading, speed, type) × 2 vessels. No hidden state, no clock dependency (a `Scenario` has no time dimension beyond the current instant).
-**Trade-offs:** Requires discipline to keep the core pure — the moment a rule needs "today's date" or a database lookup, it stops being pure. For this domain (Rules 11–18, static regulation text) that's not a risk. Slight verbosity vs. just writing an `if/else` chain in a tRPC procedure, but that verbosity is exactly what buys independent unit-testability.
-
-**Example:**
-```typescript
-// domain/colregs/classify-encounter.ts
-export function classifyEncounter(scenario: Scenario): ClassificationResult {
-  const geometry = computeEncounterGeometry(scenario.vesselA, scenario.vesselB);
-  const applicableRule = ruleRegistry.find((rule) => rule.applies(geometry));
-  return applicableRule.explain(geometry, scenario);
-}
-// No imports from react, next, @prisma/client, or trpc anywhere in this file's dependency tree.
+**What:** shadcn's CLI and its generated components assume a `@/components/ui/...`-style alias. This codebase currently has **no `paths` alias at all** — every import (~98 across 37 files) is a relative, `.js`-suffixed specifier (`../../domain/vessel/vessel.js`), a convention this project locked in Phase 1 and later had to patch `next.config.ts`'s webpack `resolve.extensionAlias` for (see PROJECT.md Key Decisions). Introducing shadcn requires adding:
+```json
+// tsconfig.json compilerOptions — additive only
+"baseUrl": ".",
+"paths": { "@/*": ["./src/*"] }
 ```
+This is purely additive under `moduleResolution: "bundler"` (already set) — it does not require touching any of the 98 existing relative imports, and shadcn-generated files use **bare, non-`.js`-suffixed** imports (`import { cn } from "@/lib/utils"`), so they never touch the webpack `extensionAlias` remap at all (that remap only intercepts specifiers literally ending in `.js`). The two import conventions coexist without conflict.
 
-### Pattern 2: Ports & Adapters (Repository Interfaces)
+**When to use:** Use the `@/*` alias only for consuming `components/ui/*` and `lib/utils` (i.e., anything shadcn-generated or shadcn-adjacent). Do **not** retroactively convert the existing hand-written relative-import codebase — that's an unrelated, large, risk-adding mechanical change this milestone doesn't need (mirrors the project's own prior "smaller blast radius" precedent for the webpack fix).
 
-**What:** The application layer declares the interface it needs (`ScenarioRepository` with `save()`, `findById()`, `listPresets()`); infrastructure provides the Prisma-backed implementation. Use cases receive the repository via dependency injection (constructor/parameter), never import Prisma directly.
-**When to use:** Whenever a use case needs persistence. Standard Clean Architecture / hexagonal pattern, well-supported in the TypeScript + Prisma ecosystem.
-**Trade-offs:** One extra layer of indirection (interface + implementation) for what could be a single Prisma call — worth it here specifically because it (a) keeps domain/application unit-testable with an in-memory fake repository and no database, and (b) is a well-understood pattern to narrate in interviews.
+**Trade-offs:** Two coexisting import styles in one repo is a minor inconsistency, but converting 98 existing imports has no functional benefit and real regression risk; isolating the new convention to genuinely new (shadcn) code is the lower-risk choice.
 
-**Example:**
-```typescript
-// application/scenario/ports/scenario-repository.ts
-export interface ScenarioRepository {
-  save(scenario: Scenario): Promise<ScenarioId>;
-  findById(id: ScenarioId): Promise<Scenario | null>;
+### Pattern 2: Dark-only theming without a `.dark` class or `next-themes`
+
+**What:** shadcn's default template pairs CSS-variable tokens with a `.dark` class selector (toggled by `next-themes`) so components can reference semantic classes like `bg-primary`/`text-primary-foreground` (verified via Context7: shadcn's own recommended theming pattern is CSS-variable-driven semantic classes, not literal `dark:` Tailwind variants baked into component source). Since this project's locked decision is **dark-mode only, no toggle, no light palette**, the `.dark`/`next-themes` machinery is pure unneeded complexity: define the palette **once**, directly in `:root`, and skip the `.dark` class and `next-themes` dependency entirely.
+
+```css
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  /* ...only the tokens the design file actually uses... */
 }
 
-// application/scenario/create-scenario.ts
-export async function createScenario(
-  input: CreateScenarioInput,
-  deps: { repository: ScenarioRepository }
-): Promise<ClassificationResult & { id: ScenarioId }> {
-  const scenario = Scenario.fromInput(input);        // domain construction/validation
-  const result = classifyEncounter(scenario);          // domain — authoritative, server-side
-  const id = await deps.repository.save(scenario);     // infrastructure via port
-  return { ...result, id };
+:root {
+  --background: oklch(...); /* #09090B from the design file */
+  --primary: oklch(...);    /* #2dd4bf teal accent */
+  /* single palette, no .dark block needed */
 }
 ```
 
-### Pattern 3: Specification Pattern for Rules
+**When to use:** Any project that is genuinely single-theme forever (this one, per the locked decision). Do not install `next-themes` or scaffold a `.dark` class — there is nothing to toggle, and adding the machinery would be dead code contradicting the project's own "justify every dependency" persona.
 
-**What:** Each COLREGS rule (13, 14, 15, 18) is a self-contained object/function pair: `applies(geometry): boolean` decides if the rule's sector/condition is met, `explain(geometry): ReasoningStep` produces the citation + geometric justification. A `ruleRegistry` array is evaluated in priority order (Rule 18 vessel-type overrides checked before/after sector-based rules as COLREGS itself prescribes).
-**When to use:** Any time classification logic would otherwise become a nested if/else tree mixing "is this true" with "what do I tell the user." Also directly supports the explainability requirement — since `explain()` is a first-class method, the reasoning trail isn't reverse-engineered after the fact, it's the same code path that produced the verdict.
-**Trade-offs:** More files/ceremony than a single switch statement; pays off because it makes the rule *order* (which matters — COLREGS rules have precedence) explicit and testable in isolation, and each rule can be unit tested against textbook encounter fixtures independently of the others.
+**Trade-offs:** If a future milestone ever wants a light theme, this needs to be un-simplified (add `.dark` class + `next-themes`) — acceptable since that's explicitly Out of Scope for v1.1.
+
+### Pattern 3: One shared style/lookup map instead of two parallel ones (fixing an existing DRY gap)
+
+**What:** `ChartPanel.tsx` currently defines `HULL_FILL_CLASS: Record<VesselRole, string>` and `ROLE_BADGE_TEXT: Record<VesselRole, string>`; `ReasoningPanel.tsx` independently defines its own `ROLE_BADGE: Record<..., {text, className}>` and `VESSEL_LABEL_TEXT`. These describe the same three concepts (role → display text, role → color/class) in two places that must be kept in sync by hand — exactly the duplication the milestone's DRY constraint targets. The existing `src/components/sandbox/vessel-role.ts` (already the single shared source for role *derivation*, per its own header comment) is the correct place to **extend** with role → text and role → Tailwind-class maps, consumed by both `ChartPanel` and `ReasoningPanel`.
+
+**When to use:** Whenever a lookup table (color, label, icon) is duplicated — or nearly duplicated — across 2+ sibling components describing the same domain concept (here: `VesselRole`). Extend the file that already owns that concept's derivation, don't create a third parallel map.
+
+**Trade-offs:** None meaningful — this is a pure consolidation with no behavior change, straightforward to do while restyling ChartPanel/ReasoningPanel in the Sandbox phase.
 
 ## Data Flow
 
-### Flow 1: Live Interactive Classification (client-only, no network)
+### Request Flow (unchanged by this milestone)
 
 ```
-User drags vessel on chart-canvas
+[User drags vessel] → ChartPanel (SVG pointer handlers, hooks/useHullDrag)
     ↓
-React state update (vessel position/heading)
+SandboxContainer.applyVesselUpdate() → VesselSchema.safeParse → classifyEncounter() (src/domain)
+    ↓                                                              ↓
+setVesselA/B, setLastGoodClassification            ClassificationResult
     ↓
-use-live-classification hook calls domain/colregs classifyEncounter() directly, in-browser
-    ↓
-ClassificationResult (encounter type, give-way/stand-on, reasoning trail)
-    ↓
-Reasoning Trail panel + chart overlay re-render
+re-render: ChartPanel (roles/colors), ControlPanel (form), ReasoningPanel (trail)
 ```
-No tRPC/Prisma involved — this loop must be sub-frame-latency, so it stays entirely client-side, in memory, in the browser's JS runtime, using the exact same pure functions the server uses.
+This entire flow is presentation-layer restyling only — no change to `SandboxContainer`'s state-owner logic, `classifyEncounter`, or the tRPC/Prisma layers.
 
-### Flow 2: Save/Share Scenario (persistence, authoritative re-classification)
+### New Flow: Hero's illustrative preview card
 
 ```
-User clicks "Save & Share"
+Hero.tsx (Server or Client Component, static)
     ↓
-tRPC client mutation: scenario.create(input)
+usePreviewClassification() (or plain module-level call, no interactivity)
     ↓
-scenario router (Zod validates raw input shape)
+classifyEncounter(fixedVesselA, fixedVesselB)  ← same domain fn Sandbox uses, different fixture
     ↓
-application/scenario/create-scenario.ts (use case)
-    ↓
-domain: Scenario.fromInput() (re-validate invariants) → classifyEncounter() (re-run, never trust client verdict)
-    ↓
-infrastructure: PrismaScenarioRepository.save() → PostgreSQL
-    ↓
-returns { id, classification } → client shows shareable URL /s/[id]
+render verdict/badge inside a shadcn Card
 ```
-The server *always* re-derives the classification rather than trusting a client-computed result — this closes the obvious integrity gap of a client-side-only rules engine and is a deliberate defense against "trust the client."
+No tRPC call — the Hero preview is illustrative/static per the design brief, so it should call the pure domain function directly, exactly like `SandboxContainer` already does for its lazy-initializer default classification (`crossingResidualBasicCase` fixture pattern already established in `src/domain/colregs/classify-encounter.fixtures.ts` — reuse that pattern for Hero's fixture rather than inventing a new one).
 
-### Flow 3: Load Scenario (shared link or gallery preset)
+### New Flow: Gallery embedded on home page
 
 ```
-GET /s/[id] (Next.js server component)
+app/page.tsx (Server Component)
     ↓
-tRPC query: scenario.getById(id)
+<GallerySection />  (src/components/gallery/, Server Component)
     ↓
-application/scenario/get-scenario.ts
+getCaller().gallery.list()  ← same tRPC caller pattern as current app/gallery/page.tsx
     ↓
-infrastructure: PrismaScenarioRepository.findById() → scenario-mapper (row → domain entity)
-    ↓
-domain: classifyEncounter() re-run (so displayed reasoning always matches current rule-engine version)
-    ↓
-Server component passes serializable Scenario + ClassificationResult as props to client chart
-    ↓
-Client hydrates, further drags trigger Flow 1 again
+render shadcn Card grid, Link to /s/[shareId] (unchanged)
 ```
-
-### Key Data Flows
-
-1. **Live classification bypasses the network entirely** — the domain layer's framework-agnostic purity is what makes sub-100ms drag feedback possible without debounced API calls.
-2. **Persistence always re-classifies server-side** — the stored `ClassificationResult` is never blindly trusted from the client; this also means if the rule engine is updated later, old scenario *inputs* remain valid but reasoning can be recomputed rather than becoming stale/incorrect stored output (favor storing vessel inputs as source of truth over storing the derived verdict — see Anti-Pattern 2).
+`app/gallery/page.tsx` shrinks to a redirect shim (`redirect("/#gallery")` from `next/navigation`), preserving any existing bookmarked `/gallery` links per the locked decision.
 
 ## Scaling Considerations
 
-This is a portfolio project with no auth and no expected high-concurrency load; scaling is a minor concern, but table included per methodology:
+Not applicable in the traditional sense (this is a portfolio app, not a scaling concern) — the relevant "scale" axis here is **feature count**, not traffic:
 
 | Scale | Architecture Adjustments |
 |-------|--------------------------|
-| 0–1k users | Current architecture as-is: single Next.js app, single Postgres instance (e.g., Neon/Supabase free tier), no caching needed |
-| 1k–100k users | Add caching for shared scenario reads (`/s/[id]` is read-heavy, write-once) via Next.js ISR or edge caching; no schema changes needed since domain/application/infra boundaries are already in place |
-| 100k+ users | Unlikely for this project's scope, but the modular monolith structure (feature-first `scenario`/`gallery` modules with clean ports) is what would allow extracting a module into a separate service later without touching the domain layer |
-
-### Scaling Priorities
-
-1. **First plausible bottleneck:** Unauthenticated scenario creation (no auth = no natural rate limit) could allow spam/abuse of the database. Mitigate with basic IP-based rate limiting on the `scenario.create` tRPC procedure before this becomes a real product, not before — premature for MVP.
-2. **Second bottleneck:** None realistically anticipated at portfolio scale; Postgres + Prisma handles the read/write pattern (mostly reads of static preset/shared scenarios) trivially.
+| Current (4 feature folders: sandbox, hero, gallery, layout) | Flat `src/components/<feature>/` + `src/components/shared/` is sufficient — no need for further nesting |
+| If a 5th+ feature folder emerges post-v1.1 | Re-audit `shared/` for anything now duplicated across 3+ folders; keep the same flat pattern, resist adding a generic `common/` catch-all that isn't `ui/` or `shared/` |
+| If `shared/ScenarioCard.tsx`-style extraction grows past 3-4 components | Consider splitting `shared/` into `shared/cards/`, `shared/badges/`, etc. — not needed yet |
 
 ## Anti-Patterns
 
-### Anti-Pattern 1: Classification Logic Inside tRPC Procedures
+### Anti-Pattern 1: Hand-editing/duplicating `components/ui/*` per feature
 
-**What people do:** Write the encounter-classification if/else chain directly inside the tRPC `scenario.create` resolver "because it's only used once."
-**Why it's wrong:** Couples the highest-value, most-tested piece of logic to the transport layer. It can no longer be called from the browser for live feedback without a network round-trip (killing the drag-and-see-it-update UX), and it can't be unit tested without spinning up a tRPC context/mock request.
-**Do this instead:** Keep `classifyEncounter()` as a pure function in `domain/colregs/`, imported by both the tRPC procedure (via the application layer) and the client hook.
+**What people do:** Copy `ui/card.tsx` into `hero/HeroCard.tsx` and tweak it, because "the Hero card needs slightly different padding."
+**Why it's wrong:** Immediately breaks the DRY constraint and makes future `npx shadcn add`/upgrades diverge unpredictably; also means two components silently drift out of visual sync.
+**Do this instead:** Compose `ui/card.tsx` with different `className` props (shadcn primitives are designed to accept `className` and merge via `cn()`), or if the variation is a genuine reusable pattern (not a one-off), extract it once into `src/components/shared/`.
 
-### Anti-Pattern 2: Persisting the Derived Verdict Instead of the Inputs
+### Anti-Pattern 2: Re-adding `next-themes`/`.dark` toggle machinery "just in case"
 
-**What people do:** Store `encounterType`, `giveWayVessel`, and the reasoning trail directly in the database alongside the vessel data.
-**Why it's wrong:** Creates two sources of truth. If the rule engine has a bug fix later, previously saved scenarios show stale/incorrect verdicts frozen at save time, and there's no way to tell a "wrong-by-old-bug" verdict from a "wrong-by-current-bug" verdict.
-**Do this instead:** Persist only the raw scenario inputs (vessel positions, headings, speeds, types). Always recompute `classifyEncounter()` on load (Flow 3). If reasoning-trail history matters later (e.g., "this scenario used engine v1.2"), version the domain engine explicitly rather than freezing output.
+**What people do:** Scaffold shadcn's default dark-mode boilerplate (ThemeProvider, `.dark` class, toggle button) reflexively because "that's what the docs show."
+**Why it's wrong:** This project has a locked decision — dark-only, no toggle. Adding unused toggle machinery is dead code and directly contradicts the "justify every dependency" persona already established in CLAUDE.md/STACK.md for this project.
+**Do this instead:** Single `:root` palette, no `.dark` class, no `next-themes` dependency (see Pattern 2 above).
 
-### Anti-Pattern 3: Mixing Rendering Coordinates with Domain Coordinates
+### Anti-Pattern 3: Retrofitting the entire codebase's import style to match shadcn's alias convention
 
-**What people do:** Let `Vessel.position` store pixel/canvas coordinates directly, computed once during rendering setup, and feed those into the geometry math.
-**Why it's wrong:** Silently couples domain correctness to viewport size/zoom/pan state; bearing and distance calculations become meaningless once the canvas is resized or panned, and the domain layer becomes untestable without a rendering context.
-**Do this instead:** Domain `Position` is always in a stable unit (e.g., nautical miles on an abstract plane, or lat/lon). The chart-canvas component owns a separate, one-way transform (domain → pixel) purely for drawing; it never flows back into domain calculations.
+**What people do:** See the new `@/*` alias, decide "for consistency" to rewrite all 98 existing relative `.js`-suffixed imports to `@/...` aliases.
+**Why it's wrong:** Large, purely-cosmetic diff across every existing file, in a milestone explicitly scoped as "zero change to domain logic or existing validated requirements" — high regression risk (this repo already had one webpack-resolution incident from an import-convention mismatch, per PROJECT.md's Key Decisions) for zero functional benefit.
+**Do this instead:** New alias for new (shadcn-adjacent) code only; leave the existing convention untouched (see Pattern 1 above).
 
-### Anti-Pattern 4: One "God" Rule Function
+### Anti-Pattern 4: Restyling ChartPanel's `<Card>` wrapper without re-theming the SVG's own hardcoded colors
 
-**What people do:** A single 200-line `determineEncounter()` function with nested conditionals covering sector detection, vessel-type precedence, and message formatting all at once.
-**Why it's wrong:** Impossible to unit test each rule (12/13/14/15/18) independently against textbook fixtures; a bug fix to the overtaking sector risks silently breaking head-on detection; hard to cite in a portfolio walkthrough ("here's exactly where Rule 15 lives").
-**Do this instead:** One file/specification per rule (Pattern 3 above), composed through an explicit, ordered `ruleRegistry`.
+**What people do:** Wrap `ChartPanel`'s existing `<div>`/`<svg>` in a shadcn `<Card>` and call the restyle done.
+**Why it's wrong:** `ChartPanel.tsx` currently hardcodes a **light-theme** chart surface directly in the SVG/JSX — `className="bg-white border border-slate-200 rounded"` on the `<svg>`, plus hex literals (`GRID_STROKE = "#E2E8F0"`, `BEARING_LINE_DEFAULT_STROKE = "#475569"`, `DOUBT_STROKE = "#F59E0B"`, `CONE_DEFAULT_STROKE = "#CBD5E1"`, stroke `"#94A3B8"`, `"#0D9488"`). Against the new dark page shell these will visually clash (a bright white chart panel on a `#09090B` page) even after the outer `<Card>` chrome is restyled — this is the single highest-risk visual regression in the Sandbox phase if missed.
+**Do this instead:** Re-theme these specific constants against the new dark palette's CSS custom properties (or Tailwind's generated `bg-background`/`border-border` semantic classes) as part of the Sandbox phase restyle — not deferred, not assumed to be "just a wrapper Card" job.
 
 ## Integration Points
 
 ### External Services
 
-None required for MVP scope (no auth provider, no AIS data feed, no third-party maps API — the chart is a custom-rendered sandbox, not a real nautical chart service). This is deliberate per the project's Out of Scope decisions.
-
 | Service | Integration Pattern | Notes |
 |---------|---------------------|-------|
-| PostgreSQL (Neon/Supabase/local) | Prisma Client, connection string via env var | Only external dependency; standard Prisma setup, no special COLREGS-specific concerns |
+| shadcn/ui CLI (`npx shadcn@latest`) | One-time `init` (Scaffolding phase) + `add <component>` per primitive needed | Verified via Context7 (`/websites/ui_shadcn`, HIGH confidence): CLI writes `components.json`, `src/components/ui/*`, `src/lib/utils.ts`, and edits `app/globals.css` in place — review its edit to `globals.css` against the "one shared token location" rule before committing |
+| Google Fonts (Geist, Geist Mono) | `next/font/google` in `app/layout.tsx`, exposed as CSS vars consumed by `@theme inline` in `globals.css` | Matches PROJECT.md's "Geist fonts" scaffolding requirement; load once in `layout.tsx`, never re-imported per-feature |
 
 ### Internal Boundaries
 
 | Boundary | Communication | Notes |
 |----------|---------------|-------|
-| UI (client component) ↔ Domain | Direct function import (`classifyEncounter`) | In-browser, synchronous, no serialization — this is what makes live drag-classification feel instant |
-| UI ↔ Server (tRPC) | tRPC client hooks (`useMutation`/`useQuery`) over HTTP, end-to-end typed | Only for persistence (save/load), not for live classification |
-| tRPC router ↔ Application | Direct function call, router passes parsed/validated input | Router is a thin adapter — no business logic, no direct domain imports (goes through application) |
-| Application ↔ Domain | Direct function/class import — domain has no dependencies, so this is a one-way, always-safe import direction | Application depends on domain; domain never depends on application |
-| Application ↔ Infrastructure | Dependency injection via repository interface (port) defined in `application/*/ports/` | Infrastructure implements the interface; application never imports `@prisma/client` |
-| `scenario` module ↔ `gallery` module | No direct coupling — gallery reads presets via its own repository method; if presets are just seeded `Scenario` rows, gallery can reuse `ScenarioRepository.listPresets()` rather than duplicating persistence logic | Keeps the two feature modules independent per modular-monolith intent |
+| `src/components/ui/*` ↔ every feature folder | One-directional import (feature → ui, never reverse) | `ui/*` must never import from `hero/`, `sandbox/`, `gallery/`, or `layout/` |
+| `src/components/shared/*` ↔ `hero/`, `sandbox/`, `gallery/` | One-directional import (feature → shared) | Before adding a new component/type/map in a feature folder, check `shared/` first per the milestone's explicit DRY instruction |
+| `src/components/*` ↔ `src/domain/*` | Presentation calls pure domain functions (`classifyEncounter`, fixtures) directly; domain never imports back | Existing hard rule from CLAUDE.md/STACK.md — unaffected by this milestone; Hero's preview card is the one new call site |
+| `src/components/*` ↔ `src/server/*` | Only via `trpc` client (Client Components) or `getCaller()` (Server Components) — unchanged existing pattern | `GallerySection` and `app/s/[shareId]/page.tsx` already establish this; `Hero` should NOT introduce a new server round-trip for its static preview |
+| `app/layout.tsx` ↔ `src/components/layout/*` | RootLayout renders `<Header />`/`<Footer />` once, wraps `{children}` | Keeps Header/Footer consistent across `/`, `/s/[shareId]`; `app/gallery/page.tsx` still inherits this chrome even though it's now just a redirect (irrelevant since it never renders) |
 
-## Suggested Build Order (dependency-driven)
+## Suggested Build Order (feeds roadmap phases)
 
-1. **Domain layer first, in isolation** (`domain/colregs/`: value objects → geometry → rules → `classifyEncounter`), fully unit-tested against textbook encounter fixtures (classic head-on, classic crossing, classic overtaking, Rule 18 vessel-type overrides) — this has zero dependencies on anything else in the stack and is the core value; get it right and verified before any UI or persistence exists.
-2. **Prisma schema + infrastructure repository**, satisfying the `ScenarioRepository` port defined alongside the application layer — can be built and tested (integration tests against a real/test Postgres) independently of the UI.
-3. **Application use cases** (`create-scenario`, `get-scenario`, `list-presets`) wiring domain + infrastructure — unit-testable with an in-memory fake repository, no network/database needed for these tests.
-4. **tRPC routers** as thin adapters over the application layer, plus Zod input schemas at the boundary.
-5. **UI sandbox** (chart canvas, vessel controls) wired to the domain layer directly for live classification (Flow 1) — this is where the "live update while dragging" requirement gets exercised, and it should be buildable/demoable using the domain layer alone, before Save/Share exists.
-6. **Persistence UI** (Save & Share button → tRPC mutation → shareable link page) — Flow 2 and Flow 3.
-7. **Gallery of presets** — mostly a thin read-only extension of the same repository/application patterns, last because it depends on the scenario persistence model already existing (presets are just seeded scenarios).
+1. **Scaffolding** — hard dependency for everything downstream:
+   - `npx shadcn@latest init` → `components.json`, `src/components/ui/*`, `src/lib/utils.ts`
+   - Add `tsconfig.json` `paths: { "@/*": ["./src/*"] }` (Pattern 1)
+   - Rewrite `app/globals.css`: single dark-only `:root` palette + `@theme inline` (Pattern 2) — no `.dark` class, no `next-themes`
+   - Add Geist/Geist Mono via `next/font/google` in `app/layout.tsx`
+   - Build `src/components/layout/Header.tsx` + `Footer.tsx` (compose `ui/*` only), wire into `app/layout.tsx`
+   - Create empty `src/components/shared/` (structural placeholder; first real content added once Hero/Sandbox reveal actual duplication)
+2. **Hero** — depends on Scaffolding's primitives, tokens, and Header/Footer shell:
+   - `src/components/hero/Hero.tsx` + preview-card logic calling `classifyEncounter()` against a new fixture (sibling pattern to `classify-encounter.fixtures.ts`)
+   - Compose `app/page.tsx`: `<Hero />` above `<SandboxContainer />`
+3. **Sandbox** — depends on Scaffolding's dark tokens (needed to re-theme ChartPanel's hardcoded light colors, Anti-Pattern 4) and `ui/*` (Button, Card, Input, Select, Badge):
+   - Restyle `SandboxContainer.tsx`, `ControlPanel.tsx`, `ReasoningPanel.tsx`, `CopyLinkButton.tsx` JSX/markup only — logic/hooks/types unchanged
+   - Restyle `ChartPanel.tsx`: re-theme hardcoded colors, extract `wedgePath`/`buildGridLines`/constants to co-located `chart-rendering.ts`
+   - Consolidate `HULL_FILL_CLASS`/`ROLE_BADGE_TEXT`/`ROLE_BADGE`/`VESSEL_LABEL_TEXT` into extended `vessel-role.ts` (Pattern 3), update both consumers
+   - Optional: extract `SandboxContainer`'s state/handlers into a co-located `useSandboxState.ts` hook so the component file is markup-only
+4. **Gallery** — depends on Scaffolding (`ui/*` Card) and optionally on a shared card treatment extracted during Hero (only if Hero's preview card and Gallery's scenario cards turn out to share a visual pattern — don't pre-abstract):
+   - New `src/components/gallery/GallerySection.tsx` (Server Component, moved logic from `app/gallery/page.tsx`)
+   - `app/page.tsx`: append `<GallerySection id="gallery" />` below Sandbox
+   - `app/gallery/page.tsx`: replace body with `redirect("/#gallery")` (verify hash-preserving redirect behavior renders/scrolls correctly — flag as a Gallery-phase verification item, MEDIUM confidence on exact browser scroll behavior through a server redirect)
 
-This order front-loads the highest-risk, highest-interview-value work (the rules engine) and defers the lowest-risk, most-conventional work (CRUD persistence, gallery listing) to the end — matching both technical dependency order and the project's stated priority that correctness/explainability of the domain logic is what the whole project stands or falls on.
+## Reuse-as-is vs Restructure Summary (existing `src/components/sandbox/*`)
+
+| File | Verdict | Why |
+|------|---------|-----|
+| `types.ts` | Reuse as-is | Pure prop contracts, framework-light, no styling/logic concerns |
+| `vessel-role.ts` (+ test) | Extend, don't duplicate | Already the correct shared location for role derivation; add the display-text/color maps currently duplicated in ChartPanel/ReasoningPanel (Pattern 3) |
+| `hooks/useHullDrag.ts`, `hooks/useRotateHandleDrag.ts` (+ tests) | Reuse as-is, verbatim | Pure interaction logic, emits no JSX/classNames — exactly the target end-state for "logic" concern already |
+| `SandboxContainer.tsx` | Restructure (moderate) | Logic (`applyVesselUpdate`, state) reuse as-is; JSX/markup (raw `<button>`, `<header>`, layout divs) restyled to shadcn primitives; optional extraction of state into a co-located hook to fully satisfy the milestone's logic/presentation split |
+| `ChartPanel.tsx` | Restructure (heaviest) | Keep SVG approach; must re-theme hardcoded light-mode colors (Anti-Pattern 4), extract rendering-math constants/functions to a co-located module, consolidate role/color maps into `vessel-role.ts` |
+| `ControlPanel.tsx` | Restructure (moderate) | Swap raw `<input>`/`<select>` for shadcn `<Input>`/`<Select>`; existing `VESSEL_TYPE_LABELS` map and options-loop logic reuse as-is |
+| `ReasoningPanel.tsx` | Restructure (moderate) | Dedupe role/label maps into `vessel-role.ts`; wrap trail entries in shadcn primitives; all locked copywriting strings reuse verbatim, do not touch |
+| `CopyLinkButton.tsx` | Restructure (trivial) | Swap raw `<button>` for shadcn `<Button variant="outline" size="sm">`; clipboard logic unchanged |
+| `*.test.tsx` files | Reuse test intent as-is | Tests already query via `data-testid`/role, not raw className strings — a shadcn primitive swap should not break existing assertions, but re-run full suite after each file's restyle |
 
 ## Sources
 
-- [Clean Architecture in Practice with TypeScript, Prisma, Next.js — Arnaud Renaud](https://www.arnaudrenaud.com/articles/clean-architecture-typescript-prisma-next/) — MEDIUM confidence (single-author blog, but pattern matches broader Clean Architecture consensus); domain/services/infrastructure layering, Prisma abstracted behind repository interfaces.
-- [nikolovlazar/nextjs-clean-architecture (GitHub)](https://github.com/nikolovlazar/nextjs-clean-architecture) — MEDIUM confidence (community reference implementation, associated with a Sentry developer advocate talk); entities/application/infrastructure/interface-adapters layering, dependency-injection container, downward-only dependency flow.
-- [tRPC official docs — Next.js project structure](https://trpc.io/docs) via Context7 (`/trpc/trpc`) — HIGH confidence (official documentation); router/context/procedure file layout for both Pages Router and App Router.
-- [Building a Rule Engine With TypeScript — Benjamin Ayangbola](https://benjamin-ayangbola.medium.com/building-a-rule-engine-with-typescript-1732d891385c) — LOW/MEDIUM confidence (single blog source, but consistent with independently-found Decider/functional-core patterns); pure-function rules engine approach.
-- ["Stop letting your database dictate your TypeScript domain logic" — dev.to](https://dev.to/dogganidhal/stop-letting-your-database-dictate-your-typescript-domain-logic-kf5) — MEDIUM confidence; functional core / Decider pattern, persistence as configuration not architecture.
-- COLREGS Rules 12–15 (encounter classification sectors) and Rule 18 (vessel-type responsibility) — public regulation text; sector boundaries (e.g., overtaking = >22.5° abaft the beam) cross-referenced via [ShipCalculators.com COLREGs wiki](https://shipcalculators.com/wiki/colregs-steering-and-sailing-rules) and academic literature on COLREGS-compliant collision-avoidance algorithms (ScienceDirect) — HIGH confidence for the rule text itself (public law), MEDIUM confidence for exact sector-boundary conventions used in software implementations (multiple published algorithms note common implementation pitfalls, e.g., using COG instead of heading — flagged here as a pitfall for the domain-logic phase to verify carefully during implementation, not just architecture).
+- Context7 `/websites/ui_shadcn` (HIGH reputation) — `components.json` aliases/custom path structure, Tailwind v4 `@theme inline` + CSS-variable theming pattern, confirmation that shadcn primitives use semantic classes (`bg-primary`) rather than literal `dark:` variants baked into component source
+- Direct repository reads (HIGH confidence, primary source): `SandboxContainer.tsx`, `ChartPanel.tsx`, `ControlPanel.tsx`, `ReasoningPanel.tsx`, `CopyLinkButton.tsx`, `vessel-role.ts`, `types.ts`, `useHullDrag.ts`, `app/layout.tsx`, `app/page.tsx`, `app/gallery/page.tsx`, `app/s/[shareId]/page.tsx`, `app/globals.css`, `tsconfig.json`, `next.config.ts`, `package.json`
+- `.planning/PROJECT.md` — locked v1.1 decisions (Hero Direction A, dark-mode-only/no-toggle, `/gallery` → `/#gallery` redirect, shadcn as primitive layer) and prior architecture-relevant incidents (webpack `extensionAlias`, Rule 13/18 precedence) used to ground the "smaller blast radius" and "no premature toggle machinery" recommendations
 
 ---
-*Architecture research for: maritime COLREGS rules-engine visualizer (Next.js + tRPC + Prisma + PostgreSQL, DDD-lite/Clean Architecture/Modular Monolith)*
-*Researched: 2026-07-14*
+*Architecture research for: Next.js + shadcn/ui integration into an existing DDD-lite Next.js/tRPC/Prisma codebase*
+*Researched: 2026-07-18*

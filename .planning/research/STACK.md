@@ -1,161 +1,170 @@
-# Stack Research
+# Stack Research: shadcn/ui Adoption (v1.1 UI Redesign)
 
-**Domain:** Maritime COLREGS collision-avoidance rules engine + 2D chart visualizer (Next.js/tRPC/Prisma foundation locked)
-**Researched:** 2026-07-14
-**Confidence:** HIGH (rendering/testing choices verified via WebSearch + Context7 + live npm registry), MEDIUM (domain-layer pattern — synthesized from multiple community sources, no single canonical spec)
+**Domain:** Adopting shadcn/ui + dark-only theme + Geist fonts into an existing Next.js 16 / React 19 / Tailwind v4 app
+**Researched:** 2026-07-18
+**Confidence:** HIGH (all core claims verified via Context7 `/shadcn-ui/ui` official docs + live npm registry lookups; a few CLI-behavior details flagged MEDIUM where they can only be confirmed by actually running the CLI)
 
-This document covers what to add **on top of** the already-locked stack (Next.js, React, TypeScript, Tailwind CSS, tRPC, Prisma, Zod, PostgreSQL, Vitest, React Testing Library). It does not re-litigate the locked choices.
+This is a **delta** stack document — it only covers what's being *added* for the v1.1 redesign. Next.js 16.2.10, React 19.2.7, TypeScript 7.0.2, Tailwind CSS 4.3.3, tRPC 11.18.0, Prisma 7.8.0, Zod 4.4.3, Vitest 4.1.10 stay exactly as they are; see the root `CLAUDE.md` for that locked stack. The prior `STACK.md` (v1.0, dated 2026-07-14, covering the SVG/geometry/domain-layer decisions) is superseded by this file for v1.1 planning purposes — those v1.0 decisions are unaffected by this redesign and remain valid, just no longer the active research document.
 
 ## Recommended Stack
 
-### Core Technologies (locked — versions current as of research date)
+### Core Additions
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| Next.js | 16.2.10 | App framework, routing, SSR | Locked by project constraint |
-| React | 19.2.7 | UI layer | Locked by project constraint |
-| TypeScript | 7.0.2 | Type safety, domain modeling | Locked by project constraint |
-| Tailwind CSS | 4.3.2 | Styling | Locked by project constraint |
-| @trpc/server / client / react-query | 11.18.0 | Typed API layer | Locked by project constraint |
-| @tanstack/react-query | 5.101.2 | tRPC's underlying data layer (installed as a peer, not a separate decision) | Ships alongside tRPC 11 |
-| Prisma / @prisma/client | 7.8.0 | ORM / DB access | Locked by project constraint |
-| Zod | 4.4.3 | Schema validation | Locked by project constraint — also doubles as the domain value-object layer, see below |
-| Vitest | 4.1.10 | Test runner | Locked by project constraint |
-| @testing-library/react | 16.3.2 | Component testing | Locked by project constraint |
+| `shadcn` (CLI + runtime CSS) | **4.13.1** (latest, stable — NOT canary) | Component scaffolding CLI; also ships a runtime `shadcn/tailwind.css` import consumed by generated components | As of this research date shadcn's Tailwind v4 + React 19 support has been stable/default for months (the "canary" era ended with the v4 GA). `npx shadcn@latest init` auto-detects Next.js App Router + Tailwind v4 from `next.config.*`/`app/` and needs no special flags for framework detection. |
+| `radix-ui` (unified package) | **1.6.2** | Underlying accessible primitives (Select, Slider, Tabs, Dialog/Sheet, etc.) for the components you `add` | **Explicit choice — deviates from the CLI's current default.** See "The Base UI vs Radix decision" below. |
+| `class-variance-authority` | **0.7.1** | Variant/size class composition inside every generated component (`buttonVariants`, `badgeVariants`, etc.) | Installed automatically as a runtime dependency by `shadcn init`; this is how shadcn expresses "give-way" vs "stand-on" badge color variants, button sizes, etc. without a CSS-in-JS library. |
+| `clsx` + `tailwind-merge` | **2.1.1** / **3.6.0** | Power the generated `cn()` helper in `src/lib/utils.ts` | Standard shadcn `cn()` = `twMerge(clsx(inputs))`. Needed by literally every generated component file. |
+| `lucide-react` | **1.25.0** | Icon set used by all shadcn component defaults (chevrons in Select, close icon in Sheet/Dialog, etc.) | Default icon library for both `base` and `radix` presets; already assumed by every registry component's `.tsx` source, so treat as non-optional once you `add` more than a couple of components. |
+| `tw-animate-css` | **1.4.0** | CSS-only enter/exit animation utilities (`animate-in`, `fade-out-0`, etc.) used by Select/Tabs/Sheet transitions | Replaces the old `tailwindcss-animate` **v3** Tailwind plugin. In Tailwind v4 there is no `tailwind.config.js` plugins array, so this ships as a pure `@import "tw-animate-css";` CSS import instead — installed as a `devDependency` by `shadcn init` automatically. |
 
-**Confidence:** HIGH — versions pulled live from the npm registry (`npm view <pkg> version`), not training data.
+### Fonts — no new dependency needed
 
-### Supporting Libraries (new — the actual research deliverable)
-
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| *(none — native SVG + Pointer Events)* | — | Chart rendering + draggable vessel icons | Default choice for this project. See rationale below. |
-| `@testing-library/user-event` | latest v14+ (verify at install time — registry lookup was interrupted; this line is MEDIUM confidence) | Simulates realistic pointer drag sequences (`pointer()` API) against SVG elements in tests | Any test that exercises vessel drag-to-reposition interaction |
-| `zustand` | 5.0.14 | Lightweight shared client state | Only if the chart panel, control panel, and reasoning-trail panel end up as non-nested siblings and prop drilling becomes painful. Start without it. |
-| `nanoid` | 6.0.0 | Short, URL-safe shareable scenario slugs | Only if you want a slug distinct from the DB primary key (e.g. `/s/xK9d2q` instead of a full cuid). Prisma's built-in `cuid()`/`uuid()` default is sufficient otherwise — prefer that and skip this dependency unless the shorter URL is a real product requirement. |
-
-**Explicitly not recommended** (see "What NOT to Use" for full rationale): `react-konva`/`konva` (canvas rendering), `geolib`/`@turf/turf` (geodesy), `json-rules-engine` (JSON-driven rules), `xstate` (state machine).
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| `next/font/google` (built into `next`) | ships with Next.js 16.2.10 (already installed) | Load Geist Sans + Geist Mono | Next.js's own `create-next-app` template imports `Geist` and `Geist_Mono` directly from `next/font/google` (confirmed via Context7 `/vercel/next.js` official docs) — self-hosted at build time, zero runtime network request to Google, and zero extra npm package. **Do not** add the standalone `geist` npm package (v1.7.2 exists on npm) or manual `<link>` tags — both are redundant given `next/font/google` already ships Geist natively. |
 
 ### Development Tools
 
 | Tool | Purpose | Notes |
 |------|---------|-------|
-| Native Pointer Events API (`onPointerDown`/`onPointerMove`/`onPointerUp`, `setPointerCapture`) | Drag handling for vessel icons | No library needed — see Architecture note below |
-| `ResizeObserver` (native browser API) | Track chart container size for the screen↔chart coordinate transform | Pair with a pure `screenToChart()`/`chartToScreen()` function you unit test directly — do not rely on `SVGElement.getScreenCTM()` in components (see jsdom caveat below) |
+| `npx shadcn@latest init` | One-time scaffolding: writes `components.json`, patches `app/globals.css`, adds `src/lib/utils.ts`, installs the runtime deps above | Run in Phase 1 (Scaffolding). Does **not** touch `next.config.ts`, does **not** care whether you run webpack or Turbopack — it only writes source files and edits `package.json`/CSS, so it is fully orthogonal to the project's `--webpack` requirement (see Version Compatibility below). |
+| `npx shadcn@latest add <component>` | Adds one component + its transitive registry deps as vendored `.tsx` source under `src/components/ui/` | Re-run per phase as new components are needed (Select/Slider in Sandbox phase, Tabs/Card/Badge wherever the mockup calls for them). |
 
 ## Installation
 
 ```bash
-# Supporting (only if/when needed — start without any of these)
-npm install zustand        # only if cross-panel prop drilling becomes real
-npm install nanoid         # only if you want short shareable slugs distinct from cuid
+# Phase 1 (Scaffolding) — one-time init, explicit base + template flags for a
+# reproducible, non-interactive setup:
+npx shadcn@latest init --template next --base radix --preset nova
 
-# Dev dependencies
-npm install -D @testing-library/user-event
+# Then pull the components this redesign actually needs (can be split across phases):
+npx shadcn@latest add button card badge tabs select slider separator sheet label input
 ```
 
-Note the shortest path here is genuinely "add nothing new" beyond what's already locked — the chart rendering and geometry math are built on native browser APIs (SVG, Pointer Events, `Intl`/`Math`) plus hand-written TypeScript, which is the deliberate recommendation, not an oversight.
+`init` will itself add `radix-ui`, `class-variance-authority`, `clsx`, `tailwind-merge`, `lucide-react` to `dependencies` and `shadcn`, `tw-animate-css` to `devDependencies` in `package.json` — no manual `npm install` step is required beyond running the CLI.
 
-## The Big Decision: SVG + Pointer Events, NOT react-konva/Canvas
+## The Base UI vs Radix decision
 
-**Recommendation: render the chart as native SVG (`<svg>`, `<circle>`/`<polygon>` vessel icons, `<line>` heading/bearing vectors, `<circle>` CPA marker) using plain React JSX, with dragging implemented via the native Pointer Events API.** Do not add `react-konva`/`konva`.
+This is the single most important — and most likely to be missed — finding of this research: **shadcn/ui's CLI default primitive library changed from Radix UI to Base UI (`@base-ui/react`) as of the "July 2026 - Base UI as the Default" changelog.** Running a bare `npx shadcn@latest init` today (or `--defaults`) gives you `--preset base-nova`, which pulls in `@base-ui/react` (v1.6.0), **not** `radix-ui`. This is a genuine, very recent (this month) change that most existing tutorials, blog posts, and Stack Overflow answers do not reflect yet.
 
-**Why (confidence: HIGH — verified via WebSearch across multiple 2025/2026 comparison sources and Context7 library metadata):**
+**Recommendation: pass `--base radix` explicitly and don't take the new default.**
 
-- **Scale doesn't justify canvas.** This project has exactly 2 vessels plus a handful of overlay primitives (bearing line, CPA marker, heading vectors). Konva's retained-mode canvas rendering exists to solve *many-object* performance problems (dashboards, games, editors with hundreds of shapes) — [Konva's own "best canvas library" guide](https://konvajs.org/docs/guides/best-canvas-library.html) and comparison articles position it for exactly that case. At 2 objects, canvas buys nothing and costs a dependency the project's own engineering persona ("justify every abstraction and dependency") would reject.
-- **Testability fits the locked stack.** The project's testing constraint is Vitest + React Testing Library, TDD-where-practical. SVG elements are real DOM nodes — RTL can query them (`getByRole`, `getByTestId`) and `@testing-library/user-event` can simulate pointer drags directly. Canvas content is opaque pixels to RTL; teams testing `react-konva` widely report needing `vitest-canvas-mock` and still hitting flakiness — one canvas-testing writeup found Vitest's canvas+thread combination "crashing node.js" and "failing ~50% of the time" ([source](https://github.com/vitest-dev/vitest/discussions/395)), with the pragmatic workaround being "don't test the canvas, test the model." SVG avoids that problem class entirely — you get DOM-level interaction testing for free.
-- **Vector aesthetic fit.** A nautical chart (compass rose, range rings, rhumb/bearing lines, sharp vessel wedges) is fundamentally vector content, not bitmap/sprite content — SVG is a more natural fit than a canvas library built around sprites and filters.
-- **Fits existing idioms.** SVG-in-JSX is fully declarative React, consistent with how the rest of the app (including tRPC-driven UI) is built — no separate imperative scene-graph API to learn or maintain alongside React's own render model.
+Rationale:
+- **Maturity/predictability over novelty.** Radix UI primitives have years of production usage, exhaustive a11y test coverage, and an enormous body of community "how do I customize X" answers. Base UI (co-authored by the former MUI/Base UI team) became shadcn's default only this month — it's the direction shadcn is clearly heading, but for a portfolio project where you (and interviewers) may need to debug an unfamiliar primitive under time pressure, the deeply-documented option is the safer bet.
+- **Both are confirmed compatible with your exact React 19.2.7.** Verified via live npm registry: `radix-ui@1.6.2` peer-deps declare `"react": "^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc"`; `@base-ui/react@1.6.0` declares `"react": "^17 || ^18 || ^19"`. Neither requires `--legacy-peer-deps` or `--force` on install — shadcn's own `react-19.mdx` doc warning about peer-dep conflicts is now stale for both current packages (verify this stays true at actual install time, since it's a live registry state, not a permanent guarantee).
+- **Unified package, not the old fragmented `@radix-ui/react-select` + `@radix-ui/react-slider` + ... imports.** As of the shadcn "Unified Radix UI Package" changelog (Feb 2026), Radix-based components generated by the `new-york`/`radix-*` styles now import everything from a single `radix-ui` package — so choosing Radix today does **not** mean a sprawling dependency list like older shadcn setups; `package.json` gets exactly one `radix-ui` entry.
+- **No `Select`/`Slider` API surface risk.** The `base` vs `radix` split has a real, documented API difference (e.g. Base UI's `Select` requires an `items` prop; Radix's `Select` is inline-JSX-only) — per shadcn's own `skills/shadcn/rules/base-vs-radix.md`. Given this project needs `Select` (vessel type) and `Slider` (speed) specifically, picking one base up front and sticking with it avoids having to rewrite those two components' internals mid-milestone if a `shadcn add` run ever silently mixes bases.
 
-**Known caveat (confidence: HIGH, verified via GitHub issues):** `jsdom` (used by Vitest's DOM environment) does **not** implement `SVGElement.getScreenCTM()` or `getBBox()` — calling them in a component throws `TypeError: ... is not a function` in tests ([testing-library/react-testing-library#1116](https://github.com/testing-library/react-testing-library/issues/1116)). Mitigation: never call `getScreenCTM()` from component code. Compute the screen↔chart coordinate transform as a **pure function** (`screenToChart(clientPoint, viewBox, containerRect): ChartPoint`) driven by a `ResizeObserver`-tracked container rect and the SVG's known `viewBox`, and unit-test that function directly with plain numbers — no DOM APIs, no jsdom limitations, no mocking required.
+If a future contributor re-runs `init` without `--base radix`, they will silently get Base UI instead — worth a one-line comment in `components.json` or the phase-1 PR description.
 
-**Alternative — `react-konva` 19.2.5 + `konva` 10.3.0:** revisit this if the roadmap grows to 3+ simultaneously animated vessels, real-time AIS replay/animation, or heavy layering/rotation performance needs (all currently listed as Out of Scope in PROJECT.md). If adopted later, pair with `vitest-canvas-mock` and adopt a "test the model, not the canvas" testing strategy from day one.
+## Tailwind v4 setup — confirm before writing custom tokens
 
-## The Big Decision: Hand-Rolled Geometry, NOT geolib/turf.js
+Tailwind v4 changed shadcn's whole theming model vs v3. Concretely, for this project:
 
-**Recommendation: write the bearing/CPA/relative-geometry math as a small, pure, fully unit-tested TypeScript domain module (`src/domain/geometry/`). Do not add `geolib` or `@turf/turf`.**
+1. **No `tailwind.config.js` file, and `components.json`'s `tailwind.config` field is left as `""`.** Confirmed current behavior — Tailwind v4 is configured entirely through CSS (`@import`, `@theme`, `@custom-variant`), matching what's already in this repo's `postcss.config.mjs` (`@tailwindcss/postcss` plugin, no config file). Nothing to change here — the existing setup is already v4-idiomatic.
+2. `app/globals.css` (currently just `@import "tailwindcss";`) will be rewritten by `init` to something like:
+   ```css
+   @import "tailwindcss";
+   @import "tw-animate-css";
+   @import "shadcn/tailwind.css";
 
-**Why (confidence: HIGH for the "don't add a geodesy library" call, MEDIUM for exact formula sourcing — standard nautical formulas, cross-checked across multiple sources):**
+   @custom-variant dark (&:is(.dark *));
 
-- **Wrong problem class.** `geolib` (3.3.14) and `@turf/turf` (7.3.5) solve *geodesy* — great-circle/rhumb-line math on the WGS84 ellipsoid, built for real lat/lon coordinates where Earth's curvature matters over long distances. This project is an explicit "chart-style sandbox" with synthetic vessel positions (not real AIS/lat-lon ingestion — that's listed Out of Scope in PROJECT.md). At the scale of a two-vessel encounter (positions at most a few tens of nautical miles apart, likely a local Cartesian plane with an arbitrary origin), flat-plane trigonometry is both correct and simpler than pulling in a geodesy library.
-- **This math IS the portfolio's core value.** PROJECT.md is explicit that the point of this project is demonstrating "domain modeling depth" through the rules-engine/geometry layer. True bearing (`atan2`-based, normalized 0–360° clockwise from North), relative bearing (bearing to contact minus own heading, normalized to ±180°), and CPA/TCPA (closest point of approach / time to CPA, via the standard relative-position-dot-relative-velocity formula) are each a few dozen lines of trigonometry. Outsourcing them to a library would remove the exact code an interviewer is meant to read.
-- **Testability.** A pure `bearing(a, b): number` / `relativeBearing(own, contact): number` / `cpa(vesselA, vesselB): { distance, timeToClosestApproach }` module has zero dependencies on Next.js/tRPC/Prisma/React and is trivially unit-tested with plain numeric fixtures in Vitest — directly satisfying the project's stated testing priority ("the COLREGS rules engine is the highest-value test target").
+   @theme inline {
+     --color-background: var(--background);
+     --color-foreground: var(--foreground);
+     /* ...card/popover/primary/secondary/muted/accent/destructive/border/input/ring/chart/sidebar... */
+     --radius-sm: calc(var(--radius) * 0.6);
+     --radius-md: calc(var(--radius) * 0.8);
+     --radius-lg: var(--radius);
+     /* ... */
+   }
 
-**Formulas to implement (MEDIUM confidence — standard navigation math, cross-verified across multiple sources, recommend validating against a known textbook example during implementation):**
-- True bearing between two points: `atan2(dx, dy)` (note: bearing convention swaps the usual x/y order vs. math-standard `atan2(y, x)`, since bearing is measured clockwise from North, not counterclockwise from East), normalized to `[0, 360)`.
-- Relative bearing: `normalize(bearingToContact - ownHeading)` to `(-180, 180]`.
-- CPA: relative position vector `R = posB - posA`, relative velocity vector `V = velB - velA`; `tcpa = -(R · V) / (V · V)` (guard `V · V ≈ 0` → parallel/matching course, CPA = current distance, no time bound); `dcpa = |R + V * tcpa|`. ([Background reference](https://binnacleai.com/blog/cpa-tcpa-explained))
+   :root { /* light palette, oklch(...) by default */ }
+   .dark { /* dark palette, oklch(...) by default */ }
 
-**If real lat/lon geodesy is ever added** (currently Out of Scope): `geolib` 3.3.14 over `@turf/turf` — geolib is TypeScript-native, zero-dependency, and scoped to exactly point/bearing/distance operations; turf is a much larger modular GIS suite (area, polygons, spatial joins) that's overkill for this project's needs even if geodesy were in scope.
+   @layer base {
+     * { @apply border-border outline-ring/50; }
+     body { @apply bg-background text-foreground; }
+   }
+   ```
+   The `@import "shadcn/tailwind.css"` line is new (added within the last few months) — it's how the `shadcn` npm package (installed as a `devDependency`) now ships shared base utilities instead of inlining everything into your `globals.css`. Confirm this import resolves correctly in your Tailwind v4 PostCSS pipeline the first time you build after `init` — it's a bare-specifier CSS `@import`, which Tailwind v4's own resolver (not classic `postcss-import`) handles, and should Just Work given `@tailwindcss/postcss` is already your plugin, but it's new enough to be worth a sanity build immediately after `init`.
+3. **Colors don't have to be OKLCH.** The default template uses `oklch(...)` because that's shadcn's own default palette, not a Tailwind v4 requirement — CSS custom properties accept any valid color syntax. For this milestone, put the mockup's literal hex values directly into the palette block (`--background: #09090B;`, `--accent: #2dd4bf;` /* teal */, etc.) rather than converting to OKLCH — simpler, and avoids any transcription error converting hex→OKLCH by hand.
 
-## Domain / Rules-Engine Layer: Plain TypeScript + Zod, NOT a Rules-Engine Library
+## Dark-only theme — don't add `next-themes`
 
-**Recommendation: no new dependency.** Model the COLREGS rules as a pure TypeScript decision layer, using Zod (already locked) for domain value-object schemas.
+The mockup defines exactly one palette (dark) with no toggle. The idiomatic shadcn-recommended way to add a light/dark switcher is `next-themes` (`ThemeProvider attribute="class" defaultTheme="system" enableSystem`) — **skip it entirely.**
 
-**Why (confidence: MEDIUM — synthesized from multiple community Clean-Architecture-in-Next.js writeups, no single canonical source, but consistent pattern across sources):**
+Recommended pattern instead:
+- Keep the generated `.dark { ... }` CSS block (rename its values to the mockup's actual colors) as the **only** palette that matters, and hardcode `<html lang="en" className="dark">` in `app/layout.tsx` — permanently, no state, no provider.
+- Do **not** delete the `.dark` class/`@custom-variant dark` machinery even though there's no toggle: several shadcn component internals bake in literal `dark:` prefixed Tailwind utility overrides (e.g. `dark:bg-input/30` in Button, `dark:border-input` etc.) that only fire when a `.dark` ancestor class exists. Deleting the class instead of just always applying it would silently drop those refinements.
+- This avoids a runtime dependency (`next-themes` 0.4.6 is not needed anywhere) and matches CLAUDE.md's existing "dark-mode only, no light theme/toggle" locked decision.
 
-- **`json-rules-engine` and similar libraries solve a different problem.** These exist so non-engineers can edit rules at runtime via JSON (pricing, eligibility, feature flags) — the tradeoff is weaker TypeScript type-checking and harder-to-trace rule firing ("debugging is harder than expected... rule conflicts are invisible until production" — multiple sources). COLREGS Rules 11–18 are fixed, published maritime law that will never need runtime editing by a non-engineer. A JSON rules engine would add indirection without solving a real problem this project has, and would make producing the required "reasoning trail" (rule citation + geometric logic) harder to construct and test than a typed function would.
-- **XState doesn't fit either.** Encounter classification is a pure, stateless derivation — recomputed from scratch on every vessel drag/position change — not a long-lived process with time-based transitions and side effects. Modeling it as an actual finite state machine would add a dependency to manage a problem (state over time) this domain doesn't have at the current scope.
-- **Recommended pattern:** a pure `classifyEncounter(vesselA: Vessel, vesselB: Vessel): EncounterResult` function in `src/domain/colregs/`, internally structured as a decision tree/strategy dispatch across Rule 13 (overtaking) → Rule 14 (head-on) → Rule 15 (crossing) → Rule 18 (vessel-type precedence), with zero imports from Next.js, tRPC, or Prisma. Zod schemas (`VesselSchema`, `PositionSchema`) act as the shared boundary contract — used both for tRPC input validation and as the domain's value-object types (`z.infer<typeof VesselSchema>`), avoiding duplicate type definitions between the API and domain layers. tRPC routers become thin "interface adapter" wrappers that call the pure domain function and (optionally) hand the result to a Prisma repository for persistence when a scenario is saved. This keeps the domain layer 100% unit-testable in isolation, matching multiple independently-sourced Clean-Architecture-in-Next.js references: [Clean Architecture in Practice with TypeScript, Prisma, Next.js](https://www.arnaudrenaud.com/articles/clean-architecture-typescript-prisma-next/), [nikolovlazar/nextjs-clean-architecture](https://github.com/nikolovlazar/nextjs-clean-architecture).
-- **Folder shape:** flat and pragmatic is fine at this project's scope — `src/domain/` (pure, framework-free: colregs rules, geometry math, types), `src/server/api/` (tRPC routers = interface adapters, call into `src/domain/`), `src/server/db/` (Prisma client + repositories = infrastructure). The hard rule to enforce: `src/domain/` never imports from `src/server/` or any Next.js/tRPC/Prisma package — this boundary is what makes the "domain modeling depth" claim in PROJECT.md actually true rather than aspirational.
+## Component mapping to this milestone's actual UI needs
+
+| Design pattern (from PROJECT.md phases) | shadcn component(s) | Notes |
+|---|---|---|
+| Header / top nav | **no dedicated shadcn "header" component exists** — compose from `Button` (ghost/link variants) + plain `<nav>`/`<a>` markup; add `Sheet` only if the mockup's mobile breakpoint (900px/640px per PROJECT.md) collapses nav into a slide-out drawer | Verify against the actual mockup in Phase 1 whether mobile nav is a drawer (→ needs `Sheet`) or a simple stacked/hidden menu (→ no extra component) |
+| Buttons (CTAs, controls) | `Button` | Core dependency for almost every other component; add first |
+| Vessel type picker | `Select` | This is the component most exposed to the Base-vs-Radix API difference noted above — Radix's `Select` composes as inline JSX children; confirm this matches how the mockup's dropdown is expected to behave (single-select, no multi-select needed) |
+| Speed control | `Slider` | Radix's `Slider` supports a controlled `value`/`onValueChange` array — fits a single-thumb speed control directly |
+| Hero preview / reasoning-trail containers | `Card` | Also likely useful for the Sandbox phase's reasoning-trail panel and Gallery phase's preset-scenario tiles |
+| Give-way/stand-on role indicators, vessel-type tags | `Badge` | Matches the existing Phase-4 "color + role badges" pattern referenced in PROJECT.md's Validated requirements — this is a restyle, not new UX |
+| Tabbed content (if the mockup groups controls/panels) | `Tabs` | Only add if the mockup actually shows tabs — don't add speculatively |
+| Position/heading numeric fields (Sandbox phase, inferred) | `Input`, `Label` | Not explicitly named in the question but near-certain given "position, heading, speed, vessel type" are all user-set values (PROJECT.md) — confirm against the mockup in Phase 3 (Sandbox) before adding |
+| Visual separation in Header/Footer or Card internals | `Separator` | Small, no-dependency-risk addition; add opportunistically rather than up front |
+
+### What NOT to add (yet)
+
+| Component/library | Why not | Add it if... |
+|---|---|---|
+| `Sidebar` (+ `SidebarProvider`/`SidebarInset`/etc.) | This is a dashboard-drawer-navigation pattern (persistent left rail, collapsible sections) — the app is a single-page marketing-style site (Hero → Sandbox → Gallery on one route) per PROJECT.md's phase list, not a multi-page app-shell | The app ever grows a genuine multi-page admin-style nav |
+| `Dialog`/`AlertDialog` | Not mentioned in the mockup's described patterns; the existing "save & share" flow (Phase 5, v1.0) doesn't obviously need a modal, and PITFALLS territory (focus trapping, portal z-index vs the SVG chart's own stacking context) isn't worth taking on speculatively | The mockup actually shows a modal confirmation for save/share, or delete-scenario confirmation is added later |
+| `next-themes` | Dark-only, no toggle — see above | A light theme or user-togglable theme is ever added (`v1.2+`, not currently planned) |
+| `geist` (standalone npm package) | Redundant — `next/font/google`'s built-in `Geist`/`Geist_Mono` already self-hosts identically, at zero extra dependency cost | You need Geist outside a Next.js project (this package exists specifically for non-Next projects) |
+| `sonner` (toast) | Not named in the mockup patterns given; the existing share-link UX (v1.0) has no described toast requirement | The redesign's Hero/Sandbox actually shows a toast for "link copied" or similar — verify against the mockup, don't assume |
+| `Sidebar`'s implicit `Sheet`/`Tooltip` transitive adds | Only pull `Sheet` directly if the mockup's mobile header genuinely needs a drawer | Confirmed via mockup in Phase 1 |
 
 ## Alternatives Considered
 
 | Recommended | Alternative | When to Use Alternative |
-|-------------|-------------|--------------------------|
-| SVG + native Pointer Events | `react-konva` + `konva` | Roadmap grows to 3+ animated vessels, real-time replay, or heavy shape-transform performance needs (currently Out of Scope) |
-| SVG + native Pointer Events | `@use-gesture/react` (10.3.1) or Motion/`framer-motion` (12.42.2) drag helpers | Drag interactions need multi-touch, inertia, or complex gesture composition beyond simple click-drag-release — not needed for 2 vessels on a fixed chart |
-| Hand-rolled geometry module | `geolib` (3.3.14) | Real lat/lon + geodesic (Earth-curvature) distance/bearing become in-scope (e.g. real AIS ingestion is added in a future milestone) |
-| Plain TS + Zod domain layer | `json-rules-engine` | Rules need to be editable by non-engineers at runtime without a deploy (not the case for published maritime law) |
-| Plain TS + Zod domain layer | `xstate` | Encounter modeling grows into an actual time-based multi-step process (e.g. simulating maneuver sequences over time) rather than a stateless snapshot classification |
-| Prisma default `cuid()`/`uuid()` for shareable IDs | `nanoid` (6.0.0) | Product requirement for short, human-shareable URLs distinct from the DB primary key |
-| `useState`/`useReducer` + lifting state up | `zustand` (5.0.14) | Sandbox grows to 3+ sibling panels genuinely needing shared read/write state without prop drilling |
+|---|---|---|
+| `--base radix` | `--base base` (Base UI, the new CLI default) | Starting a brand-new project today with no legacy pattern-matching concerns, or specifically wanting to track shadcn's own forward direction; also has a smaller/cleaner component API in places (e.g. exposed `buttonVariants` without `asChild`/Slot indirection) |
+| `next/font/google` (`Geist`, `Geist_Mono`) | `geist` npm package + `next/font/local` | Non-Next.js rendering paths, or if you need Geist's variable-font axis controls beyond what `next/font/google`'s wrapper exposes (unlikely for this project) |
+| Hardcoded `<html className="dark">` | `next-themes` with `ThemeProvider` | A theme toggle becomes an actual product requirement |
+| `--preset nova` | `--preset lyra` or a bespoke/no-preset init | The mockup's visual language (spacing density, radius scale) more closely matches a different named preset — worth a quick visual comparison during Phase 1, though since the mockup's colors/spacing/breakpoints are being followed exactly and will override most preset defaults anyway, this choice mostly only affects default component internals (padding scale, icon library) rather than final appearance |
 
 ## What NOT to Use
 
 | Avoid | Why | Use Instead |
-|-------|-----|--------------|
-| `react-konva` / `konva` (canvas rendering) | Solves a many-object/high-performance-animation problem this 2-vessel project doesn't have; makes RTL-based component testing much harder (canvas is opaque pixels); known Vitest+canvas testing flakiness in the community | Native SVG + React JSX |
-| `geolib` / `@turf/turf` | Solves real-world geodesy (Earth curvature) for a synthetic, non-geographic sandbox; would also outsource the exact math the portfolio project exists to showcase | Hand-rolled `src/domain/geometry/` pure functions |
-| `json-rules-engine` (or similar JSON-driven rules libraries) | Built for runtime-editable business rules by non-engineers; weakens type safety and traceability versus a typed function, for rules (COLREGS 11–18) that are fixed published law | Pure `classifyEncounter()` TypeScript function with Zod-typed inputs |
-| `xstate` | Adds state-machine machinery for a classification that is a stateless per-render derivation, not a time-based multi-step process | Pure function recomputed on each vessel state change |
-| `vitest-canvas-mock` | Only needed if you adopt `react-konva`/canvas rendering — irrelevant complexity if you take the SVG recommendation | N/A — avoided by not using canvas |
-| Calling `SVGElement.getScreenCTM()`/`getBBox()` directly inside components | Not implemented in `jsdom`, throws in Vitest/RTL tests | Pure `screenToChart()`/`chartToScreen()` functions driven by `ResizeObserver` + known `viewBox`, tested independently of the DOM |
-
-## Stack Patterns by Variant
-
-**If the roadmap later adds 3+ simultaneously visible/animated vessels (currently Out of Scope):**
-- Reconsider `react-konva`/`konva` for the chart layer
-- Because SVG's DOM-node-per-element cost and React reconciliation overhead start to matter once you're past a handful of simultaneously moving objects; Konva's retained-mode canvas scales better there
-
-**If real AIS lat/lon ingestion is added later (currently Out of Scope):**
-- Add `geolib` (3.3.14) for geodesic distance/bearing between real-world coordinates
-- Because flat-plane trigonometry stops being a safe approximation once real Earth-referenced positions and longer distances are involved
+|---|---|---|
+| Bare `npx shadcn@latest init` / `init --defaults` | Silently pulls the new `--preset base-nova` default (`@base-ui/react`), not Radix — a very recent (this month) CLI default change that most existing docs/tutorials/answers still assume is Radix | `npx shadcn@latest init --template next --base radix --preset nova` (explicit flags) |
+| `tailwindcss-animate` (the v3-era Tailwind plugin) | No `tailwind.config.js`/plugins array exists in Tailwind v4 — this package's plugin API doesn't apply | `tw-animate-css` (pure CSS `@import`, installed automatically by `shadcn init`) |
+| `next-themes` | Adds a runtime theme-switching dependency and provider tree for a fixed, dark-only design with no toggle requirement | Hardcoded `<html className="dark">` in `app/layout.tsx` |
+| Standalone `geist` npm package or manual `<link>` Google Fonts tags | `next/font/google` already self-hosts Geist/Geist Mono natively at build time — either alternative is a redundant dependency or a slower, non-self-hosted network fetch | `import { Geist, Geist_Mono } from "next/font/google"` |
+| Individual `@radix-ui/react-select`, `@radix-ui/react-slider`, etc. package installs | Superseded by the unified `radix-ui` package (Feb 2026 shadcn change) — installing the old fragmented packages manually would fight what the current CLI/registry actually generates | Let `shadcn init --base radix` install the single `radix-ui` package; don't hand-install fragmented Radix packages |
 
 ## Version Compatibility
 
 | Package A | Compatible With | Notes |
-|-----------|------------------|-------|
-| `react-konva@19.2.5` | `react@19.2.7` | Confirmed current major-version alignment, for reference only — not the primary recommendation |
-| `zod@4.4.3` | `@trpc/server@11.18.0` | tRPC 11's input/output validation is designed around Zod 3/4-style schemas; no known incompatibility |
-| `jsdom` (via Vitest env) | SVG testing | Does not implement `getScreenCTM()`/`getBBox()` — see caveat above; keep coordinate-transform logic DOM-API-free |
-| `@testing-library/user-event` | `@testing-library/react@16.3.2` | Verify exact user-event major version at install time (registry lookup was interrupted mid-research) — any recent major (v14+) supports the `pointer()` API needed for drag simulation |
+|---|---|---|
+| `shadcn@4.13.1` init | `next@16.2.10` + `--webpack` dev/build scripts | The CLI only writes/edits source files (`components.json`, `globals.css`, `src/components/ui/*`, `src/lib/utils.ts`) and edits `package.json` — it never inspects or depends on which bundler `next dev`/`next build` uses. **Verified no known incompatibility with the project's webpack-only `resolve.extensionAlias` requirement** — that config only remaps `.js`→`.ts`/`.tsx` extension resolution for hand-authored relative imports; it has zero interaction with shadcn's generated `@/`-alias, extensionless imports (see next row). |
+| shadcn-generated imports (`@/lib/utils`, `@/components/ui/button`) | Project's `tsconfig.json` (currently has **no** `@/*` path alias) | **Action needed in Phase 1:** add `"baseUrl": ".", "paths": { "@/*": ["./src/*"] }` to `tsconfig.json`'s `compilerOptions`. This is purely additive — it does not touch or conflict with the existing `.js`-suffix relative-import convention (that's an *extension-resolution* concern handled by webpack's `extensionAlias`; `@/*` is a *path-prefix* alias, an orthogonal mechanism). Recommended boundary: shadcn-generated files under `src/components/ui/` keep their default `@/`-prefixed, no-`.js`-suffix internal imports unmodified (so future `shadcn add`/diff/update commands stay clean against upstream); hand-authored app code consuming those components keeps using the project's existing relative `.js`-suffixed convention when importing them, e.g. `import { Button } from "../../components/ui/button.js"`. |
+| `radix-ui@1.6.2` | `react@19.2.7` | Peer dep `"react": "^16.8 \|\| ^17.0 \|\| ^18.0 \|\| ^19.0 \|\| ^19.0.0-rc"` — confirmed via live npm registry lookup, satisfies 19.2.7 natively, no `--legacy-peer-deps`/`--force` needed. |
+| `@base-ui/react@1.6.0` (if `--base base` chosen instead) | `react@19.2.7` | Peer dep `"react": "^17 \|\| ^18 \|\| ^19"` — also natively compatible, for reference if the Base UI alternative is revisited later. |
+| `tailwindcss@4.3.3` (already installed) | `shadcn@4.13.1`'s CSS-first templates | Matches exactly — no Tailwind version bump needed for this milestone. |
+| `typescript@7.0.2` (tsgo) | shadcn CLI's codegen (`ts-morph`-based file edits) | The CLI edits/writes plain `.tsx`/`.ts`/`.json` source files; it does not invoke the TypeScript compiler API directly against your project, so it's unaffected by the `tsgo`/`ignoreBuildErrors` situation documented in `next.config.ts`. Your existing `npx tsc --noEmit` gate remains the authoritative type-check step after any `shadcn add`. |
 
 ## Sources
 
-- Context7 `/konvajs/react-konva`, `/konvajs/konva`, `/konvajs/site` — library metadata/resolution (HIGH reputation, used to confirm Konva is the community-standard canvas choice, then deliberately not selected for this project's scope)
-- Context7 `/websites/motion_dev` — `onDrag`/drag-constraints API shape, used to evaluate Motion as a drag alternative
-- npm registry (`npm view <pkg> version`) — live version numbers for all packages listed, fetched at research time (HIGH confidence, not training data)
-- [Konva "Best JavaScript Canvas Library" guide](https://konvajs.org/docs/guides/best-canvas-library.html) — canvas-vs-SVG-vs-WebGL positioning
-- [Fabric.js vs Konva vs PixiJS 2026 comparison](https://www.pkgpulse.com/guides/fabricjs-vs-konva-vs-pixijs-canvas-2d-graphics-2026) — MEDIUM confidence, single source, but consistent with Konva's own positioning
-- [vitest-dev/vitest discussion #395](https://github.com/vitest-dev/vitest/discussions/395) — canvas mocking flakiness in Vitest
-- [testing-library/react-testing-library#1116](https://github.com/testing-library/react-testing-library/issues/1116) — `getScreenCTM` not implemented in jsdom, MEDIUM-HIGH confidence (verified GitHub issue, first-party repo)
-- [geolib npm](https://www.npmjs.com/package/geolib) / [turf.js distance docs](https://turfjs.org/docs/api/distance) — geodesy library comparison
-- [CPA & TCPA Explained — Binnacle AI](https://binnacleai.com/blog/cpa-tcpa-explained) — CPA/TCPA formula background, MEDIUM confidence (single source, cross-checked against standard relative-velocity vector math which is well-established)
-- [Clean Architecture in Practice with TypeScript, Prisma, Next.js — Arnaud Renaud](https://www.arnaudrenaud.com/articles/clean-architecture-typescript-prisma-next/) — MEDIUM confidence, community pattern reference
-- [nikolovlazar/nextjs-clean-architecture](https://github.com/nikolovlazar/nextjs-clean-architecture) — MEDIUM confidence, community reference implementation
-- [Nected: Top 10 Node.js Rule Engines 2026](https://www.nected.ai/blog/rule-engine-in-node-js-javascript) — rules-engine-library use-case boundaries (when to use vs. avoid)
+- Context7 `/shadcn-ui/ui` (HIGH reputation, 3700+ snippets) — CLI `init`/`add` command definitions, `components.json` schema, Tailwind v4 CSS templates, React 19 peer-dep guidance, Base UI vs Radix changelog entries ("December 2025 - npx shadcn create", "January 2026 - Base UI Documentation", "July 2026 - Base UI as the Default", "February 2026 - Unified Radix UI Package"), `base-nova`/`radix-nova` registry.json dependency declarations, preset defaults (`packages/shadcn/src/preset/defaults.ts`)
+- Context7 `/vercel/next.js` (HIGH reputation, official docs) — `next/font/google` Geist/Geist_Mono import pattern from `create-next-app`'s own template and `01-app/01-getting-started/13-fonts.mdx`
+- npm registry live lookups (HIGH confidence, current at research date, not training data): `shadcn` (4.13.1 latest / 4.2.0-canary.0 / 4.10.0-rc), `radix-ui` (1.6.2), `@base-ui/react` (1.6.0), `class-variance-authority` (0.7.1), `clsx` (2.1.1), `tailwind-merge` (3.6.0), `lucide-react` (1.25.0), `tw-animate-css` (1.4.0), `geist` (1.7.2), `next-themes` (0.4.6), `next` (16.2.10 latest), peer-dependency fields for `radix-ui` and `@base-ui/react`
+- WebFetch `https://ui.shadcn.com/docs/tailwind-v4` — corroborated the `@theme inline`/OKLCH/no-`tailwind.config.js` current setup (MEDIUM-HIGH — WebFetch summary, cross-checked against the same claims independently confirmed via Context7's raw doc snippets above)
+- Repo inspection (this codebase, HIGH confidence — direct file reads): `package.json`, `next.config.ts`, `app/globals.css`, `app/layout.tsx`, `postcss.config.mjs`, `tsconfig.json` — used to ground every "no change needed here" / "action needed here" claim against the actual current state rather than a generic starter
 
 ---
-*Stack research for: Maritime COLREGS collision-avoidance rules engine and visualizer*
-*Researched: 2026-07-14*
+*Stack research for: shadcn/ui adoption into existing Next.js 16 + React 19 + Tailwind v4 app (v1.1 UI Redesign milestone)*
+*Researched: 2026-07-18*

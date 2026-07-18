@@ -1,180 +1,159 @@
 # Project Research Summary
 
 **Project:** COLREGS Navigator
-**Domain:** Maritime COLREGS collision-avoidance rules-engine + interactive 2D chart visualizer (portfolio project)
-**Researched:** 2026-07-14
-**Confidence:** MEDIUM-HIGH
+**Milestone:** v1.1 — UI Redesign (shadcn/ui adoption)
+**Domain:** Retrofitting a dark-only, shadcn/ui-based design system onto an existing, already-shipped Next.js 16 / React 19 / Tailwind v4 interactive-SVG portfolio app, plus relocating an existing `/gallery` route into a home-page anchor section
+**Researched:** 2026-07-18
+**Confidence:** HIGH
 
 ## Executive Summary
 
-COLREGS Navigator is a rules-engine-centric web app, not a CRUD app wearing a maritime skin — and the research across all four tracks converges on the same core message: the entire value of this portfolio project lives in a small, pure, framework-free domain layer (`src/domain/colregs/`) that classifies a two-vessel encounter (head-on/crossing/overtaking, Rules 12–15), applies the Rule 18 vessel-type hierarchy, and produces a structured reasoning trail — not just a verdict. Every other layer (Next.js/tRPC/Prisma UI and persistence) exists to expose that domain layer, never to contain it. The stack needed on top of the already-locked foundation (Next.js/React/TypeScript/Tailwind/tRPC/Prisma/Zod/Vitest/RTL) is deliberately minimal: native SVG + Pointer Events for the chart (not react-konva/canvas — this project has only ~2 vessels, nowhere near canvas's many-object performance threshold, and SVG is trivially testable with RTL), and hand-rolled trigonometry for bearing/CPA math (not geolib/turf — this is a synthetic flat-plane sandbox, not real-world geodesy, and the math itself is the portfolio's showcase content). No new rules-engine or state-machine library is warranted either — COLREGS 11–18 is fixed published law, not runtime-editable business rules, so a typed `classifyEncounter()` function with a Specification-pattern rule registry is both simpler and more testable than `json-rules-engine` or `xstate`.
+This milestone is a pure presentation-layer restyle, not a new product. The app (a domain-modeling-heavy COLREGS collision-avoidance rules engine with an interactive SVG sandbox) already shipped its v1.0 core loop and validated features; v1.1 layers shadcn/ui + Tailwind v4 dark-only theming on top, adds a net-new marketing Hero section, and relocates the existing preset Gallery from its own `/gallery` route to a `/#gallery` anchor on the home page. No domain logic, tRPC routers, or Prisma layer changes. The four phases (Scaffolding, Hero, Sandbox, Gallery) map directly onto dependency order: tooling/tokens/shell first, then the one genuinely new UI surface (Hero), then the highest-risk restyle (Sandbox), then the lowest-risk relocation (Gallery).
 
-The recommended architecture is Functional Core / Imperative Shell with Ports & Adapters: a zero-dependency domain layer callable from *both* the browser (for instant live-drag reclassification, no network round-trip) and the server (for authoritative re-classification before persistence) — this dual-callability is only possible if domain code never imports React, Next.js, tRPC, or `@prisma/client`. Persistence should store only raw scenario inputs (vessel position/heading/speed/type) and always recompute the verdict on read, never store the derived verdict as a second source of truth. Build order should be strictly dependency-driven: domain layer and its unit tests first (fully verified against textbook fixtures before any UI exists), then infrastructure/application/tRPC, then the UI sandbox wired directly to the domain layer, then persistence/sharing, then the gallery last (since presets are just seeded scenarios reusing the same model).
+The recommended approach is deliberately conservative given how recent and fast-moving the shadcn ecosystem is: pin `--base radix` explicitly (shadcn's CLI silently defaulted to Base UI as of this month — most existing docs/tutorials still assume Radix), skip `next-themes`/`.dark`-toggle machinery entirely in favor of a single hardcoded dark palette (matching the locked "no toggle" decision), and add a narrowly-scoped `@/*` path alias only for shadcn-adjacent code rather than retrofitting the existing 98 relative `.js`-suffixed imports. Component responsibility stays feature-first (`ui/`, `layout/`, `shared/`, `hero/`, `gallery/`, `sandbox/`), with `shared/` as the single DRY location the milestone's own constraints require, and `src/domain/`/`src/server/` untouched.
 
-The single largest risk is getting the COLREGS domain logic subtly wrong in ways that look plausible but are legally/nautically incorrect — this is where pitfalls research is most load-bearing. The most dangerous failure modes are: classifying by heading-difference instead of relative bearing (Pitfall 1), evaluating head-on/crossing before overtaking despite Rule 13's explicit precedence (Pitfall 2), treating COLREGS's explicit "in doubt, assume the cautious case" clauses as hard floating-point cutoffs instead of a first-class ambiguous-zone concept (Pitfall 3), and skipping the Rule 7 risk-of-collision precondition so that diverging/parallel vessels get a confident (wrong) give-way verdict (Pitfall 4). All four are domain-modeling-phase decisions that must be made correctly before writing a single UI component — retrofitting them later is a rewrite, not a patch, especially since explainability (Pitfall 8) requires the reasoning trail to be a byproduct of rule evaluation from day one, not reverse-engineered from a final label afterward.
+The dominant risk across all four research files is not "does shadcn work" (it does, cleanly) — it's **silent regressions in code the restyle touches without meaning to change behavior**: (1) the Sandbox's SVG hull/rotate-handle hit-testing contract, which took two rounds of human UAT to fix in v1.0 and depends on `fill` never becoming `"none"`/transparent, a change jsdom-based tests structurally cannot detect; (2) a half-wired dark theme that silently renders light-mode by default if `<html>` never gets a hardcoded `dark` class; (3) Tailwind v4's CSS-first `@theme` model failing silently (no error) when new semantic color tokens are referenced in JSX but never registered; and (4) the Radix `Select`/`Slider` swap breaking existing `userEvent.selectOptions`-based tests in a way that looks like a DOM bug rather than an interaction-model change. All four have concrete, low-cost mitigations documented in PITFALLS.md, and all require a **manual browser verification pass**, not just a green `npm test`, before merging — this should be an explicit success criterion in the Sandbox and Scaffolding phases specifically.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The locked stack (Next.js 16, React 19, TypeScript 7, Tailwind 4, tRPC 11, Prisma 7, Zod 4, Vitest 4, RTL 16) needs almost nothing added on top of it — the deliberate, high-confidence recommendation is to build the chart and geometry layers on native browser APIs and hand-written TypeScript rather than adding dependencies. See `.planning/research/STACK.md` for full detail.
+The locked core stack (Next.js 16.2.10, React 19.2.7, TypeScript 7.0.2, Tailwind CSS 4.3.3, tRPC 11.18.0, Prisma 7.8.0, Zod 4.4.3, Vitest 4.1.10) is unaffected — this is purely a delta stack for the redesign.
 
-**Core technologies (on top of the locked stack):**
-- Native SVG + Pointer Events (no library): chart rendering + draggable vessel icons — SVG is real DOM, so RTL/`@testing-library/user-event` can test it directly; canvas (react-konva) is opaque pixels and only pays off at object counts far beyond this project's 2 vessels
-- Hand-rolled `src/domain/geometry/` module (no `geolib`/`@turf/turf`): bearing/relative-bearing/CPA-TCPA math as pure, unit-tested TypeScript — this is a synthetic flat-plane sandbox, not real-world geodesy, and the math is the portfolio's core showcase content
-- Plain TypeScript + Zod domain layer (no `json-rules-engine`/`xstate`): COLREGS 11–18 is fixed published law needing type-safety and traceability, not runtime-editable rules or time-based state transitions
-- `@testing-library/user-event` (dev dependency): simulates pointer-drag sequences against SVG elements in tests
-- `zustand` / `nanoid`: optional, add only if cross-panel prop drilling or short shareable slugs become real needs — start without both
-
-**Critical caveat:** `jsdom` (Vitest's DOM environment) does not implement `SVGElement.getScreenCTM()`/`getBBox()` — the screen↔chart coordinate transform must be written as a pure, DOM-API-free function and unit-tested directly, never called from component code in a way that hits this limitation.
+**Core additions:**
+- `shadcn` CLI 4.13.1 + `radix-ui` 1.6.2 (unified package) — component scaffolding + accessible primitives. **Must pass `--base radix` explicitly** — the CLI's bare/default init now pulls Base UI (`@base-ui/react`), a change too recent for most existing docs to reflect.
+- `class-variance-authority` 0.7.1, `clsx` 2.1.1 + `tailwind-merge` 3.6.0, `lucide-react` 1.25.0, `tw-animate-css` 1.4.0 — all installed automatically by `shadcn init`; power the generated `cn()` helper, variant classes, icons, and CSS-only transitions respectively.
+- `next/font/google`'s built-in `Geist`/`Geist_Mono` — no new dependency; do not add the standalone `geist` npm package.
+- Explicitly **not adopted**: `next-themes` (no toggle needed — dark-only is a locked decision), `react-konva`/canvas (unaffected v1.0 decision), `geolib`/`turf.js` (unaffected v1.0 decision), `json-rules-engine`/`xstate` (unaffected v1.0 decision), individual fragmented `@radix-ui/react-*` packages (superseded by the unified `radix-ui` package).
+- Action required in Phase 1: add `tsconfig.json` `paths: { "@/*": ["./src/*"] }` — purely additive, does not conflict with the existing `.js`-suffixed relative-import convention or the webpack `extensionAlias` fix.
 
 ### Expected Features
 
-See `.planning/research/FEATURES.md` for the full landscape, competitor analysis, and dependency graph.
+This milestone adds no new domain capability — "features" here means UX/interaction-pattern decisions for the Hero (net-new) and Gallery (relocated) phases.
 
-**Must have (table stakes, v1):**
-- Per-vessel setup: position, heading, speed, type (two vessels)
-- Live encounter classification (head-on/crossing/overtaking, Rules 12–15) with instant feedback on parameter change
-- Give-way/stand-on determination, clearly labeled, with rule citation shown
-- Reasoning trail: rule citation + geometric explanation (relative bearing, closing angle) in text
-- Visual chart rendering with vessel position/heading and basic bearing indicator
-- Live drag-and-adjust with real-time reclassification
-- Save scenario + shareable link, no login
-- Curated gallery of 5–8 classic preset encounters
+**Must have (table stakes):**
+- Hero: headline + plain-language subhead, primary CTA scrolling straight into the Sandbox (no signup/login gate — matches the app's no-login design), a real-product visual near the fold (the already-locked "illustrative live-classification preview card").
+- Gallery: server-rendered grid of the existing 6 curated presets, reachable at a stable `/#gallery` fragment, cards still navigating to `/s/[shareId]` unchanged.
+- `/gallery` → `/#gallery` permanent (308) redirect so old bookmarks resolve to something meaningful.
 
-**Should have (differentiators, v1.x):**
-- Rule 18 vessel-type hierarchy (sailing, fishing, restricted-in-ability-to-maneuver overrides) — add once the power-driven baseline is solid
-- Geometric overlay drawn directly on the chart (bearing line, overtaking boundary arc), not just described in text
-- Deep-link social preview (OG image) for portfolio/resume distribution
-- Edge-case/ambiguous scenarios in the gallery (near-boundary head-on/crossing, Rule 17(a)(ii) doubt situations)
+**Should have (differentiators, discretionary):**
+- Secondary "view source" CTA in the Hero (verify against the design file first — not confirmed in scope).
+- Small illustrative motion in the Hero preview card (only if it doesn't reintroduce live sandbox wiring or cause layout shift above the Gallery anchor).
 
-**Defer (v2+, explicitly out of scope per PROJECT.md):**
-- Multi-vessel (3+) conflict resolution
-- Lights/shapes/sound-signal and restricted-visibility rules (Rules 19, 32–37)
-- Real AIS data ingestion/replay
-- User accounts/auth
-- Gamification/scoring (actively conflicts with the reasoning-trail-first UX this project is built around)
+**Defer (v2+):**
+- Mini geometric chart thumbnail per Gallery card (requires extracting a non-interactive `ChartPanel` render mode — real cost, conflicts with the milestone's "restyle don't refactor" framing).
+- Inline "load preset into the current sandbox in place" interaction as an alternative to full navigation — explicitly not needed; today's per-scenario `/s/[shareId]` pages are simpler and already validated.
+
+**Explicit anti-features:** do NOT wire the Hero preview card to the real, stateful `SandboxContainer`; do NOT add an auto-playing carousel/video; do NOT gate the CTA behind signup; do NOT add pagination to the Gallery (exactly 6 fixed presets); do NOT client-fetch the Gallery section (breaks the anchor-scroll target's presence at first paint).
 
 ### Architecture Approach
 
-See `.planning/research/ARCHITECTURE.md` for the full system diagram, project structure, and data flows. The recommended shape is Clean Architecture / DDD-lite / Modular Monolith with a Functional Core, Imperative Shell split: a pure, zero-dependency domain layer (`src/domain/colregs/`) is called directly from the browser for live classification (no network) and from tRPC/application-layer code for authoritative server-side re-classification before persistence — the same functions, both places. This is the load-bearing architectural decision: if domain code ever imports `next/*`, `react`, or `@prisma/client`, live client-side reclassification breaks.
+Feature-first, presentation-layer-only restructuring on top of the existing DDD-lite boundary (`src/domain/` and `src/server/` stay completely untouched). shadcn's vendored primitives live in `src/components/ui/` as a strict leaf dependency every feature composes but never forks; a new `src/components/shared/` folder is the single DRY home for cross-feature composed pieces and lookup maps (fixing an existing duplication between `ChartPanel`'s `HULL_FILL_CLASS`/`ROLE_BADGE_TEXT` and `ReasoningPanel`'s parallel maps); new `layout/`, `hero/`, `gallery/` folders sit as siblings to the existing `sandbox/` folder, which keeps its current internal shape (hooks/types/pure-logic modules) as the reference pattern to extend, not replace.
 
 **Major components:**
-1. **Domain layer** (`domain/colregs/`) — entities/value objects (Vessel, Position, Heading, VesselType), geometry (bearing, CPA/TCPA), rules (one file per COLREGS rule as a Specification with `applies()`/`explain()`), and a `classifyEncounter()` orchestrator returning a `ClassificationResult` with an ordered reasoning trail
-2. **Application layer** (`application/`) — use cases (`createScenario`, `getScenario`, `listPresets`) that validate input, re-run domain classification server-side, and call a repository via a port interface (dependency inversion, never importing Prisma directly)
-3. **Infrastructure** (`infrastructure/`) — `PrismaScenarioRepository` implementing the domain-owned repository interface, plus row↔entity mappers
-4. **Interface adapters** (`server/routers/`) — thin tRPC routers (Zod-validated input, one call into the application layer, no business logic)
-5. **UI** (`app/`) — chart canvas, vessel control panel, reasoning trail panel; client components call the domain layer directly for live feedback, and the tRPC client only for persistence/loading
+1. `src/components/layout/` (Header, Footer) — global chrome composed from `ui/*` only, rendered once from `app/layout.tsx`.
+2. `src/components/hero/` — net-new Hero section; its illustrative preview card calls `classifyEncounter()` directly against a fixed fixture (no tRPC, no live wiring), mirroring the existing fixture pattern already used by `SandboxContainer`'s default state.
+3. `src/components/gallery/` — `GallerySection.tsx`, a Server Component moved from `app/gallery/page.tsx`, reusing the existing `gallery.list()` tRPC caller pattern unchanged; `app/gallery/page.tsx` is replaced by a `next.config.ts` redirect (see reconciliation below) rather than left as a lingering shim page.
+4. `src/components/sandbox/` (existing, heaviest restyle) — logic/hooks/types reused verbatim; JSX swapped to shadcn primitives; hardcoded light-theme SVG colors re-themed against the new dark palette; role/color lookup maps consolidated into the existing `vessel-role.ts`.
 
-**Suggested build order (dependency-driven):** domain layer + unit tests → Prisma schema + repository → application use cases → tRPC routers → UI sandbox (wired to domain directly) → persistence/share UI → gallery (last, since presets reuse the same scenario model).
+Design tokens live in exactly one file (`app/globals.css`, CSS-first Tailwind v4, no `tailwind.config.js`), and the standard shadcn `:root`/`.dark`/`@theme inline` shape should be **kept** (not simplified away) even though only one theme is ever active — collapsing it wrong risks black/white color bugs and future `npx shadcn add` diff incompatibility.
+
+### Reconciled Point: `/gallery` → `/#gallery` mechanism
+
+FEATURES.md and ARCHITECTURE.md/PITFALLS.md differ slightly on mechanism. **Recommendation: use a `next.config.ts` `redirects()` entry** (`{ source: "/gallery", destination: "/#gallery", permanent: true }`), not a lingering `app/gallery/page.tsx` shim that calls `redirect()` from `next/navigation`. Rationale: the config-level redirect is a single, static, HTTP-level (308) rule verified via Next.js source (`prepare-destination.ts`) to correctly parse and preserve hash fragments in the `destination` string — it's documented, supported behavior, not a workaround, and it avoids an unnecessary extra render/hop that a lingering page-based shim would add. Both research files agree the redirect must only match on the *path* (fragments never reach the server, so `has`/`missing` conditions can't key off `#gallery`), must use `permanent: true` (308, since this is a permanent structural removal), and that the Gallery section's HTML must exist in the initial server-rendered payload (async Server Component, not client-fetched) for the anchor-scroll target to be present when the browser attempts to scroll.
+
+**Both files also agree this needs manual, non-automated verification** — Next.js's hash-scroll behavior has known gaps (native full-page-load fragment scroll after an HTTP redirect behaves differently than client-side `<Link href="/#gallery">` navigation, and Next.js's scroll targeting explicitly skips sticky/fixed elements, so a sticky header can cover the target after "successful" scroll). Concretely test: (a) a fresh tab navigating directly to the old `/gallery` URL, and (b) an in-app `<Link href="/#gallery">` click — these are different code paths and can fail independently. Add `scroll-padding-top` sized to the sticky header's height regardless of outcome.
 
 ### Critical Pitfalls
 
-See `.planning/research/PITFALLS.md` for all 10 pitfalls plus technical debt, integration, performance, security, and UX tables. Top risks, in order of how early they must be decided:
-
-1. **Heading-difference vs. relative-bearing confusion** — classification must be built on relative-bearing-of-B-from-A and relative-bearing-of-A-from-B as independently computed, independently tested primitives; heading-difference alone silently misclassifies both head-on and overtaking cases. Avoid by writing and unit-testing the geometry primitives before any classification rule.
-2. **Wrong rule evaluation order** — Rule 13 (overtaking) explicitly overrides Rules 14/15 and must be evaluated first, using relative bearing only; a classifier structured as `if headOn() else if crossing() else overtaking()` will misclassify legitimate overtaking situations as crossing. Also implement the "sticky" rule: an established overtaking situation must not flip to crossing later even if bearing drifts.
-3. **Doubt/boundary handling treated as exact thresholds** — COLREGS explicitly requires "if in doubt, assume the more cautious classification" near the 22.5°-abaft-beam and reciprocal-heading boundaries; naive hard cutoffs cause verdict "flicker" during live drag and omit the ambiguous-zone concept the reasoning trail is supposed to surface. Model doubt bands as first-class domain concepts from the start.
-4. **Missing Rule 7 (risk-of-collision) gating** — classifying encounters without first checking whether the vessels are actually converging (CPA/TCPA or bearing-rate) produces confident-but-nonsensical give-way verdicts for diverging/parallel vessels. Decide explicitly (recommended: yes, minimal version) before building the classification pipeline.
-5. **Explainability bolted on instead of designed in** — the reasoning trail must be a byproduct of the same rule-evaluation code path that produces the verdict (structured `RuleEvaluation` objects with rule id, matched facts, and threshold), not a separate function re-deriving text from a final label. This is a domain-model return-type decision, not a UI feature.
-
-Also notable: Rule 18 must treat "not under command" and "restricted in ability to maneuver" as co-equal (not strictly ranked), and must never override an overtaking classification; degenerate inputs (identical position, zero speed, exact boundary angles) need explicit defined behavior since a free-drag sandbox will produce them constantly; compass-bearing vs. math-angle vs. screen-Y-down conventions must be isolated behind small, independently tested pure converter functions; and the domain layer must have zero imports from `@prisma/client` or `@trpc/*` so its test suite never needs a database or tRPC context.
+1. **Silent SVG hit-testing regression** — the hull/rotate-handle drag contract depends on `fill` never resolving to `"none"`/transparent (SVG's `pointer-events: visiblePainted` default); jsdom-based tests cannot detect this since `user-event`'s `pointer()` API dispatches events directly at the selected node rather than resolving screen-coordinate hit-testing. **Avoid by:** never setting `fill="none"` or a token that can resolve to transparent on these two elements, and requiring a mandatory manual browser drag+rotate UAT pass (matching v1.0 Phase 4's precedent) before merging the Sandbox PR — not just a green test suite.
+2. **Half-wired dark theme** — shadcn's default scaffold ships both `:root` (light) and `.dark` (dark) blocks assuming a toggle; if nobody hardcodes `className="dark"` on `<html>`, the app silently renders in light mode by default. **Avoid by:** hardcoding `dark` on `<html>` in `app/layout.tsx` in the Scaffolding phase and adding "view with OS color-scheme set to light" to that phase's manual-verification checklist.
+3. **Unregistered `@theme` color tokens fail silently** — Tailwind v4's CSS-first model only generates `fill-*`/`bg-*`/`text-*` utilities for colors declared under `@theme`'s `--color-*` namespace; a new semantic name (e.g. `fill-give-way`) referenced in JSX without a matching `--color-give-way` declaration produces zero CSS with no error, which (combined with Pitfall 1) can also silently break hit-testing. **Avoid by:** reusing shadcn's existing `--color-chart-1..5` tokens for vessel-role colors where possible, and verifying generated CSS in devtools rather than trusting JSX class names.
+4. **Radix `Select`/`Slider` breaks existing native-control tests** — `ControlPanel.test.tsx` currently drives the vessel-type picker with `userEvent.selectOptions`, which has nothing to act on against Radix's portalled `button[role=combobox]` structure; Radix components also call jsdom-unimplemented APIs (`hasPointerCapture`, `scrollIntoView`). **Avoid by:** rewriting (not patching) the test to a click + `findByRole("option")` pattern, adding scoped per-file polyfills matching the existing `MockResizeObserver` convention, or choosing shadcn's native-`<select>`-based "Native Select" variant to sidestep the problem entirely.
+5. **shadcn CLI overwrites hand-authored Tailwind v4 config** — `init`/`add` can rewrite `globals.css`/`components.json` wholesale, risking silent loss of the project's existing custom breakpoints (900px/640px). **Avoid by:** committing before running any `shadcn` CLI command and reviewing the full diff afterward, in the Scaffolding phase, before any other phase depends on the resulting CSS shape.
 
 ## Implications for Roadmap
 
-### Phase 1: Domain Foundations — Geometry Primitives + Value Objects
-**Rationale:** Everything else in the product (classification, reasoning trail, chart overlay) depends on correct bearing/relative-bearing/CPA math and well-formed value objects (Vessel, Position, Heading, VesselType). Getting this wrong is the highest-cost-to-fix mistake in the whole project (Pitfall 1, 6, 7), so it must be built and fully unit-tested in isolation before any classification logic or UI exists.
-**Delivers:** `Position`, `Heading`, `Speed`, `VesselType` value objects; `bearing()`, `relativeBearing()`, CPA/TCPA functions; compass↔math↔screen angle converters — all pure, zero framework dependencies, fixture-tested against known values (North=0°=up, reciprocal-heading-but-off-axis-bearing is NOT head-on, etc.)
-**Addresses:** Vessel setup feature (FEATURES.md P1)
-**Avoids:** Pitfall 1 (heading-diff vs. relative-bearing), Pitfall 6 (angle convention mismatch), Pitfall 7 (degenerate inputs — identical position, zero speed, exact boundary angles)
+Based on combined research, the 4-phase structure already scoped in PROJECT.md (Scaffolding → Hero → Sandbox → Gallery) is well-supported by the dependency graph found in all four research files and should be kept as-is.
 
-### Phase 2: COLREGS Rules Engine — Classification, Give-Way/Stand-On, Rule 18
-**Rationale:** With geometry primitives verified, the classification pipeline (Rules 11–18) can be built as a Specification-pattern rule registry evaluated in the legally-correct order (overtaking first, per Rule 13's override clause), returning structured reasoning facts rather than a bare verdict. This is the core value proposition of the entire project and must be validated against textbook fixtures before any UI consumes it.
-**Delivers:** `classifyEncounter(scenario): ClassificationResult` with ordered `ReasoningStep[]`; Rule 7 risk-of-collision gate; Rule 13/14/15 encounter classification; Rule 18 vessel-type override layer with NUC/RAM modeled as co-equal; explicit doubt-zone/ambiguous-classification state
-**Addresses:** Encounter classification, give-way/stand-on determination, Rule 18 hierarchy, reasoning trail data model (FEATURES.md P1/P2)
-**Avoids:** Pitfall 2 (evaluation order), Pitfall 3 (doubt/boundary handling), Pitfall 4 (Rule 7 gating), Pitfall 5 (Rule 18 strict-ranking mistake), Pitfall 8 (explainability designed in, not bolted on), Pitfall 10 (domain coupled to tRPC/Prisma — enforce zero imports from either)
+### Phase 1: Scaffolding
+**Rationale:** Hard dependency for every downstream phase — establishes the CLI-installed primitives, design tokens, path alias, and global page chrome (Header/Footer) that Hero, Sandbox, and Gallery all consume.
+**Delivers:** `npx shadcn@latest init --template next --base radix --preset nova`; `tsconfig.json` `@/*` alias; single dark-only `:root`/`.dark`/`@theme inline` palette in `app/globals.css` (kept in the standard shadcn shape, not simplified); Geist/Geist Mono via `next/font/google`; `<html className="dark">` hardcoded (no `next-themes`); `src/components/layout/Header.tsx`+`Footer.tsx`; empty `src/components/shared/` placeholder.
+**Addresses:** Foundational — no FEATURES.md item directly, but unblocks all of them.
+**Avoids:** Pitfall 2 (half-wired dark theme), Pitfall 3/4 (`@theme` registration/consistency), Pitfall 7 (CLI clobbering existing config).
 
-### Phase 3: Persistence Layer — Prisma Schema, Repository, Application Use Cases
-**Rationale:** Can be built and integration-tested independently of the UI, satisfying the `ScenarioRepository` port already implied by the domain/application boundary. Comes before the UI so the "save & share" and "load scenario" flows have a real backend to wire into once the sandbox exists.
-**Delivers:** Prisma schema (scenario inputs only — position/heading/speed/type — never the derived verdict); `PrismaScenarioRepository`; `createScenario`/`getScenario`/`listPresets` use cases with in-memory-fake-repository unit tests; non-guessable share-slug IDs (UUID/cuid, not sequential)
-**Uses:** Prisma, PostgreSQL, Zod (API-boundary validation only, not domain typing) from STACK.md
-**Implements:** Ports & Adapters / Repository pattern from ARCHITECTURE.md; avoids Anti-Pattern 2 (persisting derived verdict instead of inputs) and the sequential-ID security mistake from PITFALLS.md
+### Phase 2: Hero
+**Rationale:** The one genuinely new UI surface; depends only on Scaffolding's primitives/tokens/shell, has no dependency on the Sandbox restyle, and is lower-risk than Sandbox — good second phase to build momentum and validate the token system end-to-end before the higher-risk restyle.
+**Delivers:** `src/components/hero/Hero.tsx` (headline, subhead, primary CTA scrolling to Sandbox, illustrative canned classification preview card calling `classifyEncounter()` against a fixed fixture); composed into `app/page.tsx` above `SandboxContainer`.
+**Addresses:** FEATURES.md table-stakes (headline/subhead/CTA, no-gate CTA, real-product visual preview) and the locked "illustrative, not live" anti-feature guardrail.
+**Avoids:** Reintroducing a second stateful sandbox instance (Anti-Feature); layout-shift above the future Gallery anchor target (flagged cross-dependency with Phase 4).
 
-### Phase 4: tRPC API Layer — Thin Routers Over Application Use Cases
-**Rationale:** Once use cases exist and are tested, the tRPC routers are a thin, low-risk adapter layer (Zod input validation → one use-case call → typed response). Sequencing this after Phase 3 keeps routers free of business logic per Anti-Pattern 1.
-**Delivers:** `scenario` and `gallery` routers merged into `appRouter`; Zod schemas at the API boundary distinct from internal domain types
-**Uses:** tRPC 11, Zod 4 (STACK.md); Interface Adapters layer (ARCHITECTURE.md)
-**Avoids:** Pitfall 10 / Anti-Pattern 1 (classification logic leaking into router handlers)
+### Phase 3: Sandbox
+**Rationale:** Highest-risk, heaviest-restyle phase — depends on Scaffolding's dark tokens (needed to re-theme `ChartPanel`'s hardcoded light-mode hex colors) and `ui/*` primitives (Button, Card, Input, Select, Badge). Placed after Hero so the token system is already validated once before the riskiest surface touches it.
+**Delivers:** Restyled `SandboxContainer`/`ControlPanel`/`ReasoningPanel`/`CopyLinkButton` (markup only, logic/hooks unchanged); restyled `ChartPanel` with re-themed colors and extracted rendering constants; consolidated `vessel-role.ts` color/label maps; rewritten `Select` interaction tests.
+**Addresses:** No new FEATURES.md item — pure restyle of already-validated v1.0 Sandbox behavior.
+**Avoids:** Pitfall 1 (hit-testing regression — requires mandatory manual browser UAT), Pitfall 5 (Radix Select/Slider test breakage), the "hardcoded hex chart colors" and "vessel label contrast" UX pitfalls.
 
-### Phase 5: Interactive Chart Sandbox — SVG Rendering + Live Drag Classification
-**Rationale:** This is where the "live update while dragging" requirement — the main interaction loop and a stated PROJECT.md differentiator — gets built and demoed, using the domain layer directly (Flow 1, no network round-trip). Deliberately sequenced after the domain/rules engine is proven correct in isolation, so the UI is exercising known-good logic rather than co-developing both at once.
-**Delivers:** SVG chart canvas with vessel icons, heading vectors, bearing line; native Pointer Events drag handling with `screenToChart()`/`chartToScreen()` pure converters; `use-live-classification` hook wrapping `classifyEncounter()` for React state; reasoning trail panel; give-way/stand-on visual role coding
-**Addresses:** Visual chart rendering, live drag-and-adjust, reasoning trail UI (FEATURES.md P1)
-**Avoids:** Pitfall 9 (drag re-triggering persistence/over-computation every frame — keep drag position as local/ref state, throttle via rAF, decouple from any network call), Pitfall 6 (verify rendered vessel direction matches stated heading), the SSR/hydration gotcha (guard canvas/drag-dependent rendering behind client-only mounting)
-
-### Phase 6: Save/Share + Gallery
-**Rationale:** Depends on both the persistence layer (Phase 3/4) and the working sandbox (Phase 5) already existing. Presets are modeled as seeded, flagged scenarios reusing the exact same save/load mechanism — not a separate feature — so this is naturally last and lowest-risk.
-**Delivers:** "Save & Share" button → tRPC mutation → shareable `/s/[id]` link (Flow 2/3, server always re-classifies on load, never trusts a stored verdict); curated gallery of 5–8 classic preset encounters with short rationale text per entry
-**Addresses:** Save/share scenario, curated preset gallery (FEATURES.md P1)
-**Avoids:** Anti-Pattern 2 (stale verdict drift — always recompute on load)
+### Phase 4: Gallery
+**Rationale:** Lowest functional risk (no new interaction model, reuses existing tRPC query and click-through behavior verbatim) but has real, non-obvious routing/scroll gotchas — sequenced last since it's independent of Sandbox and benefits from the Header/nav (built in Scaffolding) already existing to link directly at `/#gallery`.
+**Delivers:** `src/components/gallery/GallerySection.tsx` (Server Component, moved from `app/gallery/page.tsx`) appended to `app/page.tsx` with `id="gallery"`; `next.config.ts` `redirects()` entry (`/gallery` → `/#gallery`, `permanent: true`); `scroll-padding-top` sized to the sticky header.
+**Addresses:** FEATURES.md table-stakes (Gallery embedded, server-rendered, stable linkable URL, unchanged card-click behavior).
+**Avoids:** Pitfall 6 (route-to-anchor scroll/redirect gaps) — requires manual verification of both fresh-tab bookmark navigation and in-app `<Link>` click, per the reconciliation note above.
 
 ### Phase Ordering Rationale
 
-- Domain correctness (geometry → classification) is strictly upstream of everything else technically and is also the highest interview-value, highest-risk-of-subtle-bugs work — front-loading it means the riskiest logic is validated against textbook fixtures before any UI or persistence complexity is layered on top.
-- Persistence and API layers are conventional, low-risk CRUD-shaped work once ports/interfaces are defined — sequencing them before the UI means the "save & share" flow has a real backend the moment the sandbox needs it, without blocking sandbox development on backend work.
-- The interactive chart is sequenced after the domain layer specifically so live-drag feedback (Pitfall 9) and rendering-direction correctness (Pitfall 6) can be verified against an already-correct classification engine, rather than debugging domain bugs and UI bugs simultaneously.
-- Gallery/presets are explicitly last because FEATURES.md's dependency graph shows presets are not a separate data model — they require save/share to exist first (seeded scenarios flagged as featured).
+- Scaffolding must be first — every other phase consumes its tokens, primitives, and path alias; running the CLI early also minimizes the blast radius of any config restructuring (Pitfall 7).
+- Hero before Sandbox: Hero is net-new and lower-risk, letting the team validate the token/theming system on a smaller surface before applying it to the SVG-heavy, hit-testing-sensitive Sandbox.
+- Sandbox before Gallery: Sandbox's dark-token re-theming work has no dependency on Gallery, but sequencing it before Gallery matches its higher risk profile getting resolved before the final, lower-risk phase.
+- Gallery last: depends on Scaffolding's `ui/*` Card primitive and (optionally, not by default) a shared card treatment extracted during Hero — don't pre-abstract that dependency; only extract into `shared/` if Hero and Gallery cards are shown to actually share a visual pattern.
 
 ### Research Flags
 
-Phases likely needing deeper research during planning (`/gsd:plan-phase --research-phase <N>`):
-- **Phase 2 (Rules Engine):** COLREGS-specific implementation pitfalls are well-documented at a conceptual level (PITFALLS.md) but exact sector-boundary conventions, doubt-band widths, and the precise Rule 7 risk-of-collision test used in practice are MEDIUM confidence and worth validating against a textbook worked example or the official Navigation Rules text during planning, not just architecture review.
-- **Phase 5 (Interactive Chart):** The SVG+Pointer-Events approach and the `jsdom`/`getScreenCTM()` testing caveat are well-researched, but the exact drag-gesture implementation (native `document` listeners vs. React synthetic handlers, throttling strategy) benefits from a focused look at current React 19 + Pointer Events patterns during phase planning.
+Phases likely needing deeper research during planning:
+- **Phase 4 (Gallery):** the `/gallery` → `/#gallery` redirect + anchor-scroll behavior has genuine, documented Next.js App Router gaps (sticky-header skip, client-nav vs. full-reload scroll differences) that cannot be fully resolved by reading docs alone — flag for manual browser verification as an explicit phase success criterion, and consider `/gsd:plan-phase --research-phase 4` if the manual test reveals unreliable native scroll behavior requiring a client-side fallback effect.
+- **Phase 3 (Sandbox):** while shadcn/Radix patterns are well-documented in general, this phase's actual risk (silent hit-testing regression, jsdom's structural inability to catch it) is specific to this codebase's prior incident, not a generic shadcn concern — worth explicit phase-level "manual UAT required" framing rather than additional library research.
 
-Phases with standard, well-documented patterns (skip research-phase):
-- **Phase 1 (Geometry Primitives):** Standard nautical trigonometry, cross-verified across multiple sources — implementation-ready.
-- **Phase 3 (Persistence) / Phase 4 (tRPC API):** Conventional Clean Architecture + tRPC + Prisma patterns, HIGH confidence, official docs available via Context7 (`/trpc/trpc`).
-- **Phase 6 (Save/Share + Gallery):** Straightforward extension of the persistence layer; no novel technical risk.
+Phases with standard patterns (skip research-phase):
+- **Phase 1 (Scaffolding):** shadcn CLI init/add, Tailwind v4 `@theme` theming, and Geist font loading are all officially documented, HIGH-confidence, verified-via-Context7 patterns with no domain-specific ambiguity.
+- **Phase 2 (Hero):** composing shadcn primitives + calling an existing pure domain function against a new fixture is a well-established, low-risk pattern already used elsewhere in this codebase.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Versions verified live from npm registry; the "don't add a dependency" recommendations (SVG over konva, hand-rolled geometry over geolib/turf, plain TS over json-rules-engine/xstate) are cross-checked across multiple 2025/2026 comparison sources and GitHub issues |
-| Features | MEDIUM-HIGH | COLREGS rule content itself is HIGH confidence (public law, cross-verified); competitor/UX feature patterns are MEDIUM — this exact "explainable rules-engine visualizer" sub-category has few direct comparables, so some conclusions are inferred by analogy to adjacent sandbox-tool categories (Algorithm Visualizer, regex101) |
-| Architecture | HIGH for layering/dependency-direction (verified against multiple Clean Architecture + Next.js/tRPC/Prisma reference implementations and official tRPC docs) / MEDIUM for COLREGS-specific module decomposition (sound application of standard patterns, but no comparable open-source reference project exists for this exact domain) |
-| Pitfalls | MEDIUM-HIGH | COLREGS rule semantics (Pitfalls 1–5) are HIGH confidence, sourced from multiple maritime training/reference sites that independently agree, plus ScienceDirect literature documenting real systematic implementation failures; software-architecture/UI pitfalls (6–10) are MEDIUM, sourced from community engineering writing rather than a single authoritative spec |
+| Stack | HIGH | Verified via Context7 `/shadcn-ui/ui` official docs plus live npm registry lookups for every version cited; only the Base-UI-vs-Radix CLI default change and `@testing-library/user-event` exact version are flagged MEDIUM (recency/registry-interruption caveats), both with clear mitigations (explicit `--base radix` flag, verify at install time). |
+| Features | MEDIUM-HIGH | Next.js redirect/hash mechanics are HIGH (verified against Next.js source and official docs); Hero/Gallery UX pattern claims are MEDIUM, synthesized from a single (if methodologically substantial, 100+ page) dev-tool-landing-page study cross-checked against this project's own already-locked design decisions in PROJECT.md. |
+| Architecture | HIGH | shadcn/Tailwind v4 conventions verified via Context7; all folder/boundary/reuse recommendations are grounded directly in actual repo files read (not generic advice), including specific existing duplication (ChartPanel/ReasoningPanel role maps) and specific existing hardcoded colors. |
+| Pitfalls | HIGH | Grounded in this repo's actual source (ChartPanel, hooks, tests, vitest config) cross-checked against Context7 shadcn/Tailwind docs and current Next.js docs; a handful of community-sourced claims (Radix Select jsdom polyfill needs, `@theme` vs `@theme inline` black/white bug) are flagged MEDIUM/MEDIUM-HIGH but corroborated by first-party GitHub issues/discussions, not single blog posts alone. |
 
-**Overall confidence:** MEDIUM-HIGH
+**Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Exact CPA/TCPA and Rule 7 risk-of-collision formula:** cross-checked against standard relative-velocity vector math (well-established) but sourced from a single blog reference for the exact formula presentation — validate against a known textbook worked example during Phase 2 implementation before trusting it as the authoritative gate.
-- **`@testing-library/user-event` exact version:** registry lookup was interrupted mid-research (STACK.md); verify the installed version supports the `pointer()` API needed for SVG drag-simulation tests at install time in Phase 5.
-- **Doubt-band width for the "in doubt, assume cautious" clauses:** COLREGS text mandates the behavior but doesn't specify a numeric tolerance band around 22.5°/reciprocal-heading — this is a product/domain decision to make explicitly during Phase 2 planning (document the chosen epsilon as a named, tested domain constant, not an implicit side effect of comparison operators).
-- **Sector-boundary implementation conventions:** MEDIUM confidence per ARCHITECTURE.md sources — cross-referenced against ShipCalculators.com and academic literature, but worth a focused validation pass against the official Navigation Rules PDF during Phase 2 planning, given documented real-world implementation pitfalls (e.g., using COG instead of heading).
+- **`/gallery` → `/#gallery` mechanism reconciliation (resolved above, but verification still open):** all four files agree on the config-level `redirects()` approach and agree the actual scroll-to-anchor behavior cannot be confirmed by documentation alone — this must be manually tested in a real browser for both fresh-tab and in-app-link navigation paths as a Phase 4 (Gallery) success criterion, not assumed to work from the redirect config alone.
+- **Base UI vs. Radix CLI default:** shadcn's CLI changed its default primitive library to Base UI very recently (this month, per STACK.md). The recommendation to pass `--base radix` explicitly is sound today, but if this milestone's execution is delayed, re-verify the CLI's current default behavior and Radix/Base UI's respective React 19 peer-dep compatibility before running `init`.
+- **Whether the mockup/design file specifies a mini chart thumbnail per Gallery card or a mobile drawer nav:** FEATURES.md and STACK.md both flag these as "verify against the actual design file" items rather than confirmed scope — the roadmap should treat these as open questions to resolve at the start of the Hero/Gallery/Scaffolding phases, not assumed either way.
+- **Exact `@testing-library/user-event` version:** flagged MEDIUM confidence in STACK.md due to an interrupted registry lookup during research — verify the installed version supports the `pointer()` API (any v14+ does) at actual install time in Phase 1.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- npm registry (`npm view <pkg> version`) — live version numbers, STACK.md
-- Context7 `/trpc/trpc` — official tRPC project structure and router patterns, ARCHITECTURE.md
-- [US DHS/USCG Navigation Rules PDF](https://www.navcen.uscg.gov/sites/default/files/pdf/navRules/navrules.pdf) — official regulatory text, FEATURES.md
-- [testing-library/react-testing-library#1116](https://github.com/testing-library/react-testing-library/issues/1116) — `getScreenCTM` jsdom limitation, STACK.md
-- [Reliability of maritime collision avoidance systems algorithms — ScienceDirect](https://www.sciencedirect.com/science/article/pii/S0951832025010403) — documented real implementation failure patterns, PITFALLS.md
+- Context7 `/shadcn-ui/ui` — CLI `init`/`add` commands, `components.json` schema, Tailwind v4 CSS templates, React 19 peer-dep guidance, Base UI vs Radix changelog entries, theming docs
+- Context7 `/vercel/next.js` — `next/font/google` Geist import pattern, `redirects()` config semantics, `prepare-destination.ts`/`parseDestination()` hash-preservation behavior, `Link` scroll behavior
+- Context7 `/websites/tailwindcss` — `@custom-variant dark`, `@theme` directive semantics
+- npm registry live lookups — exact current versions for `shadcn`, `radix-ui`, `@base-ui/react`, `class-variance-authority`, `clsx`, `tailwind-merge`, `lucide-react`, `tw-animate-css`, `geist`, `next-themes`, `next`
+- Direct repository reads — `package.json`, `next.config.ts`, `app/globals.css`, `app/layout.tsx`, `app/page.tsx`, `app/gallery/page.tsx`, `app/s/[shareId]/page.tsx`, `postcss.config.mjs`, `tsconfig.json`, `SandboxContainer.tsx`, `ChartPanel.tsx`, `ControlPanel.tsx`/`.test.tsx`, `ReasoningPanel.tsx`, `CopyLinkButton.tsx`, `vessel-role.ts`, `types.ts`, `useHullDrag.ts`, `useRotateHandleDrag.ts`, `vitest.config.ts`
+- `.planning/PROJECT.md` — authoritative for locked v1.1 decisions (Hero Direction A, dark-mode-only, `/gallery` redirect rationale, breakpoints) and prior incidents (SVG hit-target fix, webpack `extensionAlias` fix)
 
 ### Secondary (MEDIUM confidence)
-- [Clean Architecture in Practice with TypeScript, Prisma, Next.js — Arnaud Renaud](https://www.arnaudrenaud.com/articles/clean-architecture-typescript-prisma-next/) — layering pattern, STACK.md + ARCHITECTURE.md
-- [nikolovlazar/nextjs-clean-architecture (GitHub)](https://github.com/nikolovlazar/nextjs-clean-architecture) — reference implementation, ARCHITECTURE.md
-- [Rule 18: not a simple "pecking order" — Professional Mariner](https://professionalmariner.com/rule-18-not-a-simple-pecking-order/) — NUC/RAM co-equal status, PITFALLS.md
-- [Rule 7 COLREGS Risk of Collision — Marine Public](https://www.marinepublic.com/blogs/training/575092-rule-7-colregs-risk-of-collision-with-explanations) — risk-of-collision precondition, PITFALLS.md
-- [SkipperCheck](https://skippercheck.net/colreg-simulator) / [Columbia COLREGs Challenge](https://smartmaritimenetwork.com/2025/07/29/columbia-launches-gamified-colregs-training-app/) — competitor analysis, FEATURES.md
-- [CPA & TCPA Explained — Binnacle AI](https://binnacleai.com/blog/cpa-tcpa-explained) — CPA/TCPA formula background, STACK.md
+- [We studied 100 dev tool landing pages (Evil Martians)](https://evilmartians.com/chronicles/we-studied-100-devtool-landing-pages-here-is-what-actually-works-in-2025) — hero visual taxonomy, "no salesy BS" principle
+- [Shadcnblocks — Updating shadcn/ui to Tailwind 4](https://www.shadcnblocks.com/blog/tailwind4-shadcn-themeing) — `@theme` vs `@theme inline` black/white color bug
+- [github.com/testing-library/user-event Discussion #1087](https://github.com/testing-library/user-event/discussions/1087) and [radix-ui/primitives Issue #1822](https://github.com/radix-ui/primitives/issues/1822) — Radix Select/jsdom incompatibility, first-party but community-reported
+- [vercel/next.js Issue #44295](https://github.com/vercel/next.js/issues/44295) and [Discussion #13804](https://github.com/vercel/next.js/discussions/13804) — hash-scroll behavior gaps, first-party but still-open/unresolved
 
 ### Tertiary (LOW confidence)
-- [ColRegs Collaborative VR Training](https://chaac.tech/solutions/military-immersive-training/colregs-collaborative) — vendor marketing page, not independently verified, FEATURES.md
-- [Fabric.js vs Konva vs PixiJS 2026 comparison](https://www.pkgpulse.com/guides/fabricjs-vs-konva-vs-pixijs-canvas-2d-graphics-2026) — single-source comparison, STACK.md
+- General WebSearch on generic hero-section/scroll-pattern listicles — used only for background context, not the basis for any table-stakes/differentiator claim without corroboration from a higher-confidence source
 
 ---
-*Research completed: 2026-07-14*
+*Research completed: 2026-07-18*
 *Ready for roadmap: yes*

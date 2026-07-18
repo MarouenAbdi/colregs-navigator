@@ -1,194 +1,144 @@
 # Feature Research
 
-**Domain:** Maritime COLREGS collision-avoidance rules-engine visualizer (scenario sandbox, educational/portfolio tool)
-**Researched:** 2026-07-14
-**Confidence:** MEDIUM-HIGH (COLREGS rule content is HIGH confidence — public, well-documented maritime law, cross-verified across multiple sources; competitor/UX feature patterns are MEDIUM confidence — verified against live product pages but this exact "explainable rules-engine visualizer" sub-category has few direct comparables, so some conclusions are inferred by analogy to adjacent tool categories)
+**Domain:** Portfolio/demo-site hero section + embedded preset-gallery UX for a single-page interactive tool (v1.1 UI Redesign milestone — Hero and Gallery phases only; Scaffolding/Sandbox restyle are presentation-only and not covered here)
+**Researched:** 2026-07-18
+**Confidence:** MEDIUM-HIGH (Next.js redirect/hash mechanics verified against official docs and source via Context7 = HIGH; hero/gallery UX patterns synthesized from multiple WebSearch sources on dev-tool landing pages, cross-checked against this project's own already-locked design decisions = MEDIUM)
+
+## Scope Note
+
+This project's v1.1 milestone is a pure re-implementation of an already-designed UI — it adds **no new domain/business features**. The only genuinely new piece of UI is the **Hero** section (this app previously had no marketing/landing content — `/` went straight to the sandbox). The **Gallery** phase is not a new feature either; it's a **relocation** of an already-shipped, already-validated feature (curated preset browsing, built in v1.0 Phase 5) from its own `/gallery` route to a `/#gallery` section on the home page. Accordingly, this document treats "features" as **UX/interaction-pattern decisions**, not domain capabilities — the downstream roadmap needs to know which patterns are expected, which are worth the extra polish, and which would be scope creep against a milestone whose own charter is "zero change to domain logic or existing validated requirements."
+
+Prior feature research for this project (COLREGS domain/rules-engine feature landscape, v1.0) is superseded by this document for the v1.1 milestone — that domain research already fed a shipped, validated product and is not re-litigated here.
 
 ## Feature Landscape
 
 ### Table Stakes (Users Expect These)
 
-Features users assume exist. Missing these = product feels incomplete or untrustworthy to anyone with maritime-training or dev-tool-sandbox context.
-
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Per-vessel setup: position, heading, speed, vessel type | Every COLREGS trainer (SkipperCheck Bridge Simulator, Columbia's COLREGs Challenge, ColRegs Collaborative VR) starts from configuring vessel state before showing an encounter | LOW-MEDIUM | Already in PROJECT.md active requirements; needs a clean domain model (Vessel value object) since it feeds everything downstream |
-| Encounter classification (head-on / crossing / overtaking) | This is the universal first output of every rules-of-the-road trainer found (SkipperCheck game, Columbia app, academic collision-avoidance literature all use this exact 3-way taxonomy) | MEDIUM | Rule 11 gates applicability ("vessels in sight of one another"); Rules 12–15 do the classification math (relative bearing, aspect) |
-| Give-way / stand-on determination, clearly labeled | Every single competitor tool reduces to this binary — it's the "answer" users are drilling for (SkipperCheck's game literally asks "stand-on or give-way?") | LOW-MEDIUM | Rules 13 (overtaking), 14 (head-on — both give-way), 15 (crossing), 17 (stand-on duty), plus Rule 18 hierarchy override |
-| Rule citation shown with the verdict | SkipperCheck's game explicitly "shows which rule applied plus a short explanation"; every study resource (ecolregs.com, safe-skipper.com) organizes content by rule number — users expect to see "Rule 15" not just "you must turn" | LOW | Cheap once the rules engine returns a structured verdict object (ruleId + text) |
-| Visual chart/plot rendering with vessel position + heading | Every simulator reviewed (SkipperCheck's radar PPI, Columbia's ECDIS-style mode, RORSIM's 3D bridge) renders geometry visually, not just as text/numbers — plain text-only verdicts read as incomplete for a navigation tool | MEDIUM-HIGH | This is also the differentiator surface (see below) — table-stakes bar is "show the vessels and their headings on something chart-like," not full ECDIS fidelity |
-| Instant/live feedback on parameter change | SkipperCheck's quiz gives feedback "instantly" per round; users configuring a sandbox expect the verdict to update as they adjust inputs, not require a manual "submit" | MEDIUM | Drives an architecture requirement: classification must be fast enough to run on every drag tick (client-side or near-instant tRPC round trip) |
-| Curated set of classic/textbook encounter examples | Every COLREGS educational resource (textbooks, ecolregs.com, safe-skipper.com quizzes) teaches via canonical diagrams — "the" head-on case, "the" crossing case, "the" overtaking case are pedagogically standard; a rules-visualizer without these feels like it's missing the obvious starting point | LOW-MEDIUM | Can be implemented as pre-seeded rows in the same scenario-save data model — see Feature Dependencies |
-| No-login shareable link for a scenario | Table stakes for the entire "sandbox tool" category this product also belongs to (regex101, Algorithm Visualizer, See Algorithms, AlgoVis.io, Excalidraw-style tools) — permalink sharing with zero signup is the default expectation for browser-based sandboxes in 2026 | LOW-MEDIUM | PROJECT.md already scopes this in; needs only scenario state serialization + a short ID, no auth |
-| Clear visual role coding (give-way vs stand-on) | Bridge simulators use color/danger classification on radar targets (SkipperCheck's "danger classifications"); users scan visually before reading text | LOW | Simple color/icon convention (e.g., red = give-way, green = stand-on) applied to vessel markers |
+| Headline + one-line subhead stating what the tool actually does, in plain language (not vague SaaS copy) | Dev-tool landing page research is explicit: "No salesy BS" and "Clever and simple wins" are the two rules that hold across the 100+ pages studied — visitors bounce fast if they can't tell what the product *is* within seconds | LOW | Already scoped in PROJECT.md ("headline, copy, CTAs"). Pure content/copy work, shadcn Typography primitives. |
+| Primary CTA that leads directly into the interactive tool, with zero signup/login gate | This app has no accounts by design (no-login save/share is a locked v1.0 decision) — a hero that funnels toward a "Sign up" / "Request a demo" CTA would misrepresent the product and add friction the tool doesn't need | LOW | CTA = anchor-scroll or route-scroll to the Sandbox section on the same page (no separate `/try` route exists or is needed). |
+| A visual preview of the *actual product surface* near the fold, not stock imagery/generic illustration | Confirmed pattern across dev-tool landing pages: visuals paired with relevant, on-brand content increase engagement; devtool audiences specifically expect to see real UI, not marketing photography | LOW–MEDIUM | PROJECT.md already locks this as an "illustrative live-classification preview card" — see Differentiators below for why "illustrative" (not literally live) is the correct scope. |
+| No forced onboarding/tour before reaching the tool | "Developers want to try your product now" is a repeated, cross-sourced finding; a wizard/tour before the sandbox contradicts the project's own "no login, no gate" positioning | LOW | Direct scroll/CTA into Sandbox, no modal/carousel gate. |
+| Gallery section renders as a real grid of the 6 curated presets, each identifiable by encounter type + short rationale | Already shipped and validated in v1.0 Phase 5 — this is existing, tested behavior, just being relocated | LOW | Reuse `gallery.list()` tRPC query and card content; only the container/route changes. |
+| Gallery section is reachable via a stable, linkable URL fragment (`/#gallery`) | Required directly by the locked decision to redirect the removed `/gallery` route here — old bookmarks/links must still resolve to *something* meaningful, not a 404 | LOW–MEDIUM | See "Redirect + Anchor Scroll Considerations" below — this has real technical gotchas despite looking trivial. |
+| Gallery cards still navigate to a full scenario view on click (`/s/[shareId]`) | This is the existing, already-tested v1.0 interaction — changing it would be a functional change, which this milestone explicitly excludes | LOW | Zero new engineering: same `<Link href={`/s/${row.id}`}>` pattern already in `app/gallery/page.tsx`, just moved into a home-page section component. |
 
 ### Differentiators (Competitive Advantage)
 
-Features that set the product apart from existing COLREGS trainers and quiz apps. Should align with PROJECT.md's stated core value: correct, *transparent* reasoning — not just a verdict.
-
 | Feature | Value Proposition | Complexity | Notes |
-|---------|--------------------|------------|-------|
-| Geometric reasoning overlaid directly on the chart (relative bearing line, closing angle, the 22.5°-abaft-the-beam overtaking boundary) | Competitor tools show either a text rule citation (SkipperCheck game) or raw radar CPA/TCPA numbers (SkipperCheck simulator) — none combine "here is the exact angle that triggered this rule" as a live visual annotation tied to the verdict. This is the single clearest way to make the domain-model reasoning legible, which is the whole point of the project per PROJECT.md | MEDIUM-HIGH | Requires computing and rendering: relative bearing vector, own-ship-relative aspect angle, and (for overtaking) the abaft-the-beam threshold arc |
-| Step-by-step reasoning trail / decision audit (Rule 11 applicability → 12/13/14/15 classification → 18 vessel-type override → 17 stand-on duty) | Quiz tools give a single flat "Rule X applies" answer. Exposing the *chain* of rule evaluation as a visible trace demonstrates the rules-engine/state-machine architecture itself — directly serves the portfolio's interview goal of showing domain-modeling depth, not just a correct final answer | MEDIUM | This is as much a UI feature as a domain-layer design constraint: the engine should return an ordered list of evaluated rules/conditions, not just a final verdict, so the UI has something to render |
-| Continuous live drag-and-recompute (vs. discrete scenario stepping) | SkipperCheck's simulator moves vessels via ± buttons in fixed increments; a draggable, continuously-recomputing sandbox is a smoother, more exploratory interaction that better supports "what if I nudge the heading 5° — does the classification flip?" — which is exactly the kind of edge-case exploration that shows rule-boundary understanding | MEDIUM-HIGH | Already an active PROJECT.md requirement; the differentiation is in polish/responsiveness, not just existence |
-| Explicit Rule 18 vessel-type hierarchy modeled and explained (power-driven, sailing, fishing, restricted-in-ability-to-maneuver overriding the geometric verdict) | Simple quiz tools and most "who gives way" explainers stop at power-vs-power geometry. Modeling the hierarchy as an explicit override layer — and showing *why* a sailing vessel becomes stand-on despite crossing geometry — is a richer domain-modeling showcase and matches an active PROJECT.md requirement | MEDIUM-HIGH | Natural fit for a decorator/strategy pattern in the domain layer; good architecture-story material for interviews |
-| Portfolio-quality curated gallery with written rationale per preset ("why this is the textbook head-on case") | Competitor tools list scenarios (SkipperCheck's 54 scenarios) but as training drills, not annotated reference cases. A small, high-quality gallery with a sentence of "why this matters" per entry reads as curated expertise rather than bulk content — better fit for a portfolio piece than breadth | LOW-MEDIUM | Depends on save/share data model (see dependencies); mostly a content/curation effort once the model exists |
-| Deep-linkable, embeddable scenario state (rich preview / OG image on share) | None of the competitor tools reviewed support this — most are session-based drills, not persistent shareable artifacts. A shareable link with a good social preview makes the tool easy to drop into a resume/portfolio README or LinkedIn post, which matters for this project's actual goal (interview visibility) | LOW-MEDIUM | Server-rendered OG image or static chart snapshot per saved scenario; nice-to-have polish, not core logic |
-| Surfacing genuine rule ambiguity/edge cases (e.g., near-000°/180° head-on/crossing boundary, Rule 17(a)(ii) "in extremis" doubt situations) | Training quiz apps deliberately pick clean-cut scenarios so answers are unambiguous (needed for scoring). A sandbox tool has no such constraint — showing that the engine correctly handles boundary/ambiguous cases (and explains the ambiguity rather than hiding it) is a stronger demonstration of domain understanding | MEDIUM-HIGH | Higher research/testing burden — these are exactly the cases where naive implementations get COLREGS wrong; good target for the TDD-focused testing strategy in PROJECT.md |
+|---------|-------------------|------------|-------|
+| Illustrative (not wired-to-live-state) mini classification preview card in the Hero, showing a canned example verdict (e.g., a classic crossing encounter with a give-way/stand-on badge) | Directly showcases this project's actual core value — explainability, not just visualization — before the user even reaches the real sandbox. Research on dev-tool heroes found interactive/product-truthful previews outperform generic screenshots for conveying value fast | LOW–MEDIUM | **This is already the locked design** (PROJECT.md: "illustrative live-classification preview card," Hero Direction A). Keep it a static/canned example — see Anti-Features for why NOT to wire it to real state. |
+| Secondary/tertiary CTA linking to source code (GitHub) or an "About this project" note | Portfolio-specific differentiator with no equivalent in commercial SaaS hero research — the actual audience here (interviewers/engineers evaluating the project) values seeing the implementation, not just the demo | LOW | Not in the current 4-phase plan; flag as a candidate scope addition for the Hero phase if not already covered by the design file — verify against the design file's actual CTA set before adding. |
+| Small illustrative geometry motion (e.g., a subtly animated bearing line or heading vector) in the Hero preview card | Evil Martians' research explicitly separates "static product UI" (fast, valid) from "animated product UI" (more compelling, more effort) — a small, tasteful animation is consistent with the domain (motion/bearing is literally the subject matter) and would sit well within Direction A's existing preview-card slot | MEDIUM | Discretionary polish — only pursue if it doesn't reintroduce actual sandbox/domain logic into the Hero (see Anti-Features). |
+| Mini visual thumbnail per gallery card (small rendered chart snippet showing the two vessels' relative geometry) instead of text-only cards | Existing `/gallery` implementation is text-only (encounter type label + rationale paragraph); a geometric thumbnail would let users visually recognize "the crossing one" or "the overtaking one" at a glance, leveraging chart-rendering work already built for the Sandbox | MEDIUM–HIGH | Real cost: needs a reusable, non-interactive "mini chart" render mode extracted from `ChartPanel`, one per card × 6 cards. Worth flagging to the roadmap as an optional Gallery-phase stretch goal, not a requirement — the design file should be checked first for whether it already specifies this. |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
-Features that seem good — and that competitor tools often have — but would dilute this project's focused scope or its actual (portfolio) goal.
-
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|------------------|-------------|
-| Full ARPA/radar bridge simulation (multiple AIS targets, CPA/TCPA plotting, vector true/relative motion modes) | SkipperCheck's flagship product is exactly this, and it looks impressive/comprehensive | Explodes scope far beyond a 2-vessel rules engine into a full navigation-simulator product; PROJECT.md explicitly scopes out multi-vessel and real AIS data for good reason — this is a different (much larger) project | Keep the chart a clean 2-vessel geometric sandbox; if multi-vessel is ever wanted, it's an explicit, separately-scoped v2 |
-| Gamification: scoring, streak bonuses, leaderboards | SkipperCheck's quiz game and most COLREGS learning apps use this to drive engagement/retention | Turns the tool from "explain reasoning" into "guess the answer," which undercuts the core value (transparency over quizzing) and pulls UI/backend effort toward session/leaderboard state instead of the domain layer that's the actual point of the portfolio piece | If engagement is desired later, prefer a "try to predict, then reveal the reasoning trail" soft-check pattern — no scores, no leaderboard, no persistence of "performance" |
-| User accounts, saved history, favorites/bookmarks | Natural extension once you have shareable scenarios — "why not let me log in and see my saved list?" | PROJECT.md explicitly excludes auth to keep scope minimal; accounts add an entire auth/session subsystem that has nothing to do with the rules-engine domain logic this project exists to showcase | Anonymous link-based saves only; a scenario's shareable URL *is* its persistence mechanism |
-| Real AIS live-data feed / historical replay | Would make the tool feel "real" and connected to actual shipping traffic | PROJECT.md explicitly excludes this — it's a data-engineering/integration problem, not a domain-modeling one, and pulls focus from the rules engine | Manual sandbox + curated presets are sufficient to demonstrate and test the rules engine thoroughly |
-| Full lights/shapes/sound-signal rules and restricted-visibility rules (Rules 19, 32–37) | Comprehensive COLREGS trainers (Columbia's app, SkipperCheck) cover these as part of "complete" rules-of-the-road training | PROJECT.md explicitly scopes to Rules 11–18 (steering/sailing, vessels in sight of one another) because that's the richest state-machine/classification target; lights/sound rules are mostly lookup-table facts, not much added architectural depth, and would roughly double scope | Keep to Rules 11–18; if desired, a brief "out of scope" disclaimer in the UI rather than partial/shallow coverage of the broader rule set |
-| Native mobile app | Several competitor tools (ColRegs Rules of the Road, Columbia's app) are mobile-first, and "mobile app" feels more polished/complete | Doubles the delivery surface (build, ship, maintain two platforms) for a project whose PROJECT.md tech stack and goals are web-first (Next.js/React); adds no domain-modeling value, only cost | Responsive web app only; mobile-friendly layout is enough since the real audience is interviewers reviewing a portfolio link, not boaters at the helm |
-| Photorealistic/gamey 3D bridge or ECDIS-fidelity chart rendering | RORSIM and VR trainers use immersive 3D to maximize realism, and it's visually impressive in a demo | High implementation cost for a feature that doesn't strengthen the actual value proposition (correct + explainable classification); risks the project reading as a graphics showcase rather than a domain-modeling showcase, and eats time that should go to the rules engine and its test suite | A clean, restrained 2D nautical-chart-style canvas (compass rose, simple vessel glyphs, bearing lines) — enough visual credibility without competing on production values |
+| Wiring the Hero preview card to the *real* `SandboxContainer`/live classification engine (a second, fully-functional mini-sandbox above the real one) | Feels more "impressive" — "why show a fake demo when the real one is one scroll away?" | Duplicates a stateful, draggable, `"use client"` component on the same page; doubles the surface area to keep in sync with the real sandbox's domain wiring; directly contradicts the milestone's own locked framing of the preview card as "illustrative"; adds real engineering cost to a phase whose charter is presentation-only | Static/canned example data rendered once, no drag/live-update wiring — exactly what PROJECT.md already locks in |
+| Auto-playing hero video, carousel, or slideshow of multiple "example encounters" cycling automatically | Looks polished in isolation, common in generic SaaS hero galleries | Cross-sourced dev-tool-landing-page research flags this as "salesy" — motion for its own sake, without user control, is the opposite of the "clever and simple wins" finding; also adds CLS/layout-shift risk that can break the `/#gallery` anchor-scroll math (see below) | One static illustrative preview card, matching the locked Direction A design |
+| Gated CTA ("Request a demo" / "Book a call" / email-capture before viewing the tool) | Standard B2B SaaS lead-gen pattern | Wrong model for this product entirely — it's a no-login, publicly demoable tool; a lead-gen gate would misrepresent both the product and the portfolio intent | Direct CTA into the Sandbox section, no email/contact capture |
+| Pagination, "load more," or infinite scroll on the Gallery section | Reflexive pattern for "any grid of cards" | There are exactly 6 hand-curated presets (fixed, not user-generated, not growing over time) — pagination solves a many-items problem this project doesn't have and adds unnecessary interaction/complexity | Render all 6 as a single static responsive grid (already the v1.0 behavior; matches the design file's fixed breakpoints at 900px/640px) |
+| Client-side-only data fetching for the Gallery section (spinner-first render, `useEffect` + fetch) | Common default in component-library thinking ("gallery" = "fetch client-side, show a loading skeleton") | Breaks the `/#gallery` redirect UX: the browser's native fragment-scroll only works if the `id="gallery"` element already exists in the *initial* HTML. If the section is empty at first paint and fills in after a client fetch, users redirected from the old `/gallery` route will land at the top of the page instead of at the gallery, silently defeating the whole redirect | Keep the Gallery section a server-rendered async Server Component (same pattern as today's `app/gallery/page.tsx`, which already does `await getCaller().gallery.list()`) so `#gallery` is present at first paint |
 
 ## Feature Dependencies
 
 ```
-Vessel setup (position, heading, speed, type)
-    └──requires──> (nothing — foundational input)
+Hero preview card (illustrative)
+    └──requires nothing new from Sandbox/domain layer
+         (canned example data only — deliberately NOT wired to SandboxContainer)
 
-Encounter classification (head-on / crossing / overtaking)
-    └──requires──> Vessel setup
+Gallery section (embedded on home page)
+    └──requires──> existing gallery.list() tRPC query (already built, v1.0 Phase 5)
+    └──requires──> id="gallery" present in initial server-rendered HTML
+                       └──requires──> /gallery → /#gallery redirect landing correctly
+                                          └──requires──> next.config.ts redirects() entry,
+                                                          NOT a client-side-only route removal
 
-Give-way / stand-on determination
-    └──requires──> Encounter classification
-    └──requires──> Rule 18 vessel-type hierarchy (as an override layer, when vessel types differ)
+Gallery card click → /s/[shareId] full page
+    └──requires nothing new: reuses existing v1.0 SandboxContainer + initialScenario seeding
+        (see app/s/[shareId]/page.tsx — already server-fetches and seeds via `initialScenario` prop)
 
-Reasoning trail (rule citation + geometric explanation)
-    └──requires──> Give-way / stand-on determination
-                       └──requires──> Encounter classification
-                                          └──requires──> Vessel setup
-
-Geometric overlay on chart (relative bearing line, closing angle, overtaking boundary arc)
-    └──enhances──> Reasoning trail
-    └──requires──> Visual chart rendering
-
-Live drag-and-adjust with real-time reclassification
-    └──requires──> Encounter classification (must be fast/synchronous)
-    └──enhances──> Visual chart rendering
-
-Scenario save/share (shareable link, no login)
-    └──requires──> Vessel setup (state to serialize)
-
-Curated preset gallery
-    └──requires──> Scenario save/share (presets are pre-seeded saved scenarios)
-
-Deep-linkable / embeddable preview (OG image)
-    └──requires──> Scenario save/share
-
-Rule 18 vessel-type hierarchy
-    └──enhances/overrides──> Encounter classification → Give-way/stand-on determination (sequential override, not a conflict: geometry runs first, hierarchy can then supersede the geometric default)
-
-Gamification/scoring ──conflicts──> Reasoning-trail-first UX
-Real AIS data / multi-vessel ──conflicts──> Focused 2-vessel scope (PROJECT.md Out of Scope)
+Mini chart thumbnail per gallery card (differentiator, optional)
+    └──requires──> extracting a non-interactive render mode from ChartPanel
+                       └──conflicts with──> milestone's "restyle, don't refactor domain wiring" framing
+                                             (flag as an explicit scope decision, not an assumed default)
 ```
 
 ### Dependency Notes
 
-- **Give-way/stand-on determination requires encounter classification:** you cannot apply Rules 13/14/15/17 until the encounter has been categorized as overtaking, head-on, or crossing — this ordering should be reflected directly in the domain layer (a classification step that produces a typed result consumed by the determination step).
-- **Reasoning trail requires determination, which requires classification, which requires vessel setup:** this is a strict pipeline. It strongly suggests a phase-by-phase build order (vessel model → classification → determination/Rule 18 → explanation/reasoning trail → visualization polish) rather than building the UI shell first.
-- **Geometric overlay enhances the reasoning trail:** the overlay isn't a separate feature so much as a rendering of the same data the reasoning trail already needs (bearing, angle) — build the geometry calculations once and drive both the text explanation and the visual annotation from it.
-- **Curated preset gallery requires save/share:** presets should not be a separate hardcoded feature — model them as scenarios saved through the same mechanism regular users get, just seeded and flagged as "featured." This avoids building two data models for one concept.
-- **Rule 18 hierarchy overrides classification, doesn't conflict with it:** power-driven-vs-power-driven geometry (Rules 12–15) still runs first to establish the baseline; Rule 18 then adjusts which vessel is give-way based on vessel type. Model this as a decorator/override step after the base classification, not as a competing classification path.
-- **Gamification conflicts with the reasoning-trail-first UX:** scoring/streaks push users toward fast guessing (SkipperCheck's model), while this project's core value is slow, visible reasoning — don't combine the two interaction models in the same core loop.
-- **Real AIS/multi-vessel conflicts with the focused scope:** both were explicitly excluded in PROJECT.md; flagging here only to confirm the research doesn't surface a compelling reason to reconsider — competitor analysis shows these are what turn a project into a much larger navigation-simulator product (SkipperCheck's paid tier), not what a focused 2-vessel showcase needs.
+- **Gallery section requires `id="gallery"` in initial HTML, which requires the redirect to be config-based, not route-based:** if `/gallery` is simply deleted with no `next.config.ts` `redirects()` entry, visitors get a hard 404 instead of landing on `/#gallery`. If it's redirected via a lingering `app/gallery/page.tsx` that itself calls `redirect('/#gallery')` from `next/navigation`, that still works, but it's an unnecessary extra render/hop versus a config-level redirect — see below for the concrete recommendation.
+- **Gallery card click → `/s/[shareId]` requires no new work:** this is the single most important complexity-reducing finding here — the existing "click preset → full navigation to a dedicated shared-scenario page" interaction is exactly what's already built, tested, and human-verified in v1.0. The tempting alternative (click preset → load into the *same* home-page sandbox instance in place, scroll up) would require lifting `SandboxContainer`'s state to the page level and adding remount/reseed logic that doesn't exist today (`SandboxContainer` only seeds from `initialScenario` once, at mount — it has no mechanism to accept a *new* scenario after the fact; the existing `key`-driven remount pattern lives in `app/s/[shareId]/page.tsx`, one instance per route, not a shared in-place instance). Keeping the existing click-through-to-`/s/[shareId]` behavior avoids this entirely and matches the milestone's explicit "zero change to domain logic or existing validated requirements" charter.
+- **Mini chart thumbnail conflicts with milestone scope framing:** it's a legitimate differentiator (see above) but requires new component extraction work beyond "restyle existing UI to match the design file." Recommend checking whether the design file itself specifies text-only or thumbnail cards before deciding — don't assume the differentiator is in scope just because it's a good idea.
+
+## Redirect + Anchor-Scroll Considerations (Gallery phase — HIGH confidence, verified via Next.js source/docs)
+
+This is a small feature surface with real, non-obvious failure modes. Recommended approach and why:
+
+1. **Use a `next.config.ts` `redirects()` entry, not a lingering `app/gallery/page.tsx`:**
+   ```ts
+   async redirects() {
+     return [
+       { source: "/gallery", destination: "/#gallery", permanent: true },
+     ];
+   }
+   ```
+   Verified via Next.js source (`prepare-destination.ts`, `parseDestination()`): hash fragments in redirect `destination` strings are explicitly parsed into their own `hash` field and preserved through the redirect — this is supported, documented behavior, not a workaround.
+2. **Use `permanent: true` (308), not a temporary 307:** `/gallery` is being permanently removed, and the Key Decision log's own stated rationale for adding a redirect at all is "preserves any existing bookmarked links" — a permanent redirect is the semantically correct signal to search engines and browsers for that intent.
+3. **The Gallery section must be part of the initial server-rendered HTML.** Because this redirect is a real HTTP-level navigation (the browser receives a 308 with `Location: /#gallery` and performs a fresh top-level load), the fragment-scroll-into-view behavior that follows is the **browser's native anchor-scroll**, not Next.js's client-side `<Link>`-specific scroll handling (that logic — `scroll={false}`, scroll-into-view-if-not-visible — only applies to client-side transitions triggered by `next/link` or `useRouter`, not to a fresh document load following an HTTP redirect). The practical consequence: if the Gallery section is a client component that fetches its data after hydration, the `id="gallery"` element won't exist at the moment the browser tries to scroll to the fragment, and the redirect will silently degrade to "land at the top of the page." Keep the Gallery section as an async Server Component (mirroring the current `app/gallery/page.tsx`'s `await getCaller().gallery.list()` pattern) so the anchor target exists at first paint.
+4. **Watch for post-paint layout shift above the Gallery section.** Native browser fragment-scroll computes the target's position once, near initial load; if the Hero section's height changes after that (web font swap, late image load, an entrance animation on the illustrative preview card), the computed scroll offset can end up wrong and the user lands slightly above/below the intended section. Mitigate by avoiding layout-shifting effects in the Hero (e.g., reserve space for Geist font metrics, avoid an entrance animation that changes the Hero's box height) — this is a real, if minor, cross-dependency between the Hero and Gallery phases worth flagging to whoever builds Hero.
 
 ## MVP Definition
 
-### Launch With (v1)
+### Launch With (v1 — this milestone)
 
-Minimum viable product — validates that the rules engine is correct and the reasoning is genuinely legible, which is the entire point of the project.
-
-- [ ] Vessel setup: position, heading, speed, type for two vessels — foundational input, nothing else works without it
-- [ ] Live encounter classification (head-on / crossing / overtaking) for power-driven vessels, Rules 12–15 — the core domain logic the whole project exists to showcase
-- [ ] Give-way/stand-on determination, Rules 13/14/15/17 — the "answer" users came for
-- [ ] Reasoning trail: rule citation + geometric explanation (relative bearing, closing angle) in text — explainability is called out as first-class in PROJECT.md; must ship in v1, not bolted on later
-- [ ] Visual chart rendering with vessel position/heading and basic bearing indicator — table stakes across every competitor reviewed
-- [ ] Live drag-and-adjust with real-time reclassification — an active PROJECT.md requirement and the main interaction loop
-- [ ] Save scenario + shareable link, no login — active PROJECT.md requirement, and table stakes for the sandbox-tool category
-- [ ] Curated gallery of 5–8 classic preset encounters — gives new visitors an immediate way to see the tool work without configuring anything themselves
+- [ ] Hero section: headline, subhead, primary CTA (scroll to Sandbox), illustrative (canned, non-interactive) live-classification preview card — this is the one genuinely new UI surface in the milestone
+- [ ] Gallery section embedded on the home page below the Sandbox, server-rendered (not client-fetched), reusing the existing `gallery.list()` query and card-click-to-`/s/[shareId]` behavior unchanged
+- [ ] `/gallery` route removed; `next.config.ts` permanent redirect (`308`) to `/#gallery` in its place
 
 ### Add After Validation (v1.x)
 
-Features to add once the core classify → explain → visualize loop is proven correct and legible.
-
-- [ ] Rule 18 vessel-type hierarchy (sailing, fishing, restricted-in-ability-to-maneuver overrides) — add once the power-driven baseline is solid; trigger: base engine is fully tested and the UI reasoning trail reads well
-- [ ] Geometric overlay drawn on the chart itself (bearing line, overtaking boundary arc), not just described in text — trigger: text-based explanation is validated as correct/clear, then invest in the higher-effort visual layer
-- [ ] Deep-link social preview (OG image per shared scenario) — trigger: share feature is used/tested and worth making presentable for portfolio distribution
-- [ ] Edge-case/ambiguous scenarios added to the gallery (near-boundary head-on/crossing, Rule 17(a)(ii) doubt situations) — trigger: base classification is proven correct on clean-cut cases first
+- [ ] Secondary CTA in the Hero linking to source/about (if not already specified by the design file — verify first)
+- [ ] Small illustrative motion/animation in the Hero preview card (only if it doesn't reintroduce real sandbox wiring or cause layout shift above the Gallery anchor target)
 
 ### Future Consideration (v2+)
 
-Features to defer — explicitly out of scope per PROJECT.md, revisit only if the project's goals change (e.g., extending beyond portfolio use).
-
-- [ ] Multi-vessel (3+) conflict resolution — defer: a genuinely separate, larger domain-modeling problem; only worth it if v1's 2-vessel engine is fully proven and there's appetite for a v2 milestone
-- [ ] Lights/shapes/sound-signal and restricted-visibility rules (Rules 19, 32–37) — defer: lower architectural value (mostly lookup tables) relative to effort; would roughly double rule-coverage scope
-- [ ] Real AIS data ingestion/replay — defer: separate data-engineering concern, not a rules-engine concern
-- [ ] User accounts/auth — defer: no functional need while sharing is link-based; only reconsider if a "my saved scenarios" feature becomes a real user request post-launch
+- [ ] Mini geometric chart thumbnail per Gallery card (replacing/augmenting the text-only card) — defer until there's a clear need to differentiate cards visually beyond the rationale text, and until it can be built without duplicating `ChartPanel`'s interactive logic
+- [ ] Inline "load preset into the current sandbox instance + scroll up" interaction as an alternative to full navigation to `/s/[shareId]` — defer indefinitely unless a future milestone explicitly wants a single continuous-page experience; today's per-scenario dedicated pages are simpler, already built, and already validated
 
 ## Feature Prioritization Matrix
 
 | Feature | User Value | Implementation Cost | Priority |
-|---------|------------|----------------------|----------|
-| Vessel setup (position/heading/speed/type) | HIGH | LOW | P1 |
-| Encounter classification (head-on/crossing/overtaking) | HIGH | MEDIUM | P1 |
-| Give-way/stand-on determination | HIGH | LOW-MEDIUM | P1 |
-| Reasoning trail (rule citation + text explanation) | HIGH | LOW-MEDIUM | P1 |
-| Visual chart rendering | HIGH | MEDIUM-HIGH | P1 |
-| Live drag-and-adjust | HIGH | MEDIUM | P1 |
-| Save/share scenario (no login) | HIGH | LOW-MEDIUM | P1 |
-| Curated preset gallery | MEDIUM-HIGH | LOW-MEDIUM | P1 |
-| Rule 18 vessel-type hierarchy | HIGH (for domain-modeling story) | MEDIUM-HIGH | P2 |
-| Geometric overlay on chart (bearing line, boundary arc) | MEDIUM-HIGH | MEDIUM-HIGH | P2 |
-| Deep-link social preview (OG image) | LOW-MEDIUM | LOW-MEDIUM | P3 |
-| Ambiguous/edge-case gallery entries | MEDIUM | MEDIUM | P3 |
-| Multi-vessel resolution | MEDIUM (out of scope) | HIGH | P3 (deferred) |
-| Lights/shapes/sound signals | LOW (out of scope) | HIGH | P3 (deferred) |
-| Real AIS integration | LOW (out of scope) | HIGH | P3 (deferred) |
-| Gamification/scoring | LOW (anti-feature) | MEDIUM | P3 (do not build) |
-| User accounts/auth | LOW (out of scope) | MEDIUM | P3 (do not build) |
+|---------|------------|---------------------|----------|
+| Hero headline/subhead/CTA + illustrative preview card | HIGH | LOW-MEDIUM | P1 |
+| Gallery section embedded server-side on home page (reusing existing query/click behavior) | HIGH | LOW | P1 |
+| `/gallery` → `/#gallery` permanent redirect, config-based | HIGH (avoids broken bookmarks) | LOW | P1 |
+| Secondary "view source" CTA in Hero | MEDIUM | LOW | P2 |
+| Illustrative motion in Hero preview card | LOW-MEDIUM | MEDIUM | P3 |
+| Mini chart thumbnail per Gallery card | MEDIUM | MEDIUM-HIGH | P3 |
+| Inline preset-load-without-navigation into shared sandbox instance | LOW (nice-to-have polish) | HIGH (requires state-lifting refactor) | P3 (likely out of milestone scope) |
 
-**Priority key:**
-- P1: Must have for launch
-- P2: Should have, add when possible
-- P3: Nice to have / deferred / explicitly not building
+## Competitor/Reference Pattern Analysis
 
-## Competitor Feature Analysis
-
-| Feature | SkipperCheck (Simulator + Game) | Columbia COLREGs Challenge App | COLREGS Navigator (our approach) |
-|---------|----------------------------------|----------------------------------|-------------------------------------|
-| Scope | Full ARPA/radar bridge sim (54 scenarios, Rules 5–19) + separate quiz game (Rules 12–30) | Gamified mobile/web app: navigation, collision avoidance, lights/shapes, sound signals | Focused 2-vessel sandbox, Rules 11–18 only |
-| Vessel input | Randomized AIS targets per scenario; player maneuvers own ship via ± COG/SOG buttons | Scenario-driven within mini-games (radar sim, ECDIS-style, bridge view) | Direct manual control: position, heading, speed, type for both vessels, freely adjustable |
-| Feedback mechanism | Game: instant correct/incorrect + rule + short explanation. Simulator: scenario briefing pages with rule citations, common mistakes | Reaction-based mini-games and modules; feedback style not detailed in available sources | Persistent reasoning trail (rule citation + geometric explanation), visible before and after any answer — not a graded quiz |
-| Visualization | Radar PPI with AIS vectors, CPA/TCPA, danger classification (simulator) | ECDIS-style and bridge-view rendering | Restrained nautical-chart-style 2D canvas with bearing/angle overlay tied directly to the explanation |
-| Engagement model | Scoring, streak bonuses, global leaderboard (game); paid course/subscription tiers (simulator) | Gamified modules across multiple play styles | No scoring/leaderboard — exploratory sandbox, engagement via curated gallery + shareability |
-| Sharing/persistence | None found (session-based drills; simulator scenarios gated behind paid access) | None found | Shareable no-login link per scenario; curated preset gallery seeded from the same mechanism |
-| Vessel-type/Rule 18 hierarchy | Not confirmed in available sources (breadth-focused, Rules 5–30) | Not confirmed in available sources | Explicit, explained override layer — a stated differentiator |
-| Access model | Freemium (7 free scenarios; rest paywalled) | App store download | Fully open web tool, no paywall, no login — matches portfolio/demo goal |
+| Pattern | Generic SaaS Landing Pages | Dev-Tool Landing Pages (Evil Martians study, n=100+) | Our Approach |
+|---------|---------------------------|-------------------------------------------------------|--------------|
+| Hero visual | Stock photography, abstract illustration, marketing screenshots | Real product UI: static screenshot, code snippet, or (for narrow-scope tools) a live embedded working element | Illustrative (canned, non-live) classification preview card — a middle ground already locked by the design: real-looking product content, but not the actual stateful sandbox, appropriate given this isn't a "narrow-scope tool" like an image upscaler |
+| Primary CTA | "Start free trial" / "Book a demo" / "Sign up" | "Start building" / "Download now" / direct link into a live playground | Scroll/CTA straight into the on-page Sandbox — no signup exists in this product at all |
+| Example/preset gallery | Rare; if present, usually customer logos or case-study cards | Present in tools like regex101 (a "Samples"/pattern-library menu for loading example patterns into the *same* live editor in place) | Present, but architecturally different from regex101's in-place example loader: our presets link to a dedicated `/s/[shareId]` page per scenario (already built/validated) rather than mutating a shared editor instance in place — a deliberate, lower-risk choice for this milestone, not an oversight |
 
 ## Sources
 
-- [SkipperCheck: ARPA/AIS/COLREG Bridge Simulator](https://skippercheck.net/colreg-simulator) — fetched and analyzed directly; MEDIUM confidence (single-source product page, but directly verified)
-- [SkipperCheck COLREG Practice Game](https://skippercheck.net/colreg-game) — fetched and analyzed directly; MEDIUM confidence
-- [Columbia launches gamified COLREGs training app — Smart Maritime Network](https://smartmaritimenetwork.com/2025/07/29/columbia-launches-gamified-colregs-training-app/) — MEDIUM confidence, third-party news coverage
-- [ColRegs Collaborative VR Training](https://chaac.tech/solutions/military-immersive-training/colregs-collaborative) — LOW-MEDIUM confidence, vendor marketing page, not independently verified in depth
-- [RORSIM: warship collision avoidance 3D simulation — Springer](https://link.springer.com/article/10.1007/s10055-013-0223-z) — MEDIUM confidence, peer-reviewed but describes a specialized military trainer, limited direct comparability
-- [ColRegs: Rules of the Road App — App Store](https://apps.apple.com/us/app/colregs-rules-road-for-all/id494839562) — LOW confidence, listing only, not deeply analyzed
-- [ecolregs.com — COLREGs course, Rule 17](https://ecolregs.com/index.php?option=com_k2&view=item&layout=item&id=57&Itemid=390&lang=en) — HIGH confidence for rule content (established maritime education reference)
-- [Safe Skipper — give-way hierarchy at sea](https://www.safe-skipper.com/the-give-way-hierarchy-at-sea-who-gives-way-to-whom/) — MEDIUM-HIGH confidence for Rule 18 hierarchy content
-- [US DHS/USCG Navigation Rules PDF](https://www.navcen.uscg.gov/sites/default/files/pdf/navRules/navrules.pdf) — HIGH confidence, official regulatory text
-- Academic literature on encounter classification (crossing/overtaking/head-on taxonomy) — MEDIUM-HIGH confidence, consistent across multiple peer-reviewed sources (Frontiers in Marine Science, MDPI, arXiv preprints on COLREGs-compliant collision avoidance)
-- Analogous sandbox/dev-tool patterns: Algorithm Visualizer, See Algorithms, AlgoVis.io — MEDIUM confidence for the "no-login shareable permalink" pattern, inferred by analogy from adjacent (non-maritime) sandbox-tool category, not maritime-specific
+- [We studied 100 dev tool landing pages — here's what really works in 2025 (Evil Martians)](https://evilmartians.com/chronicles/we-studied-100-devtool-landing-pages-here-is-what-actually-works-in-2025) — MEDIUM-HIGH confidence, single but methodologically substantial source (100+ pages analyzed), used for hero visual taxonomy ("live product embed," "animated vs. static product UI," "no salesy BS" principle) and CTA-pairing pattern
+- [Next.js official docs — `redirects()` in `next.config.js`](https://nextjs.org/docs/01-app/02-guides/redirecting.mdx) via Context7 `/vercel/next.js` — HIGH confidence, official documentation
+- [Next.js source — `prepare-destination.ts` `parseDestination()`](https://github.com/vercel/next.js/blob/canary/packages/next/src/shared/lib/router/utils/prepare-destination.ts) via Context7 `/vercel/next.js` — HIGH confidence, verified against actual routing implementation, confirms hash fragments are preserved through config-level redirects
+- [Next.js `redirect()`/`permanentRedirect()` API reference](https://github.com/vercel/next.js/blob/canary/docs/01-app/03-api-reference/04-functions/redirect.mdx) via Context7 `/vercel/next.js` — HIGH confidence, official docs
+- [Next.js `Link` component — scroll-to-id and `scroll={false}` behavior](https://github.com/vercel/next.js/blob/canary/docs/01-app/03-api-reference/02-components/link.mdx) via Context7 `/vercel/next.js` — HIGH confidence; used to establish that Next's own scroll-management logic is specific to client-side `<Link>`/`useRouter` transitions, distinct from native browser fragment-scroll following a full HTTP redirect
+- Project source read directly: `app/page.tsx`, `app/gallery/page.tsx`, `app/s/[shareId]/page.tsx`, `src/components/sandbox/SandboxContainer.tsx`, `src/server/api/routers/gallery.ts` — HIGH confidence (ground truth for existing dependencies/behavior)
+- `.planning/PROJECT.md` — HIGH confidence, authoritative for locked decisions (Hero Direction A, "illustrative" preview card wording, dark-mode-only, `/gallery` redirect rationale, breakpoints)
+- General WebSearch on hero-section and gallery/scroll-pattern conventions — LOW-MEDIUM confidence, used only for background context (generic hero-section listicles, generic scrolling-pattern articles); not treated as authoritative and not the basis for any table-stakes/differentiator claim above without corroboration from the Evil Martians source or the project's own locked decisions
 
 ---
-*Feature research for: maritime COLREGS collision-avoidance rules-engine visualizer*
-*Researched: 2026-07-14*
+*Feature research for: COLREGS Navigator v1.1 UI Redesign — Hero section (new UI) and Gallery-embed UX (relocation of existing feature)*
+*Researched: 2026-07-18*

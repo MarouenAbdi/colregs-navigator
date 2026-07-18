@@ -1,315 +1,255 @@
 # Pitfalls Research
 
-**Domain:** Maritime collision-avoidance (COLREGS) rules-engine + interactive 2D chart visualizer
-**Researched:** 2026-07-14
-**Confidence:** MEDIUM-HIGH (COLREGS rule semantics are HIGH confidence — sourced from multiple maritime training/reference sites that agree; software-architecture and canvas/UI pitfalls are MEDIUM — sourced from community engineering writing, not a single authoritative spec)
+**Domain:** Retrofitting shadcn/ui + Tailwind v4 dark-only theming onto an existing Next.js 16 app with a hand-rolled interactive SVG chart, plus a route-to-anchor page migration
+**Researched:** 2026-07-18
+**Confidence:** HIGH (grounded in this repo's actual source — `ChartPanel.tsx`, `useHullDrag.ts`, `useRotateHandleDrag.ts`, `ControlPanel.tsx`/`.test.tsx`, `vitest.config.ts`, `app/gallery/page.tsx`, `app/page.tsx` — cross-checked against Context7 shadcn/ui + Tailwind CSS docs and current Next.js 16 docs); MEDIUM where only WebSearch-verified community sources are cited (flagged inline)
 
 ## Critical Pitfalls
 
-### Pitfall 1: Checking heading difference instead of the actual Rule 13/14/15 tests (relative bearing, not just relative heading)
+### Pitfall 1: Redesign silently breaks the already-fixed SVG hit-testing contract, and existing tests cannot catch it
 
 **What goes wrong:**
-Developers new to COLREGS often implement classification as "compare the two vessels' headings" (e.g., `headingDiff < 15° → head-on`, `headingDiff ≈ 90° → crossing`). This is wrong. COLREGS classification is defined primarily in terms of **relative bearing** (where vessel B appears, as seen from vessel A's bow) and **secondarily** by heading similarity — not heading difference alone:
-- Rule 14 (head-on) requires **two** conditions: reciprocal/nearly-reciprocal courses **and** each vessel sees the other "ahead or nearly ahead" (i.e., near 0° relative bearing from both perspectives). A crossing situation with near-parallel headings but off-axis relative bearing is not head-on.
-- Rule 13 (overtaking) is defined **entirely** by relative bearing (>22.5° abaft the other vessel's beam), regardless of the overtaking vessel's own heading — a vessel can be "overtaking" even while turning or on a very different heading than the vessel it is overtaking.
-- Rule 15 (crossing) give-way determination depends on which vessel has the other "on her own starboard side" — a bearing-sign question, not a heading-difference question.
+`ChartPanel.tsx`'s hull polygon and rotate-handle circle rely on a structural contract: the pointer handlers are attached to the actual visible, solid-`fill`-painted shape, so SVG's default `pointer-events: visiblePainted` only fires where the user can actually see something to grab (`HULL_FILL_CLASS` gives the polygon `fill-red-500`/`fill-green-500`/`fill-slate-400`; the rotate handle has `fill="white"`). This is the fix for a bug PROJECT.md documents as having taken **two rounds of live human UAT** to root-cause in Phase 4. A visual redesign is very likely to touch exactly these two elements — e.g. restyling the hull to a stroke-only "outline vessel icon" (`fill="none"` + `stroke=...`) to match a more modern/minimal design aesthetic, or swapping the literal Tailwind color classes for new shadcn semantic tokens (`fill-destructive`/`fill-primary`/`fill-muted` — see Pitfall 3) without checking that the referenced token actually resolves to a non-transparent fill. The moment `fill` becomes `"none"` (or a token that resolves to `transparent`), the shape is no longer hit-tested by `visiblePainted` and dragging/rotating breaks in the browser — silently, with no error, no failing type-check.
 
 **Why it happens:**
-Heading-difference is the intuitive first model because it's simpler to compute (one subtraction) and "feels" like it captures head-on vs. crossing. Relative bearing requires computing a full geometry pipeline (position vectors, bearing from A to B, bearing from B to A, normalizing both to a consistent 0–360° or -180–180° convention) which is more work and easier to get subtly wrong.
+The existing Vitest test suite (`useHullDrag.test.ts`, `useRotateHandleDrag.test.ts`, `ChartPanel.test.tsx`) runs under `@vitest-environment jsdom` (per-file, not global — the project's default `vitest.config.ts` environment is `"node"`). jsdom does not implement layout, paint, or CSS-based hit-testing; RTL's `fireEvent`/`user-event` `pointer()` API dispatches `PointerEvent`s directly at the DOM node you already selected (by `data-testid`), never resolving "what's under these screen coordinates" the way a real browser does. This means **the tests validate the gesture-handling logic (capture/release, coordinate math) but structurally cannot validate the visibility-based hit-testing contract that was the actual root cause of the original bug.** All 24 test files can stay green while the production hit-testing contract is silently broken.
 
 **How to avoid:**
-Model the domain explicitly around two independent geometric primitives before writing any classification rule: (1) **relative bearing of B as seen from A's bow** and (2) **relative bearing of A as seen from B's bow** — these are NOT the same value and are NOT simply 180° apart unless headings are involved correctly. Write these as pure, independently unit-tested functions first. Only compose classification rules on top of verified geometry primitives.
+- Before restyling `VesselGroup`'s hull polygon/rotate circle, keep the invariant explicit as a code comment rule (it already exists in `ChartPanel.tsx`'s comments — keep and extend it) and treat any diff touching `fill` on these two elements as requiring manual verification, not just `npm test` passing.
+- Never set `fill="none"` (or a CSS variable/token that can resolve to `transparent`/opacity-0) on the hull polygon or rotate-handle circle. If the design calls for a stroke-only/outline look, keep a real, visible (if subtle) fill matching the new palette rather than relying on `pointer-events="all"` as a blanket fallback (see Technical Debt Patterns — that fallback reintroduces the original bug class).
+- Add a mandatory **manual drag+rotate UAT pass in a real browser** to the Sandbox phase's success criteria (matching Phase 4's precedent), not just a green test suite, before merging the Sandbox phase PR.
+- Do not delete or thin out the existing comments in `ChartPanel.tsx` that document the `visiblePainted` contract — they are load-bearing institutional memory for exactly this pitfall.
 
 **Warning signs:**
-- Classification logic that only ever computes one bearing value and reuses it for both vessels.
-- Rule 14 (head-on) implemented as a single condition instead of two ANDed conditions.
-- No unit tests where heading difference is ~180° (reciprocal) but relative bearing is off-axis (should NOT be head-on — it's likely two vessels crossing on parallel-ish tracks, not meeting bow-to-bow).
+- Any diff that changes a `fill`/`fill-*` value on `<polygon data-testid="hull-hit-*">` or `<circle data-testid="rotate-hit-*">`.
+- A restyle PR where `npm test` is green but nobody dragged a vessel in an actual browser tab.
+- Introducing shared/decorative "read-only" SVG chart previews (see Hero-phase note under Pitfall 8) that get refactored to share code with the real interactive chart.
 
-**Phase to address:**
-Domain modeling / rules-engine core phase (before any UI work) — geometry primitives must be correct and independently tested before classification rules are built on top of them.
+**Phase to address:** Sandbox (primary); Hero (if a decorative chart preview shares code with `ChartPanel`)
 
 ---
 
-### Pitfall 2: Wrong evaluation order — checking head-on/crossing before overtaking
+### Pitfall 2: Half-wiring a light/dark toggle nobody uses, so the app renders in light mode by default
 
 **What goes wrong:**
-Rule 13 opens with "Notwithstanding anything contained in Rules 4–18, any vessel overtaking any other shall keep out of the way of the vessel being overtaken" — overtaking **takes precedence over and overrides** the head-on and crossing rules. If a classifier evaluates head-on/crossing first and only falls back to overtaking as a last case, it will misclassify legitimate overtaking situations (e.g., a much faster vessel approaching from behind on a heading that happens to differ significantly from the leading vessel's heading) as crossing situations, producing the wrong give-way vessel.
+shadcn/ui's default scaffold (both the CLI and the docs' manual-install snippet) ships **both** a `:root` block (light palette) and a `.dark` block (dark palette) plus `@custom-variant dark (&:is(.dark *));`, on the assumption a `next-themes`-driven toggle will add/remove the `.dark` class on `<html>` at runtime. If a team copies this scaffold for a stated "dark-mode only, no toggle" project but never actually adds `class="dark"` to `<html>` (because there's no toggle to do it, and nobody remembers to hardcode it), the app renders using the **light** `:root` values by default — i.e., the opposite of the intended design — even though a `.dark` block with the correct palette exists unused in the CSS. This is the exact "half-wired" trap: the CSS *looks* complete (both palettes are there) but the switch that was supposed to select between them was never installed and nothing selects the dark one.
 
 **Why it happens:**
-Rules 11–18 are numbered and often mentally implemented in numeric order (14 before 13, or "classify by heading pattern" before "classify by position"), which is the opposite of the precedence the regulations actually require. The 22.5°-abaft-the-beam test is also easy to skip because it requires the relative-bearing primitive from Pitfall 1.
+Every shadcn/ui doc example, CLI-generated file, and blog post assumes a toggle exists, because toggle-based dark mode is shadcn's default supported pattern (confirmed via Context7 `/shadcn-ui/ui` theming docs — the shipped scaffold always includes both `:root` and `.dark`). Nothing in the tooling itself enforces "delete the toggle-only machinery" for a hard-coded single-theme project; it's a manual step a redesign can silently skip, especially across a 4-phase, multi-PR migration where the Scaffolding phase sets up the CSS and later phases (Hero, Sandbox, Gallery) just consume the resulting utility classes without re-checking the base setup.
 
 **How to avoid:**
-Evaluate the overtaking test **first**, using relative bearing only (not heading). Only if overtaking does not apply, proceed to test head-on, then crossing. Encode this as an explicit, ordered decision structure (not implicit if/else fallthrough) so the precedence is visible and testable in isolation. Also implement the "sticky" rule: once an overtaking situation is established, it must not be reclassified as crossing later even if the relative bearing subsequently changes (COLREGS explicitly forbids this) — this matters for the live-drag interaction where the user can nudge a vessel from clearly-overtaking into the ambiguous zone.
+- In the Scaffolding phase, either:
+  1. **Recommended — keep the standard two-block shape but collapse it to one palette:** put the dark palette values directly under `:root` (so there is no "light default" to accidentally fall back into), keep the `.dark` block present (equal to `:root` or simply retained) for forward compatibility with future `npx shadcn add` runs that may re-diff against the standard file shape, and **still add `className="dark"` to the root `<html>` element in `app/layout.tsx` as a hardcoded, permanent attribute** (not state, not a toggle, no `next-themes` dependency) — this gives defense-in-depth: even if a future component or copy-pasted shadcn recipe snippet includes a literal `dark:`-prefixed utility class, it still resolves correctly because `.dark` is genuinely present on `<html>`.
+  2. Or, simpler: delete the `@custom-variant dark (...)` line and the `.dark` block entirely, put the dark palette straight into `:root`, and never use `dark:`-prefixed classes anywhere in the codebase (grep for `dark:` in CI/lint as a guard). This is simplest but means any future shadcn block/recipe copy-pasted from docs (which often includes `dark:` variants for polish) silently no-ops its dark-specific styling — acceptable only if the team is disciplined about never introducing `dark:` classes.
+- Do **not** install `next-themes` or a `ThemeProvider` at all — it is machinery for a toggle this project has explicitly decided not to have (per PROJECT.md's locked decision: "Dark-mode only, no light theme/toggle").
+- Add a one-line check to the Scaffolding phase's manual-verification checklist: "view the app with system/browser color-scheme set to light — it must still render dark."
 
 **Warning signs:**
-- Classification function structured as `if headOn() else if crossing() else overtaking()`.
-- No test with a fast vessel approaching from ~30–60° abaft the beam on a very different heading than the lead vessel (this should be overtaking, not crossing, despite the heading difference).
+- `app/layout.tsx`'s `<html>` tag has no `dark` class and no other permanent dark-forcing mechanism, yet `globals.css` still defines a light `:root` palette.
+- Any `ThemeProvider`/`next-themes` import appears in the diff for a project that locked "no toggle" as a decision.
+- The app looks correct in local dev (because the developer's OS is set to dark) but wrong when demoed on a machine/browser set to light — the single most likely way this bug is discovered late, e.g. during a portfolio demo.
 
-**Phase to address:**
-Domain modeling / rules-engine core phase — this is a rule-ordering/precedence decision that belongs in the core classification algorithm design, not something to patch on later.
+**Phase to address:** Scaffolding (must be fixed before Hero/Sandbox/Gallery build any UI against the token system)
 
 ---
 
-### Pitfall 3: Treating the 22.5°-abaft-the-beam and near-reciprocal-heading boundaries as exact instead of applying the "in doubt" rule
+### Pitfall 3: Custom/domain-semantic color tokens (give-way / stand-on / mutual) never registered in Tailwind v4's `@theme`, so their utility classes silently don't exist
 
 **What goes wrong:**
-COLREGS Rules 13 and 14 both contain an explicit "if in doubt, assume the more cautious classification" clause: doubt about overtaking → assume overtaking; doubt about head-on → assume head-on and act accordingly. A naive implementation treats `22.5°` and `reciprocal heading` as exact floating-point thresholds. Two problems follow: (a) a vessel dragged to exactly 22.5° or 180.0° can flip unpredictably between classifications due to floating-point rounding, causing verdict "flicker" during live drag; (b) the engine has no representation for the "ambiguous zone" the rules explicitly acknowledge exists, so it cannot show the doubt-favors-caution reasoning that is core to the product's "explain, don't just assert" value proposition.
+Tailwind v4's CSS-first config generates utilities like `bg-*`, `text-*`, `fill-*`, `stroke-*` **only** for CSS custom properties declared under the `--color-*` namespace inside an `@theme` (or `@theme inline`) block — this is different from Tailwind v3, where any config-declared color automatically worked. The current code hardcodes vessel-role colors as literal Tailwind palette classes (`HULL_FILL_CLASS`: `"fill-red-500"`, `"fill-green-500"`, `"fill-slate-400"`). If the redesign introduces new semantic names to match the design system (e.g. `fill-give-way`, `fill-stand-on`, `fill-mutual`, or reuses shadcn's `--color-destructive`/`--color-chart-1..5`) but forgets to register `--color-give-way`, `--color-stand-on`, etc. under `@theme`, Tailwind's JIT scanner will not generate those utility classes at all — the class name appears in the JSX but produces zero CSS, and the shape silently renders with no fill (which, per Pitfall 1, also breaks pointer hit-testing).
 
 **Why it happens:**
-Regulatory text written for human judgment ("in doubt... shall assume") does not translate directly into a deterministic boolean function. Developers default to picking an arbitrary hard cutoff because it's easy to code, without designing for the ambiguous band the rule anticipates.
+This is a genuinely new failure mode introduced by Tailwind v4's CSS-first model, and it fails silently (no error, no warning — the class just doesn't exist in the generated stylesheet) rather than loudly, which is what makes it a real pitfall rather than an annoyance developers immediately notice.
 
 **How to avoid:**
-Model doubt-triggering thresholds explicitly (e.g., a narrow band around 22.5° and around 0°/180° heading reciprocality) as first-class domain concepts, and make the "assume the cautious case" behavior an explicit, tested rule outcome — not an accidental side effect of comparison operators. This also directly enables the "reasoning trail" feature: the explanation can literally say "bearing was within the doubt band near the overtaking/crossing boundary; COLREGS Rule 13 requires assuming overtaking in this case."
+- When migrating `HULL_FILL_CLASS`/`GRID_STROKE`/`BEARING_LINE_DEFAULT_STROKE`/etc. to the new design system, explicitly add each new semantic color as a `--color-<name>` variable inside the project's `@theme` (or `@theme inline`, if it needs to vary — see Pitfall 4) block in `globals.css` before referencing it as a `fill-<name>`/`stroke-<name>`/`bg-<name>` utility class.
+- Prefer reusing shadcn's existing `--color-chart-1` through `--color-chart-5` tokens (already wired into `@theme inline` by the default scaffold) for the three vessel-role colors rather than inventing new token names — fewer moving parts to wire up correctly, and shadcn ships these specifically for data-visualization use cases like this.
+- Verify with a quick check of the compiled/dev CSS (or Tailwind's own class-detection in devtools) that `fill-give-way` (or whichever name is chosen) actually appears in generated output before relying on it — do not just trust that the class "looks right" in JSX.
 
 **Warning signs:**
-- Threshold comparisons using `<` / `>` with no tolerance or epsilon.
-- No UI/domain concept of "boundary/ambiguous encounter" distinct from "clear-cut encounter."
-- Live-drag demo shows the verdict rapidly toggling between two classifications as the vessel crosses a boundary angle.
+- A vessel hull renders with no visible fill (transparent/default) after a restyle, and devtools shows the `fill-*` class applied but no matching CSS rule generated.
+- Any new semantic color name is added to a `Record<Role, string>`-style lookup table without a corresponding `--color-*` declaration appearing in the same PR's `globals.css` diff.
 
-**Phase to address:**
-Rules-engine core phase for the domain modeling; explainability/reasoning-trail phase for surfacing the doubt logic in the UI.
+**Phase to address:** Sandbox (vessel role colors), Scaffolding (any shared/global semantic tokens the design introduces)
 
 ---
 
-### Pitfall 4: Classifying encounters without first checking whether risk of collision exists (Rule 7 precondition)
+### Pitfall 4: shadcn's default `:root`/`.dark` + `@theme inline` split is treated as unnecessary ceremony for a single-theme app, but removing it wrong breaks utilities or future `shadcn add` compatibility
 
 **What goes wrong:**
-Rules 11–18 only matter when a "risk of collision" exists between the two vessels (established under Rule 7 — bearing not appreciably changing while range decreases, i.e., a converging/closing geometry). A classifier that ignores this precondition will produce a confident "head-on, vessel A must give way" verdict even for two vessels that are diverging, running parallel and never closing, or already past and clear — situations where COLREGS doesn't actually assign a give-way obligation because there's no risk to begin with. This produces verdicts that look plausible but are operationally nonsensical, undermining the product's core "correctly classify and explain" value.
+Because this design only ever has one theme, it's tempting to skip the indirection entirely and hardcode raw color values directly inside `@theme { --color-primary: oklch(...); }` (bypassing the `:root` custom-property layer and `@theme inline` reference layer shadcn normally uses to let `.dark` swap values at runtime). This mostly works for the app's own components, but two things can go wrong: (1) utilities like `bg-primary` behave differently depending on whether the value is declared as a **static** build-time value in plain `@theme` vs. a runtime `var(--foo)` reference in `@theme inline` — mixing the two conventions inconsistently across the same file is a documented source of "colors appear black/white" bugs (community-verified, MEDIUM confidence — see Sources); (2) if the team later runs `npx shadcn add <new-component>` to pull in a component not yet installed, the CLI/registry assumes the standard `:root` + `.dark` + `@theme inline` shape and may generate a diff or new file that doesn't merge cleanly with a heavily simplified/nonstandard `globals.css`.
 
 **Why it happens:**
-It's tempting to treat classification as a pure function of instantaneous position/heading/speed and skip the temporal "will these tracks actually converge" check, especially since Rules 11–18 text focuses on geometry, not motion prediction. But real encounter classification is meaningless without first confirming a collision risk trajectory.
+Tailwind v4's `@theme` directive has two related-but-different forms (`@theme` bakes the value at build time; `@theme inline` keeps a `var(--foo)` reference so runtime CSS-variable overrides, like `.dark` swapping `--background`, still work) and shadcn's whole point in using `@theme inline` is to preserve that runtime-swap capability — capability this project has explicitly decided not to need (no runtime toggle). It's easy to "simplify away" the indirection without realizing which specific colors/utilities depend on it working a particular way.
 
 **How to avoid:**
-Compute a simple closest-point-of-approach (CPA) / time-to-CPA (TCPA) or bearing-rate check as a gating step before applying Rules 11–18. If CPA is large / bearing rate is significant (vessels diverging or passing at safe distance), report that explicitly ("no risk of collision — Rules 11–18 do not apply") rather than forcing a give-way verdict. This is a natural, valuable addition to the "reasoning trail" and should be scoped explicitly (even a simplified two-vessel CPA calc, since the project already excludes multi-vessel and live AIS data).
+- Keep the standard shadcn shape (`:root` + `.dark` + `@theme inline`) even though only one theme is ever active — per Pitfall 2's recommendation, just make both blocks equal or make `:root` the dark palette. This keeps the project forward-compatible with future `npx shadcn add` runs and avoids the build-time-vs-runtime `@theme`/`@theme inline` confusion entirely, at the cost of a small amount of "unused" indirection.
+- If simplifying anyway, do it consistently: either everything goes through `@theme inline` + `:root` custom properties, or everything is hardcoded directly in a single `@theme` block — never mix the two forms for different tokens in the same file.
 
 **Warning signs:**
-- No CPA/TCPA or bearing-rate concept anywhere in the domain model.
-- Demo scenario where two vessels are moving apart still produces a confident give-way verdict.
+- Some shadcn component colors render correctly and others render as black/white/unstyled after a "simplify the theme file" refactor.
+- `npx shadcn add` (if ever run again mid-project) produces a large/unexpected diff against `globals.css`.
 
-**Phase to address:**
-Rules-engine core phase — decide explicitly whether Rule 7 gating is in scope (recommended: yes, minimal version) before building the classification pipeline, since it changes the shape of the domain model (adds a "risk of collision" concept prior to "encounter type").
+**Phase to address:** Scaffolding
 
 ---
 
-### Pitfall 5: Rule 18 vessel-type hierarchy modeled as a strict linear pecking order
+### Pitfall 5: Introducing shadcn's Radix-based `Select` breaks the existing `userEvent.selectOptions` test and needs jsdom polyfills this project deliberately doesn't install globally
 
 **What goes wrong:**
-Rule 18 lists vessel categories (not under command, restricted in ability to maneuver, constrained by draft, fishing, sailing, power-driven) in an order that looks like a strict ranking, so developers implement it as `priority[typeA] > priority[typeB] → typeA is stand-on`. Two things break this: (1) "not under command" and "restricted in ability to maneuver" are **co-equal**, not ranked relative to each other, despite appearing in sequence in the rule text — mariners and examiners have flagged this as a persistent point of confusion IMO has declined to clarify; (2) Rule 18's hierarchy is explicitly subordinate to Rules 9 (narrow channels), 10 (traffic separation schemes), and 13 (overtaking) — "except where Rules 9, 10, and 13 otherwise require." Since this project scopes out Rules 9/10, that's fine, but Rule 13 is in scope, meaning the vessel-type hierarchy must NOT override an overtaking classification (overtaking vessel keeps clear regardless of relative vessel-type "rank").
+`ControlPanel.tsx` currently renders the vessel-type picker as a plain native `<select>`, and `ControlPanel.test.tsx` (line 132) drives it with `await user.selectOptions(vesselBSelect, "fishing")` — the standard Testing Library helper for **native** `<select>` elements only. shadcn's `Select` component is Radix-based: a `button[role=combobox]` trigger plus a portalled listbox (`SelectContent` renders into `document.body` via a portal, not as a DOM child of the trigger). `userEvent.selectOptions` does not work against this structure at all (confirmed via community reports — Radix `Select` simply isn't a native `<select>`, `selectOptions` has nothing to act on). Swapping the control without rewriting the test produces a test failure that looks like a Testing Library/DOM query bug rather than what it actually is: a fundamentally different interaction model.
+
+Separately, Radix primitives (`Select`, `Slider`, and any others introduced — e.g. if the speed input becomes a shadcn `Slider`) call browser APIs jsdom does not implement: `Element.hasPointerCapture`/`setPointerCapture`/`releasePointerCapture`, and `HTMLElement.prototype.scrollIntoView`. This project already hit this exact class of problem with its own hand-rolled drag code and has an established, deliberate pattern for it: **per-test-file** `// @vitest-environment jsdom` pragmas plus **minimal, local** polyfills (see `ChartPanel.test.tsx`'s `MockResizeObserver`), not a blanket global jsdom environment or a kitchen-sink global polyfill file. Any new test exercising a shadcn `Select`/`Slider` needs the same treatment (adding `scrollIntoView`/pointer-capture shims local to that test file) — copying a generic "add these to your global setup" tutorial snippet into `vitest.setup.ts` would be inconsistent with the codebase's existing, intentional convention (`vitest.config.ts`'s global `environment: "node"` default plus explicit per-file `jsdom` opt-in).
 
 **Why it happens:**
-The rule text reads like an ordered list, and a simple integer-priority lookup table is the path of least resistance. The overtaking-overrides-hierarchy exception is easy to miss because it's a single subordinate clause at the start of Rule 18, not repeated at each vessel-type pairing.
+Radix's interaction model (portals, `role=combobox`/`listbox` ARIA pattern, pointer-capture-based drag for `Slider`) is a deliberate accessibility/behavior upgrade over native form controls, but it means "just swap the JSX, keep the test" does not hold — this is a widely-reported shadcn/Radix migration friction point (community-verified, MEDIUM-HIGH confidence, multiple independent sources).
 
 **How to avoid:**
-Model NUC and RAM as an unordered/co-equal set rather than two distinct priority integers. Apply the Rule 13 overtaking check (Pitfall 2) before ever consulting the Rule 18 vessel-type hierarchy — vessel type should only break ties/determine give-way when the encounter is head-on or crossing, never when it's overtaking.
+- Treat every native-`<select>`→shadcn-`Select` (and native `<input type=number>`/`<input type=range>`→shadcn-`Slider`, if adopted for vessel speed) swap in the Sandbox phase as requiring a **test rewrite**, not a test fix: click the trigger (`await user.click(screen.getByRole("combobox"))`), then click the option by ARIA role/name (`await user.click(await screen.findByRole("option", { name: "Fishing" }))`) — `findByRole` (async) is required because `SelectContent` mounts into the portal only once opened.
+- Add the pointer-capture/`scrollIntoView` polyfills locally in whichever test file(s) newly exercise `Select`/`Slider`, following the existing `MockResizeObserver`-in-`ChartPanel.test.tsx` pattern (minimal, scoped, documented with a one-line "why" comment) rather than a global blanket shim.
+- Consider shadcn's own **"Native Select"** component variant (a styled wrapper around a real `<select>`, shipped alongside the Radix-based `Select` in the current shadcn registry) for the vessel-type picker specifically, if the dropdown doesn't need rich custom item rendering — this keeps `userEvent.selectOptions` working unmodified and avoids the portal/polyfill problem entirely. Worth a deliberate choice, not a default, since it trades some visual/animation polish for test simplicity and native mobile behavior.
 
 **Warning signs:**
-- A single flat `VESSEL_TYPE_PRIORITY` enum/array with NUC and RAM at distinct adjacent ranks used for direct comparison.
-- Vessel-type hierarchy consulted before the encounter-type (head-on/crossing/overtaking) classification is finalized.
+- `ControlPanel.test.tsx` line 132 (`user.selectOptions(...)`) starts failing with a confusing "element not found"/"not a select element" error immediately after a `Select` component swap.
+- New Radix components in the Sandbox phase throw `TypeError: target.hasPointerCapture is not a function` or `scrollIntoView is not a function` under Vitest.
 
-**Phase to address:**
-Rules-engine core phase, specifically the vessel-type responsibility layer (Rule 18) that composes on top of encounter classification (Rules 13–15).
+**Phase to address:** Sandbox
 
 ---
 
-### Pitfall 6: Compass-bearing vs. math-angle convention mismatch
+### Pitfall 6: Route-to-anchor migration breaks deep-linking/scroll behavior because URL fragments never reach the server and Next.js's hash-scroll-on-navigation is unreliable
 
 **What goes wrong:**
-Nautical headings/bearings are measured **clockwise from North (0°/360°)**. `Math.atan2` and most graphics/canvas coordinate systems measure **counterclockwise from the positive x-axis**, and screen/canvas Y-axis typically increases **downward**, which flips the visual rotation sense yet again. Mixing these conventions produces vessels that visually point the wrong way, relative bearings that are mirrored or off by a sign, or verdicts that are correct in the domain model but rendered backwards on the chart (e.g., "give-way vessel has the other on her starboard side" computed correctly in domain space but displayed as if it were port side, due to an unconverted axis flip somewhere in the render pipeline).
+The plan is: remove the standalone `/gallery` route (currently `app/gallery/page.tsx`, an async Server Component calling `getCaller().gallery.list()` directly), embed its content as an `id="gallery"` section on the home page, and add a `next.config.ts` `redirects()` entry sending `/gallery` → `/#gallery`. Two independent things can silently fail here:
+1. **Server-side redirect matching never sees the fragment.** URL fragments (`#gallery`) are a client-only construct — the browser strips them before sending the HTTP request, so `next.config.ts`'s `redirects()` `source`/`has`/`missing` matching logic (which runs server-side) can never match or vary behavior based on a hash. This isn't a blocker for this specific migration (the redirect only needs to match the *path* `/gallery`, and browsers do honor a `#fragment` written into the `destination` string as part of the resulting `Location` header — standard HTTP browser behavior, not a Next-specific feature) but it does mean you cannot build a smarter per-hash redirect table server-side; the redirect is necessarily a single static rule.
+2. **Scrolling to the hash after the redirect completes is unreliable.** Next.js's own hash-scroll behavior (both via `<Link href="/#gallery">` and via a raw browser navigation following a 308 redirect) has known gaps: clicking a `Link` that only changes the hash sometimes updates the URL bar without actually scrolling to the target element (a long-standing, still-open App Router behavior gap per community/first-party issue reports); and even when it does scroll, Next.js explicitly skips `position: sticky`/`fixed` elements when computing the scroll target, so a sticky header (this design has one, per the Scaffolding phase's Header/Nav) can end up covering the top of the `#gallery` section after the "successful" scroll.
 
 **Why it happens:**
-Three different angle/coordinate conventions are in play simultaneously (compass bearing for domain logic and user input, standard math radians for `atan2`/trig calls, and screen-space Y-down pixels for canvas/SVG rendering), and it's easy to apply only one conversion when two are needed, or to apply a conversion twice.
+Fragment-based navigation was designed for static, same-document anchor jumps in an era before client-side routers with async data/layout — Next.js's router has to reconcile "did the target element exist in the DOM yet when I tried to scroll" (a real risk here, since the gallery section's content comes from a server-fetched list) with historically browser-native anchor scrolling.
 
 **How to avoid:**
-Pick one canonical internal representation for all domain logic (recommended: compass bearing in degrees, 0–360°, clockwise from North) and write two small, independently unit-tested pure conversion functions at the system boundary: `compassBearingToCanvasRadians()` (for rendering) and `screenDeltaToCompassBearing()` (for interpreting drag/mouse input back into domain terms). Never let trigonometric math (`atan2`, `sin`/`cos`) touch raw compass bearings without going through these converters, and never let the renderer consume raw compass bearings without going through the inverse converter. Test the converters against known fixed points (North = 0° = "up" on screen, East = 90° = "right" on screen, etc.).
+- Keep the redirect simple and let the browser handle the fragment natively: `{ source: "/gallery", destination: "/#gallery", permanent: true }` (308, since this is a permanent structural change, not a temporary one) — do not try to pass query/has-based logic that depends on the fragment; it can't.
+- Since the Gallery section's data currently loads via a **Server Component** async call (`await getCaller().gallery.list()`), keep it that way when merging into the home page tree — the section's HTML (including the `id="gallery"` target element) is present in the initial server-rendered payload, not appended later by client-side data fetching. This sidesteps the "element doesn't exist yet when the router tries to scroll" failure mode almost entirely, since the target exists on first paint.
+- Explicitly test (don't assume) the redirect + scroll behavior in a real browser for: (a) a fresh browser tab navigating directly to `/gallery` (full page load, not client nav) — this is the realistic "someone has the old link bookmarked" case and behaves differently (full HTTP redirect + browser-native fragment scroll) than (b) clicking an in-app `<Link href="/#gallery">` from the header nav (client-side hash update, more prone to the known Next.js scroll gap).
+- Add `scroll-padding-top` (sized to the sticky header's height) to the scrolling container (`html` or the relevant scroll container) so that even when the browser/Next.js does scroll to `#gallery`, the section's heading isn't hidden underneath the sticky header.
+- If (b) above is found to be unreliable in manual testing, add a small client-side effect (in the home page's client boundary) that listens for `window.location.hash === "#gallery"` on mount and calls `document.getElementById("gallery")?.scrollIntoView()` as an explicit fallback — but only after confirming the native behavior actually needs it; don't add this defensively up front.
 
 **Warning signs:**
-- `atan2` results used directly as "bearing" without a `(90 - angle + 360) % 360`-style conversion (or equivalent) to compass convention.
-- Vessel icons rendered pointing a visibly different direction than their stated heading in a demo scenario.
-- Bugs that only appear in specific quadrants (e.g., southwest-heading vessels behave correctly but northwest-heading ones don't) — a classic symptom of an unhandled negative-angle wraparound after `atan2`.
+- Following the old `/gallery` bookmark in a fresh tab loads the home page at the top instead of scrolled to the gallery section.
+- Clicking a `/#gallery` nav link from elsewhere on the site changes the URL bar to include `#gallery` but the viewport doesn't move (the known App Router gap).
+- The gallery heading is technically "scrolled to" but sits directly underneath the sticky header, visually cut off.
 
-**Phase to address:**
-Split across two phases: the conversion functions themselves belong in the rules-engine/geometry core phase (as pure, tested utilities with no rendering dependency); the "is it actually drawn correctly" verification belongs in the canvas/visualization phase.
+**Phase to address:** Gallery
 
 ---
 
-### Pitfall 7: Degenerate geometry inputs not handled (zero speed, identical position, exact reciprocal course)
+### Pitfall 7: shadcn CLI `init`/`add` overwrites or conflicts with existing hand-authored Tailwind v4 config
 
 **What goes wrong:**
-A sandbox where users freely drag position/heading/speed will inevitably produce degenerate inputs: two vessels at the same position (bearing/relative-bearing undefined — division by zero or `atan2(0,0)`), a stationary vessel (speed = 0, so "relative motion" and thus overtaking/CPA calculations that depend on a velocity vector break down), or headings that are exactly reciprocal (180.000°) landing precisely on a classification boundary. If these aren't handled deliberately, the engine can throw runtime errors, return `NaN`, or silently produce a confident but meaningless verdict during normal interactive use — which is highly visible and embarrassing in a live-drag demo aimed at interviewers.
+The app already has a working, hand-authored Tailwind v4 setup (custom breakpoints at 900px/640px per the design, presumably custom fonts once Geist is added, and existing utility-class usage throughout `ChartPanel.tsx`/`ControlPanel.tsx`). Running `npx shadcn init` (and later `npx shadcn add <component>`) against an existing project is documented to overwrite existing component files and can rewrite `globals.css`/`components.json` wholesale rather than merging surgically with what's already there — losing custom breakpoints, font tokens, or existing project conventions if the diff isn't reviewed.
 
 **Why it happens:**
-Textbook COLREGS examples are always "clean" (vessels moving, positions distinct, angles not exactly on a boundary). Developers build and test against clean textbook scenarios and don't think to test what happens when a user drags a vessel on top of another or sets speed to 0.
+The CLI is optimized for greenfield or "already-shadcn" projects; it has limited awareness of arbitrary pre-existing hand-authored Tailwind customizations and, per its own documentation/community reports, will overwrite existing components without confirmation in some flows.
 
 **How to avoid:**
-Enumerate degenerate cases explicitly as first-class test cases during rules-engine development: identical positions, zero speed on one or both vessels, exact boundary angles (0°, 22.5°, 180°, 360°), and anchored/stationary vessel types. Decide and document the intended behavior for each (e.g., "a stationary vessel cannot be classified as overtaking or being overtaken by relative motion in the usual sense — but Rule 13's geometric bearing test still applies since it doesn't require motion of the reference vessel") rather than discovering the behavior by accident via a UI crash.
+- Commit before running any `shadcn` CLI command in the Scaffolding phase.
+- Review the full diff on `globals.css`/`components.json`/any touched files after `init`, and manually re-merge existing custom breakpoints/fonts/tokens rather than accepting the CLI's version wholesale or discarding it wholesale.
+- Run `init` early (Scaffolding phase, first PR) before any other phase has built UI depending on the pre-shadcn CSS shape, to minimize the blast radius of any config restructuring.
 
 **Warning signs:**
-- No explicit test for `speed = 0` on either vessel.
-- No explicit test for `positionA === positionB`.
-- Dragging a vessel in the running dev build onto the other vessel's exact position crashes or shows `NaN`/`undefined` in the reasoning trail.
+- Custom breakpoints (900px/640px) or font tokens silently disappear from `globals.css` after running a `shadcn` CLI command.
+- `components.json`'s `tailwind.css` path or `aliases` config point somewhere inconsistent with the project's actual file layout (`app/` at repo root, not `src/app/`).
 
-**Phase to address:**
-Rules-engine core phase for behavior definition and unit tests; canvas/interaction phase for constraining or gracefully handling degenerate drag states in the UI (e.g., minimum separation snapping, disallowing exact overlap).
-
----
-
-### Pitfall 8: Encoding rules as opaque imperative logic instead of an explainable decision structure
-
-**What goes wrong:**
-The single most important requirement in this project is that verdicts come with a **reasoning trail** — a rule citation plus the specific geometric facts that produced it. If the classification logic is written as a tangle of nested `if`/`else` and boolean flags optimized only for "produce the right final answer," retrofitting explainability later becomes a rewrite, not an addition: there's no natural place to capture "which specific fact caused which specific branch to be taken." This is the single highest-risk architectural mistake for this project because explainability is stated as the differentiator, not a nice-to-have.
-
-**Why it happens:**
-It's fast and natural to write classification as straight-line "compute the answer" code, especially under TDD pressure to make the next boolean assertion pass. Explainability then becomes an afterthought layered on with string concatenation ("if headOn: return 'Rule 14 applies'") that doesn't actually capture the geometric reasoning, only the label.
-
-**How to avoid:**
-Design the domain model so that every rule evaluation is a discrete, named step that returns both a verdict fragment and the specific inputs/thresholds it compared (e.g., a `RuleEvaluation` value object with `{ rule: 'Rule 13', matched: true, relativeBearing: 137.2, threshold: 157.5, explanation: '...' }`), and compose the final verdict from an ordered list of these evaluations. This is exactly what a rules-engine/state-machine architecture (per the project's DDD-lite ambitions) should produce naturally — treat "explainability" as a design constraint on the domain model's return type from day one, not a UI feature to bolt on afterward.
-
-**Warning signs:**
-- Classification function signature returns only a final enum/string verdict, no supporting facts.
-- "Reasoning trail" text is generated by a separate function that re-derives explanations from the final verdict rather than being produced as a byproduct of the actual rule evaluation.
-- Difficulty writing a unit test that asserts on *why* a verdict was reached, only what the verdict is.
-
-**Phase to address:**
-Must be decided in the rules-engine core / domain-modeling phase, before classification logic is written — this is an API/return-type design decision, not something fixed after the fact. The explainability/reasoning-trail feature phase then consumes this structure rather than building new inference on top of it.
-
----
-
-### Pitfall 9: Live-drag interaction re-triggers full classification (and potentially persistence) on every mouse-move frame
-
-**What goes wrong:**
-The requirement "user can drag vessel position/heading and see the encounter classification update live" invites naively wiring the drag handler's `onMouseMove` directly to both the classification recompute AND to state that's bound to network calls (tRPC mutations / autosave), causing dozens of classification calls and potentially network requests per second during a single drag gesture. At minimum this causes UI jank; at worst it causes redundant/racing tRPC calls, database writes for a scenario that's still being actively edited, or a "save" history full of every intermediate drag position rather than deliberate user checkpoints.
-
-**Why it happens:**
-React's data flow makes it easy to lift drag position into shared state that everything (classification, chart render, save button state) subscribes to, without distinguishing "local, high-frequency interaction state" from "committed, low-frequency application state." Global mouse listeners attached via React's synthetic event system (rather than native `document` listeners) can also compound this with unnecessary re-renders across the component tree during drag.
-
-**How to avoid:**
-Keep drag position as fast local component state (or a ref-driven imperative update path) decoupled from anything that triggers persistence. Classification recompute on every frame is usually fine (it's pure, synchronous domain logic — cheap), but persistence (tRPC mutation to save the scenario) must be explicitly and separately triggered (an explicit "Save" action or a debounced/throttled autosave with a clear trailing-edge trigger on drag end, not on every frame). Use native `document.addEventListener('mousemove'/'pointermove', ...)` for the drag gesture itself rather than React synthetic handlers scoped to the dragged element, and encapsulate the whole gesture in a reusable hook.
-
-**Warning signs:**
-- A single `onDrag` handler that both updates vessel position state and calls a tRPC mutation.
-- Visible input lag or dropped frames while dragging a vessel in dev builds.
-- Network tab shows a burst of requests during a single drag gesture.
-
-**Phase to address:**
-Canvas/interaction phase for the drag mechanics; API/persistence phase for defining the explicit save boundary (what "save a scenario" actually captures and when).
-
----
-
-### Pitfall 10: Domain rules-engine logic coupled to tRPC routers or Prisma models
-
-**What goes wrong:**
-Given the project's stated Clean Architecture/DDD-lite ambitions and TDD focus on "business rules, domain logic," a common failure mode is writing the COLREGS classification logic directly inside tRPC procedure handlers, or shaping domain types (vessel, encounter, verdict) to match Prisma-generated types / Zod input schemas rather than the reverse. This makes the highest-value part of the codebase (the rules engine) hard to unit-test in isolation (tests need a live/mocked tRPC context or DB), hard to reuse (e.g., can't run classification in a Vitest test or a script without spinning up the API layer), and couples domain semantics to persistence/transport concerns that will inevitably drift (e.g., a Prisma schema migration nudging the shape of a domain concept for storage-efficiency reasons).
-
-**Why it happens:**
-tRPC + Prisma + Zod scaffolding tutorials overwhelmingly demonstrate CRUD-shaped, router-centric code where "the logic" lives directly in the procedure. It's also genuinely less code, short-term, to skip a domain layer and just validate-then-persist. The pull toward this pattern is strong precisely because the surrounding stack is optimized for it.
-
-**How to avoid:**
-Keep the rules engine as a standalone module with zero imports from `@prisma/client`, tRPC, or Next.js — it should be a pure TypeScript package/folder that takes plain domain objects (vessel state, positions) and returns plain verdict/reasoning objects, testable with nothing but Vitest. tRPC routers and Prisma models are adapters at the edges: routers translate HTTP-ish input (validated by Zod) into domain calls and translate domain output into API responses; Prisma models represent the persisted *scenario* (position/heading/speed/vessel-type inputs), not the *verdict* (which should generally be recomputed from stored inputs, not stored as denormalized state, to avoid drift between engine version and stored verdict).
-
-**Warning signs:**
-- Import of `@prisma/client` or `trpc` types anywhere inside files under a `domain/` or `rules/` folder.
-- Classification unit tests require mocking a database or tRPC context to run.
-- Zod schemas used simultaneously as both API input validation and the canonical domain type (no separate domain model).
-
-**Phase to address:**
-Foundational architecture decision for the rules-engine core phase; enforced/verified again when the API/persistence phase wires the engine up to tRPC and Prisma.
+**Phase to address:** Scaffolding
 
 ---
 
 ## Technical Debt Patterns
 
+Shortcuts that seem reasonable but create long-term problems.
+
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
-|----------|-------------------|-----------------|------------------|
-| Storing the computed verdict/reasoning trail in Postgres alongside scenario inputs | Faster reads, simpler shareable-link rendering | Verdict can silently drift from what the current rules-engine version would compute (bug fixes to the engine don't retroactively fix saved scenarios) | Only if verdict is explicitly recomputed from stored inputs at read time; never treat stored verdict as source of truth |
-| Hard-coded numeric thresholds (22.5°, reciprocal-heading tolerance) scattered inline in classification code | Fast to write, matches how the rule text reads | Impossible to unit-test boundary/doubt behavior systematically, hard to adjust or explain in the reasoning trail | Never — extract as named domain constants from the start given this is the highest-scrutiny part of the codebase |
-| Building classification as heading-difference comparison first, relative-bearing later | Gets a demo-able "it classifies something" working fast | Silently wrong verdicts for legitimate overtaking/crossing edge cases (Pitfall 1) that require a rewrite, not a patch | Acceptable only as a literal throwaway spike to validate UI wiring — must not survive into the tested rules-engine module |
-| Skipping Rule 7 (risk-of-collision) gating for MVP | Simpler domain model, fewer cases to test | Confident wrong verdicts on diverging/parallel-non-closing scenarios undermine the "correctly classify" core value | Acceptable to explicitly defer if documented as a known limitation in the reasoning trail UI ("assumes risk of collision"), not acceptable to silently omit |
+|----------|-------------------|-----------------|-----------------|
+| Adding a fallback `pointer-events="all"` attribute to the hull/rotate shapes "just in case," instead of confirming `fill` stays non-`"none"` | Removes the temptation to worry about Pitfall 1 during the redesign | Reintroduces exactly the "invisible/mismatched hit-target" failure mode the Phase 4 fix eliminated — a `pointer-events="all"` shape can be grabbed anywhere in its bounding geometry regardless of what's actually painted, which is the bug, not the fix | Never as a first choice; only as a documented, deliberate exception if a specific design element truly needs an invisible hit-region larger than its visible paint (not the case for the hull/rotate handle) |
+| Skipping the `:root`/`.dark` dual-block shadcn convention and hardcoding one palette directly, to "reduce boilerplate" for a dark-only app | Slightly less CSS to read/maintain up front | Future `npx shadcn add` runs and any copy-pasted shadcn doc snippet with `dark:` classes silently misbehave; harder to onboard a future contributor familiar with shadcn's standard shape | Acceptable only if paired with a lint/grep guard banning `dark:`-prefixed classes anywhere in the codebase (Pitfalls 2/4) |
+| Leaving `userEvent.selectOptions`-based tests unmigrated and instead reaching for a workaround (e.g. keeping a hidden native `<select>` around) to make old assertions "pass" | Test suite stays green with minimal edits | Tests stop verifying real user interaction with the component actually shipped (a hidden native select nobody clicks in production) — false confidence | Never; rewrite the test to match the real interaction model (Pitfall 5) |
+| Adding global jsdom polyfills (pointer capture, `scrollIntoView`, etc.) to `vitest.setup.ts` for convenience once shadcn Select/Slider land | One place to add shims instead of per-file | Breaks from this project's established, deliberate `environment: "node"` global default + per-file `jsdom` opt-in convention; makes it harder to reason about which tests actually need a DOM at all | Acceptable only if the team explicitly decides to change the global test-environment convention project-wide, as a conscious decision — not as an incidental side effect of adding Select/Slider |
 
 ## Integration Gotchas
 
+Common mistakes when connecting to external services/tools.
+
 | Integration | Common Mistake | Correct Approach |
 |-------------|-----------------|-------------------|
-| Prisma + shareable scenario links | Using sequential/incrementing IDs exposed in the shareable URL, allowing enumeration of other users' saved scenarios | Use a non-guessable identifier (UUID/cuid) as the public share slug, separate from any internal DB primary key |
-| tRPC input validation (Zod) vs. domain types | Reusing the same Zod schema object as both the wire-format validator and the internal domain type, so domain logic silently depends on API-shape decisions (optional fields, string vs. number encodings) | Define Zod schemas at the API boundary only; parse into explicit domain types before calling into the rules engine |
-| Next.js SSR/hydration + canvas-based chart | Rendering the interactive chart with browser-only APIs (`window`, `Canvas` context) during SSR, causing hydration mismatches on shared-link page loads | Guard canvas/drag-dependent rendering behind client-only rendering (e.g., dynamic import with SSR disabled, or mount-effect gating) for the interactive sandbox component |
+| `shadcn` CLI `init`/`add` against an existing, hand-authored Tailwind v4 `globals.css` | Running `shadcn init` (or `add --force`/`add -o`) and letting it overwrite existing custom breakpoints (900px/640px) or component files without reviewing the diff | Commit before running any `shadcn` CLI command; review the diff on `globals.css`/`components.json` afterward; merge the CLI's default token block with the project's existing custom tokens rather than accepting either wholesale |
+| Radix-based shadcn `Select`/`Slider`/`Dialog` etc. + Vitest/jsdom | Assuming Radix components "just work" under the same jsdom setup as native form elements, then being surprised by `hasPointerCapture`/`scrollIntoView` `TypeError`s | Add scoped per-file polyfills (matching this project's existing `MockResizeObserver` pattern) only in test files that render Radix components requiring them |
+| `next.config.ts` `redirects()` for the `/gallery` → `/#gallery` move | Assuming the redirect's `source`/`has` matching can key off the fragment, or forgetting `permanent: true` for what is a permanent structural change (leaving stale 307s that browsers/search engines won't cache) | Match only on the path (`/gallery`); write the fragment directly into `destination`; use `permanent: true` (308) |
+| Existing internal navigation (Header/Nav built in Scaffolding phase) linking to the gallery section | Nav links point at the old `/gallery` path (working, but forces every internal click through an unnecessary redirect hop) instead of directly at `/#gallery` | Point all new in-app navigation directly at `/#gallery` (or a same-page anchor `#gallery` if already on `/`); the `next.config.ts` redirect exists only to catch *external*/bookmarked links to the old path |
 
 ## Performance Traps
 
 | Trap | Symptoms | Prevention | When It Breaks |
-|------|----------|------------|-----------------|
-| Classification recompute + full chart re-render on every raw pointer-move event during drag | Visible jank/stutter while dragging a vessel, especially with reasoning-trail text re-rendering every frame | Throttle/rAF-batch position updates feeding the classification pipeline; memoize chart sub-components keyed on rounded position values | Noticeable even at small scale (single browser tab) since it's a per-frame UI responsiveness issue, not a data-scale issue |
-| Re-deriving verdict from scratch inside every render of every child component that displays a piece of it | Redundant computation, harder-to-reason-about render tree | Compute verdict once per meaningful state change (e.g., in a memoized selector/hook), pass the result down as data, not recompute per consumer | Becomes visible once the reasoning trail has multiple UI consumers (chart overlay, sidebar explanation, rule citation badge) |
-
-## Security Mistakes
-
-| Mistake | Risk | Prevention |
-|---------|------|------------|
-| Predictable/sequential shareable-link IDs | Enumeration of other users' scenarios (no-auth model makes any saved scenario effectively "public if you have the link") | Non-guessable slugs (UUID v4/cuid2); treat all saved scenarios as inherently public data (no auth, so don't accept sensitive input into scenario metadata) |
-| No input bounds validation on position/speed/heading before persisting | Malformed or extreme values (e.g., negative speed, heading outside 0–360, absurd coordinates) stored and later crashing the classification engine on load | Validate all vessel input at the Zod boundary with explicit ranges, independent of the domain engine's own defensive checks |
+|------|----------|------------|----------------|
+| Merging the Gallery section's server data-fetch into the same home-page Server Component render as the Hero/Sandbox content, without a clean subtree boundary | Home page's Time-to-First-Byte/streamed content grows as the curated-scenario list grows, even though the sandbox above it is interactive-only and doesn't need the gallery data | Keep the gallery data-fetch scoped to its own section (a dedicated async Server Component subtree, not hoisted into the top-level page function) so it can stream/suspend independently of the Hero/Sandbox content above it | Noticeable once the curated gallery list grows well beyond the current handful of seed scenarios — not a concern at today's scale, but worth keeping the boundary clean now rather than retrofitting later |
 
 ## UX Pitfalls
 
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-------------------|
-| Verdict/label flickers rapidly between two classifications as a vessel is dragged near a boundary angle (22.5°, reciprocal heading) | Feels buggy/untrustworthy, undermines confidence in the "correct and explainable" core value | Explicitly render the "doubt zone" as its own visual/labeled state near boundaries (ties to Pitfall 3), rather than only ever showing one of two hard classifications |
-| Reasoning trail shows only the final rule number ("Rule 15 applies") without the geometric facts that produced it | Feels like an assertion, not an explanation — defeats the stated differentiator | Always pair the rule citation with the specific computed values (relative bearing, heading difference) that satisfied that rule's test, per Pitfall 8 |
-| No visual indication of relative bearing sectors (the 22.5°-abaft-beam boundary, ahead/abeam zones) on the chart itself | Users can't visually verify why a classification was reached, reducing trust and educational value | Render the classic COLREGS bearing-sector diagram (sternlight/sidelight arcs) as an overlay on the vessel being evaluated, at least for preset/gallery scenarios |
+| Vessel role badge text (`fill-current` on the `<text>` label) inherits an ancestor `color` value tuned for the old light chart background (`bg-white`) | After the dark-palette restyle, the give-way/stand-on/mutual label text can render dark-on-dark and become unreadable/invisible, even though the shape/color-coding around it is otherwise correct | Set an explicit, dark-background-appropriate text color token on (or near) the vessel label rather than relying on inherited `currentColor`; verify contrast against the new dark chart background specifically, not just against the page background |
+| Chart grid/bearing-line/cone colors remain hardcoded light-mode hex values (`GRID_STROKE = "#E2E8F0"`, `BEARING_LINE_DEFAULT_STROKE = "#475569"`, `CONE_DEFAULT_STROKE = "#CBD5E1"`, plus the `<svg>`'s own `bg-white border-slate-200`) | If only some of these are migrated to the new dark palette and others are missed (they're plain string constants, not Tailwind classes, so a project-wide search for Tailwind utility names won't catch them), the chart ends up a mix of light-on-dark, producing a visually broken "half-migrated" chart | Treat these hardcoded hex constants as an explicit checklist item in the Sandbox phase (they will not show up in a search for `dark:` or shadcn token names) — search specifically for hex-literal color strings (`#[0-9A-Fa-f]{3,6}`) in `ChartPanel.tsx` as part of the phase's done-checklist |
+| Focus ring color hardcoded per-input (`focus:outline-teal-600` in `ControlPanel.tsx`) instead of using the shared shadcn `--ring` token | Inconsistent focus-ring color between native inputs left as-is and any new shadcn components introduced alongside them in the same panel | When restyling `ControlPanel`, replace ad hoc `focus:outline-*` utilities with the shared `ring`/`--color-ring` token so focus styling is visually consistent across native and shadcn-sourced controls |
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **Encounter classification:** Often missing the risk-of-collision (Rule 7) precondition — verify diverging/parallel-non-closing scenarios don't produce confident give-way verdicts (Pitfall 4)
-- [ ] **Overtaking detection:** Often implemented via heading comparison instead of relative bearing — verify a fast vessel approaching from abaft the beam on a very different heading is still classified as overtaking (Pitfall 1, 2)
-- [ ] **Rule 18 vessel-type logic:** Often modeled as a strict linear priority list — verify NUC and RAM are treated as co-equal, and that overtaking classification is checked before vessel-type hierarchy is consulted (Pitfall 5)
-- [ ] **Boundary/doubt handling:** Often only tested with clean textbook angles — verify behavior exactly at 22.5°, exactly at reciprocal heading, and just inside/outside these thresholds (Pitfall 3, 7)
-- [ ] **Reasoning trail:** Often shows only the verdict label — verify it surfaces the actual computed geometric values (relative bearing, closing angle) alongside the rule citation (Pitfall 8)
-- [ ] **Live drag interaction:** Often wired to trigger persistence on every frame — verify saving is an explicit/debounced action, not a byproduct of every mouse-move (Pitfall 9)
-- [ ] **Degenerate inputs:** Often untested — verify identical vessel positions and zero-speed vessels don't crash or silently produce `NaN`/nonsensical verdicts (Pitfall 7)
-- [ ] **Rules engine isolation:** Often coupled to tRPC/Prisma — verify the classification module has zero imports from `@prisma/client` or `@trpc/*` and its tests run without a database (Pitfall 10)
-- [ ] **Out-of-scope rules (Rule 19, restricted visibility, sound signals):** Often accidentally implied by UI copy or preset scenario descriptions — verify no UI text or reasoning trail references rules explicitly out of scope for this project
+- [ ] **Dark-only theming:** Looks correct in local dev — verify it *also* renders dark with the OS/browser color-scheme preference set to light, and that `<html>` carries a permanent `dark` class (or the `.dark`/`:root` split was deliberately collapsed) rather than depending on `prefers-color-scheme` or an unused toggle.
+- [ ] **Restyled vessel hull/rotate handle:** Passes `npm test` — verify by *actually dragging and rotating a vessel in a real browser tab*, not just reading green test output (jsdom cannot verify the `visiblePainted` hit-testing contract).
+- [ ] **New semantic color tokens (vessel-role colors, any custom design-system colors):** Referenced in JSX as `fill-*`/`bg-*`/`text-*` classes — verify the corresponding `--color-*` variable actually exists in `@theme`/`@theme inline` and the class shows up in generated CSS, not just in source.
+- [ ] **Vessel-type `Select` (if migrated to shadcn):** `ControlPanel.test.tsx` still calls `user.selectOptions` — verify it was rewritten to the click-based Radix interaction pattern, not left silently broken or "fixed" by reverting to a hidden native select nobody clicks in production.
+- [ ] **`/gallery` → `/#gallery` migration:** The redirect config exists — verify by testing a *fresh, non-client-routed* navigation to the old `/gallery` URL (not just clicking an in-app link) and confirming both the redirect *and* the scroll-to-anchor actually land the user on the gallery section, not just somewhere on the home page.
+- [ ] **Sticky header + anchor scroll:** Scrolling to `#gallery` "works" — verify the section's heading isn't hidden underneath the sticky header on arrival (check `scroll-padding-top` is set to the header's actual height).
+- [ ] **shadcn CLI scaffold:** `init`/`add` ran cleanly — diff `globals.css`/`components.json` against the pre-CLI commit to confirm no existing custom breakpoints/tokens were silently dropped.
 
 ## Recovery Strategies
 
 | Pitfall | Recovery Cost | Recovery Steps |
-|---------|----------------|------------------|
-| Heading-difference-based classification shipped instead of relative-bearing-based (Pitfall 1) | MEDIUM | Isolate and rewrite the geometry primitives module; classification rule functions that consume it should need minimal changes if they were already composed on top of a clean interface — cost is high only if the wrong primitive leaked into many call sites |
-| Verdict stored denormalized and now drifting from a fixed rules-engine bug (Technical Debt row 1) | LOW–MEDIUM | Add a recompute-on-read migration/backfill; going forward, always derive verdict from stored inputs at render time |
-| Domain logic tangled into tRPC routers (Pitfall 10) | HIGH | Requires extracting pure functions out of router handlers into a standalone module and rewriting tests to not depend on tRPC context — do this before the router surface grows further, as the cost only increases with more routes |
-| No doubt-zone handling, verdict flickers in demo (Pitfall 3) | LOW | Add an explicit tolerance band and a third "ambiguous — doubt rule applies" classification state; low cost if the underlying geometry primitives (Pitfall 1) are already correct |
+|---------|-----------------|-----------------|
+| Hit-testing silently broken after restyle (Pitfall 1) | LOW | Revert the specific `fill` change on the hull polygon/rotate circle to a real, non-`"none"` value matching the new palette; re-run the existing Phase-4-style manual drag/rotate UAT pass before re-merging |
+| Half-wired dark theme (Pitfall 2) | LOW | Add `className="dark"` to the root `<html>` element in `app/layout.tsx`; no CSS restructuring needed if the `.dark` block already has correct values |
+| Missing `@theme` registration for a custom color (Pitfall 3) | LOW | Add the missing `--color-<name>` declaration to the `@theme`/`@theme inline` block; no JSX changes needed once the token exists |
+| Broken `Select` test after Radix swap (Pitfall 5) | LOW–MEDIUM | Rewrite the specific test assertions to the click+`findByRole("option")` pattern; add scoped jsdom polyfills to that test file only |
+| Route-to-anchor scroll unreliable (Pitfall 6) | MEDIUM | Add `scroll-padding-top`; if native/Next.js scroll behavior still doesn't reliably land on `#gallery`, add a small client-side `scrollIntoView` fallback effect keyed on `window.location.hash` |
+| shadcn CLI clobbered existing config (Pitfall 7) | LOW | `git diff`/`git checkout` the affected files back to the pre-CLI commit and manually re-apply only the shadcn-specific additions |
 
 ## Pitfall-to-Phase Mapping
 
 | Pitfall | Prevention Phase | Verification |
-|---------|-------------------|----------------|
-| Heading-diff vs. relative-bearing confusion (1) | Rules-engine core / domain modeling | Unit tests: reciprocal-heading-but-off-axis-bearing case is NOT head-on; off-heading-but-abaft-beam case IS overtaking |
-| Evaluation order / overtaking precedence (2) | Rules-engine core / domain modeling | Unit test: fast vessel astern on a very different heading still classifies as overtaking, not crossing |
-| Doubt/boundary handling (3) | Rules-engine core; surfaced in explainability phase | Unit tests at exact and near-exact boundary angles (22.5°, 180°); UI test that verdict doesn't flicker across the boundary |
-| Risk-of-collision gating (4) | Rules-engine core (scope decision made explicitly, not by omission) | Unit test: diverging/parallel-non-closing scenario returns "no risk of collision," not a give-way verdict |
-| Rule 18 hierarchy modeling (5) | Rules-engine core, vessel-type layer | Unit tests: NUC vs. RAM produces no strict ranking; overtaking classification is not overridden by vessel type |
-| Bearing/angle convention mismatch (6) | Rules-engine core (pure converters) + canvas/visualization phase (render verification) | Fixed-point unit tests (North=0°=up, East=90°=right); visual smoke test of vessel icon direction vs. stated heading |
-| Degenerate geometry inputs (7) | Rules-engine core (behavior defined + tested); canvas/interaction phase (drag constraints) | Unit tests for zero-speed and identical-position inputs; manual drag test overlapping two vessels in dev build |
-| Explainability designed in, not bolted on (8) | Rules-engine core (return-type design) | Code review check: classification functions return structured evaluation facts, not just a final label; reasoning-trail UI phase consumes this structure without re-deriving explanations |
-| Drag-triggered over-computation/persistence (9) | Canvas/interaction phase; API/persistence phase (explicit save boundary) | Network tab shows no request burst during a drag gesture; frame-rate check during drag in dev build |
-| Domain/API/persistence coupling (10) | Rules-engine core phase (module boundary set from the start); verified again in API/persistence phase | Lint/import-boundary check (no `@prisma/client` or `@trpc/*` imports in `domain/`); rules-engine test suite runs without a database |
+|---------|------------------|---------------|
+| 1. Silent SVG hit-testing regression | Sandbox | Manual browser drag+rotate UAT pass (not just `npm test`) before merging the Sandbox PR |
+| 2. Half-wired light/dark toggle | Scaffolding | View the deployed/dev app with the OS set to light color-scheme; confirm `<html>` carries `dark` permanently |
+| 3. Unregistered custom `@theme` color tokens | Scaffolding (shared tokens) / Sandbox (vessel-role colors) | Inspect generated CSS (devtools or build output) for each new `fill-*`/`bg-*` class actually used |
+| 4. `@theme` vs `@theme inline` inconsistency | Scaffolding | All theme colors resolve correctly across every shadcn component after the token file is finalized, not just the ones tested first |
+| 5. Radix `Select`/`Slider` breaks native-control tests | Sandbox | `ControlPanel.test.tsx` (and any new Slider tests) pass using the rewritten click/`findByRole` pattern, run against real Radix components, not mocks |
+| 6. Route-to-anchor scroll/redirect gaps | Gallery | Manual test: fresh-tab navigation to old `/gallery` URL lands scrolled to `#gallery`, heading visible below the sticky header |
+| 7. shadcn CLI clobbers existing config | Scaffolding | Diff review immediately after `init`/`add`; confirm no custom breakpoints/tokens lost |
+| Hardcoded hex chart colors missed during restyle | Sandbox | Search for hex-literal color strings in `ChartPanel.tsx` returns nothing left unconverted |
+| Vessel label text contrast (fill-current) | Sandbox | Visual check of give-way/stand-on/mutual badge legibility against the new dark chart background |
 
 ## Sources
 
-- [Rule 13 COLREGS Overtaking with Explanations](https://www.marinepublic.com/blogs/training/136427-rule-13-colregs-overtaking-with-explanations) — 22.5° threshold, doubt clause, sticky overtaking status
-- [COLREG Rule 13 — Overtaking — IALACOLREG](https://ialacolreg.com/en/colreg/rule-13)
-- [Overtaking or crossing? Don't assume what other ship will do – Professional Mariner](https://professionalmariner.com/overtaking-or-crossing-dont-assume-what-other-ship-will-do/) — real-world consequence of misclassification
-- [Rule 18: not a simple "pecking order" – Professional Mariner](https://professionalmariner.com/rule-18-not-a-simple-pecking-order/) — NUC/RAM co-equal status confusion, Rule 9/10/13 override
-- [COLREGs Rule 18: Vessel Hierarchy and Who Gives Way - LegalClarity](https://legalclarity.org/colregs-rule-18-vessel-hierarchy-and-who-gives-way/)
-- [Col Regs – Rule 17 Stand-on vessel action / Rule 18 – The Seamanship Centre](https://seamanship.ie/col-regs-rule-18-responsibilities-between-vessels/)
-- [Rule 7 COLREGS Risk of Collision with explanations](https://www.marinepublic.com/blogs/training/575092-rule-7-colregs-risk-of-collision-with-explanations) — bearing-constant/range-decreasing risk test, CPA/TCPA
-- [Reliability of maritime collision avoidance systems algorithms in the implementation of COLREGs - ScienceDirect](https://www.sciencedirect.com/science/article/pii/S0951832025010403) — documented systematic implementation failures and recurring error patterns in real COLREGS software
-- [COLREGs and their application in collision avoidance algorithms: A critical analysis - ScienceDirect](https://www.sciencedirect.com/science/article/pii/S0029801822013592) — encounter categories not cleanly separable, interpretation ambiguity in software implementations
-- [Bearing (navigation) - Wikipedia](https://en.wikipedia.org/wiki/Bearing_(navigation)) and mathsathome.com/edspi31415.blogspot.com bearing calculators — compass-vs-math angle convention, negative-angle wraparound bug pattern
-- [Common Mistakes in Developing Solutions Using Business Rules - Business Rules Journal](https://www.brcommunity.com/articles.php?id=b778) — rules embedded in process/integration layers, hidden complexity in technical rules
-- [Domain Driven Backend Architecture · trpc/trpc · Discussion #1376](https://github.com/trpc/trpc/discussions/1376) — domain logic independence from tRPC/Prisma infrastructure
-- [Clean Architecture in Practice with TypeScript, Prisma, Next.js - Arnaud Renaud](https://www.arnaudrenaud.com/articles/clean-architecture-typescript-prisma-next/) — moving Prisma-specific code to dedicated adapters
-- [From SVG to Canvas – part 2: a new way of building interactions - Felt](https://felt.com/blog/svg-to-canvas-part-2-building-interactions) — per-element DOM/event overhead at scale
-- [Dragging SVGs with React - DEV Community](https://dev.to/tvanantwerp/dragging-svgs-with-react-38h6) and [Drag events do not fire for SVG elements · Issue #3192 · facebook/react](https://github.com/facebook/react/issues/3192) — native listener requirement, synthetic event scoping issues during drag
-- [Decision Table Testing Tutorial - ZetCode](https://zetcode.com/terms-testing/decision-table-testing/) and [Decision Table Based Testing - GeeksforGeeks](https://www.geeksforgeeks.org/software-engineering/decision-table-based-testing-in-software-testing/) — combinatorial coverage approach for rule-based systems
+- This repository: `.planning/PROJECT.md` (Key Decisions table — SVG hit-target fix, webpack `extensionAlias` fix, v1.1 locked decisions), `src/components/sandbox/ChartPanel.tsx`, `src/components/sandbox/hooks/useHullDrag.ts`, `src/components/sandbox/hooks/useRotateHandleDrag.ts`, `src/components/sandbox/ControlPanel.tsx`, `src/components/sandbox/ControlPanel.test.tsx` (line 132, `userEvent.selectOptions`), `src/components/sandbox/ChartPanel.test.tsx` (per-file `@vitest-environment jsdom` + `MockResizeObserver` pattern), `vitest.config.ts` (global `environment: "node"`), `app/gallery/page.tsx`, `app/page.tsx` — HIGH confidence, directly inspected
+- Context7 `/shadcn-ui/ui` theming/manual-install docs — default `:root`/`.dark`/`@theme inline` scaffold shape — HIGH confidence
+- Context7 `/websites/tailwindcss` (`docs/dark-mode`, `docs/functions-and-directives`, `docs/adding-custom-styles`) — `@custom-variant dark`, `@theme` directive semantics — HIGH confidence
+- [shadcn/ui — Tailwind v4](https://ui.shadcn.com/docs/tailwind-v4) — MEDIUM-HIGH confidence, official docs
+- [Shadcnblocks — Updating shadcn/ui to Tailwind 4](https://www.shadcnblocks.com/blog/tailwind4-shadcn-themeing) — `@theme` vs `@theme inline` black/white color bug — MEDIUM confidence, single community source, internally consistent with Tailwind's own directive semantics
+- [github.com/testing-library/user-event Discussion #1087](https://github.com/testing-library/user-event/discussions/1087) — `hasPointerCapture is not a function` — MEDIUM-HIGH confidence, first-party repo discussion
+- [radix-ui/primitives Issue #1822 — Unable to open select with @testing-library/react](https://github.com/radix-ui/primitives/issues/1822) — MEDIUM-HIGH confidence, first-party repo issue
+- [ClarityDev — Testing Select Components with React Testing Library](https://claritydev.net/blog/testing-select-components-react-testing-library) — click+`findByRole` pattern for Radix Select — MEDIUM confidence
+- [shadcn/ui — Native Select](https://ui.shadcn.com/docs/components/radix/native-select) — MEDIUM-HIGH confidence, official docs, confirms a native-`<select>`-based alternative exists in the current registry
+- [Next.js — redirects (next.config.js)](https://nextjs.org/docs/app/api-reference/config/next-config-js/redirects), version 16.2.10 docs, fetched directly — HIGH confidence, official docs (confirms path-only matching, 307/308 semantics; does not document fragment support explicitly, consistent with fragments being client-only per HTTP semantics)
+- [vercel/next.js Issue #44295 — Next.js 13 Link not scrolling to anchor element](https://github.com/vercel/next.js/issues/44295) — MEDIUM-HIGH confidence, first-party repo issue, still-open class of problem
+- [vercel/next.js Discussion #13804 — replace url hash without scrolling](https://github.com/vercel/next.js/discussions/13804) — MEDIUM confidence, corroborating context on hash-scroll behavior gaps
 
 ---
-*Pitfalls research for: Maritime COLREGS rules-engine visualizer (COLREGS Navigator)*
-*Researched: 2026-07-14*
+*Pitfalls research for: shadcn/ui + Tailwind v4 dark-only redesign of an existing interactive-SVG Next.js app (COLREGS Navigator v1.1)*
+*Researched: 2026-07-18*
