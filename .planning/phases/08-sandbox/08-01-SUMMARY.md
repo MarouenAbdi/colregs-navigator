@@ -151,6 +151,10 @@ None - no external service configuration required.
 - `npm run typecheck`'s remaining errors (`ControlPanel.test.tsx`, `ReasoningPanel.tsx`, `SandboxContainer.tsx`) are the expected, plan-documented wave-2 cleanup surface -- not a regression introduced here.
 - No blockers for Wave 2.
 
+## Self-Check: PASSED
+
+All 16 created/modified files verified present on disk; all 5 commit hashes (`0f96a3d`, `ca0d3bc`, `4b9af6b`, `be5bf9e`, `289c808`) verified present in git log.
+
 ---
 *Phase: 08-sandbox*
 *Completed: 2026-07-18*
