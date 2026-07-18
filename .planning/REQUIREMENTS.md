@@ -39,7 +39,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Scenarios & Sharing
 
-- [ ] **SCEN-01**: User can save a scenario and receive a shareable link, with no login required
+- [x] **SCEN-01**: User can save a scenario and receive a shareable link, with no login required
 - [x] **SCEN-02**: Loading a shared scenario always re-runs classification from the saved inputs (never trusts a stored verdict)
 - [x] **SCEN-03**: User can browse a curated gallery of 5–8 classic textbook encounters (clean head-on, crossing, and overtaking cases)
 
@@ -92,7 +92,7 @@ Populated during roadmap creation.
 | RSON-03 | Phase 4 - Interactive Chart Sandbox | Pending |
 | CHRT-01 | Phase 4 - Interactive Chart Sandbox | Pending |
 | CHRT-02 | Phase 4 - Interactive Chart Sandbox | Pending |
-| SCEN-01 | Phase 5 - Save, Share & Gallery | Pending |
+| SCEN-01 | Phase 5 - Save, Share & Gallery | Complete |
 | SCEN-02 | Phase 3 - Persistence & API Layer | Complete |
 | SCEN-03 | Phase 5 - Save, Share & Gallery | Complete |
 
