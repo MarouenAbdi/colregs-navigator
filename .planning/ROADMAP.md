@@ -22,7 +22,7 @@ Branch names follow this project's standard `phase_branch_template` (`gsd/phase-
 
 **Phase Numbering:** v1.1 continues numbering from v1.0's last phase (Phase 5) — this milestone is Phases 6-9. Integer phases are planned milestone work; decimal phases (e.g. 6.1) would be urgent insertions, none currently exist.
 
-- [ ] **Phase 6: Scaffolding** - shadcn/ui install + Tailwind dark theme tokens + Header/Nav + page shell (Header/Main/Footer) + Footer
+- [x] **Phase 6: Scaffolding** - shadcn/ui install + Tailwind dark theme tokens + Header/Nav + page shell (Header/Main/Footer) + Footer (completed 2026-07-18)
 - [ ] **Phase 7: Hero** - Direction A hero section (headline, copy, CTAs, illustrative live-classification preview card)
 - [ ] **Phase 8: Sandbox** - Restyle the existing interactive chart/controls/reasoning-trail to match the design exactly, same domain wiring, same interaction model
 - [ ] **Phase 9: Gallery** - Gallery section embedded on the home page below Sandbox; `/gallery` route removed with a redirect to `/#gallery`

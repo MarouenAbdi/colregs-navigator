@@ -40,7 +40,26 @@
     "allowJs": true,
     "noEmit": true,
     "resolveJsonModule": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    // Rule 3 (06-01): shadcn's CLI init requires a pre-existing `@/*` path
+    // alias to detect this repo's import-alias convention before it will
+    // run at all ("Could not find valid path aliases... Configure path
+    // aliases in tsconfig.json... then run init again" -- confirmed live
+    // this session). Adding it manually, additive only -- coexists with
+    // the existing relative ".js"-suffixed imports (an orthogonal
+    // extension-resolution mechanism, see next.config.ts's
+    // `resolve.extensionAlias`), scoped to new shadcn-adjacent code only
+    // per 06-PATTERNS.md Pattern 1.
+    //
+    // Rule 3 (06-01): typescript@7.0.2 (tsgo) removed the `baseUrl` option
+    // entirely ("Option 'baseUrl' has been removed... Use '\"paths\":
+    // {\"*\": [\"./*\"]}' instead" -- confirmed live this session running
+    // `npx tsc --noEmit`). `paths` entries are resolved relative to the
+    // tsconfig file itself without `baseUrl` under tsgo, so `"./src/*"`
+    // below still resolves correctly with `baseUrl` omitted.
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": [
     "src",

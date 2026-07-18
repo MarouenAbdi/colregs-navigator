@@ -9,12 +9,12 @@ This milestone is a presentation-layer re-implementation, not a new-feature mile
 
 ### Scaffolding (shadcn/ui + theme + page shell)
 
-- [ ] **SCAF-01**: shadcn/ui is installed and configured (CLI init, `@/*` path alias, `components/ui/`) as the app's component-primitive layer, compatible with the existing webpack-only (non-Turbopack) Next.js 16 build
-- [ ] **SCAF-02**: A dark-only design-token theme (base `#09090B`, zinc scale, teal `#2dd4bf` accent) is defined once in `app/globals.css` via Tailwind v4's `@theme`, with no light-theme variant or unused `next-themes`/`.dark`-toggle machinery
-- [ ] **SCAF-03**: Geist and Geist Mono fonts are loaded via `next/font/google` and applied app-wide
-- [ ] **SCAF-04**: A sticky Header/Nav (logo, "Sandbox"/"Gallery" in-page anchor links, external "Source" link) renders above all pages, collapsing nav links at the 640px breakpoint per the design
-- [ ] **SCAF-05**: A page shell (Header / Main / Footer) wraps the app in `app/layout.tsx`, with Footer matching the design's content and layout
-- [ ] **SCAF-06**: Shared cross-feature components, types, and design tokens live in one shared location (e.g. `src/components/shared/`) that Hero/Sandbox/Gallery all import from — no duplicated role/color/label mappings across features
+- [x] **SCAF-01**: shadcn/ui is installed and configured (CLI init, `@/*` path alias, `components/ui/`) as the app's component-primitive layer, compatible with the existing webpack-only (non-Turbopack) Next.js 16 build
+- [x] **SCAF-02**: A dark-only design-token theme (base `#09090B`, zinc scale, teal `#2dd4bf` accent) is defined once in `app/globals.css` via Tailwind v4's `@theme`, with no light-theme variant or unused `next-themes`/`.dark`-toggle machinery
+- [x] **SCAF-03**: Geist and Geist Mono fonts are loaded via `next/font/google` and applied app-wide
+- [x] **SCAF-04**: A sticky Header/Nav (logo, "Sandbox"/"Gallery" in-page anchor links, external "Source" link) renders above all pages, collapsing nav links at the 640px breakpoint per the design
+- [x] **SCAF-05**: A page shell (Header / Main / Footer) wraps the app in `app/layout.tsx`, with Footer matching the design's content and layout
+- [x] **SCAF-06**: Shared cross-feature components, types, and design tokens live in one shared location (e.g. `src/components/shared/`) that Hero/Sandbox/Gallery all import from — no duplicated role/color/label mappings across features
 
 ### Hero
 
@@ -58,12 +58,12 @@ Populated by roadmap creation — all 19 requirements mapped to their user-speci
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCAF-01 | Phase 6 | Pending |
-| SCAF-02 | Phase 6 | Pending |
-| SCAF-03 | Phase 6 | Pending |
-| SCAF-04 | Phase 6 | Pending |
-| SCAF-05 | Phase 6 | Pending |
-| SCAF-06 | Phase 6 | Pending |
+| SCAF-01 | Phase 6 | Complete |
+| SCAF-02 | Phase 6 | Complete |
+| SCAF-03 | Phase 6 | Complete |
+| SCAF-04 | Phase 6 | Complete |
+| SCAF-05 | Phase 6 | Complete |
+| SCAF-06 | Phase 6 | Complete |
 | HERO-01 | Phase 7 | Pending |
 | HERO-02 | Phase 7 | Pending |
 | HERO-03 | Phase 7 | Pending |
