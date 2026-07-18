@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI Redesign (shadcn)
 status: "Phase 07 shipped — PR #8"
-stopped_at: Phase 8 context gathered
-last_updated: "2026-07-18T19:10:34.894Z"
+stopped_at: Phase 8 UI-SPEC approved
+last_updated: "2026-07-18T20:20:20.654Z"
 last_activity: 2026-07-18
 progress:
   total_phases: 4
@@ -98,6 +98,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-18T19:10:34.879Z
-Stopped at: Phase 8 context gathered
-Resume file: .planning/phases/08-sandbox/08-CONTEXT.md
+Last session: 2026-07-18T20:20:20.642Z
+Stopped at: Phase 8 UI-SPEC approved
+Resume file: .planning/phases/08-sandbox/08-UI-SPEC.md
