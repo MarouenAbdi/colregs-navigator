@@ -165,6 +165,10 @@ None - no external service configuration required. (Local Postgres container alr
 - No blockers. One environment note for future phases: if a new path alias or shadcn primitive is added, re-verify `next build --webpack` (not just `tsc --noEmit`) since typescript@7.0.2/tsgo's removal of `baseUrl` means tsconfig-only alias additions will silently fail webpack resolution until mirrored in `next.config.ts`.
 - Manual visual verification (dark render vs. light OS/browser preference, nav collapse at 640px, font application) is intentionally deferred to Plan 06-02's checkpoint per this plan's `<verification>` section — not yet performed.
 
+## Self-Check: PASSED
+
+All 11 claimed files verified present on disk; all 5 claimed commit hashes verified present in git log.
+
 ---
 *Phase: 06-scaffolding*
 *Completed: 2026-07-18*
