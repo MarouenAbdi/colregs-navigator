@@ -1,13 +1,15 @@
 "use client";
 
 /**
- * CopyLinkButton (05-05) -- small affordance next to the /s/[shareId] banner
- * that copies the current page URL to the clipboard. Secondary/input-adjacent
- * styling (matches ControlPanel's `rounded border border-slate-200` inputs),
- * not the primary teal-600 CTA styling reserved for Save/Reset.
+ * CopyLinkButton -- small affordance next to the /s/[shareId] banner that
+ * copies the current page URL to the clipboard. Restyled to an icon-only
+ * outline button matching the rest of Phase 8's dark palette; clipboard
+ * logic is unchanged.
  */
 
 import { useState } from "react";
+import { Check, Link2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function CopyLinkButton() {
   const [copied, setCopied] = useState(false);
@@ -19,12 +21,14 @@ export function CopyLinkButton() {
   }
 
   return (
-    <button
+    <Button
       type="button"
+      variant="outline"
+      size="icon-sm"
       onClick={handleClick}
-      className="rounded border border-slate-200 px-2 py-1 text-sm text-slate-700 hover:border-teal-600"
+      aria-label={copied ? "Link copied" : "Copy link"}
     >
-      {copied ? "Copied!" : "Copy Link"}
-    </button>
+      {copied ? <Check aria-hidden="true" /> : <Link2 aria-hidden="true" />}
+    </Button>
   );
 }
