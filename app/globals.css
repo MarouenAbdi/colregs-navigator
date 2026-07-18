@@ -52,10 +52,10 @@
  * 06-01 Task 1: collapsed shadcn's generated :root/.dark dual (light/dark)
  * palette down to ONE locked dark palette (UI-SPEC.md Color table literal
  * hex values, not OKLCH) -- this app renders dark-only, with no toggle or
- * next-themes machinery. Both :root and .dark blocks below carry identical
- * values on purpose (defense-in-depth per 06-PATTERNS.md Pattern 2, against
- * any future `dark:`-prefixed utility in a copy-pasted shadcn snippet) --
- * do not remove the .dark block or introduce next-themes.
+ * theme-switcher package involved. Both :root and .dark blocks below carry
+ * identical values on purpose (defense-in-depth per 06-PATTERNS.md Pattern
+ * 2, against any future `dark:`-prefixed utility in a copy-pasted shadcn
+ * snippet) -- do not remove the .dark block or introduce a theme switcher.
  */
 :root {
     --background: #09090B;

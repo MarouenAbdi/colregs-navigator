@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -26,6 +28,19 @@ const nextConfig: NextConfig = {
   webpack: (config) => {
     config.resolve.extensionAlias = {
       ".js": [".ts", ".tsx", ".js"],
+    };
+    // Rule 3 (blocking, 06-01): tsconfig.json's "@/*" path alias (added for
+    // shadcn) resolves correctly for `tsc`/Vitest, but Next.js's webpack
+    // build ("Module not found: Can't resolve '@/lib/utils'") needs the
+    // "baseUrl" compilerOption present to auto-derive its own webpack
+    // alias -- and typescript@7.0.2 (tsgo) has removed "baseUrl" entirely
+    // (hard error: "Option 'baseUrl' has been removed"). Since both tools'
+    // requirements can't be satisfied by tsconfig.json alone, mirror the
+    // "@/*" -> "./src/*" mapping explicitly here, the same pattern already
+    // used above for the ".js"-suffix extensionAlias fix.
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@": path.join(import.meta.dirname, "src"),
     };
     return config;
   },
