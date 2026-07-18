@@ -61,7 +61,7 @@ Branch names follow this project's standard `phase_branch_template` (`gsd/phase-
 Plans:
 **Wave 1**
 
-- [ ] 07-01-PLAN.md — Build Hero.tsx (headline/copy/CTAs + static SVG preview card), verified fixture, and page/CSS wiring
+- [x] 07-01-PLAN.md — Build Hero.tsx (headline/copy/CTAs + static SVG preview card), verified fixture, and page/CSS wiring
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
