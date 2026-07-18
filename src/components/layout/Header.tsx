@@ -1,5 +1,5 @@
 /**
- * Header (06-01) -- sticky page-shell chrome wired into app/layout.tsx.
+ * Header -- sticky page-shell chrome wired into app/layout.tsx.
  * Plain Server Component (no "use client" -- no state/event handlers),
  * matching this repo's existing default (app/gallery/page.tsx is already
  * an async Server Component with no client directive).
@@ -16,10 +16,15 @@
 import { Compass, Code2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const NAV_LINKS = [
+  { href: "#sandbox", label: "Sandbox" },
+  { href: "#gallery", label: "Gallery" },
+] as const;
+
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+      <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between px-6">
         <div className="flex items-center gap-2">
           <Compass className="h-5 w-5 text-accent" aria-hidden="true" />
           <span className="text-base">
@@ -30,20 +35,29 @@ export function Header() {
             Rules 11-18
           </span>
         </div>
-        <nav className="hidden items-center gap-6 text-sm sm:flex">
-          <a href="#sandbox">Sandbox</a>
-          <a href="#gallery">Gallery</a>
-        </nav>
-        <Button asChild variant="outline" size="sm">
-          <a
-            href="https://github.com/MarouenAbdi/colregs-navigator"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <Code2 className="h-4 w-4" aria-hidden="true" />
-            Source
-          </a>
-        </Button>
+        <div className="flex items-center gap-6">
+          <nav className="hidden items-center gap-1.5 text-sm sm:flex">
+            {NAV_LINKS.map(({ href, label }) => (
+              <a
+                key={href}
+                href={href}
+                className="rounded-sm transition-colors hover:text-accent focus-visible:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+                {label}
+              </a>
+            ))}
+          </nav>
+          <Button asChild variant="outline" size="sm">
+            <a
+              href="https://github.com/MarouenAbdi/colregs-navigator"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Code2 className="h-4 w-4" aria-hidden="true" />
+              Source
+            </a>
+          </Button>
+        </div>
       </div>
     </header>
   );
