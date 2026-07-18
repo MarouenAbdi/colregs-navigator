@@ -1,5 +1,17 @@
 # COLREGS Navigator
 
+## Current Milestone: v1.1 UI Redesign (shadcn)
+
+**Goal:** Re-implement the existing app's front end against the imported Claude Design file ("COLREGS Navigator (shadcn).dc.html" — `claude.ai/design` project `c265c047-81a0-4446-bdf3-95d434adc3dc`) using shadcn/ui + Tailwind, with zero change to domain logic or existing validated requirements.
+
+**Target features (4 phases, each its own branch + PR):**
+- Scaffolding — shadcn/ui install + Tailwind theme tokens (dark palette, Geist fonts), Header/Nav, page shell (Header / Main / Footer), Footer
+- Hero — Direction A hero section (headline, copy, CTAs, illustrative live-classification preview card)
+- Sandbox — restyle the existing interactive chart/controls/reasoning-trail to match the design exactly, same domain wiring
+- Gallery — gallery section embedded on the home page below Sandbox (closes the pending gallery-placement todo); `/gallery` route removed, redirects to `/#gallery`
+
+**Locked decisions:** Hero Direction A (not the alternate "bridge display" variant); dark-mode only, no light theme/toggle; design followed exactly (colors, spacing, breakpoints at 900px/640px) using shadcn/ui as the component primitive layer.
+
 ## What This Is
 
 COLREGS Navigator is a maritime collision-avoidance rules engine and visualizer. Users place two vessels on a nautical-chart-style sandbox — setting each vessel's position, heading, speed, and type — and the app classifies the encounter (head-on, crossing, or overtaking) under the International Regulations for Preventing Collisions at Sea (COLREGS Rules 11–18), determines which vessel must give way, and explains the verdict with the specific rule citation and the geometric reasoning (relative bearing, closing angle) behind it. It's a portfolio project aimed at software engineering interviews, demonstrating domain modeling depth (DDD-lite, rules-engine/state-machine design) on an unusual, memorable subject.
@@ -39,12 +51,13 @@ _None — all requirements validated as of Phase 5, the milestone's final phase.
 - **Domain source**: COLREGS (International Regulations for Preventing Collisions at Sea) — Rules 11–18 govern steering and sailing responsibilities between vessels in sight of one another. This is public, well-documented maritime law, not proprietary or company-specific.
 - **Why this domain was chosen**: evaluated against 9 other candidate ideas (music theory voice-leading validator, SAR search-pattern planner, escape-room solvability engine, ATC sequencing simulator, orbital mission planner, fairy chess engine, D&D encounter balancer, whiskey substitution engine, ER triage allocator) on memorability, backend/frontend depth, scope fit, and interview value. COLREGS Navigator scored highest: it's a domain almost nobody builds a portfolio project around, and the core logic (classify encounter → determine obligations under a real published rulebook) is a textbook case for a rules-engine/state-machine domain layer — letting Clean Architecture/DDD-lite actually earn its keep rather than being over-engineering for a CRUD app.
 - **Full engineering spec** (persona, workflow, practices) originally captured in `prompt.json` at repo root — see Constraints below for the concrete decisions pulled from it.
-- **Current state**: Milestone v1.0 complete — Phase 5 (Save, Share & Gallery) was the final phase; all 6 requirements validated across 5 phases / 19 plans.
+- **Current state**: Milestone v1.0 complete — Phase 5 (Save, Share & Gallery) was the final phase; all 6 requirements validated across 5 phases / 19 plans. Milestone v1.1 (UI Redesign) started 2026-07-18.
 
 ## Constraints
 
-- **Tech stack**: Next.js, React, TypeScript, Tailwind CSS (frontend); tRPC, Prisma, Zod (backend); PostgreSQL (database); Vitest + React Testing Library (testing) — set in advance by the user's project spec (`prompt.json`)
+- **Tech stack**: Next.js, React, TypeScript, Tailwind CSS, shadcn/ui (frontend); tRPC, Prisma, Zod (backend); PostgreSQL (database); Vitest + React Testing Library (testing) — set in advance by the user's project spec (`prompt.json`); shadcn/ui added in v1.1 as the component primitive layer for the redesign
 - **Architecture style**: DDD-lite, Clean Architecture, Modular Monolith, feature-first organization — low coupling, high cohesion, explicit dependencies, composition over inheritance
+- **Frontend separation of concerns** (added v1.1): presentation (JSX/markup), styling (Tailwind classes/tokens), and logic (hooks/state/domain calls) are kept in separate concerns within a component's file/folder — no inline style objects, no business logic in component bodies. shadcn/ui primitives are composed, not bypassed. Shared components, types, and design tokens live in one shared location reused across features (DRY) — before adding a new component/type, check the shared location first and reuse or extend rather than duplicating.
 - **Engineering persona**: build as a Staff Full-Stack Engineer would — think before coding, favor simplicity over cleverness, justify every abstraction and dependency, comment only non-obvious code
 - **Testing approach**: TDD where practical, focused on unit tests for business rules, domain logic, and utilities (the COLREGS rules engine is the highest-value test target)
 - **Git workflow**: feature branches, small logical conventional commits; commit messages, branch names, and PR descriptions are AI-generated but human-reviewed
@@ -64,12 +77,15 @@ _None — all requirements validated as of Phase 5, the milestone's final phase.
 | Rule 18's vessel-type hierarchy must never override Rule 13 overtaking verdicts | Rule 13(a) explicitly states it applies "notwithstanding anything contained in Rules 4 to 18" — a code-review pass on Phase 2 caught an initial implementation that applied Rule 18 uniformly to crossing AND overtaking, which would have produced a legally incorrect give-way verdict; fixed and regression-tested before phase close | Fixed in Phase 2 |
 | SVG drag/rotate hit-targets must hit-test the actual visible shape, not a padded invisible proxy | Live human UAT on Phase 4 found dragging/rotating vessels "tricky" across two rounds of fixes — the root cause was that both the hull-drag rect and the rotate-handle circle used separate, independently-sized invisible hit-shapes, so their boundaries never matched what the user visually saw or could be reliably kept apart by picking numeric margins. The fix was structural, not numeric: attach pointer handlers directly to the visible, solid-filled shape itself (SVG's default `pointer-events: visiblePainted` hit-tests the real painted area for any non-`none` fill) so a gesture only starts where the pointer is genuinely over what the user sees. Relevant precedent if Phase 5 or later work adds more draggable/clickable chart elements. | Fixed in Phase 4 (commits `3bf6f24`, `f559e98`) |
 | `next dev`/`next build` run via webpack (not Turbopack), with `resolve.extensionAlias` set in `next.config.ts` | Phase 5's final human-verify checkpoint was the first time anyone actually ran the dev server end-to-end — it failed immediately because neither Turbopack nor Next's default webpack resolves this codebase's `.js`-suffix-pointing-at-`.ts` relative-import convention (established Phase 1, ~98 imports across 37 files; tsc and Vitest both already resolve it fine, which is why the gap went unnoticed through 4 completed phases). Turbopack's own docs list `extensionAlias` as explicitly unsupported. User chose the smaller-blast-radius fix (2-file config change, keep the convention as-is) over rewriting all 98 imports to drop the `.js` suffix (bigger, cross-phase mechanical change, would have kept Turbopack) | Fixed in Phase 5 (commit `7beb689`) |
+| v1.1 is a full front-end redesign against an imported Claude Design file, not a new-feature milestone | User adopted a design produced in `claude.ai/design` (project `c265c047-81a0-4446-bdf3-95d434adc3dc`, file "COLREGS Navigator (shadcn).dc.html") and asked for it implemented exactly, with shadcn/ui, split into 4 branch+PR phases (Scaffolding, Hero, Sandbox, Gallery). No REQ-IDs change — same validated requirements, new presentation layer | Pending |
+| Hero ships as Direction A only (split headline + live-preview card); Direction B ("bridge display" full-bleed variant) is not built | The design file's two directions were an authoring-tool toggle for comparing options, not a runtime feature; user picked A as the shipped design | Pending |
+| `/gallery` route removed in favor of a `/#gallery` section embedded on the home page, with `/gallery` redirecting there | Closes the v1.0 pending todo about gallery placement; a redirect (not a hard 404) preserves any existing bookmarked links | Pending |
+| Dark-mode only, no light theme/toggle | The source design file only defines a dark palette (#09090B base, teal #2dd4bf accent); inventing a light palette would be scope beyond "follow the design exactly" | Pending |
 
 ## Next Milestone Goals
 
-Candidates for v1.1, carried forward from v1.0's deferred items (see `.planning/milestones/v1.0-REQUIREMENTS.md` for full v2 list and rationale):
+Deferred to v1.2+ (see `.planning/milestones/v1.0-REQUIREMENTS.md` for full v2 list and rationale):
 
-- Embed the gallery on the home page below the sandbox instead of its own `/gallery` route (user-requested during Phase 5 wrap-up; tracked as a todo at `.planning/todos/pending/2026-07-18-embed-gallery-on-home-page-instead-of-separate-route.md`)
 - RSON-V2-01: ambiguous/edge-case scenarios in the curated gallery (near-boundary head-on/crossing, Rule 17(a)(ii) doubt situations)
 - SCEN-V2-01: auto-generated social preview image (OG image) per shared scenario
 
@@ -91,4 +107,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-18 after Phase 5 (Save, Share & Gallery) completion — the milestone's final phase. Users can now Save a scenario (redirects to `/s/[shareId]`), share that link (Copy Link button), and browse a curated gallery of 6 textbook encounters at `/gallery`, each linking into the same detail route. All Phase 5 requirements (SCEN-01, SCEN-03) validated: 24 test files / 160 tests passing, `tsc --noEmit` clean, and the full flow confirmed end-to-end via live human verification in a browser. That verification surfaced and fixed a real, previously-undiscovered bug: `npm run dev`/`next build` had never actually resolved the codebase's `.js`-suffix-pointing-at-`.ts` import convention (established Phase 1) — see Key Decisions for the webpack/`extensionAlias` fix. The user also raised a genuine follow-up during that same session — moving the gallery from its own route onto the home page — captured as a todo, not a phase gap. Milestone v1.0 is now complete: all 6 requirements validated across 5 phases / 19 plans.*
+*Last updated: 2026-07-18 — Milestone v1.1 (UI Redesign) started. v1.0 shipped all 6 requirements across 5 phases / 19 plans (Save/Share/Gallery flow confirmed via live human verification; webpack `extensionAlias` fix for the `.js`-suffix import convention). v1.1 re-implements the entire front end against an imported Claude Design file using shadcn/ui, in 4 branch+PR phases (Scaffolding, Hero, Sandbox, Gallery) — no functional/REQ-ID changes, presentation layer only.*
