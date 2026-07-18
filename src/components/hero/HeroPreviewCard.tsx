@@ -129,7 +129,7 @@ export function HeroPreviewCard() {
   return (
     <Card className="gap-3">
       <CardHeader className="flex flex-row items-center justify-between font-mono text-[10.5px] font-semibold text-muted-foreground">
-        <span className="flex items-center gap-[7px]">
+        <span className="flex items-center gap-1.75">
           {/* Static, non-pulsing dot per CONTEXT.md D-01 -- no animation classes. */}
           <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
           <span className="text-foreground">Live classification</span>
@@ -241,24 +241,24 @@ export function HeroPreviewCard() {
         </div>
 
         <div className="mt-3 flex items-center gap-2.5 rounded-md border border-primary/30 bg-primary/10 px-3 py-2.5">
-          <Badge className="h-auto bg-primary px-[7px] py-[3px] text-[10px] text-primary-foreground">Rule 15</Badge>
+          <Badge className="h-auto bg-primary px-1.75 py-0.75 text-[10px] text-primary-foreground">Rule 15</Badge>
           <span className="text-[15px] font-semibold text-foreground">{verdictText}</span>
         </div>
 
         <div className="mt-2 grid grid-cols-3 gap-2">
-          <div className="rounded-md border border-border px-[10px] py-[9px]">
+          <div className="rounded-md border border-border px-2.5 py-2.25">
             <div className="font-mono text-[9.5px] font-semibold tracking-wide text-muted-foreground uppercase">RANGE</div>
-            <div className="mt-[3px] font-mono text-[15px] font-semibold text-foreground">{`${range.toFixed(2)} NM`}</div>
+            <div className="mt-0.75 font-mono text-[15px] font-semibold text-foreground">{`${range.toFixed(2)} NM`}</div>
           </div>
-          <div className="rounded-md border border-border px-[10px] py-[9px]">
+          <div className="rounded-md border border-border px-2.5 py-2.25">
             <div className="font-mono text-[9.5px] font-semibold tracking-wide text-muted-foreground uppercase">BEARING</div>
-            <div className="mt-[3px] font-mono text-[15px] font-semibold text-foreground">
+            <div className="mt-0.75 font-mono text-[15px] font-semibold text-foreground">
               {`${Math.round(bearingDegrees).toString().padStart(3, "0")}°`}
             </div>
           </div>
-          <div className="rounded-md border border-border px-[10px] py-[9px]">
+          <div className="rounded-md border border-border px-2.5 py-2.25">
             <div className="font-mono text-[9.5px] font-semibold tracking-wide text-muted-foreground uppercase">CPA</div>
-            <div className="mt-[3px] font-mono text-[15px] font-semibold text-foreground">{`${cpaResult.value.dcpaNm.toFixed(2)} NM`}</div>
+            <div className="mt-0.75 font-mono text-[15px] font-semibold text-foreground">{`${cpaResult.value.dcpaNm.toFixed(2)} NM`}</div>
           </div>
         </div>
       </CardContent>
