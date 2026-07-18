@@ -125,6 +125,10 @@ None - no external service configuration required. (Local dev setup only: `.env`
 - `prisma/seed.ts` can be re-run idempotently-by-convention only in the sense that re-running it will insert a SECOND set of 6 rows (no upsert/dedup logic) -- if a future phase needs idempotent reseeding, that would be a new task, not an oversight in this one (out of this plan's stated scope).
 - The `tsx` devDependency addition should get an explicit look during code review, given it's a new package introduced mid-plan rather than pre-approved in 05-RESEARCH.md's Standard Stack.
 
+## Self-Check: PASSED
+
+All created/modified files verified present on disk; all task commit hashes (`653f87c`, `f9e9524`, `44441d8`, `31a69af`, `64ed421`, `cb17c75`) verified present in `git log`.
+
 ---
 *Phase: 05-save-share-gallery*
 *Completed: 2026-07-18*
