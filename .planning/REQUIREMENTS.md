@@ -71,34 +71,34 @@ Populated by roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LINT-01 | TBD | Pending |
-| LINT-02 | TBD | Pending |
-| LINT-03 | TBD | Pending |
-| LINT-04 | TBD | Pending |
-| LINT-05 | TBD | Pending |
-| LINT-06 | TBD | Pending |
-| LINT-07 | TBD | Pending |
-| LINT-08 | TBD | Pending |
-| TWFX-01 | TBD | Pending |
-| TWFX-02 | TBD | Pending |
-| TWFX-03 | TBD | Pending |
-| TWFX-04 | TBD | Pending |
-| RFCT-01 | TBD | Pending |
-| RFCT-02 | TBD | Pending |
-| RFCT-03 | TBD | Pending |
-| RFCT-04 | TBD | Pending |
-| RFCT-05 | TBD | Pending |
-| RFCT-06 | TBD | Pending |
-| RFCT-07 | TBD | Pending |
-| RFCT-08 | TBD | Pending |
-| CMNT-01 | TBD | Pending |
-| CMNT-02 | TBD | Pending |
+| LINT-01 | Phase 10 | Pending |
+| LINT-02 | Phase 10 | Pending |
+| LINT-03 | Phase 10 | Pending |
+| LINT-04 | Phase 10 | Pending |
+| LINT-05 | Phase 10 | Pending |
+| LINT-06 | Phase 10 | Pending |
+| LINT-07 | Phase 10 | Pending |
+| LINT-08 | Phase 10 | Pending |
+| TWFX-01 | Phase 11 | Pending |
+| TWFX-02 | Phase 11 | Pending |
+| TWFX-03 | Phase 11 | Pending |
+| TWFX-04 | Phase 11 | Pending |
+| RFCT-01 | Phase 12 | Pending |
+| RFCT-02 | Phase 12 | Pending |
+| RFCT-03 | Phase 12 | Pending |
+| RFCT-04 | Phase 12 | Pending |
+| RFCT-05 | Phase 12 | Pending |
+| RFCT-06 | Phase 12 | Pending |
+| RFCT-07 | Phase 12 | Pending |
+| RFCT-08 | Phase 12 | Pending |
+| CMNT-01 | Phase 13 | Pending |
+| CMNT-02 | Phase 13 | Pending |
 
 **Coverage:**
 - v1 requirements: 22 total
-- Mapped to phases: 0/22 (populated by roadmap creation)
-- Unmapped: 22 ⚠️ (expected — roadmap not yet created)
+- Mapped to phases: 22/22 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-07-19*
-*Last updated: 2026-07-19 — initial definition for milestone v1.2, informed by 4-track research (STACK, FEATURES, ARCHITECTURE, PITFALLS) in `.planning/research/`*
+*Last updated: 2026-07-19 — traceability populated by roadmap creation: LINT-01–08 → Phase 10, TWFX-01–04 → Phase 11, RFCT-01–08 → Phase 12, CMNT-01–02 → Phase 13. 22/22 v1 requirements mapped, no orphans.*

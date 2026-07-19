@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Tech Debt & Stabilization
-status: planning
-last_updated: "2026-07-19T11:40:59.483Z"
+status: roadmapped
+last_updated: "2026-07-19T12:00:00.000Z"
 last_activity: 2026-07-19
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,38 +17,41 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-18)
+See: .planning/PROJECT.md (updated 2026-07-19)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** v1.2 Tech Debt & Stabilization — defining requirements
+**Current focus:** v1.2 Tech Debt & Stabilization — Phase 10 (ESLint Setup & Lint-Clean Baseline) ready to plan
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-07-19 — Milestone v1.2 started
+Phase: 10 of 13 (ESLint Setup & Lint-Clean Baseline)
+Plan: — (not yet planned)
+Status: Ready to plan
+Last activity: 2026-07-19 — ROADMAP.md created for v1.2 (Phases 10-13), 22/22 requirements mapped
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 31 (all v1.0)
+- Total plans completed: 33 (19 v1.0 + 14 v1.1)
 - Average duration: - min
-- Total execution time: 0 hours (v1.1)
+- Total execution time: - hours (v1.2 not started)
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1-5 (v1.0) | 19 | - | - |
-| 6 (Scaffolding) | TBD | - | - |
-| 7 (Hero) | TBD | - | - |
-| 8 (Sandbox) | TBD | - | - |
-| 9 (Gallery) | TBD | - | - |
-| 06 | 2 | - | - |
-| 08 | 6 | - | - |
-| 09 | 4 | - | - |
+| 6 (Scaffolding) | 2 | - | - |
+| 7 (Hero) | 2 | - | - |
+| 8 (Sandbox) | 6 | - | - |
+| 9 (Gallery) | 4 | - | - |
+| 10 (ESLint Setup) | TBD | - | - |
+| 11 (Tailwind Fixes) | TBD | - | - |
+| 12 (Sandbox Refactor) | TBD | - | - |
+| 13 (Comment Cleanup) | TBD | - | - |
 
 **Recent Trend:**
 
@@ -64,26 +67,20 @@ Last activity: 2026-07-19 — Milestone v1.2 started
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- v1.1 is a full front-end redesign against an imported Claude Design file, 4 branch+PR phases (Scaffolding, Hero, Sandbox, Gallery), no REQ-ID changes.
-- Hero ships as Direction A only; Direction B not built.
-- `/gallery` route removed in favor of `/#gallery` embedded section, with a permanent redirect.
-- Dark-mode only, no light theme/toggle — matches the source design file's single palette.
-- shadcn CLI must be run with `--base radix` (not the new Base UI default) per research/STACK.md.
-- Header.tsx (built Phase 6) was retroactively corrected against the actual Claude Design MCP source file (not just the reference screenshot) and Phase 7's conventions — see quick task 260718-qgs. Ground-truth design values (height, spacing, translucent backdrop-blur) can differ meaningfully from a static screenshot; prefer pulling the live design source when precision matters.
-
-### Quick Tasks Completed
-
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 260718-qgs | Compare Header component against Claude Design source and fix styling deviations plus apply Phase 7 code conventions | 2026-07-18 | 1886ef5 | [260718-qgs-compare-header-component-against-claude-](./quick/260718-qgs-compare-header-component-against-claude-/) |
+- v1.2 is a tech-debt/hygiene milestone only — no new user-facing features, `classifyEncounter()` and all COLREGS rule outputs must stay byte-identical.
+- Phase order locked per research: ESLint setup (10) must come before everything else; Tailwind fixes (11) before the refactor (12) since both touch the same two files; comment cleanup (13) last as lowest-risk/no ordering dependency.
+- `typescript-eslint` locked at `recommended` (non-type-checked) tier this milestone; `strict`/`strict-type-checked` explicitly out of scope.
+- Lint-clean baseline must be reached via `eslint --fix`/`--fix --suppress-all`, never via mass rule-disabling.
+- `VesselGroup.tsx` (hull polygon, rotate handle, badge overlay) must be extracted last, as one atomic verbatim cut-paste — this exact code has caused two prior hit-testing regressions (Phase 4, Phase 8).
+- Tailwind class-name fixes and comment cleanup must both be done by hand, file-by-file/comment-by-comment — this codebase has known false-positive traps for any mechanical/regex pass.
 
 ### Pending Todos
 
-_None — the gallery-placement todo was closed by Phase 9 (Gallery) in v1.1._
+_None._
 
 ### Blockers/Concerns
 
-_None open — all three v1.1 phase risks (Phase 8 hit-testing, Phase 9 redirect, Phase 6 dark-mode hardcode) were resolved and verified during their respective phases._
+_None open._
 
 ## Deferred Items
 
@@ -92,19 +89,14 @@ Items acknowledged and carried forward from previous milestone close:
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
 | Functional/domain | RSON-V2-01 (ambiguous/edge-case gallery scenarios), SCEN-V2-01 (auto-generated OG image) | Deferred to v1.2+ | v1.0 milestone close |
-
-Items acknowledged at this milestone close (see pre-close artifact audit):
-
-| Category | Item | Status | Deferred At |
-|----------|------|--------|-------------|
-| Quick task tracking | 260718-qgs (Header design-fidelity fix) flagged "missing" by the audit tool | False positive — task's own `260718-qgs-SUMMARY.md` shows `status: complete`, commits `b0409ba`/`a5d1739`/`1886ef5` merged; audit tool's tracking artifact was stale, not the underlying work | v1.1 milestone close |
+| Tooling | CI-01 (GitHub Actions), HOOKS-01 (Husky/lint-staged), DOCS-CONTRIB-01 (CONTRIBUTING.md), FMT-01 (repo-wide Prettier pass), RFCT-V2-01 (ChipRow extraction) | Deferred to v2 | v1.2 requirements scoping |
 
 ## Session Continuity
 
-Last session: 2026-07-19T09:17:34.590Z
-Stopped at: Phase 9 UI-SPEC approved
-Resume file: .planning/phases/09-gallery/09-UI-SPEC.md
+Last session: 2026-07-19T12:00:00.000Z
+Stopped at: ROADMAP.md created for v1.2, 4 phases (10-13), 22/22 requirements mapped
+Resume file: None
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Run `/gsd:plan-phase 10` to plan the ESLint Setup & Lint-Clean Baseline phase
