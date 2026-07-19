@@ -48,7 +48,11 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full phase details (goals, succes
   3. A test import of `src/server/`, Next.js, tRPC, or Prisma from within `src/domain/` produces a lint error, proving the architecture boundary is enforced, not just documented.
   4. Reintroducing a stale Phase/Plan/REQ-ID comment reference or a raw-CSS-as-template-literal string produces a lint error.
   5. No rule was set to `off` or downgraded project-wide to reach the clean baseline (verified by inspecting `eslint.config.mjs` and any `eslint-suppressions.json` used).
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 10-01-PLAN.md — Install ESLint core toolchain, wire npm run lint/lint:fix, base flat config (core-web-vitals + typescript)
+- [ ] 10-02-PLAN.md — Tailwind/Vitest plugins, architecture-boundary no-restricted-imports, custom stale-ID/raw-CSS rules
+- [ ] 10-03-PLAN.md — Two-pass eslint --fix + suppress-all lint-clean baseline, recommended-type-checked stretch goal, .editorconfig + README
 
 ### Phase 11: Tailwind Deprecated Class-Name Fixes
 **Goal**: All known deprecated Tailwind v3 class-name usages are replaced with their Tailwind v4 canonical equivalents, with no visual or accessibility regression.
@@ -95,7 +99,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13
 | 7. Hero | v1.1 | 2/2 | Complete | 2026-07-18 |
 | 8. Sandbox | v1.1 | 6/6 | Complete | 2026-07-18 |
 | 9. Gallery | v1.1 | 4/4 | Complete | 2026-07-19 |
-| 10. ESLint Setup & Lint-Clean Baseline | v1.2 | 0/TBD | Not started | - |
+| 10. ESLint Setup & Lint-Clean Baseline | v1.2 | 0/3 | Not started | - |
 | 11. Tailwind Deprecated Class-Name Fixes | v1.2 | 0/TBD | Not started | - |
 | 12. ChartPanel/SandboxContainer Decomposition Refactor | v1.2 | 0/TBD | Not started | - |
 | 13. Comment Cleanup | v1.2 | 0/TBD | Not started | - |
