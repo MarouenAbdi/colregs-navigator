@@ -31,7 +31,7 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full phase details (goals, succes
 
 **Milestone Goal:** Demonstrate professional engineering hygiene — clean lint, clean deprecated-class-name usage, clean file structure, clean comment history — as a portfolio signal, with zero new user-facing features and zero change to domain logic outcomes.
 
-- [ ] **Phase 10: ESLint Setup & Lint-Clean Baseline** - Install ESLint (flat config), wire `npm run lint`, and reach a lint-clean baseline with architecture-boundary and convention-enforcing custom rules
+- [x] **Phase 10: ESLint Setup & Lint-Clean Baseline** - Install ESLint (flat config), wire `npm run lint`, and reach a lint-clean baseline with architecture-boundary and convention-enforcing custom rules (completed 2026-07-19)
 - [ ] **Phase 11: Tailwind Deprecated Class-Name Fixes** - Replace deprecated Tailwind v3 class names with v4 canonical equivalents in the 6 flagged files, verified by hand
 - [ ] **Phase 12: ChartPanel/SandboxContainer Decomposition Refactor** - Decompose the two oversized Sandbox files into focused modules, preserving all existing behavior and hit-testing
 - [ ] **Phase 13: Comment Cleanup** - Rewrite stale Phase/Plan/REQ-ID comment references by hand, preserving substantive WHY content
@@ -51,19 +51,19 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full phase details (goals, succes
   4. Reintroducing a stale Phase/Plan/REQ-ID comment reference or a raw-CSS-as-template-literal string produces a lint error.
   5. No rule was set to `off` or downgraded project-wide to reach the clean baseline (verified by inspecting `eslint.config.mjs` and any `eslint-suppressions.json` used).
 
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 Plans:
 **Wave 1**
 
-- [ ] 10-01-PLAN.md — Install ESLint core toolchain, wire npm run lint/lint:fix, base flat config (core-web-vitals + typescript)
+- [x] 10-01-PLAN.md — Install ESLint core toolchain, wire npm run lint/lint:fix, base flat config (core-web-vitals + typescript)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 10-02-PLAN.md — Tailwind/Vitest plugins, architecture-boundary no-restricted-imports, custom stale-ID/raw-CSS rules
+- [x] 10-02-PLAN.md — Tailwind/Vitest plugins, architecture-boundary no-restricted-imports, custom stale-ID/raw-CSS rules
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 10-03-PLAN.md — Two-pass eslint --fix + suppress-all lint-clean baseline, documents the tsgo/typescript-eslint incompatibility as a known limitation, .editorconfig + README
+- [x] 10-03-PLAN.md — Two-pass eslint --fix + suppress-all lint-clean baseline, documents the tsgo/typescript-eslint incompatibility as a known limitation, .editorconfig + README
 
 ### Phase 11: Tailwind Deprecated Class-Name Fixes
 
@@ -119,7 +119,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13
 | 7. Hero | v1.1 | 2/2 | Complete | 2026-07-18 |
 | 8. Sandbox | v1.1 | 6/6 | Complete | 2026-07-18 |
 | 9. Gallery | v1.1 | 4/4 | Complete | 2026-07-19 |
-| 10. ESLint Setup & Lint-Clean Baseline | v1.2 | 0/3 | Not started | - |
+| 10. ESLint Setup & Lint-Clean Baseline | v1.2 | 3/3 | Complete    | 2026-07-19 |
 | 11. Tailwind Deprecated Class-Name Fixes | v1.2 | 0/TBD | Not started | - |
 | 12. ChartPanel/SandboxContainer Decomposition Refactor | v1.2 | 0/TBD | Not started | - |
 | 13. Comment Cleanup | v1.2 | 0/TBD | Not started | - |
