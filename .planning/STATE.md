@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI Redesign (shadcn)
-status: executing
-stopped_at: Phase 8 UI-SPEC approved
-last_updated: "2026-07-18T21:13:22.142Z"
+status: ready_to_plan
+stopped_at: Phase 08 complete (6/6) — ready to discuss Phase 9
+last_updated: 2026-07-19T00:50:13.860Z
 last_activity: 2026-07-18 -- Phase 08 execution started
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 10
-  completed_plans: 4
-  percent: 40
+  completed_plans: 10
+  percent: 50
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-18)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 08 — sandbox
+**Current focus:** Phase 9 — gallery
 
 ## Current Position
 
-Phase: 08 (sandbox) — EXECUTING
-Plan: 1 of 6
-Status: Executing Phase 08
-Last activity: 2026-07-18 -- Phase 08 execution started
+Phase: 9
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-07-19
 
 Progress: [█████░░░░░] 50% (v1.1 milestone: 2/4 phases complete — Scaffolding, Hero; v1.0's 19 plans/5 phases complete and archived)
 
@@ -36,7 +36,7 @@ Progress: [█████░░░░░] 50% (v1.1 milestone: 2/4 phases compl
 
 **Velocity:**
 
-- Total plans completed: 21 (all v1.0)
+- Total plans completed: 27 (all v1.0)
 - Average duration: - min
 - Total execution time: 0 hours (v1.1)
 
@@ -50,6 +50,7 @@ Progress: [█████░░░░░] 50% (v1.1 milestone: 2/4 phases compl
 | 8 (Sandbox) | TBD | - | - |
 | 9 (Gallery) | TBD | - | - |
 | 06 | 2 | - | - |
+| 08 | 6 | - | - |
 
 **Recent Trend:**
 
