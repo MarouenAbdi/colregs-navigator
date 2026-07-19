@@ -93,6 +93,12 @@ Items acknowledged and carried forward from previous milestone close:
 | Functional/domain | RSON-V2-01 (ambiguous/edge-case gallery scenarios), SCEN-V2-01 (auto-generated OG image) | Deferred to v1.2+ | v1.0 milestone close |
 | Tooling | CI-01 (GitHub Actions), HOOKS-01 (Husky/lint-staged), DOCS-CONTRIB-01 (CONTRIBUTING.md), FMT-01 (repo-wide Prettier pass), RFCT-V2-01 (ChipRow extraction) | Deferred to v2 | v1.2 requirements scoping |
 
+## Quick Tasks Completed
+
+| Quick ID | Description | Date |
+|----------|------|------|
+| 260719-t8r | Generate `docs/reasoning-trails.json` design reference (catalog of all COLREGS reasoning-trail shapes) | 2026-07-19 |
+
 ## Session Continuity
 
 Last session: 2026-07-19T20:00:07.635Z
