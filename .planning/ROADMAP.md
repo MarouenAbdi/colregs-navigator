@@ -77,7 +77,11 @@ Plans:
   3. Non-Tailwind text and comments containing similar substrings (e.g. "Grounded in", "rounded to clean numbers") are unchanged.
   4. A human confirms in a real browser that Hero, Header, Gallery, and Sandbox show no visual or keyboard-focus-outline regression after the fixes.
 
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 11-01-PLAN.md — Rename outline-none -> outline-hidden (4 files) and rounded-[0.25rem] -> rounded-sm (2 files)
+- [ ] 11-02-PLAN.md — Remove dead eslint.config.mjs ignore pattern (D-03), project-wide lint acceptance check
+- [ ] 11-03-PLAN.md — Human browser verification of focus-ring/radius changes (TWFX-04)
 
 ### Phase 12: ChartPanel/SandboxContainer Decomposition Refactor
 
