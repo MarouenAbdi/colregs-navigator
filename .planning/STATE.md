@@ -21,7 +21,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-18)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Milestone complete
+**Current focus:** Planning next milestone (v1.2+)
 
 ## Current Position
 
@@ -80,13 +80,11 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Embed gallery on home page instead of separate route (`.planning/todos/pending/2026-07-18-embed-gallery-on-home-page-instead-of-separate-route.md`) — this todo is being closed by Phase 9 (Gallery) in this milestone.
+_None — the gallery-placement todo was closed by Phase 9 (Gallery) in v1.1._
 
 ### Blockers/Concerns
 
-- Phase 8 (Sandbox) carries the highest regression risk this milestone: restyling `ChartPanel`'s hull/rotate-handle hit-testing must not silently break drag/rotate (jsdom tests cannot detect this — mandatory manual browser UAT before merging Phase 8's PR, per research/PITFALLS.md Pitfall 1).
-- Phase 9 (Gallery) needs manual verification of the `/gallery` → `/#gallery` redirect from both a fresh tab and in-app navigation — native browser fragment-scroll behavior cannot be confirmed from docs alone (research/PITFALLS.md Pitfall 6).
-- Phase 6 (Scaffolding) must hardcode `className="dark"` on `<html>` and verify with OS/browser color-scheme set to light — shadcn's default scaffold half-wires a toggle that silently defaults to light mode if skipped (research/PITFALLS.md Pitfall 2).
+_None open — all three v1.1 phase risks (Phase 8 hit-testing, Phase 9 redirect, Phase 6 dark-mode hardcode) were resolved and verified during their respective phases._
 
 ## Deferred Items
 
@@ -95,6 +93,12 @@ Items acknowledged and carried forward from previous milestone close:
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
 | Functional/domain | RSON-V2-01 (ambiguous/edge-case gallery scenarios), SCEN-V2-01 (auto-generated OG image) | Deferred to v1.2+ | v1.0 milestone close |
+
+Items acknowledged at this milestone close (see pre-close artifact audit):
+
+| Category | Item | Status | Deferred At |
+|----------|------|--------|-------------|
+| Quick task tracking | 260718-qgs (Header design-fidelity fix) flagged "missing" by the audit tool | False positive — task's own `260718-qgs-SUMMARY.md` shows `status: complete`, commits `b0409ba`/`a5d1739`/`1886ef5` merged; audit tool's tracking artifact was stale, not the underlying work | v1.1 milestone close |
 
 ## Session Continuity
 
