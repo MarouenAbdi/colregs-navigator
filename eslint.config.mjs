@@ -3,6 +3,7 @@ import nextPlugin from "@next/eslint-plugin-next";
 import babelParser from "@babel/eslint-parser";
 import eslintPluginBetterTailwindcss from "eslint-plugin-better-tailwindcss";
 import vitest from "@vitest/eslint-plugin";
+import noStaleIdComments from "./eslint-rules/no-stale-id-comments.mjs";
 
 // The Next.js maintainers' bundled preset (see research/STACK.md CORRECTION)
 // crashes at require-time against this project's locked typescript@7.0.2
@@ -98,6 +99,41 @@ const eslintConfig = defineConfig([
       // since file length is a proxy for a judgment call, not the
       // judgment itself.
       "max-lines": ["warn", { max: 200, skipBlankLines: true, skipComments: true }],
+    },
+  },
+  {
+    // Local repo rule (ESLint's own flat-config replacement for the
+    // deprecated --rulesdir flag) operationalizing CLAUDE.md's "no rotting
+    // task/plan/REQ-ID references in comments" convention -- applies
+    // repo-wide, not scoped to any subdirectory.
+    plugins: { local: { rules: { "no-stale-id-comments": noStaleIdComments } } },
+    rules: {
+      "local/no-stale-id-comments": "error",
+    },
+  },
+  {
+    // Operationalizes CLAUDE.md's "no raw CSS composed as strings in
+    // component files" convention. Both selectors are content-gated (not a
+    // bare TemplateLiteral match) so CLAUDE.md's own sanctioned pattern --
+    // a single CSS-custom-property value formatted via template literal,
+    // e.g. style={{ "--rotation": `${angle}deg` }} -- is never flagged.
+    files: ["src/components/**/*.tsx", "app/**/*.tsx"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "JSXAttribute[name.name='style'] TemplateLiteral > TemplateElement[value.raw=/background-image|animation|gradient|:|;/]",
+          message:
+            "Raw CSS composed as a template-literal string in a style attribute -- move it to app/globals.css (or a CSS custom property) per CLAUDE.md's convention.",
+        },
+        {
+          selector:
+            "TemplateLiteral > TemplateElement[value.raw=/background-image|animation:|@keyframes/]",
+          message:
+            "Raw CSS composed as a template-literal string -- move it to app/globals.css (or a CSS custom property) per CLAUDE.md's convention.",
+        },
+      ],
     },
   },
   globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
