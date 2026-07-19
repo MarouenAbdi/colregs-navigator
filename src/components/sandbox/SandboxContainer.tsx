@@ -43,8 +43,14 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
   // 05-03 Task 2: Save persists the current vesselA/vesselB via
   // scenario.create (no login step, SCEN-01) and redirects to the
   // resulting share URL on success.
+  const [saveError, setSaveError] = useState<string | null>(null);
   const createScenario = trpc.scenario.create.useMutation({
     onSuccess: ({ shareId }) => router.push(`/s/${shareId}`),
+    // scenario-service.ts's createScenario() throws BAD_REQUEST for a
+    // degenerate (coincident) vessel pair -- the button is also disabled
+    // while isDegenerate, but the mutation can still reject for other
+    // server-side reasons, so this must not be a silent no-op either way.
+    onError: () => setSaveError("Couldn't save this scenario. Try again."),
   });
   // 05-03: when `initialScenario` is provided (saved/shared scenario), seed
   // from it instead of the app's hardcoded default demo fixture. When
@@ -77,10 +83,15 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
 
   // Tracks which chip (if any) is the source of the currently-loaded
   // scenario -- purely a client-side visual highlight (T-08-07), cleared by
-  // any manual drag/heading/speed/type edit so it never goes stale. The
-  // default seed is byte-identical to the "classic-crossing" chip fixture,
-  // matching the design's default-active chip.
-  const [activeChipId, setActiveChipId] = useState<ChipId | null>("classic-crossing");
+  // any manual drag/heading/speed/type edit so it never goes stale. Only
+  // defaults to "classic-crossing" on the plain, seedless "/" route, where
+  // the default seed genuinely IS that chip's fixture (byte-identical,
+  // matching the design's default-active chip) -- a saved/shared scenario
+  // (`initialScenario` provided) has arbitrary geometry that has nothing to
+  // do with that fixture, so it must start with no chip highlighted.
+  const [activeChipId, setActiveChipId] = useState<ChipId | null>(
+    initialScenario ? null : "classic-crossing",
+  );
 
   // Seeded from the default scenario's own encounter type, so a drag
   // immediately after mount already has correct hysteresis context.
@@ -191,8 +202,11 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
               variant="outline"
               size="icon-sm"
               aria-label="Save and share this scenario"
-              onClick={() => createScenario.mutate({ vesselA, vesselB })}
-              disabled={createScenario.isPending}
+              onClick={() => {
+                setSaveError(null);
+                createScenario.mutate({ vesselA, vesselB });
+              }}
+              disabled={createScenario.isPending || isDegenerate}
             >
               <Link2 aria-hidden="true" />
             </Button>
@@ -202,6 +216,7 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
             </Button>
           </div>
         </div>
+        {saveError ? <p className="text-sm text-doubt">{saveError}</p> : null}
         {banner ? (
           <div className="rounded border border-border bg-card px-3 py-2 text-sm text-muted-foreground">
             <div>{banner.label}</div>
@@ -238,7 +253,6 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
           vesselA={vesselA}
           vesselB={vesselB}
           classification={lastGoodClassification}
-          isDegenerate={isDegenerate}
           onVesselPositionChange={onVesselPositionChange}
           onVesselHeadingChange={onVesselHeadingChange}
         />
@@ -247,7 +261,6 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
             vesselA={vesselA}
             vesselB={vesselB}
             classification={lastGoodClassification}
-            isDegenerate={isDegenerate}
           />
           <ControlPanel
             vesselA={vesselA}

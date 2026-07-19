@@ -274,6 +274,33 @@ describe("SandboxContainer", () => {
     expect(screen.queryByText("Unable to classify")).not.toBeInTheDocument();
   });
 
+  it("does not show any chip as active when a saved/shared scenario is loaded, even though it defaults to Classic crossing on the plain seedless route (code review CR-02)", () => {
+    // Regression test: activeChipId used to default to "classic-crossing"
+    // unconditionally, so every /s/[shareId] page showed that chip as
+    // active/pressed regardless of the actually-loaded (arbitrary) vessel
+    // geometry -- directly contradicting this component's own documented
+    // "highlight never goes stale/misleading" contract.
+    render(<SandboxContainer />);
+    expect(screen.getByRole("button", { name: "Classic crossing" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    cleanup();
+
+    render(
+      <SandboxContainer
+        initialScenario={{
+          vesselA: overtakingBothDirectionsCase.vesselA,
+          vesselB: overtakingBothDirectionsCase.vesselB,
+        }}
+      />,
+    );
+    for (const chip of screen.getAllByRole("button", { pressed: false })) {
+      expect(chip).toHaveAttribute("aria-pressed", "false");
+    }
+    expect(screen.queryByRole("button", { pressed: true })).not.toBeInTheDocument();
+  });
+
   it("renders the banner label (and rationale, when provided) communicating a saved/shared scenario is loaded (D-02)", () => {
     const { rerender } = render(
       <SandboxContainer banner={{ label: "Viewing saved scenario — drag to explore" }} />,
