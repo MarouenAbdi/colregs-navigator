@@ -64,7 +64,11 @@ two vessels, two badges), and whether a comment explains the *why* rather than r
 `eslint-suppressions.json` (repo root) tracks pre-existing violations discovered when ESLint was
 first retrofitted onto this already-built codebase (via `eslint --fix --suppress-all`) -- it is a
 visible, diffable debt ledger for code this milestone didn't touch, not a mechanism for disabling
-rules. Every suppressed rule stays fully enforced (at `"error"`) against any new or changed code.
+rules. Suppressed counts are tracked per file+rule, not per individual violation: a new violation
+in an already-suppressed file+rule combination is only caught if it pushes that file's count for
+the rule above the previously recorded number -- fixing one violation while introducing another
+in the same file+rule can mask the new one. Periodically re-running `eslint --fix --suppress-all`
+and diffing the resulting file against the committed version is the way to audit for drift.
 
 ### Known limitation: no type-checked ESLint tier
 

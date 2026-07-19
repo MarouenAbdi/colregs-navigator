@@ -87,7 +87,7 @@ const eslintConfig = defineConfig([
                 "src/domain/ must never import tRPC -- architecture boundary, CLAUDE.md.",
             },
             {
-              group: ["@prisma/*", "prisma", "prisma/*"],
+              group: ["@prisma/*", "@prisma/**", "prisma", "prisma/*", "prisma/**"],
               message:
                 "src/domain/ must never import Prisma -- architecture boundary, CLAUDE.md.",
             },
@@ -136,7 +136,7 @@ const eslintConfig = defineConfig([
       ],
     },
   },
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
+  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "generated/**"]),
 ]);
 
 export default eslintConfig;

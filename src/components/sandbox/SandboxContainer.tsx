@@ -227,7 +227,7 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
         {saveError ? <p className="text-sm text-doubt">{saveError}</p> : null}
         {banner ? (
           <div className="
-            rounded-sm border border-border bg-card px-3 py-2 text-sm
+            rounded-lg border border-border bg-card px-3 py-2 text-sm
             text-muted-foreground
           ">
             <div>{banner.label}</div>

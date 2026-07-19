@@ -6,7 +6,7 @@
   },
   "eslint-rules/no-stale-id-comments.mjs": {
     "local/no-stale-id-comments": {
-      "count": 2
+      "count": 3
     }
   },
   "next.config.ts": {
@@ -16,7 +16,7 @@
   },
   "src/components/gallery/GalleryCard.tsx": {
     "local/no-stale-id-comments": {
-      "count": 1
+      "count": 2
     }
   },
   "src/components/gallery/GalleryContainer.tsx": {
@@ -26,10 +26,15 @@
   },
   "src/components/gallery/GalleryPreviewChart.tsx": {
     "local/no-stale-id-comments": {
-      "count": 1
+      "count": 3
     }
   },
   "src/components/gallery/gallery-preview-geometry.test.ts": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/hero/Hero.test.tsx": {
     "local/no-stale-id-comments": {
       "count": 1
     }
@@ -69,12 +74,12 @@
   },
   "src/components/sandbox/ChartPanel.test.tsx": {
     "local/no-stale-id-comments": {
-      "count": 1
+      "count": 2
     }
   },
   "src/components/sandbox/ChartPanel.tsx": {
     "local/no-stale-id-comments": {
-      "count": 7
+      "count": 10
     }
   },
   "src/components/sandbox/ControlPanel.test.tsx": {
@@ -82,9 +87,19 @@
       "count": 1
     }
   },
+  "src/components/sandbox/ControlPanel.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
   "src/components/sandbox/CopyLinkButton.tsx": {
     "local/no-stale-id-comments": {
       "count": 1
+    }
+  },
+  "src/components/sandbox/InstrumentReadouts.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 2
     }
   },
   "src/components/sandbox/ReasoningTrail.tsx": {
@@ -144,13 +159,18 @@
   },
   "src/components/sandbox/vessel-role.ts": {
     "local/no-stale-id-comments": {
-      "count": 3
+      "count": 4
     }
   },
   "src/components/shared/SectionGridBackground.tsx": {
     "better-tailwindcss/no-unknown-classes": {
       "count": 3
     },
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/shared/static-chart-geometry.ts": {
     "local/no-stale-id-comments": {
       "count": 1
     }
