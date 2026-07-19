@@ -48,7 +48,7 @@ export function GalleryCard({ id, title, ruleLabel, description, vesselA, vessel
       aria-label={`Load ${title} scenario into the sandbox`}
       className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <Card className="h-full gap-0 border-border px-4 transition-colors duration-200 group-hover:border-primary/40 group-hover:bg-card">
+      <Card className="h-full gap-0 border border-border px-4 transition-all duration-200 group-hover:border-primary/40 group-hover:shadow-sm">
         <div className="mb-4">
           <GalleryPreviewChart vesselA={vesselA} vesselB={vesselB} />
         </div>
@@ -56,14 +56,12 @@ export function GalleryCard({ id, title, ruleLabel, description, vesselA, vessel
           <Badge variant="outline" className="font-mono text-[13px] font-semibold text-accent border-accent">
             {ruleLabel}
           </Badge>
-          <span
-            className={`${verdict.className} rounded-md border px-2 py-0.5 font-mono text-[13px] font-semibold uppercase`}
-          >
+          <Badge variant="outline" className={`${verdict.className} font-mono text-[13px] font-semibold uppercase`}>
             {verdict.text}
-          </span>
+          </Badge>
         </div>
         <h3 className="mb-1.5 text-2xl leading-[1.25] font-semibold text-foreground">{title}</h3>
-        <p className="text-base text-muted-foreground">{description}</p>
+        <p className="text-base font-semibold text-muted-foreground">{description}</p>
       </Card>
     </Link>
   );
