@@ -1,170 +1,205 @@
-# Stack Research: shadcn/ui Adoption (v1.1 UI Redesign)
+# Technology Stack
 
-**Domain:** Adopting shadcn/ui + dark-only theme + Geist fonts into an existing Next.js 16 / React 19 / Tailwind v4 app
-**Researched:** 2026-07-18
-**Confidence:** HIGH (all core claims verified via Context7 `/shadcn-ui/ui` official docs + live npm registry lookups; a few CLI-behavior details flagged MEDIUM where they can only be confirmed by actually running the CLI)
+**Project:** COLREGS Navigator — v1.2 Tech Debt & Stabilization (ESLint/lint-tooling setup)
+**Researched:** 2026-07-19
+**Confidence:** HIGH (all package/version/config claims verified via Context7, official Next.js docs, and live npm/GitHub source inspection this session — no training-data-only claims)
 
-This is a **delta** stack document — it only covers what's being *added* for the v1.1 redesign. Next.js 16.2.10, React 19.2.7, TypeScript 7.0.2, Tailwind CSS 4.3.3, tRPC 11.18.0, Prisma 7.8.0, Zod 4.4.3, Vitest 4.1.10 stay exactly as they are; see the root `CLAUDE.md` for that locked stack. The prior `STACK.md` (v1.0, dated 2026-07-14, covering the SVG/geometry/domain-layer decisions) is superseded by this file for v1.1 planning purposes — those v1.0 decisions are unaffected by this redesign and remain valid, just no longer the active research document.
+## Scope Note
+
+This document **replaces** the prior `STACK.md` (v1.1 UI Redesign — shadcn/ui adoption research, dated 2026-07-18). That research is no longer the active decision surface; shadcn/ui is now a shipped, locked part of the stack (see `.planning/PROJECT.md` Constraints). This document covers ONLY the new decision this milestone introduces: lint/format tooling for a codebase that currently has zero lint tooling (no ESLint dependency, no config file, no Prettier/Biome). Existing stack (Next.js 16.2.10, React 19.2.7, TypeScript 7.0.2, Tailwind 4.3.3, shadcn/ui, tRPC 11, Prisma 7, Zod 4, Vitest 4 + RTL) is validated and locked — not re-researched here.
+
+### CORRECTION (discovered during Phase 10 execution, 2026-07-19)
+
+The `typescript-eslint@8.64.0` / `eslint-config-next` recommendation below is **wrong for this project** and was superseded mid-phase-10-execution. `typescript-eslint`'s peer dependency (`typescript: ">=4.8.4 <6.1.0"`, confirmed unchanged on the `canary` prerelease) does not cover this project's locked `typescript@7.0.2` (the tsgo Go-based compiler rewrite). `@typescript-eslint/parser` crashes at require-time (`Cannot read properties of undefined (reading 'Cjs')`, in `@typescript-eslint/typescript-estree/dist/create-program/shared.js`) because tsgo's package does not export the classic compiler internals (`ts.ModuleKind`, `ts.Extension`) that `typescript-estree` reads unconditionally at module load. This is not limited to the `typescript` sub-export — **`eslint-config-next`'s `core-web-vitals` sub-export also crashes**, since it transitively depends on `typescript-eslint` regardless of which export is used (confirmed via direct `require()` of both `dist/core-web-vitals.js` and `dist/typescript.js`).
+
+**Corrected approach (user-approved):** bypass `eslint-config-next` entirely.
+- Use `@next/eslint-plugin-next`'s own flat-config-native exports directly (`configs['core-web-vitals']` / `configs.recommended` — confirmed present and load cleanly standalone, zero TypeScript-package dependency, only depends on `fast-glob`).
+- Parse `.ts`/`.tsx` files via `@babel/eslint-parser` + `@babel/preset-typescript` (syntax-stripping only, no type information, does not touch the `typescript` package's compiler API at all) instead of `@typescript-eslint/parser`. Confirmed via Context7 (`babeljs.io` docs): `requireConfigFile: false` + inline `babelOptions: { babelrc: false, configFile: false, presets: ['@babel/preset-typescript', ['@babel/preset-react', { runtime: 'automatic' }]] }` avoids needing a separate `babel.config.js`. Babel 8 (installed: `8.0.1`) auto-handles `.tsx` alongside a JSX preset with no `isTSX`/`allExtensions` flags (removed in v8).
+- Type safety remains fully covered by the pre-existing `npm run typecheck` (`tsc --noEmit`) script — this ESLint-level limitation has no effect on actual type-checking, only on ESLint's own TS-aware lint rules (which are consequently out of scope this milestone; see corrected LINT-02 in REQUIREMENTS.md).
+- `no-restricted-imports`/`no-restricted-syntax` (LINT-07/LINT-08) are unaffected — both are core ESLint rules operating on any ESTree-compatible AST, including Babel's output.
+
+The "Recommended Stack" table below (written before this correction) still accurately describes `eslint-plugin-better-tailwindcss` and `@vitest/eslint-plugin`, which have no TypeScript-compiler dependency and are unaffected.
+
+## Context Established by Parallel Research (build on this, don't re-derive)
+
+- Next.js 16 removed `next lint` entirely (`v16.0.0` changelog, re-confirmed directly this session against the official docs page). There is no fallback CLI command — ESLint must be invoked directly (`eslint .`) via a flat-config `eslint.config.mjs`. Any `eslint` key in `next.config.ts` would be dead config and should be deleted — this repo's `next.config.ts` (read directly) has no such key already, so there is nothing to remove here.
+- `.eslintrc.*` (legacy config format) is not a candidate to consider — ESLint 9+/10+'s default and primary format is flat config, and this is a from-scratch install with no legacy config to migrate.
+- PITFALLS.md's `eslint --fix --suppress-all` bulk-suppression workflow (for the first-adoption "flood" problem) and FEATURES.md's `no-restricted-imports`/`no-restricted-syntax` custom-rule recommendations are both already-completed research — not re-derived here.
 
 ## Recommended Stack
 
-### Core Additions
+### Core Lint Toolchain
 
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| `shadcn` (CLI + runtime CSS) | **4.13.1** (latest, stable — NOT canary) | Component scaffolding CLI; also ships a runtime `shadcn/tailwind.css` import consumed by generated components | As of this research date shadcn's Tailwind v4 + React 19 support has been stable/default for months (the "canary" era ended with the v4 GA). `npx shadcn@latest init` auto-detects Next.js App Router + Tailwind v4 from `next.config.*`/`app/` and needs no special flags for framework detection. |
-| `radix-ui` (unified package) | **1.6.2** | Underlying accessible primitives (Select, Slider, Tabs, Dialog/Sheet, etc.) for the components you `add` | **Explicit choice — deviates from the CLI's current default.** See "The Base UI vs Radix decision" below. |
-| `class-variance-authority` | **0.7.1** | Variant/size class composition inside every generated component (`buttonVariants`, `badgeVariants`, etc.) | Installed automatically as a runtime dependency by `shadcn init`; this is how shadcn expresses "give-way" vs "stand-on" badge color variants, button sizes, etc. without a CSS-in-JS library. |
-| `clsx` + `tailwind-merge` | **2.1.1** / **3.6.0** | Power the generated `cn()` helper in `src/lib/utils.ts` | Standard shadcn `cn()` = `twMerge(clsx(inputs))`. Needed by literally every generated component file. |
-| `lucide-react` | **1.25.0** | Icon set used by all shadcn component defaults (chevrons in Select, close icon in Sheet/Dialog, etc.) | Default icon library for both `base` and `radix` presets; already assumed by every registry component's `.tsx` source, so treat as non-optional once you `add` more than a couple of components. |
-| `tw-animate-css` | **1.4.0** | CSS-only enter/exit animation utilities (`animate-in`, `fade-out-0`, etc.) used by Select/Tabs/Sheet transitions | Replaces the old `tailwindcss-animate` **v3** Tailwind plugin. In Tailwind v4 there is no `tailwind.config.js` plugins array, so this ships as a pure `@import "tw-animate-css";` CSS import instead — installed as a `devDependency` by `shadcn init` automatically. |
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| `eslint` | `10.7.0` (current `latest` on npm, verified this session) | Lint engine, CLI, flat-config runtime | Required — Next.js 16 ships no linter of its own. v10 uses flat config (`eslint.config.mjs`) as its default and primary format. |
+| `eslint-config-next` | `16.2.10` (current `latest`, pinned to match this project's exact Next.js version) | Next.js's own recommended flat-config export — bundles `@next/eslint-plugin-next` + `eslint-plugin-react`/`eslint-plugin-react-hooks` recommended rule sets | Official Next.js package for exactly this purpose (`nextjs.org/docs/app/api-reference/config/eslint`, `lastUpdated: 2025-11-10`, version-pinned to `16.2.10`). Ships flat-config-compatible sub-exports (`eslint-config-next/core-web-vitals`, `eslint-config-next/typescript`) — see exact import syntax below. |
+| `typescript-eslint` | `8.64.0` (current `latest`, verified this session) | TypeScript-aware ESLint rules, flat-config helper (`tseslint.config`) | Locked TypeScript core technology (7.0.2/tsgo) needs TypeScript-specific lint rules, or the config reads as an oversight on a fully-TS codebase. `eslint-config-next/typescript`'s own rules are themselves based on `@typescript-eslint/recommended` — installing the modern unified `typescript-eslint` meta-package (not the older split `@typescript-eslint/parser`+`@typescript-eslint/eslint-plugin` two-package install) is the current officially-documented path, useful now for its `tseslint.config()` helper and later for the `recommended-type-checked` upgrade tier FEATURES.md already scopes as a "should have." |
 
-### Fonts — no new dependency needed
+### Question 1 — Confirmed: `eslint-config-next` Flat-Config Export & Exact Import Syntax
 
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| `next/font/google` (built into `next`) | ships with Next.js 16.2.10 (already installed) | Load Geist Sans + Geist Mono | Next.js's own `create-next-app` template imports `Geist` and `Geist_Mono` directly from `next/font/google` (confirmed via Context7 `/vercel/next.js` official docs) — self-hosted at build time, zero runtime network request to Google, and zero extra npm package. **Do not** add the standalone `geist` npm package (v1.7.2 exists on npm) or manual `<link>` tags — both are redundant given `next/font/google` already ships Geist natively. |
+**Yes**, `eslint-config-next@16.2.10` ships flat-config-compatible exports. Confirmed directly against `nextjs.org/docs/app/api-reference/config/eslint` (official docs, `lastUpdated: 2025-11-10`, version-pinned to this project's exact `16.2.10`). Two relevant sub-exports:
 
-### Development Tools
+- `eslint-config-next/core-web-vitals` — base Next.js + React + React Hooks rules, with Core-Web-Vitals-impacting rules upgraded from warn to error. Recommended entry point for "most projects" per Next's own docs.
+- `eslint-config-next/typescript` — adds TypeScript-specific rules (based on `@typescript-eslint/recommended`) on top of either base config. Additive — use alongside `core-web-vitals`, not standalone.
 
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| `npx shadcn@latest init` | One-time scaffolding: writes `components.json`, patches `app/globals.css`, adds `src/lib/utils.ts`, installs the runtime deps above | Run in Phase 1 (Scaffolding). Does **not** touch `next.config.ts`, does **not** care whether you run webpack or Turbopack — it only writes source files and edits `package.json`/CSS, so it is fully orthogonal to the project's `--webpack` requirement (see Version Compatibility below). |
-| `npx shadcn@latest add <component>` | Adds one component + its transitive registry deps as vendored `.tsx` source under `src/components/ui/` | Re-run per phase as new components are needed (Select/Slider in Sandbox phase, Tabs/Card/Badge wherever the mockup calls for them). |
+Exact `eslint.config.mjs` shape (official example, adapted with `nextTs` added since this project is 100% TypeScript):
+
+```js
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
+
+const eslintConfig = defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  globalIgnores([
+    // eslint-config-next's own default ignores
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+  ]),
+]);
+
+export default eslintConfig;
+```
+
+`defineConfig`/`globalIgnores` are ESLint's own first-party flat-config authoring helpers, exported from the `eslint/config` subpath of the `eslint` package itself — not a separate dependency.
+
+### Question 2 — Confirmed: `typescript-eslint` Flat-Config Setup (Recommended Tier, Not Strict-Type-Checked)
+
+Current version: `typescript-eslint@8.64.0` (verified via `npm view`, matches the version already cited in this milestone's PITFALLS.md). Flat-config setup uses the `tseslint.config()` helper (confirmed via Context7 `/typescript-eslint/typescript-eslint`):
+
+```js
+import js from "@eslint/js";
+import tseslint from "typescript-eslint";
+
+export default tseslint.config(
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+);
+```
+
+Confirmed detail directly relevant to risk assessment: **`tseslint.configs.recommended` (the non-type-checked tier) does not require `parserOptions.project`/a TypeScript "program" to be configured** — typescript-eslint's own integration-test fixture is explicitly titled to prove "the recommended config does not require a program to be specified to ensure a fast and simple initial setup." Practical effect for this milestone: adopting `recommended` now carries zero risk of type-aware-linting slowness or `tsconfig.json` `include`/`exclude` mismatches — that risk class is deferred entirely to if/when `recommended-type-checked` is added later (already scoped in FEATURES.md as a later-tier candidate, with `strict-type-checked` explicitly ruled out there as too noisy for a first pass).
+
+**Integration note for this project specifically:** since `eslint-config-next/typescript` already wraps `@typescript-eslint/recommended`, the practical setup is to let `eslint-config-next/typescript` be the sole TS-rules source for the base pass — do not additionally hand-wire a separate `tseslint.config(... tseslint.configs.recommended)` block in the same config, which would register overlapping/conflicting rule sets for the same concern. Reach for `typescript-eslint`'s own `tseslint.config()` API directly only when/if `recommended-type-checked` is adopted as the later upgrade (at which point it would likely replace, not stack on top of, `eslint-config-next/typescript`'s bundled TS rules).
+
+### Question 3 — Tailwind v4 Deprecated/Stale Utility Class-Name Detection
+
+The ecosystem is **not as fragmented here as the parallel PITFALLS.md pass flagged as an open risk** — that flag was a reasonable caution going in, but direct rule-level inspection this session found a plugin that concretely solves this milestone's exact stated need. Two real candidates were evaluated by reading their actual rule lists (not just their marketing descriptions):
+
+| Plugin | Version | Tailwind v4 support | Flat config | Deprecated/renamed-class detection |
+|---|---|---|---|---|
+| `eslint-plugin-tailwindcss` (francoismassart) | `4.2.0` (current `latest` dist-tag) | Yes — this major version line is a ground-up rewrite exclusively for Tailwind v4 (peer dep `tailwindcss: ^4.0.0`, NOT `^3.x`; v3 support lives on separate `tw2`/`tw2beta` npm dist-tags). Confirmed via `npm view` peerDependencies and the package's own v4.0.3 release notes: "re-written from scratch...only compatible with Tailwind CSS v4.x.x." | Yes (`eslint: ^9.0.0 \|\| ^10.0.0` peer dep, `tailwind.configs["flat/recommended"]` export) | **No dedicated rule for this.** Its rule set (`classnames-order`, `no-contradicting-classname`, `no-custom-classname`, `enforces-shorthand`, `no-unnecessary-arbitrary-value`, `migration-from-tailwind-2`, ...) includes a `migration-from-tailwind-2` rule — that migrates Tailwind **v2→v3** naming, the wrong direction for this milestone's actual need (v3→v4 renames like `outline-none`→`outline-hidden`, `rounded`→`rounded-sm`/`rounded-xs`). Not the right tool for THIS specific problem despite otherwise supporting v4 syntax. |
+| **`eslint-plugin-better-tailwindcss`** (schoero) — RECOMMENDED | `4.6.1` (current `latest`) | Yes, and explicitly version-aware: its own rule table marks each rule with `tw3`/`tw4` support columns. `no-deprecated-classes` ("Remove deprecated classes") and `enforce-canonical-classes` ("Enforce canonical class names") are both marked `tw4`-only, both autofix-capable, and both included in the plugin's default `recommended` config — no extra opt-in needed. | Yes — `eslint` is listed as an **optional** peer dep (`eslint: ^7.0.0 \|\| ^8.0.0 \|\| ^9.0.0 \|\| ^10.0.0`), alongside equally-optional `oxlint` support; ESLint integration is fully supported, which is what this project needs. | **Yes — direct answer to question 3.** Confirmed by fetching the plugin's own README rule table and its `docs/parsers/tsx.md` setup doc directly (not a secondary summary). |
+
+**Recommendation: `eslint-plugin-better-tailwindcss`, not `eslint-plugin-tailwindcss`.** Beyond deprecated-class detection, it has a second concrete fit advantage for this exact codebase: it ships **built-in recognition of `cn`, `cva`, `clsx`, and `twMerge`/`twJoin`** as class-bearing call sites out of the box (confirmed in its own README "Utilities" list) — this project's `cn()` helper (built on `clsx` + `tailwind-merge`, both already dependencies per `package.json`) and `class-variance-authority` (`cva`) usage across `src/components/ui/*` are exactly the patterns it already recognizes without extra `settings` configuration.
+
+Confirmed flat-config setup (adapted from the plugin's own `docs/parsers/tsx.md`, fetched directly — Tailwind v4 uses `entryPoint`, pointing at the CSS entry file, not a JS/TS config file):
+
+```js
+import eslintPluginBetterTailwindcss from "eslint-plugin-better-tailwindcss";
+
+// merged into the same defineConfig([...]) array as the rest of eslint.config.mjs
+{
+  extends: [eslintPluginBetterTailwindcss.configs.recommended],
+  settings: {
+    "better-tailwindcss": {
+      // Tailwind v4: point at the CSS entry file (this repo's is app/globals.css,
+      // confirmed by reading it — it contains `@import "tailwindcss";`).
+      entryPoint: "app/globals.css",
+    },
+  },
+},
+```
+
+**Caveat for requirements-definition:** this plugin's Tailwind-v4-specific (`tw4`-column) rules are young — actively developed this year, per its own changelog activity. Budget for reviewing its findings rather than trusting 100% autofix blindly, consistent with PITFALLS.md's general "review every autofix in a first-adoption pass" guidance. Its practical role in this milestone is as a **regression-prevention net going forward** (catch the *next* stale-class introduction) — the 6 currently-known violation files (per `PROJECT.md`) should still be fixed by hand, per PITFALLS.md Pitfall 4's explicit no-naive-find-replace guidance; do not treat this plugin's autofix as a substitute for that manual, reviewed pass.
+
+### Question 4 — ESLint 9/10 Flat Config vs. Vitest 4 Test Files
+
+**Project-specific finding that overrides the generic advice:** this project's `vitest.config.ts` (read directly) sets `test.globals: false` explicitly, with an inline comment: *"explicit describe/it/expect imports — matches CLAUDE.md's 'no magic' persona."* Every test file already imports `describe`/`it`/`expect`/`afterEach` etc. directly from `"vitest"` (confirmed by reading `src/components/gallery/GalleryCard.test.tsx` and cross-checking others). **This means the commonly-cited ESLint+Vitest gotcha — needing a `languageOptions.globals` override block so `no-undef` doesn't flag bare `describe`/`it`/`expect` as undefined globals — does not apply to this codebase.** Those identifiers are real, statically-resolvable imports, not ambient globals; there is nothing for `no-undef` to misfire on.
+
+There is still one real, separate integration worth wiring — a genuine test-quality addition, not a bug workaround: `@vitest/eslint-plugin` (current `latest`: `1.6.23`, verified via `npm view`; peer deps `eslint: >=8.57.0`, `typescript: >=5.0.0`, `vitest: *` — all satisfied by this project's `eslint@10.7.0`/`typescript@7.0.2`/`vitest@4.1.10`). This is the official `vitest-dev`-org plugin (scoped package name) — not to be confused with the unscoped, less-maintained `eslint-plugin-vitest` (resolved to a stale `0.5.4` via `npm view` this session, versus this package's actively-maintained `1.6.23`). It adds Vitest-specific correctness rules neither `eslint-config-next` nor `typescript-eslint` can cover, since neither has any awareness of Vitest's API surface — e.g. `expect-expect` (flag a test with no assertion), `no-disabled-tests`, `no-focused-tests` (catch an accidentally-committed `.only`). Confirmed flat-config setup (from the plugin's own README, fetched directly):
+
+```js
+import vitest from "@vitest/eslint-plugin";
+
+// scoped only to test files — do not apply repo-wide
+{
+  files: ["src/**/*.test.{ts,tsx}"], // matches this project's actual vitest.config.ts `include` glob
+  plugins: { vitest },
+  rules: {
+    ...vitest.configs.recommended.rules,
+  },
+},
+```
+
+Scoping this block with `files` (matching `vitest.config.ts`'s own `include: ["src/**/*.test.{ts,tsx}"]`) is what avoids the one real integration risk: registering Vitest-specific rules unscoped would apply them to files that never import Vitest at all, producing either silent no-ops or confusing findings. Always scope this plugin's block with `files`, never register it globally.
+
+**Net answer to question 4:** no blocking incompatibility exists between ESLint 10's flat config and this project's Vitest 4 test files. The generic "add globals for describe/it/expect" advice found in general ESLint+Vitest writeups does not apply here, because this codebase's `globals: false` setting and explicit-import convention are already a deliberate, documented choice — not a gap to patch. The one real addition is `@vitest/eslint-plugin`'s `recommended` config, `files`-scoped to the test glob, for Vitest-specific correctness rules unrelated to the globals question.
+
+### Formatting (Prettier) — Not Required for the Base Setup, Optional Later
+
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| `eslint-config-prettier` | current npm `latest` (verify at install time — outside this pass's focus) | Disables ESLint stylistic rules that would conflict with Prettier | Only if Prettier is adopted. Next.js's own docs show this exact pairing recipe (`import prettier from "eslint-config-prettier/flat"`). FEATURES.md already scopes Prettier as a P3/differentiator ("format-on-save only, never a blanket reformat commit") — not required for the base ESLint setup, and that existing scoping is not re-litigated here. |
 
 ## Installation
 
 ```bash
-# Phase 1 (Scaffolding) — one-time init, explicit base + template flags for a
-# reproducible, non-interactive setup:
-npx shadcn@latest init --template next --base radix --preset nova
+# Core lint toolchain
+npm install -D eslint@10.7.0 eslint-config-next@16.2.10 typescript-eslint@8.64.0
 
-# Then pull the components this redesign actually needs (can be split across phases):
-npx shadcn@latest add button card badge tabs select slider separator sheet label input
+# Tailwind v4-aware deprecated-class detection
+npm install -D eslint-plugin-better-tailwindcss@4.6.1
+
+# Vitest-specific correctness rules (test files only)
+npm install -D @vitest/eslint-plugin@1.6.23
 ```
-
-`init` will itself add `radix-ui`, `class-variance-authority`, `clsx`, `tailwind-merge`, `lucide-react` to `dependencies` and `shadcn`, `tw-animate-css` to `devDependencies` in `package.json` — no manual `npm install` step is required beyond running the CLI.
-
-## The Base UI vs Radix decision
-
-This is the single most important — and most likely to be missed — finding of this research: **shadcn/ui's CLI default primitive library changed from Radix UI to Base UI (`@base-ui/react`) as of the "July 2026 - Base UI as the Default" changelog.** Running a bare `npx shadcn@latest init` today (or `--defaults`) gives you `--preset base-nova`, which pulls in `@base-ui/react` (v1.6.0), **not** `radix-ui`. This is a genuine, very recent (this month) change that most existing tutorials, blog posts, and Stack Overflow answers do not reflect yet.
-
-**Recommendation: pass `--base radix` explicitly and don't take the new default.**
-
-Rationale:
-- **Maturity/predictability over novelty.** Radix UI primitives have years of production usage, exhaustive a11y test coverage, and an enormous body of community "how do I customize X" answers. Base UI (co-authored by the former MUI/Base UI team) became shadcn's default only this month — it's the direction shadcn is clearly heading, but for a portfolio project where you (and interviewers) may need to debug an unfamiliar primitive under time pressure, the deeply-documented option is the safer bet.
-- **Both are confirmed compatible with your exact React 19.2.7.** Verified via live npm registry: `radix-ui@1.6.2` peer-deps declare `"react": "^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc"`; `@base-ui/react@1.6.0` declares `"react": "^17 || ^18 || ^19"`. Neither requires `--legacy-peer-deps` or `--force` on install — shadcn's own `react-19.mdx` doc warning about peer-dep conflicts is now stale for both current packages (verify this stays true at actual install time, since it's a live registry state, not a permanent guarantee).
-- **Unified package, not the old fragmented `@radix-ui/react-select` + `@radix-ui/react-slider` + ... imports.** As of the shadcn "Unified Radix UI Package" changelog (Feb 2026), Radix-based components generated by the `new-york`/`radix-*` styles now import everything from a single `radix-ui` package — so choosing Radix today does **not** mean a sprawling dependency list like older shadcn setups; `package.json` gets exactly one `radix-ui` entry.
-- **No `Select`/`Slider` API surface risk.** The `base` vs `radix` split has a real, documented API difference (e.g. Base UI's `Select` requires an `items` prop; Radix's `Select` is inline-JSX-only) — per shadcn's own `skills/shadcn/rules/base-vs-radix.md`. Given this project needs `Select` (vessel type) and `Slider` (speed) specifically, picking one base up front and sticking with it avoids having to rewrite those two components' internals mid-milestone if a `shadcn add` run ever silently mixes bases.
-
-If a future contributor re-runs `init` without `--base radix`, they will silently get Base UI instead — worth a one-line comment in `components.json` or the phase-1 PR description.
-
-## Tailwind v4 setup — confirm before writing custom tokens
-
-Tailwind v4 changed shadcn's whole theming model vs v3. Concretely, for this project:
-
-1. **No `tailwind.config.js` file, and `components.json`'s `tailwind.config` field is left as `""`.** Confirmed current behavior — Tailwind v4 is configured entirely through CSS (`@import`, `@theme`, `@custom-variant`), matching what's already in this repo's `postcss.config.mjs` (`@tailwindcss/postcss` plugin, no config file). Nothing to change here — the existing setup is already v4-idiomatic.
-2. `app/globals.css` (currently just `@import "tailwindcss";`) will be rewritten by `init` to something like:
-   ```css
-   @import "tailwindcss";
-   @import "tw-animate-css";
-   @import "shadcn/tailwind.css";
-
-   @custom-variant dark (&:is(.dark *));
-
-   @theme inline {
-     --color-background: var(--background);
-     --color-foreground: var(--foreground);
-     /* ...card/popover/primary/secondary/muted/accent/destructive/border/input/ring/chart/sidebar... */
-     --radius-sm: calc(var(--radius) * 0.6);
-     --radius-md: calc(var(--radius) * 0.8);
-     --radius-lg: var(--radius);
-     /* ... */
-   }
-
-   :root { /* light palette, oklch(...) by default */ }
-   .dark { /* dark palette, oklch(...) by default */ }
-
-   @layer base {
-     * { @apply border-border outline-ring/50; }
-     body { @apply bg-background text-foreground; }
-   }
-   ```
-   The `@import "shadcn/tailwind.css"` line is new (added within the last few months) — it's how the `shadcn` npm package (installed as a `devDependency`) now ships shared base utilities instead of inlining everything into your `globals.css`. Confirm this import resolves correctly in your Tailwind v4 PostCSS pipeline the first time you build after `init` — it's a bare-specifier CSS `@import`, which Tailwind v4's own resolver (not classic `postcss-import`) handles, and should Just Work given `@tailwindcss/postcss` is already your plugin, but it's new enough to be worth a sanity build immediately after `init`.
-3. **Colors don't have to be OKLCH.** The default template uses `oklch(...)` because that's shadcn's own default palette, not a Tailwind v4 requirement — CSS custom properties accept any valid color syntax. For this milestone, put the mockup's literal hex values directly into the palette block (`--background: #09090B;`, `--accent: #2dd4bf;` /* teal */, etc.) rather than converting to OKLCH — simpler, and avoids any transcription error converting hex→OKLCH by hand.
-
-## Dark-only theme — don't add `next-themes`
-
-The mockup defines exactly one palette (dark) with no toggle. The idiomatic shadcn-recommended way to add a light/dark switcher is `next-themes` (`ThemeProvider attribute="class" defaultTheme="system" enableSystem`) — **skip it entirely.**
-
-Recommended pattern instead:
-- Keep the generated `.dark { ... }` CSS block (rename its values to the mockup's actual colors) as the **only** palette that matters, and hardcode `<html lang="en" className="dark">` in `app/layout.tsx` — permanently, no state, no provider.
-- Do **not** delete the `.dark` class/`@custom-variant dark` machinery even though there's no toggle: several shadcn component internals bake in literal `dark:` prefixed Tailwind utility overrides (e.g. `dark:bg-input/30` in Button, `dark:border-input` etc.) that only fire when a `.dark` ancestor class exists. Deleting the class instead of just always applying it would silently drop those refinements.
-- This avoids a runtime dependency (`next-themes` 0.4.6 is not needed anywhere) and matches CLAUDE.md's existing "dark-mode only, no light theme/toggle" locked decision.
-
-## Component mapping to this milestone's actual UI needs
-
-| Design pattern (from PROJECT.md phases) | shadcn component(s) | Notes |
-|---|---|---|
-| Header / top nav | **no dedicated shadcn "header" component exists** — compose from `Button` (ghost/link variants) + plain `<nav>`/`<a>` markup; add `Sheet` only if the mockup's mobile breakpoint (900px/640px per PROJECT.md) collapses nav into a slide-out drawer | Verify against the actual mockup in Phase 1 whether mobile nav is a drawer (→ needs `Sheet`) or a simple stacked/hidden menu (→ no extra component) |
-| Buttons (CTAs, controls) | `Button` | Core dependency for almost every other component; add first |
-| Vessel type picker | `Select` | This is the component most exposed to the Base-vs-Radix API difference noted above — Radix's `Select` composes as inline JSX children; confirm this matches how the mockup's dropdown is expected to behave (single-select, no multi-select needed) |
-| Speed control | `Slider` | Radix's `Slider` supports a controlled `value`/`onValueChange` array — fits a single-thumb speed control directly |
-| Hero preview / reasoning-trail containers | `Card` | Also likely useful for the Sandbox phase's reasoning-trail panel and Gallery phase's preset-scenario tiles |
-| Give-way/stand-on role indicators, vessel-type tags | `Badge` | Matches the existing Phase-4 "color + role badges" pattern referenced in PROJECT.md's Validated requirements — this is a restyle, not new UX |
-| Tabbed content (if the mockup groups controls/panels) | `Tabs` | Only add if the mockup actually shows tabs — don't add speculatively |
-| Position/heading numeric fields (Sandbox phase, inferred) | `Input`, `Label` | Not explicitly named in the question but near-certain given "position, heading, speed, vessel type" are all user-set values (PROJECT.md) — confirm against the mockup in Phase 3 (Sandbox) before adding |
-| Visual separation in Header/Footer or Card internals | `Separator` | Small, no-dependency-risk addition; add opportunistically rather than up front |
-
-### What NOT to add (yet)
-
-| Component/library | Why not | Add it if... |
-|---|---|---|
-| `Sidebar` (+ `SidebarProvider`/`SidebarInset`/etc.) | This is a dashboard-drawer-navigation pattern (persistent left rail, collapsible sections) — the app is a single-page marketing-style site (Hero → Sandbox → Gallery on one route) per PROJECT.md's phase list, not a multi-page app-shell | The app ever grows a genuine multi-page admin-style nav |
-| `Dialog`/`AlertDialog` | Not mentioned in the mockup's described patterns; the existing "save & share" flow (Phase 5, v1.0) doesn't obviously need a modal, and PITFALLS territory (focus trapping, portal z-index vs the SVG chart's own stacking context) isn't worth taking on speculatively | The mockup actually shows a modal confirmation for save/share, or delete-scenario confirmation is added later |
-| `next-themes` | Dark-only, no toggle — see above | A light theme or user-togglable theme is ever added (`v1.2+`, not currently planned) |
-| `geist` (standalone npm package) | Redundant — `next/font/google`'s built-in `Geist`/`Geist_Mono` already self-hosts identically, at zero extra dependency cost | You need Geist outside a Next.js project (this package exists specifically for non-Next projects) |
-| `sonner` (toast) | Not named in the mockup patterns given; the existing share-link UX (v1.0) has no described toast requirement | The redesign's Hero/Sandbox actually shows a toast for "link copied" or similar — verify against the mockup, don't assume |
-| `Sidebar`'s implicit `Sheet`/`Tooltip` transitive adds | Only pull `Sheet` directly if the mockup's mobile header genuinely needs a drawer | Confirmed via mockup in Phase 1 |
 
 ## Alternatives Considered
 
-| Recommended | Alternative | When to Use Alternative |
-|---|---|---|
-| `--base radix` | `--base base` (Base UI, the new CLI default) | Starting a brand-new project today with no legacy pattern-matching concerns, or specifically wanting to track shadcn's own forward direction; also has a smaller/cleaner component API in places (e.g. exposed `buttonVariants` without `asChild`/Slot indirection) |
-| `next/font/google` (`Geist`, `Geist_Mono`) | `geist` npm package + `next/font/local` | Non-Next.js rendering paths, or if you need Geist's variable-font axis controls beyond what `next/font/google`'s wrapper exposes (unlikely for this project) |
-| Hardcoded `<html className="dark">` | `next-themes` with `ThemeProvider` | A theme toggle becomes an actual product requirement |
-| `--preset nova` | `--preset lyra` or a bespoke/no-preset init | The mockup's visual language (spacing density, radius scale) more closely matches a different named preset — worth a quick visual comparison during Phase 1, though since the mockup's colors/spacing/breakpoints are being followed exactly and will override most preset defaults anyway, this choice mostly only affects default component internals (padding scale, icon library) rather than final appearance |
+| Category | Recommended | Alternative | Why Not |
+|----------|-------------|-------------|---------|
+| Next.js ESLint config | `eslint-config-next` flat-config exports | `@next/eslint-plugin-next` used directly, unwrapped | Official docs frame direct plugin usage as the path for projects with conflicting existing configs (custom `airbnb`/`react-app` presets, custom `parserOptions`) — none apply here, since this is a from-scratch setup. `eslint-config-next` is the simpler, officially-recommended default for exactly this "nothing installed yet" situation. |
+| TypeScript rules | `eslint-config-next/typescript` as the base TS-rules source, `typescript-eslint` installed for its `tseslint.config()` helper/future type-checked tier | Installing only the legacy split packages `@typescript-eslint/parser` + `@typescript-eslint/eslint-plugin` | The unified `typescript-eslint` meta-package is the current officially-documented install path in typescript-eslint's own Quickstart; the split-package install is the older, superseded pattern. |
+| Tailwind v4 lint plugin | `eslint-plugin-better-tailwindcss` | `eslint-plugin-tailwindcss` (francoismassart) | Confirmed via direct rule-list inspection: no v3→v4 deprecated-class-rename detection rule exists (`migration-from-tailwind-2` targets the wrong migration direction, v2→v3). Reasonable for class-ordering/contradiction rules generally, but does not solve this milestone's specific stated need. |
+| Tailwind v4 lint plugin | `eslint-plugin-better-tailwindcss` | `@poupe/eslint-plugin-tailwindcss` | Surfaced during research as another Tailwind-v4-specific option; not evaluated in depth this session since `better-tailwindcss` already has a confirmed matching `no-deprecated-classes` rule, active maintenance, and out-of-the-box `cn`/`cva`/`clsx` recognition matching this project's existing utility usage. Worth a second look only if `better-tailwindcss`'s findings prove unexpectedly noisy in practice. |
+| Vitest test-file rules | `@vitest/eslint-plugin` (official, `vitest-dev` org) | `eslint-plugin-vitest` (community, unscoped name) | `npm view eslint-plugin-vitest version` resolved to a stale `0.5.4` versus `@vitest/eslint-plugin`'s actively-maintained `1.6.23` — the scoped package is the Vitest project's own current plugin; the unscoped name is a legacy/superseded package. |
 
 ## What NOT to Use
 
 | Avoid | Why | Use Instead |
-|---|---|---|
-| Bare `npx shadcn@latest init` / `init --defaults` | Silently pulls the new `--preset base-nova` default (`@base-ui/react`), not Radix — a very recent (this month) CLI default change that most existing docs/tutorials/answers still assume is Radix | `npx shadcn@latest init --template next --base radix --preset nova` (explicit flags) |
-| `tailwindcss-animate` (the v3-era Tailwind plugin) | No `tailwind.config.js`/plugins array exists in Tailwind v4 — this package's plugin API doesn't apply | `tw-animate-css` (pure CSS `@import`, installed automatically by `shadcn init`) |
-| `next-themes` | Adds a runtime theme-switching dependency and provider tree for a fixed, dark-only design with no toggle requirement | Hardcoded `<html className="dark">` in `app/layout.tsx` |
-| Standalone `geist` npm package or manual `<link>` Google Fonts tags | `next/font/google` already self-hosts Geist/Geist Mono natively at build time — either alternative is a redundant dependency or a slower, non-self-hosted network fetch | `import { Geist, Geist_Mono } from "next/font/google"` |
-| Individual `@radix-ui/react-select`, `@radix-ui/react-slider`, etc. package installs | Superseded by the unified `radix-ui` package (Feb 2026 shadcn change) — installing the old fragmented packages manually would fight what the current CLI/registry actually generates | Let `shadcn init --base radix` install the single `radix-ui` package; don't hand-install fragmented Radix packages |
+|-------|-----|--------------|
+| `next lint` (any form, including a script alias) | Removed entirely in Next.js 16 (`v16.0.0` changelog, re-confirmed this session against the official docs, `lastUpdated: 2025-11-10`) — the command does not exist in `next@16.2.10`. | ESLint CLI directly: `eslint .`, wired as `"lint": "eslint ."` in `package.json`. |
+| Legacy `.eslintrc.json`/`.eslintrc.js` config format for this from-scratch setup | Not the right choice when there's no existing legacy config to migrate — flat config (`eslint.config.mjs`) is ESLint 9+/10+'s default and primary format. The `FlatCompat` shim (`@eslint/eslintrc`) exists specifically for migrating *existing* legacy configs, which this repo doesn't have (zero prior lint tooling). | Native flat config, no compatibility shim needed. |
+| A hand-added `languageOptions.globals` block for `describe`/`it`/`expect` in the Vitest test-file ESLint override | Unnecessary for this specific codebase — `vitest.config.ts` sets `globals: false` and every test file already imports these identifiers explicitly from `"vitest"`, so `no-undef` has nothing to flag. Adding an unused globals block is dead config that misrepresents how this codebase's tests actually work. | Explicit imports (already the codebase convention) + `@vitest/eslint-plugin`'s `recommended` config, `files`-scoped, for Vitest-specific correctness rules. |
+| `eslint-plugin-tailwindcss` (francoismassart) specifically for "catch deprecated v3→v4 class names" | Its migration rule targets v2→v3, not v3→v4 — does not solve this milestone's stated problem despite otherwise supporting Tailwind v4 syntax. | `eslint-plugin-better-tailwindcss`'s `no-deprecated-classes`/`enforce-canonical-classes` rules. |
+| Installing both `eslint-config-next/typescript` AND a separately hand-rolled `typescript-eslint` `recommended` block in the same base config | Redundant/conflicting rule registration for the same concern (both provide `@typescript-eslint/recommended`-derived rules). | `eslint-config-next/typescript` as the sole TS-rules source initially; adopt `typescript-eslint`'s own `recommended-type-checked` config later as a replacement, not an addition, if/when that upgrade is pursued. |
+| `typescript-eslint`'s `strict`/`strict-type-checked` tiers | Already ruled out by the parallel research pass (FEATURES.md) as too noisy for a first-pass retrofit on a two-milestone-old codebase — not re-litigated here, just reaffirmed as out of scope for this stack decision too. | `recommended` now; `recommended-type-checked` as the later, still-stable upgrade tier. |
 
 ## Version Compatibility
 
 | Package A | Compatible With | Notes |
-|---|---|---|
-| `shadcn@4.13.1` init | `next@16.2.10` + `--webpack` dev/build scripts | The CLI only writes/edits source files (`components.json`, `globals.css`, `src/components/ui/*`, `src/lib/utils.ts`) and edits `package.json` — it never inspects or depends on which bundler `next dev`/`next build` uses. **Verified no known incompatibility with the project's webpack-only `resolve.extensionAlias` requirement** — that config only remaps `.js`→`.ts`/`.tsx` extension resolution for hand-authored relative imports; it has zero interaction with shadcn's generated `@/`-alias, extensionless imports (see next row). |
-| shadcn-generated imports (`@/lib/utils`, `@/components/ui/button`) | Project's `tsconfig.json` (currently has **no** `@/*` path alias) | **Action needed in Phase 1:** add `"baseUrl": ".", "paths": { "@/*": ["./src/*"] }` to `tsconfig.json`'s `compilerOptions`. This is purely additive — it does not touch or conflict with the existing `.js`-suffix relative-import convention (that's an *extension-resolution* concern handled by webpack's `extensionAlias`; `@/*` is a *path-prefix* alias, an orthogonal mechanism). Recommended boundary: shadcn-generated files under `src/components/ui/` keep their default `@/`-prefixed, no-`.js`-suffix internal imports unmodified (so future `shadcn add`/diff/update commands stay clean against upstream); hand-authored app code consuming those components keeps using the project's existing relative `.js`-suffixed convention when importing them, e.g. `import { Button } from "../../components/ui/button.js"`. |
-| `radix-ui@1.6.2` | `react@19.2.7` | Peer dep `"react": "^16.8 \|\| ^17.0 \|\| ^18.0 \|\| ^19.0 \|\| ^19.0.0-rc"` — confirmed via live npm registry lookup, satisfies 19.2.7 natively, no `--legacy-peer-deps`/`--force` needed. |
-| `@base-ui/react@1.6.0` (if `--base base` chosen instead) | `react@19.2.7` | Peer dep `"react": "^17 \|\| ^18 \|\| ^19"` — also natively compatible, for reference if the Base UI alternative is revisited later. |
-| `tailwindcss@4.3.3` (already installed) | `shadcn@4.13.1`'s CSS-first templates | Matches exactly — no Tailwind version bump needed for this milestone. |
-| `typescript@7.0.2` (tsgo) | shadcn CLI's codegen (`ts-morph`-based file edits) | The CLI edits/writes plain `.tsx`/`.ts`/`.json` source files; it does not invoke the TypeScript compiler API directly against your project, so it's unaffected by the `tsgo`/`ignoreBuildErrors` situation documented in `next.config.ts`. Your existing `npx tsc --noEmit` gate remains the authoritative type-check step after any `shadcn add`. |
+|-----------|------------------|-------|
+| `eslint@10.7.0` | `eslint-config-next@16.2.10` | Both current `latest` as of this research; Next's own docs (dated 2025-11-10) already document flat-config setup against this exact version pairing. |
+| `eslint@10.7.0` | `typescript-eslint@8.64.0` | typescript-eslint's own docs/Context7 confirm flat-config `tseslint.config()` works with current ESLint major versions; no version-specific caveat found. |
+| `eslint-plugin-better-tailwindcss@4.6.1` | `eslint@10.7.0`, `tailwindcss@4.3.3` | `eslint` and `oxlint` are both **optional** peer deps (works with either) — confirmed via `npm view ... peerDependenciesMeta`; `tailwindcss` peer range `^3.3.0 \|\| ^4.1.17` covers this project's installed `4.3.3`. |
+| `@vitest/eslint-plugin@1.6.23` | `eslint@10.7.0`, `vitest@4.1.10`, `typescript@7.0.2` | Peer deps confirmed via `npm view`: `eslint: >=8.57.0`, `typescript: >=5.0.0`, `vitest: *` — all satisfied. |
+| `typescript@7.0.2` (tsgo) | `typescript-eslint@8.64.0`'s non-type-checked `recommended` tier | No conflict — `recommended` (unlike `recommended-type-checked`) never invokes the TypeScript type-checker/Program API, so it's unaffected by tsgo's known Program-API-entry-point gap (the same gap already requiring `next.config.ts`'s `ignoreBuildErrors: true` workaround for `next build`'s internal type-check, per this project's existing Key Decisions log). This gap becomes a real thing to verify only if/when `recommended-type-checked` is adopted later — flag for that future point, not now. |
 
 ## Sources
 
-- Context7 `/shadcn-ui/ui` (HIGH reputation, 3700+ snippets) — CLI `init`/`add` command definitions, `components.json` schema, Tailwind v4 CSS templates, React 19 peer-dep guidance, Base UI vs Radix changelog entries ("December 2025 - npx shadcn create", "January 2026 - Base UI Documentation", "July 2026 - Base UI as the Default", "February 2026 - Unified Radix UI Package"), `base-nova`/`radix-nova` registry.json dependency declarations, preset defaults (`packages/shadcn/src/preset/defaults.ts`)
-- Context7 `/vercel/next.js` (HIGH reputation, official docs) — `next/font/google` Geist/Geist_Mono import pattern from `create-next-app`'s own template and `01-app/01-getting-started/13-fonts.mdx`
-- npm registry live lookups (HIGH confidence, current at research date, not training data): `shadcn` (4.13.1 latest / 4.2.0-canary.0 / 4.10.0-rc), `radix-ui` (1.6.2), `@base-ui/react` (1.6.0), `class-variance-authority` (0.7.1), `clsx` (2.1.1), `tailwind-merge` (3.6.0), `lucide-react` (1.25.0), `tw-animate-css` (1.4.0), `geist` (1.7.2), `next-themes` (0.4.6), `next` (16.2.10 latest), peer-dependency fields for `radix-ui` and `@base-ui/react`
-- WebFetch `https://ui.shadcn.com/docs/tailwind-v4` — corroborated the `@theme inline`/OKLCH/no-`tailwind.config.js` current setup (MEDIUM-HIGH — WebFetch summary, cross-checked against the same claims independently confirmed via Context7's raw doc snippets above)
-- Repo inspection (this codebase, HIGH confidence — direct file reads): `package.json`, `next.config.ts`, `app/globals.css`, `app/layout.tsx`, `postcss.config.mjs`, `tsconfig.json` — used to ground every "no change needed here" / "action needed here" claim against the actual current state rather than a generic starter
+- [Next.js: ESLint Plugin config reference](https://nextjs.org/docs/app/api-reference/config/eslint) — official docs, fetched directly this session, `lastUpdated: 2025-11-10`, version-pinned to `16.2.10` (this project's exact Next.js version). Confirmed: `next lint` removal in v16.0.0, exact `eslint.config.mjs` flat-config examples for `core-web-vitals`/`typescript` sub-exports, `eslint-config-prettier` integration recipe. HIGH confidence.
+- Context7 `/websites/nextjs` and `/vercel/next.js` — cross-checked flat-config `eslint.config.mjs` examples (`defineConfig`/`globalIgnores` from `eslint/config`, `FlatCompat` migration-codemod variant) against the WebFetch result above; consistent. HIGH confidence.
+- Context7 `/typescript-eslint/typescript-eslint` — `tseslint.config()` flat-config helper, confirmation that `recommended` (non-type-checked) requires no `parserOptions.project`/program setup, current version cross-checked against `npm view typescript-eslint version` (`8.64.0`). HIGH confidence.
+- `npm view eslint / eslint-config-next / typescript-eslint / eslint-plugin-tailwindcss / eslint-plugin-better-tailwindcss / eslint-plugin-vitest / @vitest/eslint-plugin version|peerDependencies|peerDependenciesMeta|dist-tags|readme` — live npm registry lookups performed this session, HIGH confidence (not training data).
+- [eslint-plugin-tailwindcss GitHub — rules directory](https://github.com/francoismassart/eslint-plugin-tailwindcss/tree/master/lib/rules) and its [v4.0.3 release notes](https://github.com/francoismassart/eslint-plugin-tailwindcss/releases) — fetched directly, confirmed the v4.x line is a from-scratch Tailwind-v4-only rewrite, and confirmed no v3→v4 deprecated-class rule exists (`migration-from-tailwind-2` targets v2→v3 instead). MEDIUM-HIGH confidence (direct file/release-note inspection, not a summarized secondary source).
+- `eslint-plugin-better-tailwindcss` README (fetched via `npm view ... readme`, matching `github.com/schoero/eslint-plugin-better-tailwindcss`) and its `docs/parsers/tsx.md` (fetched directly) — confirmed `no-deprecated-classes`/`enforce-canonical-classes` rules, their `tw4`-only/`recommended`-config-included status, the exact flat-config `entryPoint` setup for Tailwind v4's CSS-based config, and built-in `cn`/`cva`/`clsx`/`twMerge` utility recognition. HIGH confidence (primary-source README/docs, not a secondary blog summary).
+- `@vitest/eslint-plugin` README (fetched via `npm view ... readme`) — confirmed current flat-config setup syntax, peer dependency versions, and the `files`-scoped registration pattern. HIGH confidence (primary-source README).
+- This repo's own `vitest.config.ts`, `tsconfig.json`, `package.json`, `next.config.ts`, and a sample test file (`src/components/gallery/GalleryCard.test.tsx`) — read directly this session to confirm the project-specific finding that `globals: false` + explicit imports means the generic "ESLint+Vitest globals" gotcha does not apply here, and to confirm the Tailwind CSS entry point path (`app/globals.css`) for the `better-tailwindcss` plugin's `entryPoint` setting. HIGH confidence (primary source: the actual repo).
 
 ---
-*Stack research for: shadcn/ui adoption into existing Next.js 16 + React 19 + Tailwind v4 app (v1.1 UI Redesign milestone)*
-*Researched: 2026-07-18*
+*Stack research for: v1.2 Tech Debt & Stabilization milestone (ESLint/lint-tooling setup), COLREGS Navigator*
+*Researched: 2026-07-19*

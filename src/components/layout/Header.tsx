@@ -19,7 +19,9 @@ const NAV_LINKS = [
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+    <header className="
+      sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md
+    ">
       <div className="flex h-14 items-center justify-between px-6">
         <a href="#top" className="flex items-center gap-2.75 text-foreground">
           <svg
@@ -50,17 +52,31 @@ export function Header() {
           <span className="text-[15px] font-semibold tracking-[-0.01em]">
             COLREGS <span className="text-accent">Navigator</span>
           </span>
-          <span className="rounded-md border border-border px-1.75 py-0.5 font-mono text-[10.5px] text-muted-foreground">
+          <span className="
+            rounded-md border border-border px-1.75 py-0.5 font-mono
+            text-[10.5px] text-muted-foreground
+          ">
             Rules 11–18
           </span>
         </a>
         <div className="flex items-center gap-1.5">
-          <nav className="hidden items-center gap-1.5 sm:flex">
+          <nav className="
+            hidden items-center gap-1.5
+            sm:flex
+          ">
             {NAV_LINKS.map(({ href, label }) => (
               <a
                 key={href}
                 href={href}
-                className="rounded-md px-2.75 py-1.75 text-[13.5px] font-medium text-muted-foreground transition-colors hover:text-accent focus-visible:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="
+                  rounded-md px-2.75 py-1.75 text-[13.5px] font-medium
+                  text-muted-foreground transition-colors
+                  hover:text-accent
+                  focus-visible:text-accent focus-visible:ring-2
+                  focus-visible:ring-accent/60 focus-visible:ring-offset-2
+                  focus-visible:ring-offset-background
+                  focus-visible:outline-none
+                "
               >
                 {label}
               </a>

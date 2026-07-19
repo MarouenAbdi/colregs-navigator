@@ -244,7 +244,11 @@ function VesselGroup({ label, vessel, screen, role, hullDrag, rotateDrag }: Vess
         <polygon
           data-testid={`hull-hit-${label}`}
           points={HULL_POINTS}
-          className={`cursor-grab active:cursor-grabbing ${ROLE_HULL_FILL_CLASS[role]}`}
+          className={`
+            cursor-grab
+            active:cursor-grabbing
+            ${ROLE_HULL_FILL_CLASS[role]}
+          `}
           stroke={HULL_STROKE}
           strokeWidth={HULL_STROKE_WIDTH}
           onPointerDown={hullDrag.onPointerDown}
@@ -263,7 +267,10 @@ function VesselGroup({ label, vessel, screen, role, hullDrag, rotateDrag }: Vess
           cx={0}
           cy={ROTATE_HANDLE_CY}
           r={ROTATE_HANDLE_VISIBLE_R}
-          className="cursor-grab stroke-rule-accent active:cursor-grabbing"
+          className="
+            cursor-grab stroke-rule-accent
+            active:cursor-grabbing
+          "
           strokeWidth={2}
           fill="white"
           onPointerDown={rotateDrag.onPointerDown}
@@ -290,13 +297,15 @@ function VesselGroup({ label, vessel, screen, role, hullDrag, rotateDrag }: Vess
         {/* Letter identifier (A/B), fixed upper-left of the vessel
             regardless of heading -- always the same dark chip regardless
             of role. */}
-        <circle cx={LETTER_OFFSET_X} cy={LETTER_OFFSET_Y} r={LETTER_CIRCLE_R} className="fill-card" />
+        <circle cx={LETTER_OFFSET_X} cy={LETTER_OFFSET_Y} r={LETTER_CIRCLE_R} className="
+          fill-card
+        " />
         <text
           x={LETTER_OFFSET_X}
           y={LETTER_OFFSET_Y}
           dy="0.35em"
           textAnchor="middle"
-          className="text-[12px] font-bold fill-white"
+          className="fill-white text-[12px] font-bold"
         >
           {label === "vesselA" ? "A" : "B"}
         </text>
@@ -316,7 +325,7 @@ function VesselGroup({ label, vessel, screen, role, hullDrag, rotateDrag }: Vess
           y={BADGE_OFFSET_Y}
           dy="0.35em"
           textAnchor="middle"
-          className="text-[11px] font-semibold fill-white"
+          className="fill-white text-[11px] font-semibold"
         >
           {ROLE_BADGE_TEXT[role]}
         </text>
@@ -366,7 +375,7 @@ export function ChartPanel({
   );
 
   if (!containerSize || !(containerSize.width > 0 && containerSize.height > 0)) {
-    return <div ref={containerRef} className="aspect-square w-full relative" />;
+    return <div ref={containerRef} className="relative aspect-square w-full" />;
   }
 
   const screenA = chartToScreen(vesselA.position, containerSize, CHART_VIEW_BOX);
@@ -430,11 +439,11 @@ export function ChartPanel({
   );
 
   return (
-    <div ref={containerRef} className="aspect-square w-full relative">
+    <div ref={containerRef} className="relative aspect-square w-full">
       <svg
         width={containerSize.width}
         height={containerSize.height}
-        className="bg-chart-surface border border-border rounded"
+        className="rounded-[0.25rem] border border-border bg-chart-surface"
       >
         <defs>
           <pattern
@@ -517,7 +526,9 @@ export function ChartPanel({
             (`pointerEvents: none` there) -- must never intercept a drag
             gesture aimed at the chart underneath it. */}
         <g transform={`translate(${bearingMidpoint.screenX},${bearingMidpoint.screenY})`} pointerEvents="none">
-          <rect x={-34} y={-11} width={68} height={22} rx={6} className="fill-card stroke-border" />
+          <rect x={-34} y={-11} width={68} height={22} rx={6} className="
+            fill-card stroke-border
+          " />
           <text
             x={0}
             y={4}
@@ -548,7 +559,10 @@ export function ChartPanel({
           length of 1 nautical mile for the current container size and the
           fixed CHART_VIEW_BOX.width (20nm), so it stays accurate across
           container sizes rather than being a hardcoded decorative width. */}
-      <div className="absolute bottom-2 left-2 flex items-center gap-1 font-mono text-[13px] font-semibold text-muted-foreground">
+      <div className="
+        absolute bottom-2 left-2 flex items-center gap-1 font-mono text-[13px]
+        font-semibold text-muted-foreground
+      ">
         <span
           className="h-px bg-border"
           style={{ width: containerSize.width / CHART_VIEW_BOX.width }}

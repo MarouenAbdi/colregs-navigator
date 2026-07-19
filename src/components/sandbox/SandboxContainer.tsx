@@ -181,17 +181,25 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
   }
 
   return (
-    <div className="mx-auto max-w-300 px-5 py-12 min-[900px]:px-6 min-[900px]:py-16">
+    <div className="
+      mx-auto max-w-300 px-5 py-12
+      min-[900px]:px-6 min-[900px]:py-16
+    ">
       <header className="mb-8 flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-col gap-2">
-            <span className="font-mono text-[13px] font-semibold tracking-wide text-primary uppercase">
+            <span className="
+              font-mono text-[13px] font-semibold tracking-wide text-primary
+              uppercase
+            ">
               Interactive sandbox · night-display mode
             </span>
-            <h1 className="text-2xl leading-[1.25] font-semibold text-foreground">
+            <h1 className="text-2xl/tight font-semibold text-foreground">
               Drag a vessel — watch the verdict update
             </h1>
-            <p className="max-w-150 text-base font-semibold text-muted-foreground">
+            <p className="
+              max-w-150 text-base font-semibold text-muted-foreground
+            ">
               Drag a hull to reposition it, grab the bow handle to change heading, and adjust
               speed &amp; type below. Classification recomputes live.
             </p>
@@ -218,7 +226,10 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
         </div>
         {saveError ? <p className="text-sm text-doubt">{saveError}</p> : null}
         {banner ? (
-          <div className="rounded border border-border bg-card px-3 py-2 text-sm text-muted-foreground">
+          <div className="
+            rounded-[0.25rem] border border-border bg-card px-3 py-2 text-sm
+            text-muted-foreground
+          ">
             <div>{banner.label}</div>
             {banner.rationale ? <div>{banner.rationale}</div> : null}
           </div>
@@ -235,11 +246,18 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
             type="button"
             onClick={() => handleChipSelect(id)}
             aria-pressed={activeChipId === id}
-            className={`flex h-[30px] items-center rounded-full border px-[13px] font-sans text-[12.5px] font-medium transition-colors ${
+            className={`
+              flex h-[30px] items-center rounded-full border px-[13px] font-sans
+              text-[12.5px] font-medium transition-colors
+              ${
               activeChipId === id
                 ? "border-rule-accent bg-rule-accent text-white"
-                : "border-border bg-card text-muted-foreground hover:text-foreground"
-            }`}
+                : `
+                  border-border bg-card text-muted-foreground
+                  hover:text-foreground
+                `
+            }
+            `}
           >
             {label}
           </button>
@@ -248,7 +266,10 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
 
       <VerdictBanner classification={lastGoodClassification} isDegenerate={isDegenerate} />
 
-      <div className="mt-4 grid grid-cols-1 gap-4 min-[900px]:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <div className="
+        mt-4 grid grid-cols-1 gap-4
+        min-[900px]:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]
+      ">
         <ChartPanel
           vesselA={vesselA}
           vesselB={vesselB}

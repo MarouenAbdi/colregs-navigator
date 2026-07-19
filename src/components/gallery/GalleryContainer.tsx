@@ -17,10 +17,18 @@ export async function GalleryContainer() {
   return (
     <section className="relative overflow-hidden bg-background">
       <SectionGridBackground opacity={0.18} />
-      <div className="relative z-[1] mx-auto max-w-300 px-5 py-12 min-[900px]:px-6 min-[900px]:py-16">
-        <div className="mb-8 flex flex-col items-center gap-3 text-center min-[900px]:mb-12">
+      <div className="
+        relative z-1 mx-auto max-w-300 px-5 py-12
+        min-[900px]:px-6 min-[900px]:py-16
+      ">
+        <div className="
+          mb-8 flex flex-col items-center gap-3 text-center
+          min-[900px]:mb-12
+        ">
           <span className="font-mono text-[13px] font-semibold text-accent">Curated scenarios</span>
-          <h2 className="text-center text-[36px] font-bold leading-[1.15] text-foreground">
+          <h2 className="
+            text-center text-[36px] leading-[1.15] font-bold text-foreground
+          ">
             Classic encounters, one click away
           </h2>
           <p className="max-w-125 text-base font-semibold text-muted-foreground">
@@ -31,7 +39,11 @@ export async function GalleryContainer() {
         {scenarios.length === 0 ? (
           <p className="text-center text-muted-foreground">No curated scenarios yet — run the seed script.</p>
         ) : (
-          <div className="grid grid-cols-1 gap-4 min-[640px]:grid-cols-2 min-[900px]:grid-cols-3">
+          <div className="
+            grid grid-cols-1 gap-4
+            min-[640px]:grid-cols-2
+            min-[900px]:grid-cols-3
+          ">
             {scenarios.map((row) => {
               const { vesselA, vesselB } = rowToVessels(row);
               return (

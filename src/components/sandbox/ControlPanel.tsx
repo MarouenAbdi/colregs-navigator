@@ -52,11 +52,17 @@ function VesselFormSection({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center gap-2">
-        <span className="flex h-6 w-6 items-center justify-center rounded-[7px] bg-foreground text-[13px] font-bold text-background">
+        <span className="
+          flex size-6 items-center justify-center rounded-[7px] bg-foreground
+          text-[13px] font-bold text-background
+        ">
           {letter}
         </span>
         <h2 className="text-sm font-semibold text-foreground">{heading}</h2>
-        <Badge variant="outline" className={`ml-auto border ${ROLE_BADGE_CLASSNAME[role]}`}>
+        <Badge variant="outline" className={`
+          ml-auto border
+          ${ROLE_BADGE_CLASSNAME[role]}
+        `}>
           {ROLE_BADGE_TEXT[role]}
         </Badge>
       </CardHeader>
@@ -64,7 +70,10 @@ function VesselFormSection({
         <div className="flex flex-col gap-1.5">
           <Label
             htmlFor={`${label}-type`}
-            className="font-mono text-[11px] font-semibold text-muted-foreground uppercase"
+            className="
+              font-mono text-[11px] font-semibold text-muted-foreground
+              uppercase
+            "
           >
             Type
           </Label>
@@ -84,7 +93,10 @@ function VesselFormSection({
 
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <Label className="font-mono text-[11px] font-semibold text-muted-foreground uppercase">
+            <Label className="
+              font-mono text-[11px] font-semibold text-muted-foreground
+              uppercase
+            ">
               Speed
             </Label>
             {/* Only element in this restyled section allowed to use
@@ -104,7 +116,9 @@ function VesselFormSection({
         </div>
 
         <div className="flex items-center justify-between">
-          <Label className="font-mono text-[11px] font-semibold text-muted-foreground uppercase">
+          <Label className="
+            font-mono text-[11px] font-semibold text-muted-foreground uppercase
+          ">
             Heading
           </Label>
           <span className="font-mono text-sm font-semibold text-foreground">
@@ -124,7 +138,10 @@ export function ControlPanel({
   onVesselTypeChange,
 }: ControlPanelProps) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div className="
+      grid grid-cols-1 gap-4
+      sm:grid-cols-2
+    ">
       <VesselFormSection
         label="vesselA"
         letter="A"

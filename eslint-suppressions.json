@@ -1,0 +1,341 @@
+{
+  "app/layout.tsx": {
+    "better-tailwindcss/no-unknown-classes": {
+      "count": 1
+    }
+  },
+  "eslint-rules/no-stale-id-comments.mjs": {
+    "local/no-stale-id-comments": {
+      "count": 3
+    }
+  },
+  "next.config.ts": {
+    "local/no-stale-id-comments": {
+      "count": 6
+    }
+  },
+  "src/components/gallery/GalleryCard.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 2
+    }
+  },
+  "src/components/gallery/GalleryContainer.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/gallery/GalleryPreviewChart.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 3
+    }
+  },
+  "src/components/gallery/gallery-preview-geometry.test.ts": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/hero/Hero.test.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/hero/Hero.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/hero/HeroPreviewCard.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/hero/hero-preview-fixture.test.ts": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    },
+    "vitest/no-conditional-expect": {
+      "count": 6
+    }
+  },
+  "src/components/hero/hero-preview-fixture.ts": {
+    "local/no-stale-id-comments": {
+      "count": 2
+    }
+  },
+  "src/components/hero/hero-preview-geometry.ts": {
+    "local/no-stale-id-comments": {
+      "count": 3
+    }
+  },
+  "src/components/layout/Footer.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/sandbox/ChartPanel.test.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 2
+    }
+  },
+  "src/components/sandbox/ChartPanel.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 10
+    }
+  },
+  "src/components/sandbox/ControlPanel.test.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/sandbox/ControlPanel.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/sandbox/CopyLinkButton.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/sandbox/InstrumentReadouts.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 2
+    }
+  },
+  "src/components/sandbox/ReasoningTrail.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/sandbox/SandboxContainer.test.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 3
+    }
+  },
+  "src/components/sandbox/SandboxContainer.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 4
+    }
+  },
+  "src/components/sandbox/VerdictBanner.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/sandbox/chip-scenarios.test.ts": {
+    "vitest/no-conditional-expect": {
+      "count": 1
+    }
+  },
+  "src/components/sandbox/environment.smoke.test.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/sandbox/hooks/useHullDrag.test.ts": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/sandbox/hooks/useHullDrag.ts": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/sandbox/hooks/useRotateHandleDrag.ts": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/sandbox/instrument-readouts.test.ts": {
+    "vitest/no-conditional-expect": {
+      "count": 2
+    }
+  },
+  "src/components/sandbox/types.ts": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/sandbox/vessel-role.ts": {
+    "local/no-stale-id-comments": {
+      "count": 4
+    }
+  },
+  "src/components/shared/SectionGridBackground.tsx": {
+    "better-tailwindcss/no-unknown-classes": {
+      "count": 3
+    },
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/shared/static-chart-geometry.ts": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/domain/colregs/classify-encounter.fixtures.ts": {
+    "local/no-stale-id-comments": {
+      "count": 11
+    }
+  },
+  "src/domain/colregs/classify-encounter.test.ts": {
+    "vitest/no-conditional-expect": {
+      "count": 79
+    }
+  },
+  "src/domain/colregs/classify-encounter.ts": {
+    "local/no-stale-id-comments": {
+      "count": 4
+    }
+  },
+  "src/domain/colregs/resolve-doubt-geometry.fixtures.ts": {
+    "local/no-stale-id-comments": {
+      "count": 2
+    }
+  },
+  "src/domain/colregs/resolve-doubt-geometry.test.ts": {
+    "vitest/no-conditional-expect": {
+      "count": 9
+    }
+  },
+  "src/domain/colregs/resolve-doubt-geometry.ts": {
+    "local/no-stale-id-comments": {
+      "count": 2
+    }
+  },
+  "src/domain/colregs/risk-of-collision.fixtures.ts": {
+    "local/no-stale-id-comments": {
+      "count": 2
+    }
+  },
+  "src/domain/colregs/risk-of-collision.test.ts": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    },
+    "vitest/no-conditional-expect": {
+      "count": 4
+    }
+  },
+  "src/domain/colregs/risk-of-collision.ts": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/domain/colregs/types.ts": {
+    "local/no-stale-id-comments": {
+      "count": 5
+    }
+  },
+  "src/domain/colregs/vessel-priority.fixtures.ts": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/domain/colregs/vessel-priority.ts": {
+    "local/no-stale-id-comments": {
+      "count": 2
+    }
+  },
+  "src/domain/geometry/angle-convert.ts": {
+    "local/no-stale-id-comments": {
+      "count": 3
+    }
+  },
+  "src/domain/geometry/bearing.fixtures.ts": {
+    "local/no-stale-id-comments": {
+      "count": 2
+    }
+  },
+  "src/domain/geometry/bearing.test.ts": {
+    "vitest/no-conditional-expect": {
+      "count": 10
+    }
+  },
+  "src/domain/geometry/bearing.ts": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/domain/geometry/cpa.test.ts": {
+    "vitest/no-conditional-expect": {
+      "count": 14
+    }
+  },
+  "src/domain/geometry/relative-bearing.fixtures.ts": {
+    "local/no-stale-id-comments": {
+      "count": 2
+    }
+  },
+  "src/domain/geometry/relative-bearing.test.ts": {
+    "vitest/no-conditional-expect": {
+      "count": 10
+    }
+  },
+  "src/domain/geometry/relative-bearing.ts": {
+    "local/no-stale-id-comments": {
+      "count": 2
+    }
+  },
+  "src/domain/geometry/screen-convert.fixtures.ts": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/domain/geometry/screen-convert.ts": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/domain/shared/result.test.ts": {
+    "vitest/no-conditional-expect": {
+      "count": 5
+    }
+  },
+  "src/domain/shared/result.ts": {
+    "local/no-stale-id-comments": {
+      "count": 3
+    }
+  },
+  "src/server/api/routers/scenario.test.ts": {
+    "local/no-stale-id-comments": {
+      "count": 2
+    }
+  },
+  "src/server/application/scenario-service.test.ts": {
+    "local/no-stale-id-comments": {
+      "count": 2
+    }
+  },
+  "src/server/application/scenario-service.ts": {
+    "local/no-stale-id-comments": {
+      "count": 2
+    }
+  },
+  "src/server/db/curated-scenarios.test.ts": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/server/db/curated-scenarios.ts": {
+    "local/no-stale-id-comments": {
+      "count": 2
+    }
+  },
+  "src/server/db/scenario-repository.test.ts": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "vitest.config.ts": {
+    "local/no-stale-id-comments": {
+      "count": 3
+    }
+  },
+  "vitest.setup.ts": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  }
+}

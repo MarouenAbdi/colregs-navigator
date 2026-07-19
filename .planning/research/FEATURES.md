@@ -1,144 +1,162 @@
 # Feature Research
 
-**Domain:** Portfolio/demo-site hero section + embedded preset-gallery UX for a single-page interactive tool (v1.1 UI Redesign milestone — Hero and Gallery phases only; Scaffolding/Sandbox restyle are presentation-only and not covered here)
-**Researched:** 2026-07-18
-**Confidence:** MEDIUM-HIGH (Next.js redirect/hash mechanics verified against official docs and source via Context7 = HIGH; hero/gallery UX patterns synthesized from multiple WebSearch sources on dev-tool landing pages, cross-checked against this project's own already-locked design decisions = MEDIUM)
+**Domain:** Solo-built portfolio repo tooling/hygiene (v1.2 Tech Debt & Stabilization milestone — ESLint setup, refactor, comment cleanup)
+**Researched:** 2026-07-19
+**Confidence:** HIGH (Next.js/typescript-eslint claims verified via official docs and Context7; solo-vs-team tradeoff judgments are MEDIUM, cross-checked against multiple sources but inherently a project-context call)
 
 ## Scope Note
 
-This project's v1.1 milestone is a pure re-implementation of an already-designed UI — it adds **no new domain/business features**. The only genuinely new piece of UI is the **Hero** section (this app previously had no marketing/landing content — `/` went straight to the sandbox). The **Gallery** phase is not a new feature either; it's a **relocation** of an already-shipped, already-validated feature (curated preset browsing, built in v1.0 Phase 5) from its own `/gallery` route to a `/#gallery` section on the home page. Accordingly, this document treats "features" as **UX/interaction-pattern decisions**, not domain capabilities — the downstream roadmap needs to know which patterns are expected, which are worth the extra polish, and which would be scope creep against a milestone whose own charter is "zero change to domain logic or existing validated requirements."
+This document supersedes the prior FEATURES.md (v1.1 UI Redesign, hero/gallery UX patterns) for this milestone. v1.2 adds no new user-facing features — the "feature landscape" here is a tooling/hygiene landscape: what a credible lint/code-quality setup looks like for a **solo-built portfolio repo** whose explicit audience is a hiring tech lead or interviewer, not a real multi-contributor team. Prior UI-feature research (v1.0 domain, v1.1 hero/gallery) is not re-litigated here and remains valid for its own milestones.
 
-Prior feature research for this project (COLREGS domain/rules-engine feature landscape, v1.0) is superseded by this document for the v1.1 milestone — that domain research already fed a shipped, validated product and is not re-litigated here.
+## Framing
+
+The reviewer here is not "users" but a **tech lead or interviewer skimming the repo**. Their signal for
+"professional engineering hygiene" is different from a real team's: they're not checking whether tooling
+*prevents* bad commits (there's only one contributor — nothing to prevent), they're checking whether the
+repo *demonstrates the author knows what a real team's setup looks like and can build one*, sized correctly
+for this repo. Over-scoping the tooling (CI, git hooks, CONTRIBUTING.md for zero external contributors) reads
+as cargo-culting exactly as much as under-scoping it (no linter at all) reads as unfinished. Both failure
+modes are visible to an experienced reviewer — this is why the categorization below is stricter than a
+generic "ESLint best practices" list.
+
+PROJECT.md already locks part of the scope for this milestone: **local `npm run lint` script only, no GitHub
+Actions CI this milestone** (explicitly deferred to a future milestone). That locked decision is treated as
+a hard constraint below, not re-litigated.
 
 ## Feature Landscape
 
-### Table Stakes (Users Expect These)
+### Table Stakes (A Reviewer Would Notice Absence)
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Headline + one-line subhead stating what the tool actually does, in plain language (not vague SaaS copy) | Dev-tool landing page research is explicit: "No salesy BS" and "Clever and simple wins" are the two rules that hold across the 100+ pages studied — visitors bounce fast if they can't tell what the product *is* within seconds | LOW | Already scoped in PROJECT.md ("headline, copy, CTAs"). Pure content/copy work, shadcn Typography primitives. |
-| Primary CTA that leads directly into the interactive tool, with zero signup/login gate | This app has no accounts by design (no-login save/share is a locked v1.0 decision) — a hero that funnels toward a "Sign up" / "Request a demo" CTA would misrepresent the product and add friction the tool doesn't need | LOW | CTA = anchor-scroll or route-scroll to the Sandbox section on the same page (no separate `/try` route exists or is needed). |
-| A visual preview of the *actual product surface* near the fold, not stock imagery/generic illustration | Confirmed pattern across dev-tool landing pages: visuals paired with relevant, on-brand content increase engagement; devtool audiences specifically expect to see real UI, not marketing photography | LOW–MEDIUM | PROJECT.md already locks this as an "illustrative live-classification preview card" — see Differentiators below for why "illustrative" (not literally live) is the correct scope. |
-| No forced onboarding/tour before reaching the tool | "Developers want to try your product now" is a repeated, cross-sourced finding; a wizard/tour before the sandbox contradicts the project's own "no login, no gate" positioning | LOW | Direct scroll/CTA into Sandbox, no modal/carousel gate. |
-| Gallery section renders as a real grid of the 6 curated presets, each identifiable by encounter type + short rationale | Already shipped and validated in v1.0 Phase 5 — this is existing, tested behavior, just being relocated | LOW | Reuse `gallery.list()` tRPC query and card content; only the container/route changes. |
-| Gallery section is reachable via a stable, linkable URL fragment (`/#gallery`) | Required directly by the locked decision to redirect the removed `/gallery` route here — old bookmarks/links must still resolve to *something* meaningful, not a 404 | LOW–MEDIUM | See "Redirect + Anchor Scroll Considerations" below — this has real technical gotchas despite looking trivial. |
-| Gallery cards still navigate to a full scenario view on click (`/s/[shareId]`) | This is the existing, already-tested v1.0 interaction — changing it would be a functional change, which this milestone explicitly excludes | LOW | Zero new engineering: same `<Link href={`/s/${row.id}`}>` pattern already in `app/gallery/page.tsx`, just moved into a home-page section component. |
+| ESLint installed + configured for Next.js 16 + TypeScript, using flat config (`eslint.config.mjs`) | The repo currently has **zero** lint tooling — `npm run dev/build/test/typecheck` exist but no `lint`. For a project whose CLAUDE.md explicitly claims a "Staff Full-Stack Engineer" persona and DDD-lite discipline, shipping two full milestones with no linter at all is the single most visible gap an interviewer would find in 10 seconds of opening `package.json`. | LOW | Install `eslint` + `eslint-config-next` (which bundles `@next/eslint-plugin-next`, `eslint-plugin-react`, `eslint-plugin-react-hooks` recommended sets). **Next.js 16 removed `next lint` entirely** (confirmed via official docs, `nextjs.org/docs/app/api-reference/config/eslint`, `v16.0.0` changelog) — there is no `next lint` command to fall back to, and any stale `eslint` key in `next.config.ts` should be deleted. Use the ESLint CLI directly (`eslint .`) via the flat-config file, not the old `.eslintrc.*` format (deprecated, removed in ESLint v10). |
+| `eslint-config-next/typescript` layered on top of the base config | TypeScript is a locked core technology (STACK.md) — a JS-only lint config on a fully-TypeScript codebase would look like an oversight, not a deliberate choice. | LOW | This sub-config is itself based on `plugin:@typescript-eslint/recommended` (confirmed via Next.js official docs) — see the strictness discussion under Anti-Features for why `recommended`, not `strict-type-checked`, is the right starting tier here. |
+| `npm run lint` script wired into `package.json`, documented alongside `dev`/`build`/`test`/`typecheck` | PROJECT.md's own milestone goal names this exact script. A reviewer who runs `npm run test` and `npm run typecheck` (both already present) and finds no sibling `lint` script would read the milestone as incomplete regardless of whether ESLint is technically installed. | LOW | Trivial once ESLint is configured — `"lint": "eslint ."`. Consider `"lint:fix": "eslint . --fix"` as a paired convenience script; low cost, matches the shape of existing scripts. |
+| A lint-clean baseline — `npm run lint` exits 0 with no errors across the existing codebase | Introducing a linter to an already-built, two-milestone-old codebase and leaving it red is worse than not having one: a reviewer who runs `npm run lint` and sees a wall of unaddressed errors reads it as "tooling added but not actually used," undermining the whole hygiene narrative. | MEDIUM | This is the real cost driver of the milestone, not the ESLint install itself. PROJECT.md already flags concrete known violations to fix as part of this pass (deprecated Tailwind v4 class names in 6 files, long files, stale comments) — those and whatever else surfaces from turning the linter on for the first time need to be clean before the milestone closes. |
+| Removing the stale `eslint` option from `next.config.ts` (if present) | Next.js 16 explicitly deprecated/removed this config key alongside `next lint`'s removal — leaving it in place signals unfamiliarity with the exact framework version this project is pinned to (16.2.10, per STACK.md), which is a worse look than having no lint config at all for a project whose stated differentiator is engineering rigor. | LOW | One-line removal, verified via Next.js's own migration notes; pairs naturally with the flat-config setup work. |
 
-### Differentiators (Competitive Advantage)
+### Differentiators (Impressive, Not Expected)
 
 | Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Illustrative (not wired-to-live-state) mini classification preview card in the Hero, showing a canned example verdict (e.g., a classic crossing encounter with a give-way/stand-on badge) | Directly showcases this project's actual core value — explainability, not just visualization — before the user even reaches the real sandbox. Research on dev-tool heroes found interactive/product-truthful previews outperform generic screenshots for conveying value fast | LOW–MEDIUM | **This is already the locked design** (PROJECT.md: "illustrative live-classification preview card," Hero Direction A). Keep it a static/canned example — see Anti-Features for why NOT to wire it to real state. |
-| Secondary/tertiary CTA linking to source code (GitHub) or an "About this project" note | Portfolio-specific differentiator with no equivalent in commercial SaaS hero research — the actual audience here (interviewers/engineers evaluating the project) values seeing the implementation, not just the demo | LOW | Not in the current 4-phase plan; flag as a candidate scope addition for the Hero phase if not already covered by the design file — verify against the design file's actual CTA set before adding. |
-| Small illustrative geometry motion (e.g., a subtly animated bearing line or heading vector) in the Hero preview card | Evil Martians' research explicitly separates "static product UI" (fast, valid) from "animated product UI" (more compelling, more effort) — a small, tasteful animation is consistent with the domain (motion/bearing is literally the subject matter) and would sit well within Direction A's existing preview-card slot | MEDIUM | Discretionary polish — only pursue if it doesn't reintroduce actual sandbox/domain logic into the Hero (see Anti-Features). |
-| Mini visual thumbnail per gallery card (small rendered chart snippet showing the two vessels' relative geometry) instead of text-only cards | Existing `/gallery` implementation is text-only (encounter type label + rationale paragraph); a geometric thumbnail would let users visually recognize "the crossing one" or "the overtaking one" at a glance, leveraging chart-rendering work already built for the Sandbox | MEDIUM–HIGH | Real cost: needs a reusable, non-interactive "mini chart" render mode extracted from `ChartPanel`, one per card × 6 cards. Worth flagging to the roadmap as an optional Gallery-phase stretch goal, not a requirement — the design file should be checked first for whether it already specifies this. |
+|---------|--------------------|------------|-------|
+| Architecture-boundary enforcement via ESLint's core `no-restricted-imports` (or per-directory config overrides) — encoding "`src/domain/` never imports from `src/server/`, Next.js, tRPC, or Prisma" as an actual lint rule | This is the single highest-signal differentiator available here. STACK.md/CLAUDE.md already name this exact boundary as "the hard rule to enforce" for the domain-modeling-depth claim to be real rather than aspirational — turning a **written** convention into a **lint-enforced** one is precisely the kind of thing a tech lead notices and respects, because it shows the author understands conventions rot without automation. | LOW–MEDIUM | Confirmed via research: `no-restricted-imports` is a core ESLint rule (zero new dependency) capable of this via glob-scoped flat-config overrides (a `files: ['src/domain/**']` block restricting imports outside `src/domain/`). A dedicated plugin (`eslint-plugin-boundaries`) exists for larger/monorepo-scale layering but is unjustified overhead at this project's ~3-layer, single-package scale — same "don't add a dependency the project doesn't need" logic STACK.md already applies elsewhere. |
+| `no-restricted-syntax` rule banning stale task/plan/REQ-ID references in comments (e.g. matching `/Phase \d+|REQ-\d+|Plan \d+/i` against comment text) | This milestone is *manually* removing 10 found stale comment references right now — a lint rule is the difference between "we cleaned it up once" and "this can't recur." It directly operationalizes the "WHY-only, no rotting task IDs" convention already written in CLAUDE.md/CONVENTIONS. | LOW | Core ESLint rule, no new dependency; the pattern-matching half of the convention (does this comment cite an ID that will rot?) is fully mechanical and a genuinely good fit for a custom rule. See "What NOT to Automate" below for the half of this convention that isn't mechanical. |
+| `no-restricted-syntax` rule banning raw CSS built as template-literal strings in `.tsx` files (e.g. flagging a `TemplateLiteral` assigned to a JSX `style` attribute or a `background-image`/`animation` string) | Directly operationalizes the "no raw CSS composed as strings in component files" convention already written in CLAUDE.md — same rationale as above: a documented convention with no enforcement is one refactor away from being silently violated. | LOW | Same core rule, different AST selector; no new dependency. |
+| `max-lines` / `max-lines-per-function` as an early-warning proxy for "split computation from presentation" | CLAUDE.md's own convention names a concrete numeric signal ("growing past ~150-200 lines") — that's an unusually good match for a mechanical threshold rule, better than most style conventions. | LOW | Set as `warn`, not `error` — it's a proxy for a judgment call (mixing computation with markup), not the judgment itself; a long file that's legitimately just verbose JSX shouldn't hard-fail the build. Frame this as a nudge, not a strict gate. |
+| `typescript-eslint`'s `recommended-type-checked` tier (adds type-aware rules on top of the `eslint-config-next/typescript` default `recommended`) | A meaningful, well-established step up in rigor beyond what `eslint-config-next/typescript` ships by default, without the risk profile of the `strict` tiers (see Anti-Features). Shows deliberate calibration of strictness rather than just accepting a framework default. | MEDIUM | Requires wiring `parserOptions.project`/typed linting (points ESLint at `tsconfig.json`) and is slower to run than untyped rules — real cost, but well-trodden and stable. Confirmed via Context7 (`typescript-eslint`) that `recommended-type-checked` is explicitly positioned as "additional recommended rules requiring type information," one clear step above the default, not the most aggressive tier. |
+| `.editorconfig` at repo root | Near-zero cost, cheap signal that indentation/charset/line-ending conventions were considered, without asking anything of a reviewer skimming the repo. | LOW | Single static file, no runtime dependency. Optional polish, not required — most reviewers won't specifically check for its absence the way they would a missing linter. |
+| Prettier + `eslint-config-prettier`, format-on-save only (NOT a repo-wide reformat commit) | Consistent formatting is a genuine team-hygiene signal, and Next.js's own docs show the exact recommended pairing (`eslint-config-prettier` to disable ESLint's conflicting stylistic rules). | MEDIUM | Real risk: running Prettier's formatter across ~2 milestones of already-written code produces a large, low-value diff unrelated to this milestone's actual goal (lint rules + refactor + comment cleanup) and would visually swamp the meaningful changes in the PR. If added, scope it to "install + document, format new/touched files only" rather than a blanket reformat — otherwise this tips toward scope creep for a milestone that's explicitly not supposed to touch working code without reason. |
+| A short "Linting & Code Quality" section added to the README (not a new file) enumerating which CLAUDE.md conventions are lint-enforced vs. still human-reviewed | Ties the new tooling back to the conventions the project already documents by hand — shows the two are a coherent system, not tooling bolted on independently of the written philosophy. | LOW | README additions are already an expected deliverable per CLAUDE.md's Documentation constraint; this is additive to that existing obligation, not a new deliverable category. |
 
-### Anti-Features (Commonly Requested, Often Problematic)
+### Anti-Features (Would Read as Over-Engineering Here)
 
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|------------------|-------------|
-| Wiring the Hero preview card to the *real* `SandboxContainer`/live classification engine (a second, fully-functional mini-sandbox above the real one) | Feels more "impressive" — "why show a fake demo when the real one is one scroll away?" | Duplicates a stateful, draggable, `"use client"` component on the same page; doubles the surface area to keep in sync with the real sandbox's domain wiring; directly contradicts the milestone's own locked framing of the preview card as "illustrative"; adds real engineering cost to a phase whose charter is presentation-only | Static/canned example data rendered once, no drag/live-update wiring — exactly what PROJECT.md already locks in |
-| Auto-playing hero video, carousel, or slideshow of multiple "example encounters" cycling automatically | Looks polished in isolation, common in generic SaaS hero galleries | Cross-sourced dev-tool-landing-page research flags this as "salesy" — motion for its own sake, without user control, is the opposite of the "clever and simple wins" finding; also adds CLS/layout-shift risk that can break the `/#gallery` anchor-scroll math (see below) | One static illustrative preview card, matching the locked Direction A design |
-| Gated CTA ("Request a demo" / "Book a call" / email-capture before viewing the tool) | Standard B2B SaaS lead-gen pattern | Wrong model for this product entirely — it's a no-login, publicly demoable tool; a lead-gen gate would misrepresent both the product and the portfolio intent | Direct CTA into the Sandbox section, no email/contact capture |
-| Pagination, "load more," or infinite scroll on the Gallery section | Reflexive pattern for "any grid of cards" | There are exactly 6 hand-curated presets (fixed, not user-generated, not growing over time) — pagination solves a many-items problem this project doesn't have and adds unnecessary interaction/complexity | Render all 6 as a single static responsive grid (already the v1.0 behavior; matches the design file's fixed breakpoints at 900px/640px) |
-| Client-side-only data fetching for the Gallery section (spinner-first render, `useEffect` + fetch) | Common default in component-library thinking ("gallery" = "fetch client-side, show a loading skeleton") | Breaks the `/#gallery` redirect UX: the browser's native fragment-scroll only works if the `id="gallery"` element already exists in the *initial* HTML. If the section is empty at first paint and fills in after a client fetch, users redirected from the old `/gallery` route will land at the top of the page instead of at the gallery, silently defeating the whole redirect | Keep the Gallery section a server-rendered async Server Component (same pattern as today's `app/gallery/page.tsx`, which already does `await getCaller().gallery.list()`) so `#gallery` is present at first paint |
+| Feature | Why Requested | Why Problematic (for THIS repo) | Alternative |
+|---------|---------------|----------------------------------|-------------|
+| Husky + lint-staged pre-commit hooks | Genuinely standard on real multi-contributor teams — commonly the first thing people reach for right after "add ESLint." Community sources frame it as "the professional workflow." | With exactly one contributor, there is no one else's commit to catch — the only person a pre-commit hook can block is the author themselves, who already has `npm run lint` one command away. It adds a git-hook installation step (a `prepare` script, `.husky/` directory, onboarding friction for anyone who clones the repo to review it) to solve a problem — "a teammate might skip lint" — that doesn't exist yet in a solo repo. PROJECT.md's own locked scope for this milestone ("local `npm run lint` script only") already signals this exact class of process machinery is meant to wait. | Document `npm run lint` in the README as a required pre-push step; revisit husky/lint-staged only if/when a CI workflow is added in a future milestone (the two pair naturally — CI as the actual enforcement backstop, hooks as a fast local mirror of it — but introducing hooks alone, ahead of CI, front-loads friction without the corresponding benefit). |
+| GitHub Actions CI workflow + status badge | Table stakes on a real team repo, and a badge is a highly visible "this is professional" signal on a README. | **Explicitly out of scope for this milestone per PROJECT.md's own locked decision** ("no GitHub Actions CI — that's a candidate for a future milestone"). Adding it now would both violate the milestone's stated scope and risk turning a "first step" milestone into a much larger one — CI setup for this stack (Next.js + Prisma + Postgres) means also wiring a test database, secrets, and a build step, none of which this milestone's goal calls for. | Leave as the next milestone's explicit target; this milestone's `npm run lint` is correctly framed as the prerequisite for a future CI job to call. |
+| `CONTRIBUTING.md` | Signals "welcoming to contributors," commonly bundled with CI/badge/community-health-file setups; several generic checklists list it as a default open-source hygiene file. | This is a single-author portfolio repo with **no external contributors, past or planned** — a contributor-onboarding guide for zero contributors reads as cargo-culting open-source ritual rather than genuine practice, which is the opposite of the impression this milestone is trying to create. | Fold the small amount of genuinely useful content (how to run lint/tests/build locally) into the README's existing "setup guide" section, which is already a stated CLAUDE.md documentation deliverable — don't create a second file whose entire premise (multiple contributors) doesn't apply. |
+| `typescript-eslint`'s `strict` / `strict-type-checked` config tier | Sounds like the more rigorous, more impressive choice — "strict" is a stronger word than "recommended." | typescript-eslint's own docs describe this tier as "highly opinionated," requiring "strong TypeScript proficiency," and explicitly **not stable under semver** (its rule set can change outside major version bumps) — confirmed via Context7. Turning this on retroactively across a codebase written to `recommended`-level expectations for two prior milestones would surface a large volume of stylistic-opinion violations disconnected from real bugs, right when the milestone's stated goal is a scoped, demonstrable "first step," not a rewrite. Doing this now risks a lint pass so noisy it either gets partially suppressed (undermining the exercise) or balloons the milestone's actual scope. | `eslint-config-next/typescript`'s own default (`recommended`) is the right starting tier; `recommended-type-checked` (see Differentiators) is the correct "more rigorous but still stable and well-trodden" next step, not `strict-type-checked`. |
+| Writing custom ESLint AST rules to fully automate the "no duplicated JSX for near-identical instances" and "comments must explain WHY not WHAT" conventions | Tempting once you've already written 2-3 custom `no-restricted-syntax` rules (see Differentiators) — it can feel like "why not go all the way and automate everything CLAUDE.md documents?" | Both are genuine judgment calls, not mechanical patterns. "Near-identical JSX" requires comparing two hand-authored blocks for semantic (not textual) similarity — CLAUDE.md's own example of this bug (a rotation fix applied to one vessel but not the other) was caught by a human, not tooling, and no off-the-shelf rule detects "these two blocks differ only in vessel-specific values." Whether a comment explains WHY vs. restates WHAT is a natural-language judgment ESLint's AST-based model has no access to. Writing and maintaining bespoke rules for these would itself become an unjustified dependency (a custom rule package to write, test, and keep working across ESLint upgrades) for a benefit — full automation of two judgment-based conventions — a solo repo doesn't need; PR self-review is sufficient at this scale. | Leave both conventions as documented-but-manual in CONVENTIONS/CLAUDE.md, exactly as they are today; catch violations via the same self-review discipline that's already caught them once. `eslint-plugin-sonarjs`'s `no-identical-functions` rule is a *partial*, narrower proxy (catches literally-duplicated function bodies, not "near-identical" hand-varied JSX) — not worth adding as a new dependency for that narrow a slice of the actual convention. |
+
+## What NOT to Automate — Direct Answer to "Should CLAUDE.md's Conventions Become ESLint Rules?"
+
+Splitting each of the 4 written conventions by whether the specific claim in each one is mechanically detectable:
+
+| Convention (as written in CLAUDE.md) | Automatable slice | Judgment-only slice (stays manual) |
+|---|---|---|
+| Split computation from presentation | File length crossing ~150-200 lines (`max-lines`, as a `warn`) | Whether the *mix* is actually computation+presentation vs. just verbose JSX — needs a human read |
+| No duplicated JSX for near-identical instances | None found that's worth a new dependency | Whether two blocks are "near-identical enough" to warrant extraction — inherently a similarity judgment |
+| No raw CSS as strings in component files | Template-literal-as-`style`/`background-image`/`animation` pattern (`no-restricted-syntax`) | None — this one is fully mechanical, a good candidate |
+| WHY-only comments, no rotting task/plan IDs | Detecting a stale-ID pattern (`Phase \d+`, `REQ-\d+`, etc.) in comment text (`no-restricted-syntax`) | Whether a comment explains WHY vs. restates WHAT — needs a human read |
+
+**Recommendation:** convert the two fully-mechanical slices (stale-ID comments, raw-CSS-as-strings) into real custom ESLint rules this milestone — they're low-cost, zero-new-dependency (`no-restricted-syntax` is core ESLint), and directly prevent recurrence of problems this exact milestone found by hand. Use `max-lines` as a soft proxy nudge for the file-length signal. Leave the two judgment-based conventions (near-identical JSX, WHY-vs-WHAT comments) as documented-but-manual — don't chase full automation of conventions that are, by their own nature, human calls.
 
 ## Feature Dependencies
 
 ```
-Hero preview card (illustrative)
-    └──requires nothing new from Sandbox/domain layer
-         (canned example data only — deliberately NOT wired to SandboxContainer)
+ESLint installed + flat config (eslint.config.mjs)
+    └──requires──> eslint-config-next, eslint-config-next/typescript installed
+                       └──requires──> npm run lint script wired
 
-Gallery section (embedded on home page)
-    └──requires──> existing gallery.list() tRPC query (already built, v1.0 Phase 5)
-    └──requires──> id="gallery" present in initial server-rendered HTML
-                       └──requires──> /gallery → /#gallery redirect landing correctly
-                                          └──requires──> next.config.ts redirects() entry,
-                                                          NOT a client-side-only route removal
+npm run lint script ──enables──> lint-clean baseline pass (fix existing violations)
+                                      └──enables──> custom no-restricted-syntax rules (stale-ID comments, raw-CSS-strings)
+                                                         (adding these BEFORE the codebase is lint-clean would just add more red to the same pass)
 
-Gallery card click → /s/[shareId] full page
-    └──requires nothing new: reuses existing v1.0 SandboxContainer + initialScenario seeding
-        (see app/s/[shareId]/page.tsx — already server-fetches and seeds via `initialScenario` prop)
+Architecture-boundary rule (no-restricted-imports on src/domain/**) ──independent of──> the rest of the ESLint setup
+    (can be added in the same PR, but doesn't depend on eslint-config-next specifically — it's a plain core-ESLint config block)
 
-Mini chart thumbnail per gallery card (differentiator, optional)
-    └──requires──> extracting a non-interactive render mode from ChartPanel
-                       └──conflicts with──> milestone's "restyle, don't refactor domain wiring" framing
-                                             (flag as an explicit scope decision, not an assumed default)
+typescript-eslint recommended-type-checked ──enhances──> the default eslint-config-next/typescript (recommended) tier
+    (optional upgrade, not a prerequisite for anything else in this list)
+
+GitHub Actions CI (future milestone) ──requires──> npm run lint existing and lint-clean
+    (this milestone is explicitly the prerequisite step for that future one, per PROJECT.md)
+
+Husky + lint-staged (deferred) ──pairs naturally with, but does not require──> GitHub Actions CI
 ```
 
 ### Dependency Notes
 
-- **Gallery section requires `id="gallery"` in initial HTML, which requires the redirect to be config-based, not route-based:** if `/gallery` is simply deleted with no `next.config.ts` `redirects()` entry, visitors get a hard 404 instead of landing on `/#gallery`. If it's redirected via a lingering `app/gallery/page.tsx` that itself calls `redirect('/#gallery')` from `next/navigation`, that still works, but it's an unnecessary extra render/hop versus a config-level redirect — see below for the concrete recommendation.
-- **Gallery card click → `/s/[shareId]` requires no new work:** this is the single most important complexity-reducing finding here — the existing "click preset → full navigation to a dedicated shared-scenario page" interaction is exactly what's already built, tested, and human-verified in v1.0. The tempting alternative (click preset → load into the *same* home-page sandbox instance in place, scroll up) would require lifting `SandboxContainer`'s state to the page level and adding remount/reseed logic that doesn't exist today (`SandboxContainer` only seeds from `initialScenario` once, at mount — it has no mechanism to accept a *new* scenario after the fact; the existing `key`-driven remount pattern lives in `app/s/[shareId]/page.tsx`, one instance per route, not a shared in-place instance). Keeping the existing click-through-to-`/s/[shareId]` behavior avoids this entirely and matches the milestone's explicit "zero change to domain logic or existing validated requirements" charter.
-- **Mini chart thumbnail conflicts with milestone scope framing:** it's a legitimate differentiator (see above) but requires new component extraction work beyond "restyle existing UI to match the design file." Recommend checking whether the design file itself specifies text-only or thumbnail cards before deciding — don't assume the differentiator is in scope just because it's a good idea.
-
-## Redirect + Anchor-Scroll Considerations (Gallery phase — HIGH confidence, verified via Next.js source/docs)
-
-This is a small feature surface with real, non-obvious failure modes. Recommended approach and why:
-
-1. **Use a `next.config.ts` `redirects()` entry, not a lingering `app/gallery/page.tsx`:**
-   ```ts
-   async redirects() {
-     return [
-       { source: "/gallery", destination: "/#gallery", permanent: true },
-     ];
-   }
-   ```
-   Verified via Next.js source (`prepare-destination.ts`, `parseDestination()`): hash fragments in redirect `destination` strings are explicitly parsed into their own `hash` field and preserved through the redirect — this is supported, documented behavior, not a workaround.
-2. **Use `permanent: true` (308), not a temporary 307:** `/gallery` is being permanently removed, and the Key Decision log's own stated rationale for adding a redirect at all is "preserves any existing bookmarked links" — a permanent redirect is the semantically correct signal to search engines and browsers for that intent.
-3. **The Gallery section must be part of the initial server-rendered HTML.** Because this redirect is a real HTTP-level navigation (the browser receives a 308 with `Location: /#gallery` and performs a fresh top-level load), the fragment-scroll-into-view behavior that follows is the **browser's native anchor-scroll**, not Next.js's client-side `<Link>`-specific scroll handling (that logic — `scroll={false}`, scroll-into-view-if-not-visible — only applies to client-side transitions triggered by `next/link` or `useRouter`, not to a fresh document load following an HTTP redirect). The practical consequence: if the Gallery section is a client component that fetches its data after hydration, the `id="gallery"` element won't exist at the moment the browser tries to scroll to the fragment, and the redirect will silently degrade to "land at the top of the page." Keep the Gallery section as an async Server Component (mirroring the current `app/gallery/page.tsx`'s `await getCaller().gallery.list()` pattern) so the anchor target exists at first paint.
-4. **Watch for post-paint layout shift above the Gallery section.** Native browser fragment-scroll computes the target's position once, near initial load; if the Hero section's height changes after that (web font swap, late image load, an entrance animation on the illustrative preview card), the computed scroll offset can end up wrong and the user lands slightly above/below the intended section. Mitigate by avoiding layout-shifting effects in the Hero (e.g., reserve space for Geist font metrics, avoid an entrance animation that changes the Hero's box height) — this is a real, if minor, cross-dependency between the Hero and Gallery phases worth flagging to whoever builds Hero.
+- **Lint-clean baseline requires the script to exist first:** you can't declare the codebase "lint-clean" without a way to run the linter — the script wiring and the baseline fix are sequential, not parallel, work within this milestone.
+- **Architecture-boundary enforcement is independent:** because it uses ESLint's own core `no-restricted-imports` rule rather than anything from `eslint-config-next`, it can be added in the same PR as the main setup without waiting on any other piece — there's no reason to sequence it after the Next.js-specific config.
+- **CI (future milestone) depends on this milestone's baseline being clean:** a CI job that runs `npm run lint` on every push is only useful once that command reliably exits 0 on `main` — this milestone is the explicit, correctly-ordered prerequisite PROJECT.md already frames it as.
 
 ## MVP Definition
 
-### Launch With (v1 — this milestone)
+### Launch With (this milestone)
 
-- [ ] Hero section: headline, subhead, primary CTA (scroll to Sandbox), illustrative (canned, non-interactive) live-classification preview card — this is the one genuinely new UI surface in the milestone
-- [ ] Gallery section embedded on the home page below the Sandbox, server-rendered (not client-fetched), reusing the existing `gallery.list()` query and card-click-to-`/s/[shareId]` behavior unchanged
-- [ ] `/gallery` route removed; `next.config.ts` permanent redirect (`308`) to `/#gallery` in its place
+- [ ] ESLint + `eslint-config-next` + `eslint-config-next/typescript`, flat config (`eslint.config.mjs`) — the entire premise of the milestone
+- [ ] `npm run lint` script in `package.json`, documented in README alongside existing scripts
+- [ ] Stale `eslint` key removed from `next.config.ts` if present (Next.js 16 no longer uses it)
+- [ ] Lint-clean baseline: zero errors on `npm run lint` after fixing existing known violations (deprecated Tailwind classes, etc.)
+- [ ] Architecture-boundary rule (`no-restricted-imports`, `src/domain/**` scope) — highest-signal differentiator, low cost, directly enforces an already-documented "hard rule"
+- [ ] Custom `no-restricted-syntax` rules for stale task/plan/REQ-ID comment patterns and raw-CSS-as-template-literal patterns — cheap, zero-new-dependency, prevents recurrence of exactly what this milestone is manually cleaning up
+- [ ] `max-lines` as a `warn`-level proxy nudge, tied to the same refactor sweep this milestone already scopes
 
-### Add After Validation (v1.x)
+### Add After Validation (candidate for later in this same milestone, if time allows)
 
-- [ ] Secondary CTA in the Hero linking to source/about (if not already specified by the design file — verify first)
-- [ ] Small illustrative motion/animation in the Hero preview card (only if it doesn't reintroduce real sandbox wiring or cause layout shift above the Gallery anchor target)
+- [ ] `typescript-eslint` `recommended-type-checked` tier — real value, but wire it after the base setup is lint-clean, since typed linting will surface additional, possibly-noisier findings on top of the base pass
+- [ ] `.editorconfig` — trivial to add whenever, no dependency ordering concern
+- [ ] README "Linting & Code Quality" section tying tooling back to CLAUDE.md's documented conventions
 
-### Future Consideration (v2+)
+### Future Consideration (explicitly deferred, not this milestone)
 
-- [ ] Mini geometric chart thumbnail per Gallery card (replacing/augmenting the text-only card) — defer until there's a clear need to differentiate cards visually beyond the rationale text, and until it can be built without duplicating `ChartPanel`'s interactive logic
-- [ ] Inline "load preset into the current sandbox instance + scroll up" interaction as an alternative to full navigation to `/s/[shareId]` — defer indefinitely unless a future milestone explicitly wants a single continuous-page experience; today's per-scenario dedicated pages are simpler, already built, and already validated
+- [ ] GitHub Actions CI workflow (+ status badge) — PROJECT.md's own locked decision defers this
+- [ ] Husky + lint-staged pre-commit hooks — defer until/unless CI is added; premature without it for a solo repo
+- [ ] Prettier repo-wide reformat — if pursued at all, scope to new/touched files only, never a blanket reformat commit
+- [ ] `strict-type-checked` — reconsider only if a future milestone is an intentional "raise the bar" rewrite pass, not a first-pass setup
 
 ## Feature Prioritization Matrix
 
-| Feature | User Value | Implementation Cost | Priority |
-|---------|------------|---------------------|----------|
-| Hero headline/subhead/CTA + illustrative preview card | HIGH | LOW-MEDIUM | P1 |
-| Gallery section embedded server-side on home page (reusing existing query/click behavior) | HIGH | LOW | P1 |
-| `/gallery` → `/#gallery` permanent redirect, config-based | HIGH (avoids broken bookmarks) | LOW | P1 |
-| Secondary "view source" CTA in Hero | MEDIUM | LOW | P2 |
-| Illustrative motion in Hero preview card | LOW-MEDIUM | MEDIUM | P3 |
-| Mini chart thumbnail per Gallery card | MEDIUM | MEDIUM-HIGH | P3 |
-| Inline preset-load-without-navigation into shared sandbox instance | LOW (nice-to-have polish) | HIGH (requires state-lifting refactor) | P3 (likely out of milestone scope) |
+| Feature | Reviewer-Visible Value | Implementation Cost | Priority |
+|---------|------------------------|----------------------|----------|
+| ESLint + Next.js/TS config + `npm run lint` | HIGH | LOW | P1 |
+| Lint-clean baseline (fix existing violations) | HIGH | MEDIUM | P1 |
+| Architecture-boundary `no-restricted-imports` rule | HIGH | LOW–MEDIUM | P1 |
+| Custom `no-restricted-syntax` (stale IDs, raw CSS strings) | MEDIUM–HIGH | LOW | P1 |
+| `max-lines` proxy for file-length convention | MEDIUM | LOW | P2 |
+| `recommended-type-checked` upgrade | MEDIUM | MEDIUM | P2 |
+| `.editorconfig` | LOW | LOW | P2 |
+| README lint/quality section | MEDIUM | LOW | P2 |
+| Prettier (scoped, non-blanket) | LOW–MEDIUM | MEDIUM | P3 |
+| GitHub Actions CI + badge | HIGH (but deferred) | MEDIUM | P3 (future milestone) |
+| Husky + lint-staged | LOW (solo repo) | LOW | P3 (defer) |
+| CONTRIBUTING.md | LOW (no contributors) | LOW | Do not build |
+| `strict-type-checked` | LOW (risk > payoff now) | HIGH | Do not build (this milestone) |
 
-## Competitor/Reference Pattern Analysis
-
-| Pattern | Generic SaaS Landing Pages | Dev-Tool Landing Pages (Evil Martians study, n=100+) | Our Approach |
-|---------|---------------------------|-------------------------------------------------------|--------------|
-| Hero visual | Stock photography, abstract illustration, marketing screenshots | Real product UI: static screenshot, code snippet, or (for narrow-scope tools) a live embedded working element | Illustrative (canned, non-live) classification preview card — a middle ground already locked by the design: real-looking product content, but not the actual stateful sandbox, appropriate given this isn't a "narrow-scope tool" like an image upscaler |
-| Primary CTA | "Start free trial" / "Book a demo" / "Sign up" | "Start building" / "Download now" / direct link into a live playground | Scroll/CTA straight into the on-page Sandbox — no signup exists in this product at all |
-| Example/preset gallery | Rare; if present, usually customer logos or case-study cards | Present in tools like regex101 (a "Samples"/pattern-library menu for loading example patterns into the *same* live editor in place) | Present, but architecturally different from regex101's in-place example loader: our presets link to a dedicated `/s/[shareId]` page per scenario (already built/validated) rather than mutating a shared editor instance in place — a deliberate, lower-risk choice for this milestone, not an oversight |
+**Priority key:**
+- P1: Must have for this milestone to credibly close its own stated goal
+- P2: Should have if time allows within this milestone; genuine value, no urgency
+- P3: Correctly deferred to a future milestone or an explicit non-goal
 
 ## Sources
 
-- [We studied 100 dev tool landing pages — here's what really works in 2025 (Evil Martians)](https://evilmartians.com/chronicles/we-studied-100-devtool-landing-pages-here-is-what-actually-works-in-2025) — MEDIUM-HIGH confidence, single but methodologically substantial source (100+ pages analyzed), used for hero visual taxonomy ("live product embed," "animated vs. static product UI," "no salesy BS" principle) and CTA-pairing pattern
-- [Next.js official docs — `redirects()` in `next.config.js`](https://nextjs.org/docs/01-app/02-guides/redirecting.mdx) via Context7 `/vercel/next.js` — HIGH confidence, official documentation
-- [Next.js source — `prepare-destination.ts` `parseDestination()`](https://github.com/vercel/next.js/blob/canary/packages/next/src/shared/lib/router/utils/prepare-destination.ts) via Context7 `/vercel/next.js` — HIGH confidence, verified against actual routing implementation, confirms hash fragments are preserved through config-level redirects
-- [Next.js `redirect()`/`permanentRedirect()` API reference](https://github.com/vercel/next.js/blob/canary/docs/01-app/03-api-reference/04-functions/redirect.mdx) via Context7 `/vercel/next.js` — HIGH confidence, official docs
-- [Next.js `Link` component — scroll-to-id and `scroll={false}` behavior](https://github.com/vercel/next.js/blob/canary/docs/01-app/03-api-reference/02-components/link.mdx) via Context7 `/vercel/next.js` — HIGH confidence; used to establish that Next's own scroll-management logic is specific to client-side `<Link>`/`useRouter` transitions, distinct from native browser fragment-scroll following a full HTTP redirect
-- Project source read directly: `app/page.tsx`, `app/gallery/page.tsx`, `app/s/[shareId]/page.tsx`, `src/components/sandbox/SandboxContainer.tsx`, `src/server/api/routers/gallery.ts` — HIGH confidence (ground truth for existing dependencies/behavior)
-- `.planning/PROJECT.md` — HIGH confidence, authoritative for locked decisions (Hero Direction A, "illustrative" preview card wording, dark-mode-only, `/gallery` redirect rationale, breakpoints)
-- General WebSearch on hero-section and gallery/scroll-pattern conventions — LOW-MEDIUM confidence, used only for background context (generic hero-section listicles, generic scrolling-pattern articles); not treated as authoritative and not the basis for any table-stakes/differentiator claim above without corroboration from the Evil Martians source or the project's own locked decisions
+- [Next.js: ESLint Plugin config reference](https://nextjs.org/docs/app/api-reference/config/eslint) — official docs, confirms Next.js 16 removed `next lint`, flat-config setup steps, `eslint-config-next`/`eslint-config-next/typescript`/`eslint-config-next/core-web-vitals` package boundaries, and the `eslint-config-prettier`/lint-staged integration recipes. HIGH confidence (official, dated `lastUpdated: 2025-11-10`, version-pinned to 16.2.10 matching this project's locked Next.js version).
+- Context7 `/typescript-eslint/typescript-eslint` — `recommended` / `recommended-type-checked` / `strict` / `strict-type-checked` tier definitions and stability guidance (`strict-type-checked` explicitly "not stable under Semantic Versioning"). HIGH confidence (official monorepo docs via Context7).
+- [eslint-plugin-tailwindcss (npm)](https://www.npmjs.com/package/eslint-plugin-tailwindcss) / [poupe-ui/eslint-plugin-tailwindcss](https://github.com/poupe-ui/eslint-plugin-tailwindcss) / [oxlint-tailwindcss writeup](https://sergioazocar.com/en/blog/oxlint-tailwindcss-the-linting-plugin-tailwind-v4-needed/) — confirms Tailwind v4 ESLint-plugin support is partial/fragmented across several competing community packages as of this research; treat any Tailwind-specific lint plugin choice as its own small research question if pursued, not a drop-in decision. MEDIUM confidence (community sources, no single authoritative "official Tailwind ESLint plugin").
+- WebSearch: "solo developer portfolio repo ESLint pre-commit hooks husky lint-staged" — cross-section of community writeups (Olivia Coumans, Built In, DEV Community, PkgPulse) converging on: lint-staged's value proposition is specifically fast checks on *other people's* staged files in a team; for a solo repo the enforcement benefit is much weaker. MEDIUM confidence (multiple independent sources agree, no single authoritative source since this is a project-context judgment, not a documented fact).
+- WebSearch: "CONTRIBUTING.md solo portfolio project" — GitHub's own community-health-file guidance and Open Source Guides both frame CONTRIBUTING.md as existing specifically to onboard *external* contributors; converges with the anti-feature reasoning above. MEDIUM confidence.
+- WebSearch: "eslint no-restricted-imports / eslint-plugin-boundaries architecture enforcement" — confirms `no-restricted-imports` is a core, zero-dependency ESLint rule sufficient for this project's scale, and that `eslint-plugin-boundaries`/monorepo-oriented tools exist but target a larger scale than this project's ~3-layer single package. MEDIUM-HIGH confidence (ESLint's own core-rules docs plus multiple independent architecture-enforcement writeups agree on the pattern).
 
 ---
-*Feature research for: COLREGS Navigator v1.1 UI Redesign — Hero section (new UI) and Gallery-embed UX (relocation of existing feature)*
-*Researched: 2026-07-18*
+*Feature research for: v1.2 Tech Debt & Stabilization milestone, COLREGS Navigator*
+*Researched: 2026-07-19*

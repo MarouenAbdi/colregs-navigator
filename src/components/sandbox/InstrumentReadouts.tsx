@@ -49,11 +49,18 @@ const STATUS_PILL_DOT_CLASSNAME: Record<StatusPillTone, string> = {
 
 function Tile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-border bg-chart-surface px-[11px] py-[10px]">
-      <div className="font-mono text-[9.5px] font-semibold tracking-wide text-muted-foreground uppercase">
+    <div className="
+      rounded-lg border border-border bg-chart-surface px-[11px] py-[10px]
+    ">
+      <div className="
+        font-mono text-[9.5px] font-semibold tracking-wide text-muted-foreground
+        uppercase
+      ">
         {label}
       </div>
-      <div className="mt-0.75 font-mono text-[17px] font-semibold text-foreground">{value}</div>
+      <div className="
+        mt-0.75 font-mono text-[17px] font-semibold text-foreground
+      ">{value}</div>
     </div>
   );
 }
@@ -68,7 +75,9 @@ export function InstrumentReadouts({ vesselA, vesselB, classification }: Instrum
   return (
     <Card>
       <CardHeader>
-        <span className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
+        <span className="
+          font-mono text-[11px] tracking-wide text-muted-foreground uppercase
+        ">
           Instrument Readouts
         </span>
       </CardHeader>
@@ -81,10 +90,17 @@ export function InstrumentReadouts({ vesselA, vesselB, classification }: Instrum
         </div>
 
         <div
-          className={`flex items-center gap-2 rounded-lg border px-[11px] py-[9px] text-[12.5px] ${STATUS_PILL_TONE_CLASSNAME[pill.tone]}`}
+          className={`
+            flex items-center gap-2 rounded-lg border px-[11px] py-[9px]
+            text-[12.5px]
+            ${STATUS_PILL_TONE_CLASSNAME[pill.tone]}
+          `}
         >
           <span
-            className={`size-[7px] shrink-0 rounded-full ${STATUS_PILL_DOT_CLASSNAME[pill.tone]}`}
+            className={`
+              size-[7px] shrink-0 rounded-full
+              ${STATUS_PILL_DOT_CLASSNAME[pill.tone]}
+            `}
             aria-hidden="true"
           />
           {pill.text}

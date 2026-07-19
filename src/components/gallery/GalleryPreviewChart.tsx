@@ -133,7 +133,9 @@ export function GalleryPreviewChart({ vesselA, vesselB }: GalleryPreviewChartPro
   const connectorMidpoint = midpoint(screenA, screenB);
 
   return (
-    <div className="overflow-hidden rounded-md border border-border bg-chart-surface">
+    <div className="
+      overflow-hidden rounded-md border border-border bg-chart-surface
+    ">
       <svg
         viewBox={`0 0 ${GALLERY_CONTAINER_SIZE.width} ${GALLERY_CONTAINER_SIZE.height}`}
         width="100%"
@@ -171,7 +173,9 @@ export function GalleryPreviewChart({ vesselA, vesselB }: GalleryPreviewChartPro
             pixel values regardless of card size. */}
         <g transform={`translate(${connectorMidpoint.x} ${connectorMidpoint.y})`}>
           <rect x={-34} y={-11} width={68} height={22} rx={6} fill="#18181B" stroke="#27272A" />
-          <text textAnchor="middle" dominantBaseline="middle" fill="#D4D4D8" className="font-mono" fontSize={12}>
+          <text textAnchor="middle" dominantBaseline="middle" fill="#D4D4D8" className="
+            font-mono
+          " fontSize={12}>
             {`${range.toFixed(2)} NM`}
           </text>
         </g>

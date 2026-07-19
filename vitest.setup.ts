@@ -20,7 +20,7 @@ import "@testing-library/jest-dom/vitest";
 import type { TestingLibraryMatchers } from "@testing-library/jest-dom/matchers";
 
 declare module "@vitest/expect" {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- must match @vitest/expect's own `Assertion<T = any>` default exactly (TS2428)
+  // must match @vitest/expect's own `Assertion<T = any>` default exactly (TS2428)
   interface Assertion<T = any>
     extends TestingLibraryMatchers<unknown, T> {}
 }
