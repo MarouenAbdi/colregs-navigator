@@ -12,7 +12,7 @@
 
 **Locked decisions:** Hero Direction A (not the alternate "bridge display" variant); dark-mode only, no light theme/toggle; design followed exactly (colors, spacing, breakpoints at 900px/640px) using shadcn/ui as the component primitive layer.
 
-**Progress:** Phase 6 (Scaffolding) complete — shadcn/ui installed (Radix base), dark-only design tokens locked in `app/globals.css`, Geist/Geist Mono fonts loaded app-wide, sticky Header/Footer page shell wraps every route. Human-verified in a real browser (dark render under light OS preference, 640px nav collapse, computed font-family, Source link). Next: Phase 7 (Hero).
+**Progress:** All 4 phases complete (Scaffolding, Hero, Sandbox, Gallery) — milestone shipped 2026-07-19. Phase 9 (Gallery) embedded the curated encounter gallery as a home-page section below the Sandbox, removed the standalone `/gallery` route in favor of a `/#gallery` redirect (GAL-01–04 verified 4/4), and closed the pending gallery-placement todo carried over from v1.0.
 
 ## What This Is
 
@@ -33,7 +33,7 @@ Given any two-vessel encounter, correctly classify it under COLREGS and clearly 
 - [x] App displays a reasoning trail: the specific rule citation plus the geometric logic (relative bearing, closing angle) that produced the verdict — Validated in Phase 4 (Interactive Chart Sandbox); the reasoning panel renders both rule citations/prose AND each trail entry's raw geometric facts (relative bearing, TCPA, DCPA), not verdict-only
 - [x] Visual chart rendering shows vessel positions, headings, and encounter geometry clearly — Validated in Phase 4 (Interactive Chart Sandbox)
 - [x] User can save a scenario and get a shareable link (no login required) — Validated in Phase 5 (Save, Share & Gallery); confirmed end-to-end via live human verification
-- [x] User can browse a curated gallery of preset classic encounters (e.g. textbook head-on, classic crossing, overtaking case) — Validated in Phase 5 (Save, Share & Gallery); gallery page placement (currently its own `/gallery` route) has an open follow-up to embed it on the home page instead — tracked as a todo, not a validation gap
+- [x] User can browse a curated gallery of preset classic encounters (e.g. textbook head-on, classic crossing, overtaking case) — Validated in Phase 5 (Save, Share & Gallery); gallery placement follow-up resolved in Phase 9 (Gallery) — the section is now embedded on the home page below the Sandbox, `/gallery` redirects to `/#gallery`
 
 ### Active
 
@@ -53,7 +53,7 @@ _None — all requirements validated as of Phase 5, the milestone's final phase.
 - **Domain source**: COLREGS (International Regulations for Preventing Collisions at Sea) — Rules 11–18 govern steering and sailing responsibilities between vessels in sight of one another. This is public, well-documented maritime law, not proprietary or company-specific.
 - **Why this domain was chosen**: evaluated against 9 other candidate ideas (music theory voice-leading validator, SAR search-pattern planner, escape-room solvability engine, ATC sequencing simulator, orbital mission planner, fairy chess engine, D&D encounter balancer, whiskey substitution engine, ER triage allocator) on memorability, backend/frontend depth, scope fit, and interview value. COLREGS Navigator scored highest: it's a domain almost nobody builds a portfolio project around, and the core logic (classify encounter → determine obligations under a real published rulebook) is a textbook case for a rules-engine/state-machine domain layer — letting Clean Architecture/DDD-lite actually earn its keep rather than being over-engineering for a CRUD app.
 - **Full engineering spec** (persona, workflow, practices) originally captured in `prompt.json` at repo root — see Constraints below for the concrete decisions pulled from it.
-- **Current state**: Milestone v1.0 complete — Phase 5 (Save, Share & Gallery) was the final phase; all 6 requirements validated across 5 phases / 19 plans. Milestone v1.1 (UI Redesign) started 2026-07-18; Phase 8 (Sandbox) complete 2026-07-19 — 3 of 4 v1.1 phases done (Scaffolding, Hero, Sandbox).
+- **Current state**: Milestone v1.0 complete — Phase 5 (Save, Share & Gallery) was the final phase; all 6 requirements validated across 5 phases / 19 plans. Milestone v1.1 (UI Redesign) complete 2026-07-19 — all 4 phases done (Scaffolding, Hero, Sandbox, Gallery), 19/19 v1.1 requirements validated.
 
 ## Constraints
 
@@ -110,4 +110,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-19 — Phase 8 (Sandbox) complete: interactive chart/controls/reasoning-trail restyled against the dark design system with zero regression to domain wiring or interaction model (SBOX-01–05 verified, 5/5 must-haves). Went through 6 execution waves, an 11-fix interactive UAT session (including a live re-sync against a freshly re-imported Claude Design source), and a code-review pass that caught and fixed a real SVG hit-testing dead zone (CR-01) the manual UAT missed. v1.0 shipped all 6 requirements across 5 phases / 19 plans (Save/Share/Gallery flow confirmed via live human verification; webpack `extensionAlias` fix for the `.js`-suffix import convention). v1.1 re-implements the entire front end against an imported Claude Design file using shadcn/ui, in 4 branch+PR phases (Scaffolding, Hero, Sandbox, Gallery) — no functional/REQ-ID changes, presentation layer only; 3/4 phases complete.*
+*Last updated: 2026-07-19 — Phase 9 (Gallery) complete, closing milestone v1.1: curated encounter gallery embedded as a home-page section below the Sandbox, `/gallery` route removed in favor of a `/#gallery` redirect (GAL-01–04 verified, 4/4 must-haves). Ran 3 execution waves plus a mandatory manual browser checkpoint that found and fixed 4 design-fidelity gaps (missing grid background, hover border, body-weight fonts, verdict badge shape), and a code-review pass that caught and fixed a real geometry bug (heading-vector clipping on the "Overtaking" card, invisible to jsdom) plus a stale schema comment. v1.0 shipped all 6 requirements across 5 phases / 19 plans; v1.1 re-implemented the entire front end against an imported Claude Design file using shadcn/ui across 4 branch+PR phases (Scaffolding, Hero, Sandbox, Gallery) — no functional/REQ-ID changes, presentation layer only; all 4 phases complete, 19/19 v1.1 requirements validated.*
