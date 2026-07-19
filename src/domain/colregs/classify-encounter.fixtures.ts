@@ -466,6 +466,67 @@ export const overtakingRule18NoOverrideCase: ClassificationCase = {
   expectedDoubt: false,
 };
 
+// Copied verbatim from chip-scenarios.ts's sailingHasPriorityVessels,
+// already proven correct against classifyEncounter() by chip-scenarios.test.ts.
+export const crossingSailingPriorityCase: ClassificationCase = {
+  vesselA: {
+    position: { x: 0, y: 0 },
+    heading: 0,
+    speed: 10,
+    type: "power-driven",
+  },
+  vesselB: { position: { x: 5, y: 0 }, heading: 270, speed: 10, type: "sailing" },
+  expectedEncounterType: "crossing",
+  expectedGiveWay: "vesselA",
+  expectedStandOn: "vesselB",
+  expectedDoubt: false,
+};
+
+// Copied verbatim from chip-scenarios.ts's notUnderCommandVessels,
+// already proven correct against classifyEncounter() by chip-scenarios.test.ts.
+export const crossingNotUnderCommandCase: ClassificationCase = {
+  vesselA: {
+    position: { x: 1.4, y: 0 },
+    heading: 270,
+    speed: 10,
+    type: "power-driven",
+  },
+  vesselB: {
+    position: { x: 0, y: 0 },
+    heading: 0,
+    speed: 10,
+    type: "not-under-command",
+  },
+  expectedEncounterType: "crossing",
+  expectedGiveWay: "vesselA",
+  expectedStandOn: "vesselB",
+  expectedRiskOfCollision: true,
+  expectedDoubt: false,
+};
+
+// Copied verbatim from chip-scenarios.ts's inDoubtVessels,
+// already proven correct against classifyEncounter() by chip-scenarios.test.ts.
+export const headOnInDoubtCase: ClassificationCase = {
+  vesselA: {
+    position: { x: 0, y: 0 },
+    heading: 45,
+    speed: 10,
+    type: "sailing",
+  },
+  vesselB: {
+    position: { x: 7.66044443118978, y: 6.427876096865393 },
+    heading: 225,
+    speed: 10,
+    type: "sailing",
+  },
+  expectedEncounterType: "head-on",
+  expectedGiveWay: null,
+  expectedStandOn: null,
+  expectedRiskOfCollision: true,
+  expectedDoubt: true,
+  expectedDoubtBoundary: "near-head-on-boundary",
+};
+
 // Reuse Phase 1's coincidentPropagationCase vessels directly (identical
 // positions). classifyEncounter() must propagate relativeBearing()'s own
 // 'coincident-position' failure unchanged -- no re-wrapping.
