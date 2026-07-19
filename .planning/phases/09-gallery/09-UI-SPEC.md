@@ -1,7 +1,7 @@
 ---
 phase: 9
 slug: gallery
-status: draft
+status: approved
 shadcn_initialized: true
 preset: "radix-nova"
 created: 2026-07-19
