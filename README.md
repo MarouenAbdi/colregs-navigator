@@ -31,3 +31,52 @@ defined in `docker-compose.yml`, matching the connection string in `.env.example
 `npx prisma migrate dev` applies the committed migrations under `prisma/migrations/` and
 generates the Prisma client. `npm test` runs the Vitest suite (domain rules engine plus any
 persistence/API tests).
+
+## Linting & Code Quality
+
+```bash
+npm run lint       # eslint . -- reports violations, exits non-zero on any new error
+npm run lint:fix   # eslint . --fix -- applies safe autofixes first
+```
+
+ESLint is configured via a flat `eslint.config.mjs`, combining `@next/eslint-plugin-next`'s
+`core-web-vitals` rules, Tailwind v4-aware linting (`eslint-plugin-better-tailwindcss`), and
+Vitest-specific correctness rules (`@vitest/eslint-plugin`, scoped to `src/**/*.test.{ts,tsx}`).
+
+**Mechanically lint-enforced** (a lint error, not just a convention in this file):
+
+- The `src/domain/` architecture boundary (CLAUDE.md's "hard rule to enforce") -- a
+  `no-restricted-imports` rule blocks `src/domain/` from importing `src/server/`, Next.js, tRPC,
+  or Prisma.
+- Stale Phase/Plan/REQ-ID comment references -- a repo-local `local/no-stale-id-comments` rule
+  (`eslint-rules/no-stale-id-comments.mjs`) catches rotting pointers like `Phase 3` or `04-01` in
+  comments, repo-wide.
+- Raw CSS composed as template-literal strings in component files -- a content-gated
+  `no-restricted-syntax` rule flags `background-image`/`animation`/`gradient` strings built in
+  `.tsx` files, without flagging the sanctioned single-CSS-custom-property pattern
+  (`style={{ "--rotation": \`${angle}deg\` }}`).
+
+**Still human-reviewed, not mechanically enforced** (per CLAUDE.md's conventions but outside what
+a lint rule can practically check): near-identical JSX duplication across two data instances (e.g.
+two vessels, two badges), and whether a comment explains the *why* rather than restating the
+*what*. These require judgment a static rule can't reliably apply without false positives.
+
+`eslint-suppressions.json` (repo root) tracks pre-existing violations discovered when ESLint was
+first retrofitted onto this already-built codebase (via `eslint --fix --suppress-all`) -- it is a
+visible, diffable debt ledger for code this milestone didn't touch, not a mechanism for disabling
+rules. Every suppressed rule stays fully enforced (at `"error"`) against any new or changed code.
+
+### Known limitation: no type-checked ESLint tier
+
+This project has no `typescript-eslint`-powered, type-aware ESLint tier (`recommended`,
+`recommended-type-checked`, or `strict-type-checked`) -- and this is a deliberate, documented gap,
+not an oversight. `typescript-eslint`'s peer-dependency range (`typescript: ">=4.8.4 <6.1.0"`,
+checked across all published versions including `canary`) does not cover this project's locked
+`typescript@7.0.2` (tsgo) compiler; `@typescript-eslint/parser` crashes at require-time against it
+(`Cannot read properties of undefined (reading 'Cjs')`) because tsgo doesn't export the classic
+TypeScript compiler internals that parser reads. Installing `typescript-eslint` at all would
+reintroduce that crash, so this toolchain instead parses `.ts`/`.tsx` files with
+`@babel/eslint-parser` for syntax only (no type information, no `any`-aware rules). Type safety
+itself is unaffected and fully covered separately by `npm run typecheck` (`tsc --noEmit`), which
+runs against the real tsgo compiler. Revisit this limitation if/when a `typescript-eslint` release
+adds tsgo support.
