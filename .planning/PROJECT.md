@@ -1,11 +1,23 @@
 # COLREGS Navigator
 
-## Current State
+## Current Milestone: v1.2 Tech Debt & Stabilization
 
-**Shipped:** v1.1 UI Redesign (shadcn) — 2026-07-19. The entire front end was re-implemented against an imported Claude Design file using shadcn/ui + Tailwind, dark-mode only, across 4 branch+PR phases (Scaffolding, Hero, Sandbox, Gallery). Zero change to domain logic (`src/domain/`, `src/server/`) or the underlying functional requirements validated in v1.0 — this was a presentation-layer milestone. All 19/19 v1.1 requirements validated (SCAF-01–06, HERO-01–04, SBOX-01–05, GAL-01–04). The gallery is now embedded on the home page below the Sandbox, and the standalone `/gallery` route redirects to `/#gallery`, closing the placement todo carried over from v1.0.
+**Goal:** Review and clean up the codebase — long/confusing files, stale comments, deprecated Tailwind v4 class names — and set up ESLint (`npm run lint`) as a first step toward demonstrating professional engineering hygiene to a tech lead or interviewer reviewing the repo.
+
+**Target features:**
+- ESLint configured (Next.js + TypeScript + Tailwind plugin), wired as a new `npm run lint` script alongside the existing `test`/`build`/`typecheck` scripts
+- Fix deprecated Tailwind v3→v4 class names found across the codebase (`outline-none`→`outline-hidden` in 4 files, bare `rounded`→`rounded-sm` in 2 files)
+- Full `src/` + `app/` sweep to break up long/confusing files — `ChartPanel.tsx` (560 lines) and `SandboxContainer.tsx` (280 lines) are the clear Sandbox outliers, plus a check of Hero/Gallery/domain files
+- Codebase-wide comment cleanup: remove the 10 found comments referencing Phase/Plan/REQ-IDs, enforcing the existing "WHY only, no rotting task IDs" convention (established Phase 7) retroactively across files predating that convention
+
+**Locked decisions:** Refactor/cleanup sweep covers all of `src/` + `app/`, not just Sandbox; lint tooling scope is a local `npm run lint` script only this milestone (no GitHub Actions CI — that's a candidate for a future milestone); no new user-facing features, no domain logic changes.
+
+**Why:** Portfolio project — the app has shipped two milestones' worth of features; this milestone demonstrates the same engineering discipline (clean structure, clean lint, clean commit/comment hygiene) a tech lead would expect from a real collaborative codebase, ahead of using it as an interview artifact.
 
 <details>
 <summary>v1.1 milestone details (shipped 2026-07-19)</summary>
+
+**Shipped:** v1.1 UI Redesign (shadcn) — 2026-07-19. The entire front end was re-implemented against an imported Claude Design file using shadcn/ui + Tailwind, dark-mode only, across 4 branch+PR phases (Scaffolding, Hero, Sandbox, Gallery). Zero change to domain logic (`src/domain/`, `src/server/`) or the underlying functional requirements validated in v1.0 — this was a presentation-layer milestone. All 19/19 v1.1 requirements validated (SCAF-01–06, HERO-01–04, SBOX-01–05, GAL-01–04). The gallery is now embedded on the home page below the Sandbox, and the standalone `/gallery` route redirects to `/#gallery`, closing the placement todo carried over from v1.0.
 
 **Goal:** Re-implement the existing app's front end against the imported Claude Design file ("COLREGS Navigator (shadcn).dc.html" — `claude.ai/design` project `c265c047-81a0-4446-bdf3-95d434adc3dc`) using shadcn/ui + Tailwind, with zero change to domain logic or existing validated requirements.
 
@@ -44,7 +56,7 @@ Given any two-vessel encounter, correctly classify it under COLREGS and clearly 
 
 ### Active
 
-_None — all requirements validated as of Phase 5, the milestone's final phase._
+- [ ] v1.2 Tech Debt & Stabilization requirements — being scoped in `.planning/REQUIREMENTS.md` (ESLint setup, deprecated Tailwind class fixes, long-file refactor, comment-convention cleanup)
 
 ### Out of Scope
 
@@ -117,4 +129,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-19 — v1.1 milestone archived via `/gsd:complete-milestone`. v1.0 shipped all 6 functional requirements across 5 phases / 19 plans (2026-07-14 → 2026-07-18); v1.1 re-implemented the entire front end against an imported Claude Design file using shadcn/ui across 4 branch+PR phases (Scaffolding, Hero, Sandbox, Gallery — 2026-07-18 → 2026-07-19, 166 commits, 215 files changed), no functional/REQ-ID changes, presentation layer only. All 19/19 v1.1 requirements validated (REQUIREMENTS.md's HERO-01–04/SBOX-01/SBOX-03 checkboxes had gone stale after Phase 7/8 closed without an update — corrected against phase VERIFICATION.md evidence before archiving). Key Decisions table's long-standing "— Pending" outcomes (v1.0 domain/scope decisions, never resolved at v1.0 close) resolved to ✓ Good. Requirements, ROADMAP, and MILESTONES.md archived to `.planning/milestones/v1.1-*`; fresh REQUIREMENTS.md awaits `/gsd:new-milestone`.*
+*Last updated: 2026-07-19 — Milestone v1.2 Tech Debt & Stabilization started via `/gsd:new-milestone`. No new user-facing features: ESLint setup (`npm run lint`), deprecated Tailwind v4 class-name fixes (`outline-none`→`outline-hidden`, bare `rounded`→`rounded-sm`), a full `src/`/`app/` sweep to break up long/confusing files (ChartPanel.tsx at 560 lines and SandboxContainer.tsx at 280 lines are the clear outliers), and a codebase-wide comment cleanup enforcing the existing WHY-only convention retroactively (10 stale Phase/Plan/REQ-ID references found pre-scoping). v1.0 shipped all 6 functional requirements across 5 phases / 19 plans (2026-07-14 → 2026-07-18); v1.1 re-implemented the entire front end against an imported Claude Design file using shadcn/ui across 4 branch+PR phases (2026-07-18 → 2026-07-19, 166 commits, 215 files changed), no functional/REQ-ID changes, presentation layer only, 19/19 requirements validated.*
