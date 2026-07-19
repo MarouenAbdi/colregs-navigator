@@ -33,10 +33,10 @@ This milestone is a presentation-layer re-implementation, not a new-feature mile
 
 ### Gallery
 
-- [ ] **GAL-01**: The curated gallery of preset encounters is embedded as a section on the home page below the Sandbox, matching the design's card grid exactly (responsive: 3 → 2 → 1 columns)
-- [ ] **GAL-02**: Clicking a gallery card loads that preset into the Sandbox above it (existing load-and-scroll behavior preserved)
-- [ ] **GAL-03**: The standalone `/gallery` route is removed; visiting it redirects (permanent redirect) to `/#gallery`, verified manually to work both from a fresh tab/bookmark and via in-app navigation
-- [ ] **GAL-04**: The Gallery section remains server-rendered (not client-fetched) so the `/#gallery` anchor scroll works on redirect
+- [x] **GAL-01**: The curated gallery of preset encounters is embedded as a section on the home page below the Sandbox, matching the design's card grid exactly (responsive: 3 → 2 → 1 columns)
+- [x] **GAL-02**: Clicking a gallery card loads that preset into the Sandbox above it (existing load-and-scroll behavior preserved)
+- [x] **GAL-03**: The standalone `/gallery` route is removed; visiting it redirects (permanent redirect) to `/#gallery`, verified manually to work both from a fresh tab/bookmark and via in-app navigation
+- [x] **GAL-04**: The Gallery section remains server-rendered (not client-fetched) so the `/#gallery` anchor scroll works on redirect
 
 ## v2 Requirements
 
@@ -73,10 +73,10 @@ Populated by roadmap creation — all 19 requirements mapped to their user-speci
 | SBOX-03 | Phase 8 | Pending |
 | SBOX-04 | Phase 8 | Complete |
 | SBOX-05 | Phase 8 | Complete |
-| GAL-01 | Phase 9 | Pending |
-| GAL-02 | Phase 9 | Pending |
-| GAL-03 | Phase 9 | Pending |
-| GAL-04 | Phase 9 | Pending |
+| GAL-01 | Phase 9 | Complete |
+| GAL-02 | Phase 9 | Complete |
+| GAL-03 | Phase 9 | Complete |
+| GAL-04 | Phase 9 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 19 total
