@@ -443,7 +443,7 @@ export function ChartPanel({
       <svg
         width={containerSize.width}
         height={containerSize.height}
-        className="rounded-[0.25rem] border border-border bg-chart-surface"
+        className="rounded-sm border border-border bg-chart-surface"
       >
         <defs>
           <pattern
