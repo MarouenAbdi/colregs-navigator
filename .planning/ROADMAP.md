@@ -118,7 +118,23 @@ Plans:
   3. Visiting the old `/gallery` URL issues a permanent redirect to `/#gallery` and lands the user scrolled to the Gallery section (not the top of the page), verified manually both from a fresh browser tab/bookmark navigation and via an in-app `<Link>` click — these are independent code paths that can fail separately — GAL-03
   4. The Gallery section is present in the initial server-rendered HTML (not client-fetched), so the `#gallery` anchor target exists at first paint and the redirect's scroll-to-anchor behavior works reliably — GAL-04
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+
+**Wave 1** *(2 parallel plans)*
+
+- [ ] 09-01-PLAN.md — Curated scenario data correctness (fixture fixes, title/ruleLabel fields, schema migration + reseed)
+- [ ] 09-02-PLAN.md — Shared static-chart geometry extraction + parametrized Gallery mini-chart component
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 09-03-PLAN.md — GalleryCard + GalleryContainer + home page wiring + /gallery redirect/route removal
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 09-04-PLAN.md — Mandatory manual browser checkpoint: redirect scroll behavior (both navigation paths), grid breakpoints, card click-through
+
 **UI hint**: yes
 
 ## Progress
@@ -131,4 +147,4 @@ Plans:
 | 6. Scaffolding | v1.1 | 0/? | Not started | - |
 | 7. Hero | v1.1 | 0/? | Not started | - |
 | 8. Sandbox | v1.1 | 0/6 | Not started | - |
-| 9. Gallery | v1.1 | 0/? | Not started | - |
+| 9. Gallery | v1.1 | 0/4 | Not started | - |
