@@ -39,4 +39,9 @@ model Scenario {
   isCurated    Boolean @default(false)
   displayOrder Int?
   rationale    String?
+  // Curated-only display fields (GAL-01/D-04), populated by prisma/seed.ts;
+  // null for non-curated user-shared scenarios -- same convention as
+  // `rationale` above.
+  title        String?
+  ruleLabel    String?
 }
