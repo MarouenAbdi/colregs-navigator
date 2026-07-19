@@ -129,7 +129,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 09-03-PLAN.md — GalleryCard + GalleryContainer + home page wiring + /gallery redirect/route removal
+- [x] 09-03-PLAN.md — GalleryCard + GalleryContainer + home page wiring + /gallery redirect/route removal
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
