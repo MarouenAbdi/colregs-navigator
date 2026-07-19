@@ -34,7 +34,7 @@ export default function RootLayout({
       lang="en"
       className={cn("dark font-sans", geistSans.variable, geistMono.variable)}
     >
-      <body className="bg-background text-foreground antialiased min-h-screen">
+      <body className="min-h-screen bg-background text-foreground antialiased">
         <Header />
         <main>
           <TRPCReactProvider>{children}</TRPCReactProvider>

@@ -25,7 +25,9 @@ export function SectionGridBackground({ opacity = 0.18, glow = false }: SectionG
   return (
     <div
       aria-hidden="true"
-      className={glow ? "section-grid-overlay section-grid-overlay--glow" : "section-grid-overlay"}
+      className={glow ? "section-grid-overlay section-grid-overlay--glow" : `
+        section-grid-overlay
+      `}
       style={{ "--grid-opacity": opacity } as CSSProperties}
     />
   );

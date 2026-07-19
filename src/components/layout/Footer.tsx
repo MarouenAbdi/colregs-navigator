@@ -6,7 +6,10 @@
 export function Footer() {
   return (
     <footer className="border-t border-border bg-background">
-      <div className="mx-auto flex flex-col gap-4 px-6 py-4 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between">
+      <div className="
+        mx-auto flex flex-col gap-4 px-6 py-4 text-xs text-muted-foreground
+        md:flex-row md:items-center md:justify-between
+      ">
         <span>COLREGS Navigator · classification maps to Rules 11-18</span>
         <span>
           Educational reference only — not a substitute for a qualified

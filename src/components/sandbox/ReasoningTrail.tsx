@@ -50,7 +50,9 @@ function FactReadout({ facts }: { facts: ReasoningTrailEntry["facts"] }) {
   const entries = Object.entries(facts);
   if (entries.length === 0) return null;
   return (
-    <dl className="flex flex-wrap gap-x-4 gap-y-0.5 font-mono text-sm text-muted-foreground">
+    <dl className="
+      flex flex-wrap gap-x-4 gap-y-0.5 font-mono text-sm text-muted-foreground
+    ">
       {entries.map(([key, value]) => (
         <div key={key} className="flex gap-1">
           <dt>{FACT_LABEL[key] ?? key}:</dt>
@@ -116,10 +118,14 @@ export function ReasoningTrail({ classification }: ReasoningTrailProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <span className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
+        <span className="
+          font-mono text-[11px] tracking-wide text-muted-foreground uppercase
+        ">
           Reasoning Trail
         </span>
-        <Badge variant="outline" className="font-mono text-[10px] font-normal text-muted-foreground">
+        <Badge variant="outline" className="
+          font-mono text-[10px] font-normal text-muted-foreground
+        ">
           {trail.length} steps
         </Badge>
       </CardHeader>
@@ -136,22 +142,37 @@ export function ReasoningTrail({ classification }: ReasoningTrailProps) {
             return (
               <li
                 key={`${entry.ruleId}-${index}`}
-                className="min-w-55 flex-1 basis-55 rounded-[10px] border border-border bg-chart-surface px-[13px] py-3"
+                className="
+                  min-w-55 flex-1 basis-55 rounded-[10px] border border-border
+                  bg-chart-surface px-[13px] py-3
+                "
               >
                 <div className="mb-2 flex items-center gap-[9px]">
                   <span
-                    className={`flex size-[22px] shrink-0 items-center justify-center rounded-full font-mono text-[11px] font-semibold text-white ${TONE_NUMBER_CLASSNAME[tone]}`}
+                    className={`
+                      flex size-[22px] shrink-0 items-center justify-center
+                      rounded-full font-mono text-[11px] font-semibold
+                      text-white
+                      ${TONE_NUMBER_CLASSNAME[tone]}
+                    `}
                   >
                     {index + 1}
                   </span>
                   <span
-                    className={`w-fit rounded-md px-[7px] py-0.5 font-mono text-[9.5px] font-semibold tracking-[0.04em] ${TONE_TAG_CLASSNAME[tone]}`}
+                    className={`
+                      w-fit rounded-md px-[7px] py-0.5 font-mono text-[9.5px]
+                      font-semibold tracking-[0.04em]
+                      ${TONE_TAG_CLASSNAME[tone]}
+                    `}
                   >
                     {tag}
                   </span>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <span className="shrink-0 whitespace-nowrap text-sm font-semibold text-foreground">
+                  <span className="
+                    shrink-0 text-sm font-semibold whitespace-nowrap
+                    text-foreground
+                  ">
                     {entry.ruleId}
                   </span>
                   <span className="min-w-0 text-sm text-muted-foreground">{entry.text}</span>

@@ -29,7 +29,10 @@ export default async function SharedScenarioPage({
   return (
     <>
       <SandboxContainer key={shareId} initialScenario={initialScenario} banner={banner} />
-      <div className="mx-auto max-w-300 px-5 pb-8 min-[900px]:px-6">
+      <div className="
+        mx-auto max-w-300 px-5 pb-8
+        min-[900px]:px-6
+      ">
         <CopyLinkButton />
       </div>
     </>

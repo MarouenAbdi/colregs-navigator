@@ -46,21 +46,32 @@ export function GalleryCard({ id, title, ruleLabel, description, vesselA, vessel
     <Link
       href={`/s/${id}`}
       aria-label={`Load ${title} scenario into the sandbox`}
-      className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="
+        group block rounded-xl
+        focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none
+      "
     >
-      <Card className="h-full gap-0 border border-border px-4 transition-all duration-200 group-hover:border-primary/40 group-hover:shadow-sm">
+      <Card className="
+        h-full gap-0 border border-border px-4 transition-all duration-200
+        group-hover:border-primary/40 group-hover:shadow-sm
+      ">
         <div className="mb-4">
           <GalleryPreviewChart vesselA={vesselA} vesselB={vesselB} />
         </div>
         <div className="mb-3 flex items-center justify-between">
-          <Badge variant="outline" className="font-mono text-[13px] font-semibold text-accent border-accent">
+          <Badge variant="outline" className="
+            border-accent font-mono text-[13px] font-semibold text-accent
+          ">
             {ruleLabel}
           </Badge>
-          <Badge variant="outline" className={`${verdict.className} font-mono text-[13px] font-semibold uppercase`}>
+          <Badge variant="outline" className={`
+            ${verdict.className}
+            font-mono text-[13px] font-semibold uppercase
+          `}>
             {verdict.text}
           </Badge>
         </div>
-        <h3 className="mb-1.5 text-2xl leading-[1.25] font-semibold text-foreground">{title}</h3>
+        <h3 className="mb-1.5 text-2xl/tight font-semibold text-foreground">{title}</h3>
         <p className="text-base font-semibold text-muted-foreground">{description}</p>
       </Card>
     </Link>
