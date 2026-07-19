@@ -19,6 +19,11 @@ import { curatedScenarios } from "../src/server/db/curated-scenarios.js";
 import { classifyEncounter } from "../src/domain/colregs/classify-encounter.js";
 
 async function main() {
+  // Idempotent-reseed guard (Pitfall 4): scoped exclusively to isCurated
+  // rows, so re-running this script never doubles the gallery, while any
+  // non-curated (user-shared) rows a developer created locally stay intact.
+  await prisma.scenario.deleteMany({ where: { isCurated: true } });
+
   for (const entry of curatedScenarios) {
     // Defensive dry-run validation, mirroring createScenario's own guard
     // (scenario-service.ts) -- a seed row that fails classification would
@@ -46,6 +51,8 @@ async function main() {
         isCurated: true,
         rationale: entry.rationale,
         displayOrder: entry.displayOrder,
+        title: entry.title,
+        ruleLabel: entry.ruleLabel,
       },
     });
   }
