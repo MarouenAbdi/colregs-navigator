@@ -43,27 +43,6 @@ export const VESSEL_A_HULL_COLOR = "#EF4444"; // red-500, give-way
 export const VESSEL_B_HULL_COLOR = "#22C55E"; // green-500, stand-on
 export const CONNECTOR_STROKE = "#475569"; // slate-600
 
-// The design's renderVessel() draws the hull as a 4-point path with a
-// concave notch cut into the stern (M0,-18s L11s,14s L0,7s L-11s,14s Z,
-// s=1.15 for this card), not a plain flat-back triangle -- scaled here to
-// this card's canvas (s * 320/480 = 0.767).
-export const HULL_PATH = "M 0,-13.8 L 8.43,10.73 L 0,5.37 L -8.43,10.73 Z";
-export const HULL_STROKE = "rgba(250,250,250,0.85)";
-export const HULL_STROKE_WIDTH = 1.15;
-
-const HEADING_VECTOR_LENGTH_PX = 70;
-
-export function headingVectorEndpoint(
-  screen: { screenX: number; screenY: number },
-  headingDegrees: number,
-): { x: number; y: number } {
-  const headingRadians = headingDegrees * (Math.PI / 180);
-  return {
-    x: screen.screenX + HEADING_VECTOR_LENGTH_PX * Math.sin(headingRadians),
-    y: screen.screenY - HEADING_VECTOR_LENGTH_PX * Math.cos(headingRadians),
-  };
-}
-
 // Bearing sector wedge: apex at the fixed chart-canvas center, one edge
 // running due north, the other along the real bearing to vesselB.
 export function bearingSectorPath(bearingDegrees: number): string {
@@ -83,11 +62,4 @@ export function bearingSectorPath(bearingDegrees: number): string {
     `A ${HERO_OUTER_RING_RADIUS_PX} ${HERO_OUTER_RING_RADIUS_PX} 0 ${largeArcFlag} 1 ${bearingEdge.x} ${bearingEdge.y}`,
     "Z",
   ].join(" ");
-}
-
-export function midpoint(
-  a: { screenX: number; screenY: number },
-  b: { screenX: number; screenY: number },
-): { x: number; y: number } {
-  return { x: (a.screenX + b.screenX) / 2, y: (a.screenY + b.screenY) / 2 };
 }

@@ -58,6 +58,12 @@ const nextConfig: NextConfig = {
     // Next's *redundant, currently-broken* internal duplicate of that check.
     ignoreBuildErrors: true,
   },
+  // GAL-03: `/gallery` is now a home-page section (`id="gallery"`), not its
+  // own route -- a permanent redirect preserves any existing bookmarked
+  // links rather than serving a 404 (Key Decision, PROJECT.md).
+  async redirects() {
+    return [{ source: "/gallery", destination: "/#gallery", permanent: true }];
+  },
 };
 
 export default nextConfig;

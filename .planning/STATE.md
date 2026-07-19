@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI Redesign (shadcn)
-status: "Phase 08 shipped — PR #9"
-stopped_at: Phase 8 UI-SPEC approved
-last_updated: "2026-07-19T01:35:27.267Z"
-last_activity: 2026-07-19
+status: Awaiting next milestone
+stopped_at: Phase 9 UI-SPEC approved
+last_updated: "2026-07-19T11:23:15.732Z"
+last_activity: 2026-07-19 — Milestone v1.1 completed and archived
 progress:
   total_phases: 4
-  completed_phases: 2
-  total_plans: 10
-  completed_plans: 10
-  percent: 50
+  completed_phases: 4
+  total_plans: 14
+  completed_plans: 14
+  percent: 100
 ---
 
 # Project State
@@ -21,22 +21,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-18)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 9 — gallery
+**Current focus:** Planning next milestone (v1.2+)
 
 ## Current Position
 
-Phase: 9
-Plan: Not started
-Status: Phase 08 shipped — PR #9
-Last activity: 2026-07-19
-
-Progress: [█████░░░░░] 50% (v1.1 milestone: 2/4 phases complete — Scaffolding, Hero; v1.0's 19 plans/5 phases complete and archived)
+Phase: Milestone v1.1 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-07-19 — Milestone v1.1 completed and archived
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 27 (all v1.0)
+- Total plans completed: 31 (all v1.0)
 - Average duration: - min
 - Total execution time: 0 hours (v1.1)
 
@@ -51,6 +49,7 @@ Progress: [█████░░░░░] 50% (v1.1 milestone: 2/4 phases compl
 | 9 (Gallery) | TBD | - | - |
 | 06 | 2 | - | - |
 | 08 | 6 | - | - |
+| 09 | 4 | - | - |
 
 **Recent Trend:**
 
@@ -81,13 +80,11 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Embed gallery on home page instead of separate route (`.planning/todos/pending/2026-07-18-embed-gallery-on-home-page-instead-of-separate-route.md`) — this todo is being closed by Phase 9 (Gallery) in this milestone.
+_None — the gallery-placement todo was closed by Phase 9 (Gallery) in v1.1._
 
 ### Blockers/Concerns
 
-- Phase 8 (Sandbox) carries the highest regression risk this milestone: restyling `ChartPanel`'s hull/rotate-handle hit-testing must not silently break drag/rotate (jsdom tests cannot detect this — mandatory manual browser UAT before merging Phase 8's PR, per research/PITFALLS.md Pitfall 1).
-- Phase 9 (Gallery) needs manual verification of the `/gallery` → `/#gallery` redirect from both a fresh tab and in-app navigation — native browser fragment-scroll behavior cannot be confirmed from docs alone (research/PITFALLS.md Pitfall 6).
-- Phase 6 (Scaffolding) must hardcode `className="dark"` on `<html>` and verify with OS/browser color-scheme set to light — shadcn's default scaffold half-wires a toggle that silently defaults to light mode if skipped (research/PITFALLS.md Pitfall 2).
+_None open — all three v1.1 phase risks (Phase 8 hit-testing, Phase 9 redirect, Phase 6 dark-mode hardcode) were resolved and verified during their respective phases._
 
 ## Deferred Items
 
@@ -97,8 +94,18 @@ Items acknowledged and carried forward from previous milestone close:
 |----------|------|--------|-------------|
 | Functional/domain | RSON-V2-01 (ambiguous/edge-case gallery scenarios), SCEN-V2-01 (auto-generated OG image) | Deferred to v1.2+ | v1.0 milestone close |
 
+Items acknowledged at this milestone close (see pre-close artifact audit):
+
+| Category | Item | Status | Deferred At |
+|----------|------|--------|-------------|
+| Quick task tracking | 260718-qgs (Header design-fidelity fix) flagged "missing" by the audit tool | False positive — task's own `260718-qgs-SUMMARY.md` shows `status: complete`, commits `b0409ba`/`a5d1739`/`1886ef5` merged; audit tool's tracking artifact was stale, not the underlying work | v1.1 milestone close |
+
 ## Session Continuity
 
-Last session: 2026-07-18T20:20:20.642Z
-Stopped at: Phase 8 UI-SPEC approved
-Resume file: .planning/phases/08-sandbox/08-UI-SPEC.md
+Last session: 2026-07-19T09:17:34.590Z
+Stopped at: Phase 9 UI-SPEC approved
+Resume file: .planning/phases/09-gallery/09-UI-SPEC.md
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone

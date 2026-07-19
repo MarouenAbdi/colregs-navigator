@@ -30,6 +30,8 @@ export interface ScenarioRow {
   isCurated: boolean;
   displayOrder: number | null;
   rationale: string | null;
+  title: string | null;
+  ruleLabel: string | null;
 }
 
 export async function create(

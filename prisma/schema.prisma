@@ -34,9 +34,14 @@ model Scenario {
   vesselBSpeed   Float
   vesselBType    String
 
-  // Gallery fields (D-08/D-09) -- schema support only, no seed data this
-  // phase (D-07). Unused/null/default until Phase 5.
+  // Gallery fields (D-08/D-09) -- populated by prisma/seed.ts for curated
+  // rows as of Phase 9; null/default for non-curated user-shared scenarios.
   isCurated    Boolean @default(false)
   displayOrder Int?
   rationale    String?
+  // Curated-only display fields (GAL-01/D-04), populated by prisma/seed.ts;
+  // null for non-curated user-shared scenarios -- same convention as
+  // `rationale` above.
+  title        String?
+  ruleLabel    String?
 }
