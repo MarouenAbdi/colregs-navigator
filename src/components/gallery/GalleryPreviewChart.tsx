@@ -44,12 +44,34 @@ type VesselMarkerProps = {
   label: string;
 };
 
+// headingVectorEndpoint's HEADING_VECTOR_LENGTH_PX is a fixed screen-pixel
+// length correct for Hero's one hand-solved, constant-scale viewBox. Gallery's
+// viewBox is recomputed per card by computeCardViewBox() from each curated
+// scenario's real vessel separation (1.0-10.0 NM across the 6 cards per
+// 09-RESEARCH.md), so screen-px-per-NM varies by roughly an order of
+// magnitude between cards -- on close-together pairs (e.g. the "Overtaking"
+// card, 1 NM apart) the fixed-length vector can extend past this chart's own
+// viewBox and be clipped by the wrapping div's overflow-hidden. Clamping the
+// endpoint to stay inside the visible chart (with a small margin) keeps the
+// dashed heading indicator visible on every card without needing a
+// per-card-scaled length (which would require passing the chart's px-per-NM
+// ratio down through this shared, Hero-also-used function).
+const HEADING_VECTOR_MARGIN_PX = 4;
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
 // The hull rotates with heading; the label circle and role pill are
 // deliberately SEPARATE, non-rotated groups at a fixed screen offset --
 // matching HeroPreviewCard.tsx's VesselMarker convention (only the hull
 // path carries `rotate(hdg)`).
 function VesselMarker({ screen, heading, role, label }: VesselMarkerProps) {
-  const headingVector = headingVectorEndpoint(screen, heading);
+  const rawHeadingVector = headingVectorEndpoint(screen, heading);
+  const headingVector = {
+    x: clamp(rawHeadingVector.x, HEADING_VECTOR_MARGIN_PX, GALLERY_CONTAINER_SIZE.width - HEADING_VECTOR_MARGIN_PX),
+    y: clamp(rawHeadingVector.y, HEADING_VECTOR_MARGIN_PX, GALLERY_CONTAINER_SIZE.height - HEADING_VECTOR_MARGIN_PX),
+  };
   return (
     <>
       {/* z-order per UI-SPEC.md's Mini-Chart Contract: hull (3), label

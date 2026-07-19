@@ -5,6 +5,7 @@ import { GalleryPreviewChart } from "./GalleryPreviewChart.js";
 import {
   crossingResidualBasicCase,
   headOnGenuineCase,
+  overtakingBothDirectionsCase,
 } from "../../domain/colregs/classify-encounter.fixtures.js";
 
 // Rule 3 (blocking): `vitest.config.ts` sets `globals: false` project-wide
@@ -55,5 +56,30 @@ describe("GalleryPreviewChart (09-02)", () => {
     };
 
     expect(() => render(<GalleryPreviewChart vesselA={coincident} vesselB={coincident} />)).toThrow();
+  });
+
+  it("keeps both vessels' dashed heading vectors inside the chart's viewBox on the real 'Overtaking' card geometry (WR-01 regression)", () => {
+    // Matches curated-scenarios.ts's displayOrder:2 card exactly: vesselA/B
+    // slots swapped from the fixture so give-way resolves to vesselA. This
+    // pair's 1 NM separation (vs. Hero's fixed ~6 NM viewBox) previously
+    // pushed the stand-on vessel's heading-vector endpoint above the
+    // viewBox's y=0 edge, where the wrapping div's overflow-hidden clipped it.
+    const { container } = render(
+      <GalleryPreviewChart
+        vesselA={overtakingBothDirectionsCase.vesselB}
+        vesselB={overtakingBothDirectionsCase.vesselA}
+      />,
+    );
+
+    const lines = container.querySelectorAll("line[stroke-dasharray]");
+    expect(lines.length).toBe(2);
+    for (const line of lines) {
+      const y2 = Number(line.getAttribute("y2"));
+      const x2 = Number(line.getAttribute("x2"));
+      expect(y2).toBeGreaterThanOrEqual(0);
+      expect(y2).toBeLessThanOrEqual(240);
+      expect(x2).toBeGreaterThanOrEqual(0);
+      expect(x2).toBeLessThanOrEqual(360);
+    }
   });
 });
