@@ -24,13 +24,15 @@ import {
   VESSEL_A_HULL_COLOR,
   VESSEL_B_HULL_COLOR,
   CONNECTOR_STROKE,
+  bearingSectorPath,
+} from "./hero-preview-geometry.js";
+import {
   HULL_PATH,
   HULL_STROKE,
   HULL_STROKE_WIDTH,
   headingVectorEndpoint,
-  bearingSectorPath,
   midpoint,
-} from "./hero-preview-geometry.js";
+} from "../shared/static-chart-geometry.js";
 
 const ENCOUNTER_TYPE_TITLE: Record<EncounterType, string> = {
   crossing: "Crossing",

@@ -30,6 +30,15 @@ export const ROLE_HULL_FILL_CLASS: Record<VesselRole, string> = {
   mutual: "fill-mutual",
 };
 
+// Mirrors ROLE_HULL_FILL_CLASS's pattern for the one new consumer
+// (Gallery's mini-chart dashed heading-vector lines) needing a stroke
+// instead of a fill.
+export const ROLE_STROKE_CLASS: Record<VesselRole, string> = {
+  "give-way": "stroke-give-way",
+  "stand-on": "stroke-stand-on",
+  mutual: "stroke-mutual",
+};
+
 export const ROLE_BADGE_TEXT: Record<VesselRole, string> = {
   "give-way": "GW",
   "stand-on": "SO",
