@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Tech Debt & Stabilization
 status: executing
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-07-19T20:59:56.396Z"
+stopped_at: Completed 11-02-PLAN.md
+last_updated: "2026-07-19T21:05:47.098Z"
 last_activity: 2026-07-19
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
   percent: 25
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-19)
 ## Current Position
 
 Phase: 11 (tailwind-deprecated-class-name-fixes) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-07-19
 
-Progress: [███████░░░] 67%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Progress: [███████░░░] 67%
 
 *Updated after each plan completion*
 | Phase 11 P01 | 15min | 3 tasks | 6 files |
+| Phase 11 P02 | 5min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,7 @@ Recent decisions affecting current work:
 - `VesselGroup.tsx` (hull polygon, rotate handle, badge overlay) must be extracted last, as one atomic verbatim cut-paste — this exact code has caused two prior hit-testing regressions (Phase 4, Phase 8).
 - Tailwind class-name fixes and comment cleanup must both be done by hand, file-by-file/comment-by-comment — this codebase has known false-positive traps for any mechanical/regex pass.
 - [Phase 11]: outline-none renamed to outline-hidden and rounded-[0.25rem] renamed to rounded-sm across 6 components (plan 11-01) — Canonical Tailwind v4 class names; radius increase (0.25rem -> 0.375rem) accepted deliberately per D-01/D-02
+- [Phase 11]: D-03 (Plan 02): removed the now-dead better-tailwindcss/enforce-canonical-classes ignore pattern from eslint.config.mjs, since both rounded-[0.25rem] sites were renamed to rounded-sm in Plan 01; confirmed npx eslint . stays clean (0 errors)
 
 ### Pending Todos
 
@@ -103,8 +105,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-19T20:59:56.386Z
-Stopped at: Completed 11-01-PLAN.md
+Last session: 2026-07-19T21:05:47.084Z
+Stopped at: Completed 11-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
