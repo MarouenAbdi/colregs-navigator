@@ -47,7 +47,7 @@ grid grid-cols-1 gap-4 min-[640px]:grid-cols-2 min-[900px]:grid-cols-3
 
 **Correction to 09-RESEARCH.md's Grid Breakpoints section:** research recommended `gap-6` (24px) as a MEDIUM-confidence, non-pixel-verified guess. Direct pixel measurement of `Main-Design.png`'s 3-column desktop row (card-to-card gap measured both horizontally and vertically, independently, both resolving to the same value) gives **16px**, not 24px. Use `gap-4`, not `gap-6`. (Measurement: at a 2880px-canvas/1440px-viewport 2× export, card-to-card background gap = 32 canvas px = 16 logical px, both axes.)
 
-**Per-card layout:** `<Link href="/s/{scenario.id}">` wrapping a `Card` with **zero internal `CardHeader`/`CardContent` split needed** (single padded column): mini-chart box (full card width, fixed 3:2 aspect ratio, `mb-4`) → badge row (`Rule {N}` outline badge left, verdict role badge right, `flex items-center justify-between`, `mb-3`) → title (`<h3>`, `mb-1.5`) → description (2-line paragraph). Card internal padding: **14px on all sides** (`p-3.5`) — this is a declared **exception** to the 8-point spacing scale (see Spacing Scale below), directly pixel-measured, not a guess.
+**Per-card layout:** `<Link href="/s/{scenario.id}">` wrapping a `Card` with **zero internal `CardHeader`/`CardContent` split needed** (single padded column): mini-chart box (full card width, fixed 3:2 aspect ratio, `mb-4`) → badge row (`Rule {N}` outline badge left, verdict role badge right, `flex items-center justify-between`, `mb-3`) → title (`<h3>`, `mb-1.5`) → description (2-line paragraph). Card internal padding: **16px on all sides** (`p-4`) — this is the already-declared `md` token from the Spacing Scale below (the same token used for the grid gap), not a new value.
 
 ---
 
@@ -59,14 +59,13 @@ Declared values (multiples of 4) — **identical to Phase 6/7/8's shared scale**
 |-------|-------|-------|
 | xs | 4px | Icon/dot-to-text gaps (none needed this phase — Gallery has no leading icons) |
 | sm | 8px | Compact spacing (mini-chart pill internal padding, badge-row internal gaps) |
-| md | 16px | **Card grid gap** (both axes, corrected from research's gap-6 guess — see Layout); gap between header block's eyebrow/heading/subhead lines |
+| md | 16px | **Card grid gap** (both axes, corrected from research's gap-6 guess — see Layout); gap between header block's eyebrow/heading/subhead lines; **card internal padding** (`p-4`, all sides) |
 | lg | 24px | Vertical gap between card title and description within a card (rounded up from a ~20px measurement, matching Phase 8's own "accept the small delta" precedent rather than introducing a new value) |
 | xl | 32px | Not used as a standalone gap this phase |
 | 2xl | 48px | Gap between the header block (eyebrow/heading/subhead) and the card grid (measured ~56px, rounded down to the nearest scale token per the same "accept small delta" precedent); vertical section padding at ≥900px (`py-16`) |
 | 3xl | 64px | Inherited from Phase 6's sticky Header height / `scroll-padding-top: 64px` — this phase's `#gallery` anchor target relies on this unchanged (GAL-03/GAL-04) |
 
 **Exceptions:**
-- **Card internal padding: 14px** (`p-3.5`) on all sides — directly pixel-measured from `Main-Design.png` (chart-box border to card outer border = 28 canvas px = 14 logical px, confirmed on all 4 sides), not a value from the 4/8/16/24/32/48/64 scale. Tailwind's default spacing scale does include `3.5` (14px) as a standard step, so this is not an arbitrary value — just not one of this project's 7 named tokens.
 - Mini-chart box aspect ratio (3:2, see Mini-Chart Contract below) is dimensional, not a spacing value.
 - Custom breakpoints `640px`/`900px` are layout breakpoints, already registered (Phase 6/7), reused unchanged — no new breakpoint.
 
@@ -115,7 +114,7 @@ Gallery's concrete usage of these roles:
 6. Dashed heading-vector line from each hull, stroked in that vessel's role color (not a fixed per-slot color — same correction as item 3).
 7. A floating range-label chip ("X.XX NM") at the connector line's midpoint.
 
-**Chart box dimensions:** fixed **3:2** aspect ratio (width:height), directly pixel-measured (358px : 238px logical, ≈1.50), a correction to Hero's own 8:5 (1.6) ratio — Gallery's mini-chart is proportionally slightly less wide/more square than Hero's. Full card width (card width minus 2×14px padding), height derived from the 3:2 ratio.
+**Chart box dimensions:** fixed **3:2** aspect ratio (width:height), directly pixel-measured (358px : 238px logical, ≈1.50), a correction to Hero's own 8:5 (1.6) ratio — Gallery's mini-chart is proportionally slightly less wide/more square than Hero's. Full card width (card width minus 2×16px padding), height derived from the 3:2 ratio.
 
 **Per-card dynamic viewBox:** reuse 09-RESEARCH.md's `computeCardViewBox()` recommendation (Pattern 1) unchanged — a fixed Hero-style hand-solved viewBox cannot work here since the 6 cards' real vessel-pair ranges span 1.0-10.0 NM. Bounding-box-of-both-vessels + padding fraction, forced to the 3:2 aspect ratio.
 
