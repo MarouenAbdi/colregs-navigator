@@ -46,7 +46,7 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full phase details (goals, succes
 **Success Criteria** (what must be TRUE):
 
   1. `npm run lint` exists as a script and exits with zero errors when run against the full codebase.
-  2. The flat config (`eslint.config.mjs`) applies `eslint-config-next`'s `core-web-vitals` + `typescript` sub-exports, `typescript-eslint` at the `recommended` tier, Tailwind v4-aware class-name rules, and Vitest-specific rules scoped only to test files.
+  2. The flat config (`eslint.config.mjs`) applies `@next/eslint-plugin-next`'s `core-web-vitals` config directly (not via `eslint-config-next`, which crashes against this project's locked TypeScript 7.0.2/tsgo compiler), parses `.ts`/`.tsx` via `@babel/eslint-parser` + `@babel/preset-typescript` (syntax-only, no type-checking — `typescript-eslint` is incompatible with tsgo, confirmed no version supports it), Tailwind v4-aware class-name rules, and Vitest-specific rules scoped only to test files.
   3. A test import of `src/server/`, Next.js, tRPC, or Prisma from within `src/domain/` produces a lint error, proving the architecture boundary is enforced, not just documented.
   4. Reintroducing a stale Phase/Plan/REQ-ID comment reference or a raw-CSS-as-template-literal string produces a lint error.
   5. No rule was set to `off` or downgraded project-wide to reach the clean baseline (verified by inspecting `eslint.config.mjs` and any `eslint-suppressions.json` used).
@@ -63,7 +63,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 10-03-PLAN.md — Two-pass eslint --fix + suppress-all lint-clean baseline, recommended-type-checked stretch goal, .editorconfig + README
+- [ ] 10-03-PLAN.md — Two-pass eslint --fix + suppress-all lint-clean baseline, documents the tsgo/typescript-eslint incompatibility as a known limitation, .editorconfig + README
 
 ### Phase 11: Tailwind Deprecated Class-Name Fixes
 
