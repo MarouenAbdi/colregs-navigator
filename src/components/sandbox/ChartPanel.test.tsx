@@ -10,7 +10,7 @@
  * minimal test-only polyfills for both so the component can render and be
  * drag-tested under jsdom without weakening the production implementation.
  */
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChartPanel } from "./ChartPanel.js";
 import { classifyEncounter } from "../../domain/colregs/classify-encounter.js";
@@ -67,7 +67,6 @@ function renderChartPanel(overrides: Partial<ChartPanelProps> = {}) {
     vesselA,
     vesselB,
     classification: result.value,
-    isDegenerate: false,
     onVesselPositionChange: vi.fn(),
     onVesselHeadingChange: vi.fn(),
     ...overrides,
@@ -80,6 +79,21 @@ describe("ChartPanel", () => {
     renderChartPanel();
     expect(screen.getByText("GW")).toBeInTheDocument();
     expect(screen.getByText("SO")).toBeInTheDocument();
+  });
+
+  it("gives the decorative letter/role-badge overlay pointer-events:none so it never shadows the hull's own drag hit-target underneath it", () => {
+    // Regression test for a real hit-testing dead zone (code review CR-01):
+    // at heading 0 (this app's default seed), the non-rotating badge's
+    // painted rect geometrically overlapped ~45px^2 of the hull polygon's
+    // own painted area. Without pointer-events:none, an unhandled solid
+    // shape captures that pointerdown via SVG's default
+    // pointer-events:visiblePainted, silently blocking the hull drag that
+    // should have started there.
+    const { container } = renderChartPanel();
+    const badgeText = within(container).getByText("GW");
+    const overlayGroup = badgeText.closest("g[pointer-events]");
+    expect(overlayGroup).not.toBeNull();
+    expect(overlayGroup?.getAttribute("pointer-events")).toBe("none");
   });
 
   it("renders the bearing line dashed amber when doubtBoundary is near-head-on-boundary", () => {

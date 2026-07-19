@@ -17,7 +17,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ChartPanelProps } from "./types.js";
-import { getVesselRole, type VesselRole } from "./vessel-role.js";
+import { getVesselRole, ROLE_BADGE_TEXT, ROLE_HULL_FILL_CLASS, type VesselRole } from "./vessel-role.js";
 import {
   chartToScreen,
   type ChartViewBox,
@@ -37,11 +37,22 @@ const CHART_VIEW_BOX: ChartViewBox = { minX: -10, minY: -10, width: 20, height: 
 const GRID_STEP_CHART_UNITS = 2;
 const GRID_STROKE = "#27272A"; // border token -- dark-theme grid line (was slate-200, a light-canvas color)
 
-const HULL_FILL_CLASS: Record<VesselRole, string> = {
-  "give-way": "fill-red-500",
-  "stand-on": "fill-green-500",
-  mutual: "fill-slate-400",
-};
+// Decorative fixed-pixel texture layer UNDER the nm-scale gridlines above --
+// independent of chart scale, matching the design source's own two-tier
+// grid (`sfine` 20px + `sgrid` 80px pattern, composited together). Reuses
+// the same fixed-pixel-pattern technique as HeroPreviewCard's `heroGrid`.
+const FINE_GRID_CELL_PX = 20;
+const FINE_GRID_STROKE = "rgba(120,120,130,.08)";
+
+// Range rings + N/E-W crosshair (design source: 960x640 viewBox, rings at
+// r=120/r=240 centered on the chart's own origin, crosshair spanning the
+// inner ring's diameter) -- expressed as a ratio of container width so they
+// stay correctly proportioned across container sizes, not a hardcoded px
+// literal tied to the design's own fixed 960px canvas.
+const RANGE_RING_STROKE = "rgba(45,212,191,.12)"; // primary teal -- matches HeroPreviewCard's own ring styling
+const RANGE_RING_INNER_RADIUS_RATIO = 120 / 960;
+const RANGE_RING_OUTER_RADIUS_RATIO = 240 / 960;
+const CROSSHAIR_STROKE = "#3F3F46"; // zinc-700, same as CONE_DEFAULT_STROKE below
 
 // Bigger hull + a stalk-mounted rotate handle set well clear of the bow
 // tip (04-HUMAN-UAT.md Gap 1 follow-up: separating two invisible padded
@@ -58,21 +69,47 @@ const HULL_FILL_CLASS: Record<VesselRole, string> = {
 // -- its own visible ring is the entire hit target, enlarged slightly
 // (r=10, up from a decorative r=7) to stay comfortably grabbable now that
 // it alone defines the click area.
+// Hull shape: the same concave 4-point kite/arrow as HeroPreviewCard's
+// HULL_PATH ("M 0,-13.8 L 8.43,10.73 L 0,5.37 L -8.43,10.73 Z", itself
+// transcribed from the design source's renderVessel()) -- NOT a flat-back
+// triangle. Scaled up by the same ratio across all four points (factor
+// 28/13.8 ≈ 2.029) to preserve this panel's deliberately bigger interactive
+// hit target (04-HUMAN-UAT.md Gap 1) while matching Hero's exact
+// bow/stern/notch/half-width proportions, not an arbitrarily-chosen shape.
 const HULL_BOW_Y = -28;
-const HULL_STERN_Y = 20;
-const HULL_HALF_WIDTH = 18;
-const HULL_POINTS = `0,${HULL_BOW_Y} ${HULL_HALF_WIDTH},${HULL_STERN_Y} ${-HULL_HALF_WIDTH},${HULL_STERN_Y}`;
-const HULL_BADGE_Y = HULL_STERN_Y + 14;
+const HULL_STERN_Y = 21.77;
+const HULL_NOTCH_Y = 10.9;
+const HULL_HALF_WIDTH = 17.1;
+const HULL_POINTS = `0,${HULL_BOW_Y} ${HULL_HALF_WIDTH},${HULL_STERN_Y} 0,${HULL_NOTCH_Y} ${-HULL_HALF_WIDTH},${HULL_STERN_Y}`;
+
+// Near-white outline + width, matching HeroPreviewCard's HULL_STROKE/
+// HULL_STROKE_WIDTH ("rgba(250,250,250,.85)" / 1.15) scaled by the same
+// ~2.029 hull-size ratio used for the hull points above -- not a
+// cross-feature import (Sandbox and Hero are separate features per
+// CLAUDE.md's low-coupling convention), just the same literal value.
+const HULL_STROKE = "rgba(250,250,250,.85)";
+const HULL_STROKE_WIDTH = 2.33;
+
+const BADGE_RECT_WIDTH = 30;
+const BADGE_RECT_HEIGHT = 18;
+
+// Letter identifier (A/B) and role badge (GW/SO/MUTUAL) both sit in a
+// NON-rotating sibling group at a fixed screen-relative offset from the
+// vessel's position -- matching HeroPreviewCard's VesselMarker (label
+// upper-left, badge lower-right, "only the hull path carries rotate(hdg)")
+// and the actual design source's renderVessel(), which likewise gives the
+// badge/label groups their own translate-only transform separate from the
+// hull's rotate. Offsets are Hero's own (-11,-11)/(+12,+10) scaled by the
+// same ~2.029 hull-size ratio, not arbitrary new values.
+const LETTER_OFFSET_X = -22.3;
+const LETTER_OFFSET_Y = -22.3;
+const LETTER_CIRCLE_R = 11;
+const BADGE_OFFSET_X = 24.3;
+const BADGE_OFFSET_Y = 20.3;
 
 const ROTATE_HANDLE_CY = -58;
 const ROTATE_HANDLE_VISIBLE_R = 10;
 const ROTATE_STALK_Y2 = ROTATE_HANDLE_CY + ROTATE_HANDLE_VISIBLE_R;
-
-const ROLE_BADGE_TEXT: Record<VesselRole, string> = {
-  "give-way": "GW",
-  "stand-on": "SO",
-  mutual: "MUTUAL",
-};
 
 const BEARING_LINE_DEFAULT_STROKE = "#475569"; // slate-600
 const DOUBT_STROKE = "#F59E0B"; // amber-500
@@ -167,65 +204,123 @@ interface VesselGroupProps {
 
 function VesselGroup({ label, vessel, screen, role, hullDrag, rotateDrag }: VesselGroupProps) {
   return (
-    <g transform={`translate(${screen.screenX},${screen.screenY}) rotate(${vessel.heading})`}>
-      {/* Rotate-handle stalk: a thin, non-interactive connector from the
-          bow tip to the rotate handle, signaling "this dot is a heading
-          control attached to the vessel" rather than an unrelated nearby
-          UI element. No pointer handlers -- purely decorative, so it can
-          never intercept a hull-drag or rotate-drag gesture. */}
-      <line
-        x1={0}
-        y1={HULL_BOW_Y}
-        x2={0}
-        y2={ROTATE_STALK_Y2}
-        stroke="#94A3B8" // slate-400
-        strokeWidth={1.5}
-      />
-      {/* Hull: the visible, solid-filled polygon IS the hit target --
-          pointer handlers are attached directly to it. SVG's default
-          `pointer-events: visiblePainted` hit-tests a shape's actual
-          painted area whenever its fill is anything other than "none";
-          a solid Tailwind fill class qualifies, so a drag gesture can
-          only start when the pointer is genuinely over the visible hull,
-          never over the empty chart or the (now well-separated) rotate
-          handle. Bigger than the original hull (36px wide x 48px tall,
-          vs. 12x18) per UAT feedback that the icons were also too small
-          to comfortably grab. */}
-      <polygon
-        data-testid={`hull-hit-${label}`}
-        points={HULL_POINTS}
-        className={HULL_FILL_CLASS[role]}
-        onPointerDown={hullDrag.onPointerDown}
-        onPointerMove={hullDrag.onPointerMove}
-        onPointerUp={hullDrag.onPointerUp}
-      />
-      <text
-        x={0}
-        y={HULL_BADGE_Y}
-        textAnchor="middle"
-        className="text-[14px] font-semibold fill-current"
-      >
-        {ROLE_BADGE_TEXT[role]}
-      </text>
-      {/* Rotate handle: the visible teal-ringed circle IS the hit target --
-          same principle as the hull polygon above. No separate padded
-          invisible hit-circle; `fill="white"` is a real paint (not
-          "none"), so pointer-events hit-tests exactly this circle's
-          drawn area. Centered well beyond the enlarged hull's bow tip
-          (HULL_BOW_Y) so the two hit regions cannot overlap regardless
-          of hull width. */}
-      <circle
-        data-testid={`rotate-hit-${label}`}
-        cx={0}
-        cy={ROTATE_HANDLE_CY}
-        r={ROTATE_HANDLE_VISIBLE_R}
-        stroke="#0D9488"
-        strokeWidth={2}
-        fill="white"
-        onPointerDown={rotateDrag.onPointerDown}
-        onPointerMove={rotateDrag.onPointerMove}
-        onPointerUp={rotateDrag.onPointerUp}
-      />
+    <g transform={`translate(${screen.screenX},${screen.screenY})`}>
+      {/* Everything that should visually track heading lives in this
+          rotated sub-group: the stalk, the hull, and the rotate handle
+          (its own arc position around the vessel IS the drag control, so
+          it must rotate). The letter/role-badge chips below are deliberately
+          OUTSIDE this group -- matching HeroPreviewCard's VesselMarker
+          ("only the hull path carries rotate(hdg)") and the design source's
+          renderVessel(), where the badge/label groups get their own
+          translate-only transform. Rotating them (the pre-fix behavior)
+          made a vessel's badge read sideways/upside-down at non-upright
+          headings. */}
+      <g transform={`rotate(${vessel.heading})`}>
+        {/* Rotate-handle stalk: a thin, non-interactive connector from the
+            bow tip to the rotate handle, signaling "this dot is a heading
+            control attached to the vessel" rather than an unrelated nearby
+            UI element. No pointer handlers -- purely decorative, so it can
+            never intercept a hull-drag or rotate-drag gesture. */}
+        <line
+          x1={0}
+          y1={HULL_BOW_Y}
+          x2={0}
+          y2={ROTATE_STALK_Y2}
+          className="stroke-rule-accent"
+          strokeWidth={1.5}
+          strokeDasharray="2 3"
+          opacity={0.6}
+        />
+        {/* Hull: the visible, solid-filled polygon IS the hit target --
+            pointer handlers are attached directly to it. SVG's default
+            `pointer-events: visiblePainted` hit-tests a shape's actual
+            painted area whenever its fill is anything other than "none";
+            a solid Tailwind fill class qualifies, so a drag gesture can
+            only start when the pointer is genuinely over the visible hull,
+            never over the empty chart or the (now well-separated) rotate
+            handle. Bigger than the original hull (36px wide x 48px tall,
+            vs. 12x18) per UAT feedback that the icons were also too small
+            to comfortably grab. */}
+        <polygon
+          data-testid={`hull-hit-${label}`}
+          points={HULL_POINTS}
+          className={`cursor-grab active:cursor-grabbing ${ROLE_HULL_FILL_CLASS[role]}`}
+          stroke={HULL_STROKE}
+          strokeWidth={HULL_STROKE_WIDTH}
+          onPointerDown={hullDrag.onPointerDown}
+          onPointerMove={hullDrag.onPointerMove}
+          onPointerUp={hullDrag.onPointerUp}
+        />
+        {/* Rotate handle: the visible teal-ringed circle IS the hit target --
+            same principle as the hull polygon above. No separate padded
+            invisible hit-circle; `fill="white"` is a real paint (not
+            "none"), so pointer-events hit-tests exactly this circle's
+            drawn area. Centered well beyond the enlarged hull's bow tip
+            (HULL_BOW_Y) so the two hit regions cannot overlap regardless
+            of hull width. */}
+        <circle
+          data-testid={`rotate-hit-${label}`}
+          cx={0}
+          cy={ROTATE_HANDLE_CY}
+          r={ROTATE_HANDLE_VISIBLE_R}
+          className="cursor-grab stroke-rule-accent active:cursor-grabbing"
+          strokeWidth={2}
+          fill="white"
+          onPointerDown={rotateDrag.onPointerDown}
+          onPointerMove={rotateDrag.onPointerMove}
+          onPointerUp={rotateDrag.onPointerUp}
+        />
+      </g>
+
+      {/* Letter identifier (A/B) and role badge -- both decorative overlays
+          fixed at a screen offset regardless of heading. `pointerEvents:
+          "none"` on both groups is load-bearing, not decoration: at
+          heading 0 (the app's default seed and every current chip
+          fixture), the badge's painted rect geometrically overlaps part
+          of the hull polygon's own painted stern-right wing (~45px^2,
+          confirmed via point-in-polygon test), and SVG's default
+          `pointer-events: visiblePainted` would otherwise let this
+          unhandled, purely-decorative rect silently capture a
+          pointerdown that should have started a hull drag underneath
+          it -- the exact hit-testing regression class this panel's other
+          comments call out as highest-risk. Matches the same
+          `pointerEvents="none"` pattern already used on the range-tooltip
+          group below. */}
+      <g pointerEvents="none">
+        {/* Letter identifier (A/B), fixed upper-left of the vessel
+            regardless of heading -- always the same dark chip regardless
+            of role. */}
+        <circle cx={LETTER_OFFSET_X} cy={LETTER_OFFSET_Y} r={LETTER_CIRCLE_R} className="fill-card" />
+        <text
+          x={LETTER_OFFSET_X}
+          y={LETTER_OFFSET_Y}
+          dy="0.35em"
+          textAnchor="middle"
+          className="text-[12px] font-bold fill-white"
+        >
+          {label === "vesselA" ? "A" : "B"}
+        </text>
+
+        {/* Role badge (GW/SO/MUTUAL), fixed lower-right of the vessel
+            regardless of heading. */}
+        <rect
+          x={BADGE_OFFSET_X - BADGE_RECT_WIDTH / 2}
+          y={BADGE_OFFSET_Y - BADGE_RECT_HEIGHT / 2}
+          width={BADGE_RECT_WIDTH}
+          height={BADGE_RECT_HEIGHT}
+          rx={4}
+          className={ROLE_HULL_FILL_CLASS[role]}
+        />
+        <text
+          x={BADGE_OFFSET_X}
+          y={BADGE_OFFSET_Y}
+          dy="0.35em"
+          textAnchor="middle"
+          className="text-[11px] font-semibold fill-white"
+        >
+          {ROLE_BADGE_TEXT[role]}
+        </text>
+      </g>
     </g>
   );
 }
@@ -276,6 +371,9 @@ export function ChartPanel({
 
   const screenA = chartToScreen(vesselA.position, containerSize, CHART_VIEW_BOX);
   const screenB = chartToScreen(vesselB.position, containerSize, CHART_VIEW_BOX);
+  const chartCenter = chartToScreen({ x: 0, y: 0 }, containerSize, CHART_VIEW_BOX);
+  const innerRingRadiusPx = containerSize.width * RANGE_RING_INNER_RADIUS_RATIO;
+  const outerRingRadiusPx = containerSize.width * RANGE_RING_OUTER_RADIUS_RATIO;
 
   const roleA = getVesselRole("vesselA", classification);
   const roleB = getVesselRole("vesselB", classification);
@@ -286,6 +384,22 @@ export function ChartPanel({
     classification.doubt && classification.doubtBoundary === "near-head-on-boundary";
   const bearingStroke = bearingDoubt ? DOUBT_STROKE : BEARING_LINE_DEFAULT_STROKE;
   const bearingDashArray = bearingDoubt ? "4 3" : undefined;
+
+  // Range tooltip: a chip centered on the bearing line's midpoint showing
+  // current distance in NM -- matches the design source's bearingLine()
+  // label chip (HeroPreviewCard's static preview already carries this same
+  // chip; ChartPanel's live version was missing it entirely). Chart-space
+  // position units are already NM (CHART_VIEW_BOX is a 20nm x 20nm box), so
+  // this is a plain Euclidean distance, same technique as
+  // instrument-readouts.ts's own rangeNm derivation.
+  const rangeNm = Math.hypot(
+    vesselB.position.x - vesselA.position.x,
+    vesselB.position.y - vesselA.position.y,
+  );
+  const bearingMidpoint = {
+    screenX: (screenA.screenX + screenB.screenX) / 2,
+    screenY: (screenA.screenY + screenB.screenY) / 2,
+  };
 
   // Overtaking-boundary cone doubt resolution: exactly one vessel's cone
   // (per resolveDoubtGeometry, Pitfall 3) swaps to dashed amber when the
@@ -320,9 +434,50 @@ export function ChartPanel({
       <svg
         width={containerSize.width}
         height={containerSize.height}
-        className="bg-[#0B0B0E] border border-border rounded"
+        className="bg-chart-surface border border-border rounded"
       >
+        <defs>
+          <pattern
+            id="chart-fine-grid"
+            width={FINE_GRID_CELL_PX}
+            height={FINE_GRID_CELL_PX}
+            patternUnits="userSpaceOnUse"
+          >
+            <path
+              d={`M ${FINE_GRID_CELL_PX} 0 H 0 V ${FINE_GRID_CELL_PX}`}
+              fill="none"
+              stroke={FINE_GRID_STROKE}
+              strokeWidth={1}
+            />
+          </pattern>
+        </defs>
+        <rect width={containerSize.width} height={containerSize.height} fill="url(#chart-fine-grid)" />
         <g>{buildGridLines(containerSize)}</g>
+        <g stroke={RANGE_RING_STROKE} fill="none">
+          <circle cx={chartCenter.screenX} cy={chartCenter.screenY} r={innerRingRadiusPx} />
+          <circle cx={chartCenter.screenX} cy={chartCenter.screenY} r={outerRingRadiusPx} />
+        </g>
+        <g stroke={CROSSHAIR_STROKE} strokeWidth={1}>
+          <line
+            x1={chartCenter.screenX}
+            y1={chartCenter.screenY - innerRingRadiusPx}
+            x2={chartCenter.screenX}
+            y2={chartCenter.screenY + innerRingRadiusPx}
+          />
+          <line
+            x1={chartCenter.screenX - innerRingRadiusPx}
+            y1={chartCenter.screenY}
+            x2={chartCenter.screenX + innerRingRadiusPx}
+            y2={chartCenter.screenY}
+          />
+        </g>
+        <text
+          x={chartCenter.screenX + 4}
+          y={chartCenter.screenY - innerRingRadiusPx + 12}
+          className="fill-muted-foreground font-mono text-[11px]"
+        >
+          N
+        </text>
         <g>
           <path
             data-testid="cone-vesselA"
@@ -357,6 +512,21 @@ export function ChartPanel({
             strokeDasharray={bearingDashArray}
           />
         </g>
+        {/* Range tooltip: non-interactive chip at the bearing line's
+            midpoint, matching the design source's bearingLine() label
+            (`pointerEvents: none` there) -- must never intercept a drag
+            gesture aimed at the chart underneath it. */}
+        <g transform={`translate(${bearingMidpoint.screenX},${bearingMidpoint.screenY})`} pointerEvents="none">
+          <rect x={-34} y={-11} width={68} height={22} rx={6} className="fill-card stroke-border" />
+          <text
+            x={0}
+            y={4}
+            textAnchor="middle"
+            className="fill-muted-foreground font-mono text-xs"
+          >
+            {`${rangeNm.toFixed(2)} NM`}
+          </text>
+        </g>
         <VesselGroup
           label="vesselA"
           vessel={vesselA}
@@ -374,6 +544,17 @@ export function ChartPanel({
           rotateDrag={rotateDragB}
         />
       </svg>
+      {/* "1 NM" scale-bar legend: tick width is the true on-screen pixel
+          length of 1 nautical mile for the current container size and the
+          fixed CHART_VIEW_BOX.width (20nm), so it stays accurate across
+          container sizes rather than being a hardcoded decorative width. */}
+      <div className="absolute bottom-2 left-2 flex items-center gap-1 font-mono text-[13px] font-semibold text-muted-foreground">
+        <span
+          className="h-px bg-border"
+          style={{ width: containerSize.width / CHART_VIEW_BOX.width }}
+        />
+        <span>1 NM</span>
+      </div>
     </div>
   );
 }

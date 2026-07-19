@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI Redesign (shadcn)
-status: "Phase 07 shipped — PR #8"
-stopped_at: Phase 7 complete (both plans, code review, Header quick-fix all done); next step is opening the PR for frontend-implementation/phase-7-hero → main
-last_updated: "2026-07-18T18:56:12.818Z"
-last_activity: 2026-07-18
+status: "Phase 08 shipped — PR #9"
+stopped_at: Phase 8 UI-SPEC approved
+last_updated: "2026-07-19T01:35:27.267Z"
+last_activity: 2026-07-19
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 10
+  completed_plans: 10
   percent: 50
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-18)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 07 — hero
+**Current focus:** Phase 9 — gallery
 
 ## Current Position
 
-Phase: 07 (hero) — COMPLETE, not yet shipped
-Plan: 2 of 2 complete; code review passed with fixes; Header.tsx corrected via quick task 260718-qgs
-Status: Phase 07 shipped — PR #8
-Last activity: 2026-07-18
+Phase: 9
+Plan: Not started
+Status: Phase 08 shipped — PR #9
+Last activity: 2026-07-19
 
 Progress: [█████░░░░░] 50% (v1.1 milestone: 2/4 phases complete — Scaffolding, Hero; v1.0's 19 plans/5 phases complete and archived)
 
@@ -36,7 +36,7 @@ Progress: [█████░░░░░] 50% (v1.1 milestone: 2/4 phases compl
 
 **Velocity:**
 
-- Total plans completed: 21 (all v1.0)
+- Total plans completed: 27 (all v1.0)
 - Average duration: - min
 - Total execution time: 0 hours (v1.1)
 
@@ -50,6 +50,7 @@ Progress: [█████░░░░░] 50% (v1.1 milestone: 2/4 phases compl
 | 8 (Sandbox) | TBD | - | - |
 | 9 (Gallery) | TBD | - | - |
 | 06 | 2 | - | - |
+| 08 | 6 | - | - |
 
 **Recent Trend:**
 
@@ -98,6 +99,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-18T19:15:00.000Z
-Stopped at: Phase 7 complete (both plans, code review, Header quick-fix all done); next step is opening the PR for frontend-implementation/phase-7-hero → main
-Resume file: none — ready to ship
+Last session: 2026-07-18T20:20:20.642Z
+Stopped at: Phase 8 UI-SPEC approved
+Resume file: .planning/phases/08-sandbox/08-UI-SPEC.md

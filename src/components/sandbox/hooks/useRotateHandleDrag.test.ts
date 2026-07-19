@@ -61,7 +61,6 @@ describe("useRotateHandleDrag (via ChartPanel's rotate-handle hit-circle)", () =
         vesselA,
         vesselB,
         classification: result.value,
-        isDegenerate: false,
         onVesselPositionChange,
         onVesselHeadingChange,
       }),
