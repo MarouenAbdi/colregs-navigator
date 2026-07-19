@@ -108,3 +108,7 @@ None - no external service configuration required.
 ---
 *Phase: 09-gallery*
 *Completed: 2026-07-19*
+
+## Self-Check: PASSED
+
+All created files verified present on disk; all task commit hashes (9b62c77, 4b2d5cd, 1b63424, a480d57, 878f6de) verified present in git log. Full plan verification suite (`gallery-preview-geometry.test.ts`, `GalleryPreviewChart.test.tsx`, `Hero.test.tsx`, `hero-preview-fixture.test.ts`) plus `vessel-role.test.ts` re-run: 16/16 tests pass across 5 files.
