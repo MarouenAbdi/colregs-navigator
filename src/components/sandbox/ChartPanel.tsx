@@ -272,38 +272,55 @@ function VesselGroup({ label, vessel, screen, role, hullDrag, rotateDrag }: Vess
         />
       </g>
 
-      {/* Letter identifier (A/B), fixed upper-left of the vessel regardless
-          of heading -- always the same dark chip regardless of role. */}
-      <circle cx={LETTER_OFFSET_X} cy={LETTER_OFFSET_Y} r={LETTER_CIRCLE_R} className="fill-card" />
-      <text
-        x={LETTER_OFFSET_X}
-        y={LETTER_OFFSET_Y}
-        dy="0.35em"
-        textAnchor="middle"
-        className="text-[12px] font-bold fill-white"
-      >
-        {label === "vesselA" ? "A" : "B"}
-      </text>
+      {/* Letter identifier (A/B) and role badge -- both decorative overlays
+          fixed at a screen offset regardless of heading. `pointerEvents:
+          "none"` on both groups is load-bearing, not decoration: at
+          heading 0 (the app's default seed and every current chip
+          fixture), the badge's painted rect geometrically overlaps part
+          of the hull polygon's own painted stern-right wing (~45px^2,
+          confirmed via point-in-polygon test), and SVG's default
+          `pointer-events: visiblePainted` would otherwise let this
+          unhandled, purely-decorative rect silently capture a
+          pointerdown that should have started a hull drag underneath
+          it -- the exact hit-testing regression class this panel's other
+          comments call out as highest-risk. Matches the same
+          `pointerEvents="none"` pattern already used on the range-tooltip
+          group below. */}
+      <g pointerEvents="none">
+        {/* Letter identifier (A/B), fixed upper-left of the vessel
+            regardless of heading -- always the same dark chip regardless
+            of role. */}
+        <circle cx={LETTER_OFFSET_X} cy={LETTER_OFFSET_Y} r={LETTER_CIRCLE_R} className="fill-card" />
+        <text
+          x={LETTER_OFFSET_X}
+          y={LETTER_OFFSET_Y}
+          dy="0.35em"
+          textAnchor="middle"
+          className="text-[12px] font-bold fill-white"
+        >
+          {label === "vesselA" ? "A" : "B"}
+        </text>
 
-      {/* Role badge (GW/SO/MUTUAL), fixed lower-right of the vessel
-          regardless of heading. */}
-      <rect
-        x={BADGE_OFFSET_X - BADGE_RECT_WIDTH / 2}
-        y={BADGE_OFFSET_Y - BADGE_RECT_HEIGHT / 2}
-        width={BADGE_RECT_WIDTH}
-        height={BADGE_RECT_HEIGHT}
-        rx={4}
-        className={ROLE_HULL_FILL_CLASS[role]}
-      />
-      <text
-        x={BADGE_OFFSET_X}
-        y={BADGE_OFFSET_Y}
-        dy="0.35em"
-        textAnchor="middle"
-        className="text-[11px] font-semibold fill-white"
-      >
-        {ROLE_BADGE_TEXT[role]}
-      </text>
+        {/* Role badge (GW/SO/MUTUAL), fixed lower-right of the vessel
+            regardless of heading. */}
+        <rect
+          x={BADGE_OFFSET_X - BADGE_RECT_WIDTH / 2}
+          y={BADGE_OFFSET_Y - BADGE_RECT_HEIGHT / 2}
+          width={BADGE_RECT_WIDTH}
+          height={BADGE_RECT_HEIGHT}
+          rx={4}
+          className={ROLE_HULL_FILL_CLASS[role]}
+        />
+        <text
+          x={BADGE_OFFSET_X}
+          y={BADGE_OFFSET_Y}
+          dy="0.35em"
+          textAnchor="middle"
+          className="text-[11px] font-semibold fill-white"
+        >
+          {ROLE_BADGE_TEXT[role]}
+        </text>
+      </g>
     </g>
   );
 }
@@ -505,8 +522,7 @@ export function ChartPanel({
             x={0}
             y={4}
             textAnchor="middle"
-            fill="#D4D4D8"
-            className="font-mono text-xs"
+            className="fill-muted-foreground font-mono text-xs"
           >
             {`${rangeNm.toFixed(2)} NM`}
           </text>
