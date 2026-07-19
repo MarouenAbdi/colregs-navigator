@@ -55,6 +55,51 @@ const eslintConfig = defineConfig([
       ...vitest.configs.recommended.rules,
     },
   },
+  {
+    // Architecture boundary (CLAUDE.md: "the hard rule to enforce" for the
+    // domain-modeling-depth claim to be real, not aspirational) -- src/domain/
+    // must stay pure/framework-free, so it may never reach into src/server/,
+    // Next.js, tRPC, or Prisma.
+    files: ["src/domain/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["**/server/**", "@/server/**"],
+              message:
+                "src/domain/ must never import from src/server/ -- architecture boundary, CLAUDE.md.",
+            },
+            {
+              // A bare `next/*` glob only matches one path segment past
+              // "next/" (e.g. next/navigation) -- `next/**` is required
+              // too, so deeper subpaths like next/font/google are also
+              // caught.
+              group: ["next", "next/*", "next/**"],
+              message:
+                "src/domain/ must never import Next.js -- architecture boundary, CLAUDE.md.",
+            },
+            {
+              group: ["@trpc/*", "@trpc/**"],
+              message:
+                "src/domain/ must never import tRPC -- architecture boundary, CLAUDE.md.",
+            },
+            {
+              group: ["@prisma/*", "prisma", "prisma/*"],
+              message:
+                "src/domain/ must never import Prisma -- architecture boundary, CLAUDE.md.",
+            },
+          ],
+        },
+      ],
+      // 200 is the upper bound of CLAUDE.md's documented "~150-200 lines"
+      // split-computation-from-presentation convention -- kept at warn
+      // since file length is a proxy for a judgment call, not the
+      // judgment itself.
+      "max-lines": ["warn", { max: 200, skipBlankLines: true, skipComments: true }],
+    },
+  },
   globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
 ]);
 
