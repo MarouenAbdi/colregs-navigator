@@ -25,7 +25,7 @@ Branch names follow this project's standard `phase_branch_template` (`gsd/phase-
 - [x] **Phase 6: Scaffolding** - shadcn/ui install + Tailwind dark theme tokens + Header/Nav + page shell (Header/Main/Footer) + Footer (completed 2026-07-18)
 - [x] **Phase 7: Hero** - Direction A hero section (headline, copy, CTAs, illustrative live-classification preview card) (completed 2026-07-18)
 - [x] **Phase 8: Sandbox** - Restyle the existing interactive chart/controls/reasoning-trail to match the design exactly, same domain wiring, same interaction model (completed 2026-07-18)
-- [ ] **Phase 9: Gallery** - Gallery section embedded on the home page below Sandbox; `/gallery` route removed with a redirect to `/#gallery`
+- [x] **Phase 9: Gallery** - Gallery section embedded on the home page below Sandbox; `/gallery` route removed with a redirect to `/#gallery` (completed 2026-07-19)
 
 ## Phase Details
 
@@ -133,7 +133,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 09-04-PLAN.md — Mandatory manual browser checkpoint: redirect scroll behavior (both navigation paths), grid breakpoints, card click-through
+- [x] 09-04-PLAN.md — Mandatory manual browser checkpoint: redirect scroll behavior (both navigation paths), grid breakpoints, card click-through
 
 **UI hint**: yes
 
