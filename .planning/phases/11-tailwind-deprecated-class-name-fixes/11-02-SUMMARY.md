@@ -84,3 +84,7 @@ None - no external service configuration required.
 ---
 *Phase: 11-tailwind-deprecated-class-name-fixes*
 *Completed: 2026-07-19*
+
+## Self-Check: PASSED
+
+`eslint.config.mjs` confirmed present on disk; task commit `9e81a73` and summary commit `1e4b0da` both confirmed present in git history.
