@@ -15,9 +15,14 @@ export function CopyLinkButton() {
   const [copied, setCopied] = useState(false);
 
   async function handleClick(): Promise<void> {
-    await navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Permission-denied / insecure-context rejection -- leave the button
+      // in its normal (uncopied) state rather than an unhandled rejection.
+    }
   }
 
   return (
