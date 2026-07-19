@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Tech Debt & Stabilization
-status: executing
-stopped_at: Completed 11-02-PLAN.md
-last_updated: "2026-07-19T21:05:47.098Z"
+status: ready_to_plan
+stopped_at: Phase 11 complete (3/3) — ready to plan Phase 12
+last_updated: "2026-07-19T21:35:00.000Z"
 last_activity: 2026-07-19
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
-  percent: 25
+  completed_plans: 6
+  percent: 50
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-19)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 11 — tailwind-deprecated-class-name-fixes
+**Current focus:** Phase 12 — sandbox refactor (not yet planned)
 
 ## Current Position
 
-Phase: 11 (tailwind-deprecated-class-name-fixes) — EXECUTING
+Phase: 11 (tailwind-deprecated-class-name-fixes) — COMPLETE
 Plan: 3 of 3
-Status: Ready to execute
+Status: Ready to plan Phase 12
 Last activity: 2026-07-19
 
-Progress: [████████░░] 83%
+Progress: [██████████] 100% (Phase 11)
 
 ## Performance Metrics
 
@@ -79,6 +79,7 @@ Recent decisions affecting current work:
 - Tailwind class-name fixes and comment cleanup must both be done by hand, file-by-file/comment-by-comment — this codebase has known false-positive traps for any mechanical/regex pass.
 - [Phase 11]: outline-none renamed to outline-hidden and rounded-[0.25rem] renamed to rounded-sm across 6 components (plan 11-01) — Canonical Tailwind v4 class names; radius increase (0.25rem -> 0.375rem) accepted deliberately per D-01/D-02
 - [Phase 11]: D-03 (Plan 02): removed the now-dead better-tailwindcss/enforce-canonical-classes ignore pattern from eslint.config.mjs, since both rounded-[0.25rem] sites were renamed to rounded-sm in Plan 01; confirmed npx eslint . stays clean (0 errors)
+- [Phase 11]: D-04/D-05 (Plan 03): human confirmed in a real browser (no automated pre-check per D-05) that Hero, Header, Gallery, and Sandbox show no visual or keyboard-focus-outline regression after the outline-hidden/rounded-sm renames — Phase 11 closed, TWFX-04 complete
 
 ### Pending Todos
 
@@ -105,10 +106,10 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-19T21:05:47.084Z
-Stopped at: Completed 11-02-PLAN.md
+Last session: 2026-07-19T21:35:00.000Z
+Stopped at: Phase 11 complete (3/3) — human-verified, no regressions
 Resume file: None
 
 ## Operator Next Steps
 
-- Run `/gsd:plan-phase 10` to plan the ESLint Setup & Lint-Clean Baseline phase
+- Run `/gsd:plan-phase 12` to plan the Sandbox Refactor phase
