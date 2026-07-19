@@ -114,3 +114,7 @@ None - no external service configuration required.
 ---
 *Phase: 11-tailwind-deprecated-class-name-fixes*
 *Completed: 2026-07-19*
+
+## Self-Check: PASSED
+
+All 6 modified files and the summary file confirmed present on disk; all 4 task/summary commit hashes (`7622693`, `07d1efc`, `07cde6f`, `51ad908`) confirmed present in git history.
