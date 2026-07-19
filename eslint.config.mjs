@@ -43,6 +43,18 @@ const eslintConfig = defineConfig([
         entryPoint: "app/globals.css",
       },
     },
+    rules: {
+      // enforce-canonical-classes' "simplification" autofix has no
+      // awareness of this project's customized --radius theme scale
+      // (app/globals.css derives --radius-sm/md/lg/xl from a single
+      // --radius token via calc(), not Tailwind's stock literals) -- an
+      // arbitrary-value exact override like rounded-[0.25rem] can get
+      // silently "simplified" to a named class that resolves to a
+      // completely different computed radius in this theme, since the
+      // plugin has no way to know this project's --radius overrides
+      // exist. Ignored here rather than fixed upstream for that reason.
+      "better-tailwindcss/enforce-canonical-classes": ["warn", { ignore: ["^rounded-\\[0\\.25rem\\]$"] }],
+    },
   },
   {
     // Vitest-specific correctness rules (expect-expect, no-disabled-tests,

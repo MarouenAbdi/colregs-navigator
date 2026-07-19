@@ -286,13 +286,26 @@ than any bare `:`/`;`.
 
 ## Resolution
 
-Both critical findings and the four warnings were fixed before phase completion (commit
-`64a3944`):
+Both critical findings and the four warnings were addressed. CR-01's first fix attempt
+(commit `64a3944`) was itself silently undone before phase completion — documented below,
+since this is directly relevant to trusting any future "restored the original value" claim
+against this plugin.
 
-- **CR-01**: `ChartPanel.tsx`/`SandboxContainer.tsx` restored to `rounded-[0.25rem]` (exact
-  pixel-identical prior radius). The deliberate `rounded`→`rounded-sm` class-name change is
-  deferred to Phase 11 (Tailwind Deprecated Class-Name Fixes), where it belongs with its own
-  required manual browser verification (TWFX-04) — user confirmed this scoping explicitly.
+- **CR-01**: First attempt restored `ChartPanel.tsx`/`SandboxContainer.tsx` to
+  `rounded-[0.25rem]` (exact pixel-identical prior radius) in commit `64a3944`. The
+  immediately-following `eslint --fix --suppress-all` run (done in the same commit, to absorb
+  CR-02's newly-detected violations) silently re-collapsed `rounded-[0.25rem]` to `rounded-lg`
+  via `enforce-canonical-classes`' own autofix — which resolves to `var(--radius)` = 0.625rem
+  in this project's theme, a *third*, worse, unreviewed value (2.5x the true original, versus
+  the original bug's 1.5x). Phase-goal verification caught this by diffing the actual shipped
+  code against the commit message's claim, not by trusting the SUMMARY/commit text. Fixed
+  properly by (a) restoring `rounded-[0.25rem]` again in both files, and (b) adding a scoped
+  `ignore` pattern to the `enforce-canonical-classes` rule config in `eslint.config.mjs` for
+  this exact value, so a future `eslint --fix` run cannot silently repeat this — verified by
+  running `npm run lint` (no `--fix`) afterward and confirming no warning/error on either line.
+  The deliberate `rounded`→`rounded-sm` class-name change is still deferred to Phase 11
+  (Tailwind Deprecated Class-Name Fixes), where it belongs with its own required manual
+  browser verification (TWFX-04) — user confirmed this scoping explicitly.
 - **CR-02**: `no-stale-id-comments.mjs`'s regex broadened to also match bare
   `NN-<word>.md` doc-filename references. Re-running `eslint --fix --suppress-all` surfaced
   29 newly-detected (previously invisible) violations, now tracked in
@@ -309,7 +322,7 @@ IN-01 is a pre-existing pattern unrelated to this phase's own changes, IN-02 has
 false positive to fix).
 
 Full test suite (209/209), typecheck, and production build all re-verified passing after
-these fixes.
+these fixes, including after the CR-01 correction.
 
 ---
 

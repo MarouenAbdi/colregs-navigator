@@ -11,12 +11,12 @@ This milestone is a tech-debt/hygiene milestone, not a new-feature milestone. No
 
 - [x] **LINT-01**: ESLint is installed and configured via flat config (`eslint.config.mjs`), using `@next/eslint-plugin-next`'s `core-web-vitals` flat-config export directly — not via `eslint-config-next`, which was found during execution to crash at module-load time (`Cannot read properties of undefined (reading 'Cjs')`) against this project's locked TypeScript 7.0.2 (tsgo) compiler, since it transitively requires `typescript-eslint`. Required because Next.js 16 removed the `next lint` command entirely, and because `eslint-config-next` is currently incompatible with tsgo (verified: no published `typescript-eslint` version, including `canary`, supports TypeScript ≥6.1 as of this writing) — Done Phase 10 Plan 01
 - [x] **LINT-02**: TypeScript files (`.ts`/`.tsx`) are parsed by ESLint via `@babel/eslint-parser` (syntax-only stripping, no type information) rather than `@typescript-eslint/parser` — `@typescript-eslint/parser` was found during execution to crash on any `.ts`/`.tsx` parse attempt against TypeScript 7.0.2 (tsgo), and no published `typescript-eslint` version supports it yet. Type safety continues to be enforced separately via the existing `npm run typecheck` (`tsc --noEmit`) script, which is unaffected by this ESLint-level limitation. Implementation note: `@babel/preset-typescript`/`@babel/preset-react` are installed but the actual syntax stripping is wired via `@babel/eslint-parser`'s raw `parserOpts.plugins: ["typescript", "jsx"]`, since `@babel/eslint-parser@8`'s `babelrc:false`/`configFile:false` fast path ignores `babelOptions.presets` entirely (discovered during Phase 10 Plan 01 execution) — Done Phase 10 Plan 01
-- [ ] **LINT-03**: `eslint-plugin-better-tailwindcss` is configured for Tailwind v4-aware deprecated/canonical class-name detection, so future regressions of the kind fixed in TWFX-01/02 are caught automatically going forward
-- [ ] **LINT-04**: `@vitest/eslint-plugin` is configured, scoped via `files` to test globs only, for Vitest-specific correctness rules
+- [x] **LINT-03**: `eslint-plugin-better-tailwindcss` is configured for Tailwind v4-aware deprecated/canonical class-name detection, so future regressions of the kind fixed in TWFX-01/02 are caught automatically going forward — Done Phase 10 Plan 02
+- [x] **LINT-04**: `@vitest/eslint-plugin` is configured, scoped via `files` to test globs only, for Vitest-specific correctness rules — Done Phase 10 Plan 02
 - [x] **LINT-05**: A `npm run lint` script is wired into `package.json` alongside the existing `dev`/`build`/`test`/`typecheck` scripts — Done Phase 10 Plan 01
-- [ ] **LINT-06**: The full codebase reaches a lint-clean baseline (zero errors) via `eslint --fix` and `eslint --fix --suppress-all`, never via mass-disabling or downgrading rules to reach a green run
-- [ ] **LINT-07**: A `no-restricted-imports` rule enforces the project's documented architecture boundary — `src/domain/` must never import from `src/server/`, Next.js, tRPC, or Prisma
-- [ ] **LINT-08**: Custom `no-restricted-syntax` rules operationalize two existing CLAUDE.md conventions: no stale Phase/Plan/REQ-ID references in comments, and no raw CSS-as-template-literal strings in component files
+- [x] **LINT-06**: The full codebase reaches a lint-clean baseline (zero errors) via `eslint --fix` and `eslint --fix --suppress-all`, never via mass-disabling or downgrading rules to reach a green run — Done Phase 10 Plan 03
+- [x] **LINT-07**: A `no-restricted-imports` rule enforces the project's documented architecture boundary — `src/domain/` must never import from `src/server/`, Next.js, tRPC, or Prisma — Done Phase 10 Plan 02
+- [x] **LINT-08**: Custom `no-restricted-syntax` rules operationalize two existing CLAUDE.md conventions: no stale Phase/Plan/REQ-ID references in comments, and no raw CSS-as-template-literal strings in component files — Done Phase 10 Plan 02
 
 ### Tailwind Deprecated Class-Name Fixes
 
@@ -73,12 +73,12 @@ Populated by roadmap creation.
 |-------------|-------|--------|
 | LINT-01 | Phase 10 | Done (Plan 01) |
 | LINT-02 | Phase 10 | Done (Plan 01) |
-| LINT-03 | Phase 10 | Pending |
-| LINT-04 | Phase 10 | Pending |
+| LINT-03 | Phase 10 | Done (Plan 02) |
+| LINT-04 | Phase 10 | Done (Plan 02) |
 | LINT-05 | Phase 10 | Done (Plan 01) |
-| LINT-06 | Phase 10 | Pending |
-| LINT-07 | Phase 10 | Pending |
-| LINT-08 | Phase 10 | Pending |
+| LINT-06 | Phase 10 | Done (Plan 03) |
+| LINT-07 | Phase 10 | Done (Plan 02) |
+| LINT-08 | Phase 10 | Done (Plan 02) |
 | TWFX-01 | Phase 11 | Pending |
 | TWFX-02 | Phase 11 | Pending |
 | TWFX-03 | Phase 11 | Pending |
