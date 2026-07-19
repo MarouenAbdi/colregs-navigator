@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI Redesign (shadcn)
-status: ready_to_plan
-stopped_at: Phase 08 complete (6/6) — ready to discuss Phase 9
-last_updated: 2026-07-19T00:50:13.860Z
-last_activity: 2026-07-18 -- Phase 08 execution started
+status: "Phase 08 shipped — PR #9"
+stopped_at: Phase 8 UI-SPEC approved
+last_updated: "2026-07-19T01:35:27.267Z"
+last_activity: 2026-07-19
 progress:
   total_phases: 4
   completed_phases: 2
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-07-18)
 
 Phase: 9
 Plan: Not started
-Status: Ready to plan
+Status: Phase 08 shipped — PR #9
 Last activity: 2026-07-19
 
 Progress: [█████░░░░░] 50% (v1.1 milestone: 2/4 phases complete — Scaffolding, Hero; v1.0's 19 plans/5 phases complete and archived)
