@@ -79,8 +79,16 @@ Plans:
 
 **Plans:** 3 plans
 Plans:
+**Wave 1**
+
 - [ ] 11-01-PLAN.md — Rename outline-none -> outline-hidden (4 files) and rounded-[0.25rem] -> rounded-sm (2 files)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 11-02-PLAN.md — Remove dead eslint.config.mjs ignore pattern (D-03), project-wide lint acceptance check
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 11-03-PLAN.md — Human browser verification of focus-ring/radius changes (TWFX-04)
 
 ### Phase 12: ChartPanel/SandboxContainer Decomposition Refactor
