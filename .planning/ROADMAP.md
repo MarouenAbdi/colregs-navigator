@@ -124,8 +124,8 @@ Plans:
 
 **Wave 1** *(2 parallel plans)*
 
-- [ ] 09-01-PLAN.md — Curated scenario data correctness (fixture fixes, title/ruleLabel fields, schema migration + reseed)
-- [ ] 09-02-PLAN.md — Shared static-chart geometry extraction + parametrized Gallery mini-chart component
+- [x] 09-01-PLAN.md — Curated scenario data correctness (fixture fixes, title/ruleLabel fields, schema migration + reseed)
+- [x] 09-02-PLAN.md — Shared static-chart geometry extraction + parametrized Gallery mini-chart component
 
 **Wave 2** *(blocked on Wave 1 completion)*
 

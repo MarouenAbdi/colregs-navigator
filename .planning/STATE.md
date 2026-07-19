@@ -4,8 +4,8 @@ milestone: v1.1
 milestone_name: UI Redesign (shadcn)
 status: executing
 stopped_at: Phase 9 UI-SPEC approved
-last_updated: "2026-07-19T10:00:39.475Z"
-last_activity: 2026-07-19 -- Phase 09 planning complete
+last_updated: "2026-07-19T10:03:25.817Z"
+last_activity: 2026-07-19 -- Phase 09 execution started
 progress:
   total_phases: 4
   completed_phases: 3
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-18)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 9 — gallery
+**Current focus:** Phase 09 — gallery
 
 ## Current Position
 
-Phase: 9
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-07-19 -- Phase 09 planning complete
+Phase: 09 (gallery) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 09
+Last activity: 2026-07-19 -- Phase 09 execution started
 
 Progress: [█████░░░░░] 50% (v1.1 milestone: 2/4 phases complete — Scaffolding, Hero; v1.0's 19 plans/5 phases complete and archived)
 
