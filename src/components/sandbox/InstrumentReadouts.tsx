@@ -58,12 +58,7 @@ function Tile({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function InstrumentReadouts({
-  vesselA,
-  vesselB,
-  classification,
-  isDegenerate: _isDegenerate,
-}: InstrumentReadoutsProps) {
+export function InstrumentReadouts({ vesselA, vesselB, classification }: InstrumentReadoutsProps) {
   const { rangeNm, bearingAtoBDegrees, cpaNm, tcpaMinutes } = deriveInstrumentReadouts(
     vesselA,
     vesselB,

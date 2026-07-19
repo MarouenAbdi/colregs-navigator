@@ -20,7 +20,6 @@ export interface ChartPanelProps {
   vesselA: Vessel;
   vesselB: Vessel;
   classification: ClassificationResult; // always the LAST-GOOD result, never the raw Result<T> wrapper
-  isDegenerate: boolean; // true when the most recent classifyEncounter() call returned !ok
   onVesselPositionChange: VesselUpdateHandlers["onVesselPositionChange"];
   onVesselHeadingChange: VesselUpdateHandlers["onVesselHeadingChange"];
 }
@@ -53,7 +52,6 @@ export interface InstrumentReadoutsProps {
   vesselA: Vessel;
   vesselB: Vessel;
   classification: ClassificationResult;
-  isDegenerate: boolean;
 }
 
 // The reasoning-trail card only ever renders classification.trail/doubt/

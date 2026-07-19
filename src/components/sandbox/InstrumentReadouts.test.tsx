@@ -46,7 +46,6 @@ describe("InstrumentReadouts", () => {
         vesselA={crossingResidualBasicCase.vesselA}
         vesselB={crossingResidualBasicCase.vesselB}
         classification={crossingClassification}
-        isDegenerate={false}
       />,
     );
     expect(screen.getByText("RANGE")).toBeInTheDocument();
@@ -68,7 +67,6 @@ describe("InstrumentReadouts", () => {
         vesselA={coincidentVessel}
         vesselB={coincidentVessel}
         classification={crossingClassification}
-        isDegenerate={true}
       />,
     );
     expect(screen.getByText("0.00 NM")).toBeInTheDocument();
