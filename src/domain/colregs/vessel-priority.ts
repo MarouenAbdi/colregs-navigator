@@ -9,12 +9,12 @@ import type { VesselType } from "../vessel/vessel.js";
  * power-driven vessel keeps out of the way of sailing/fishing/NUC/RIATM
  * vessels; a sailing vessel keeps out of the way of fishing/NUC/RIATM
  * vessels; NUC and RIATM are each named as vessels that others must keep
- * clear of, with no rule text ranking one above the other (Phase 1's D-11:
+ * clear of, with no rule text ranking one above the other (D-11:
  * these are legally distinct, co-equal-priority statuses, not aliases).
  */
 // Single-quoted string literals here (not the codebase's usual double
-// quotes) intentionally match this plan's exact acceptance-criteria grep
-// pattern for the co-equal NUC/RIATM tie encoding.
+// quotes) intentionally match this module's own co-equal-priority
+// test-fixture grep pattern for the co-equal NUC/RIATM tie encoding.
 const PRIORITY: Record<VesselType, number> = {
   'not-under-command': 1,
   'restricted-in-ability-to-maneuver': 1,

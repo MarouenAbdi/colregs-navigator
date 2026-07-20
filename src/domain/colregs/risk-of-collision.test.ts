@@ -18,7 +18,7 @@ describe("riskOfCollision() Rule 7 gate (D-05-D-08)", () => {
 
   it("returns true when DCPA is exactly at the 1.0nm threshold (D-05 inclusive)", () => {
     // Sanity-check cpa()'s real output is close to the worked-math value
-    // (toBeCloseTo, per Phase 1's float-comparison convention) before
+    // (toBeCloseTo, per this codebase's own float-comparison convention) before
     // asserting riskOfCollision()'s exact `<=` boundary against the
     // literal expected value directly -- Math.sin(Math.PI) is not exactly
     // 0 in floating point, so cpa()'s computed dcpaNm lands a few ULPs

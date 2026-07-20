@@ -1,5 +1,5 @@
 /**
- * Hand-derived fixtures for `resolveDoubtGeometry()` (RSON-03).
+ * Hand-derived fixtures for `resolveDoubtGeometry()`.
  *
  * Each case pins two vessels and the `doubtBoundary` classifyEncounter()
  * already determined, plus the expected triggering vessel/relative-bearing
@@ -107,7 +107,7 @@ export const stickyHysteresisNearBoundaryCase: DoubtGeometryOkCase = {
 // values within +/-5 deg of dead ahead -- the symmetric head-on doubt
 // band). Either vessel's bearing is geometrically equivalent for
 // rendering purposes here, so vesselA is the fixed, arbitrary-but-pinned
-// convention (mirrors classify-encounter.ts's own WR-02-style tie-break
+// convention (mirrors classify-encounter.ts's own bOvertakesA/aOvertakesB-simultaneity-style tie-break
 // documentation for symmetric cases).
 export const headOnBoundaryCase: DoubtGeometryOkCase = {
   vesselA: {

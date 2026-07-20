@@ -1,16 +1,15 @@
 /**
- * resolveDoubtGeometry() -- pure doubt-triggering-vessel/bearing resolution
- * (RSON-03).
+ * resolveDoubtGeometry() -- pure doubt-triggering-vessel/bearing resolution.
  *
- * Resolves 04-RESEARCH.md's Open Question 2 / Pitfall 3: given a
- * doubt-flagged classification's `DoubtBoundary`, ChartPanel (Wave 2/3)
- * needs to know exactly which vessel's relative-bearing line/overtaking-
- * boundary wedge to render as the dashed-amber doubt overlay (D-04). The
- * reasoning trail's per-stage `facts` shape is inconsistent for this
- * purpose -- the sticky-hysteresis branch's Rule 13(d) trail entry pushes
- * `facts: {}` and cannot answer this question at all -- so this function
- * recomputes geometry independently from `vesselA`/`vesselB` rather than
- * reading the trail, and takes no `previous` argument.
+ * Resolves an open design question: given a doubt-flagged classification's
+ * `DoubtBoundary`, ChartPanel needs to know exactly which vessel's
+ * relative-bearing line/overtaking-boundary wedge to render as the
+ * dashed-amber doubt overlay (D-04). The reasoning trail's per-stage
+ * `facts` shape is inconsistent for this purpose -- the sticky-hysteresis
+ * branch's Rule 13(d) trail entry pushes `facts: {}` and cannot answer this
+ * question at all -- so this function recomputes geometry independently
+ * from `vesselA`/`vesselB` rather than reading the trail, and takes no
+ * `previous` argument.
  *
  * Composes `relativeBearing()` and classify-encounter.ts's own
  * `OVERTAKING_BOUNDARY_DEGREES` constant exclusively -- no re-derived
@@ -61,7 +60,7 @@ export function resolveDoubtGeometry(
     Math.abs(rbBtoAResult.value) - OVERTAKING_BOUNDARY_DEGREES,
   );
   // `<=` favors vesselA on an exact tie, consistent with classify-
-  // encounter.ts's own documented WR-02 tie-break style.
+  // encounter.ts's own documented bOvertakesA/aOvertakesB tie-break style.
   if (distA <= distB) {
     return ok({ vessel: "vesselA", relativeBearingDegrees: rbAtoBResult.value });
   }
