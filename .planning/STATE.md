@@ -4,8 +4,8 @@ milestone: v1.2
 milestone_name: Tech Debt & Stabilization
 status: executing
 stopped_at: Phase 12 context gathered
-last_updated: "2026-07-20T08:18:34.448Z"
-last_activity: 2026-07-20 -- Phase 12 planning complete
+last_updated: "2026-07-20T08:24:42.439Z"
+last_activity: 2026-07-20 -- Phase 12 execution started
 progress:
   total_phases: 4
   completed_phases: 2
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-19)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 12 — chartpanel/sandboxcontainer decomposition refactor
+**Current focus:** Phase 12 — chartpanel-sandboxcontainer-decomposition-refactor
 
 ## Current Position
 
-Phase: 12
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-07-20 -- Phase 12 planning complete
+Phase: 12 (chartpanel-sandboxcontainer-decomposition-refactor) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 12
+Last activity: 2026-07-20 -- Phase 12 execution started
 
 Progress: [██████████] 100% (Phase 11)
 
