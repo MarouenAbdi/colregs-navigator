@@ -16,7 +16,7 @@ import type { Vessel } from "../../domain/vessel/vessel.js";
 import { curatedScenarios } from "./curated-scenarios.js";
 
 describe("curatedScenarios", () => {
-  it("Test 1: length is between 5 and 8 inclusive (SCEN-03's range)", () => {
+  it("length is between 5 and 8 inclusive", () => {
     expect(curatedScenarios.length).toBeGreaterThanOrEqual(5);
     expect(curatedScenarios.length).toBeLessThanOrEqual(8);
   });
