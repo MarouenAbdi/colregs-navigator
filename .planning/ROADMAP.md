@@ -77,7 +77,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 14-04-PLAN.md — Environment-gated vercel-build deploy script (prisma generate -> gated migrate deploy -> next build --webpack), locally verified
+- [x] 14-04-PLAN.md — Environment-gated vercel-build deploy script (prisma generate -> gated migrate deploy -> next build --webpack), locally verified
 
 ### Phase 15: Deploy & Verify
 
@@ -112,6 +112,6 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15
 | 11. Tailwind Deprecated Class-Name Fixes | v1.2 | 3/3 | Complete    | 2026-07-20 |
 | 12. ChartPanel/SandboxContainer Decomposition Refactor | v1.2 | 4/4 | Complete   | 2026-07-20 |
 | 13. Comment Cleanup | v1.2 | 8/8 | Complete | 2026-07-20 |
-| 14. Pipeline & Hooks | v1.3 | 3/4 | In Progress | - |
+| 14. Pipeline & Hooks | v1.3 | 4/4 | Complete | 2026-07-20 |
 | 15. Deploy & Verify | v1.3 | 0/TBD | Not started | - |
 </content>
