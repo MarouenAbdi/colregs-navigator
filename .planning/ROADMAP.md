@@ -32,7 +32,7 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full phase details (goals, succes
 **Milestone Goal:** Demonstrate professional engineering hygiene — clean lint, clean deprecated-class-name usage, clean file structure, clean comment history — as a portfolio signal, with zero new user-facing features and zero change to domain logic outcomes.
 
 - [x] **Phase 10: ESLint Setup & Lint-Clean Baseline** - Install ESLint (flat config), wire `npm run lint`, and reach a lint-clean baseline with architecture-boundary and convention-enforcing custom rules (completed 2026-07-19)
-- [ ] **Phase 11: Tailwind Deprecated Class-Name Fixes** - Replace deprecated Tailwind v3 class names with v4 canonical equivalents in the 6 flagged files, verified by hand
+- [x] **Phase 11: Tailwind Deprecated Class-Name Fixes** - Replace deprecated Tailwind v3 class names with v4 canonical equivalents in the 6 flagged files, verified by hand (completed 2026-07-19)
 - [ ] **Phase 12: ChartPanel/SandboxContainer Decomposition Refactor** - Decompose the two oversized Sandbox files into focused modules, preserving all existing behavior and hit-testing
 - [ ] **Phase 13: Comment Cleanup** - Rewrite stale Phase/Plan/REQ-ID comment references by hand, preserving substantive WHY content
 
@@ -77,7 +77,7 @@ Plans:
   3. Non-Tailwind text and comments containing similar substrings (e.g. "Grounded in", "rounded to clean numbers") are unchanged.
   4. A human confirms in a real browser that Hero, Header, Gallery, and Sandbox show no visual or keyboard-focus-outline regression after the fixes.
 
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 **Wave 1**
 
@@ -89,7 +89,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 11-03-PLAN.md — Human browser verification of focus-ring/radius changes (TWFX-04)
+- [x] 11-03-PLAN.md — Human browser verification of focus-ring/radius changes (TWFX-04)
 
 ### Phase 12: ChartPanel/SandboxContainer Decomposition Refactor
 
@@ -132,6 +132,6 @@ Phases execute in numeric order: 10 → 11 → 12 → 13
 | 8. Sandbox | v1.1 | 6/6 | Complete | 2026-07-18 |
 | 9. Gallery | v1.1 | 4/4 | Complete | 2026-07-19 |
 | 10. ESLint Setup & Lint-Clean Baseline | v1.2 | 3/3 | Complete    | 2026-07-19 |
-| 11. Tailwind Deprecated Class-Name Fixes | v1.2 | 2/3 | In Progress|  |
+| 11. Tailwind Deprecated Class-Name Fixes | v1.2 | 3/3 | Complete   | 2026-07-19 |
 | 12. ChartPanel/SandboxContainer Decomposition Refactor | v1.2 | 0/TBD | Not started | - |
 | 13. Comment Cleanup | v1.2 | 0/TBD | Not started | - |
