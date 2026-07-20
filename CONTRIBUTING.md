@@ -83,12 +83,13 @@ commit, not a single end-of-day squash.
 A PR is expected to pass all four required CI checks defined in `.github/workflows/ci.yml`:
 `lint`, `typecheck`, `test`, `build`.
 
-Branch protection status on `main`: as of this writing, whether these four checks are configured
-as *required* (blocking merge on failure) via GitHub branch protection depends on a decision made
-in a separate, later plan (repo-visibility tradeoff -- private-repo branch protection requires a
-paid GitHub tier on the Free plan). If that plan has not yet run, treat all four checks as
-expected-but-not-yet-mechanically-enforced: a red run should still block merging by convention,
-even before/unless branch protection is turned on to enforce it automatically.
+Branch protection status on `main`: these four checks **are** configured as required status
+checks via GitHub branch protection (`required_status_checks.contexts: ["lint", "typecheck",
+"test", "build"]`, `strict: true`), with `enforce_admins: true` so this is not bypassable even
+by the repo owner's own admin access. A red run on any of the four checks mechanically blocks
+merging into `main` -- this is enforced by GitHub itself, not just a convention. The repo is
+public, which is what unlocked branch protection on GitHub's Free plan (private repos on the
+Free plan cannot configure branch protection or Repository Rulesets).
 
 ## Rollback
 
