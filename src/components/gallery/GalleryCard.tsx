@@ -48,7 +48,8 @@ export function GalleryCard({ id, title, ruleLabel, description, vesselA, vessel
       aria-label={`Load ${title} scenario into the sandbox`}
       className="
         group block rounded-xl
-        focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none
+        focus-visible:ring-2 focus-visible:ring-ring
+        focus-visible:outline-hidden
       "
     >
       <Card className="

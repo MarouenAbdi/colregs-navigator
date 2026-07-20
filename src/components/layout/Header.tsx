@@ -75,7 +75,7 @@ export function Header() {
                   focus-visible:text-accent focus-visible:ring-2
                   focus-visible:ring-accent/60 focus-visible:ring-offset-2
                   focus-visible:ring-offset-background
-                  focus-visible:outline-none
+                  focus-visible:outline-hidden
                 "
               >
                 {label}

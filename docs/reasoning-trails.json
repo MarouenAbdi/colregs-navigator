@@ -1,0 +1,343 @@
+{
+  "meta": {
+    "description": "This catalog enumerates every reasoning-trail shape classifyEncounter() can produce, for design reference.",
+    "generatedFrom": [
+      "src/domain/colregs/classify-encounter.ts",
+      "src/domain/colregs/types.ts",
+      "src/domain/colregs/vessel-priority.ts",
+      "src/domain/colregs/risk-of-collision.ts",
+      "src/domain/vessel/vessel.ts",
+      "src/domain/colregs/classify-encounter.fixtures.ts",
+      "src/components/sandbox/ReasoningTrail.tsx",
+      "src/domain/geometry/relative-bearing.ts",
+      "src/domain/geometry/cpa.ts",
+      "src/domain/geometry/bearing.ts",
+      "src/domain/shared/result.ts"
+    ],
+    "note": "All `text` values below are byte-verbatim copies of literal strings in classify-encounter.ts -- there is no runtime string templating in this engine, only the `facts` object varies numerically/categorically per invocation. Where a trail entry's text has more than one literal variant reachable within the same shape (Rule 7's risk/no-risk pair), `text` is an object keyed by the condition instead of a plain string; every value inside that object is still a verbatim literal from the source."
+  },
+  "types": {
+    "encounterType": ["head-on", "crossing", "overtaking"],
+    "vesselLabel": ["vesselA", "vesselB"],
+    "doubtBoundary": ["near-overtaking-crossing-boundary", "near-head-on-boundary"],
+    "vesselType": [
+      "power-driven",
+      "sailing",
+      "fishing",
+      "not-under-command",
+      "restricted-in-ability-to-maneuver"
+    ],
+    "vesselPriority": {
+      "not-under-command": 1,
+      "restricted-in-ability-to-maneuver": 1,
+      "fishing": 2,
+      "sailing": 3,
+      "power-driven": 4
+    },
+    "reasoningTrailEntryShape": {
+      "ruleId": "string",
+      "text": "string",
+      "facts": "Record<string, number|string|boolean>"
+    },
+    "classificationResultShape": {
+      "encounterType": "EncounterType",
+      "riskOfCollision": "boolean",
+      "giveWay": "VesselLabel | null",
+      "standOn": "VesselLabel | null",
+      "doubt": "boolean",
+      "doubtBoundary": "DoubtBoundary | undefined (optional)",
+      "trail": "ReasoningTrailEntry[]"
+    },
+    "factKeys": [
+      { "key": "riskOfCollision", "description": "Risk of collision" },
+      { "key": "tcpaMinutes", "description": "TCPA" },
+      { "key": "dcpaNm", "description": "DCPA" },
+      { "key": "relativeBearingAtoB", "description": "Rel. bearing A→B" },
+      { "key": "relativeBearingBtoA", "description": "Rel. bearing B→A" },
+      { "key": "vesselAType", "description": "Vessel A type" },
+      { "key": "vesselBType", "description": "Vessel B type" }
+    ]
+  },
+  "constants": {
+    "overtakingBoundaryDegrees": 112.5,
+    "doubtBandDegrees": 5,
+    "riskOfCollisionDcpaThresholdNm": 1.0
+  },
+  "stage0Failures": [
+    {
+      "reason": "coincident-position",
+      "description": "Propagated unchanged from relativeBearing() (via bearing()) when the two vessels occupy the same position. classifyEncounter() returns this Result failure before pushing anything to trail -- no trail is ever built.",
+      "exampleFixture": "stage0CoincidentPropagationCase"
+    },
+    {
+      "reason": "invalid-input",
+      "description": "Propagated unchanged from relativeBearing()/cpa() when a non-finite numeric field (position, heading, or speed) is detected. classifyEncounter() returns this Result failure before pushing anything to trail -- no trail is ever built.",
+      "exampleFixture": null
+    }
+  ],
+  "reasoningTrails": [
+    {
+      "id": "overtaking-sticky-hysteresis",
+      "encounterType": "overtaking",
+      "summary": "previous encounter type was 'overtaking' and Rule 7's risk-of-collision gate still holds, so the classification stays overtaking via hysteresis without re-testing the 112.5 degree boundary.",
+      "riskOfCollision": true,
+      "giveWay": "vesselB when |relativeBearingAtoB| >= |relativeBearingBtoA|, otherwise vesselA (direction tie-break, not a distinct trail-text shape)",
+      "standOn": "the vessel not selected by the giveWay tie-break above",
+      "doubt": "depends",
+      "doubtBoundary": "near-overtaking-crossing-boundary (when doubt is true)",
+      "trail": [
+        {
+          "ruleId": "Rule 7",
+          "text": "Risk of collision exists: the vessels are closing (positive TCPA) with a projected closest-approach distance at or under the 1.0nm threshold.",
+          "facts": ["riskOfCollision", "tcpaMinutes", "dcpaNm"]
+        },
+        {
+          "ruleId": "Rule 13(d)",
+          "text": "Overtaking situation persists (once overtaking, always overtaking until finally past and clear) -- previous classification was overtaking and Rule 7 risk of collision still holds.",
+          "facts": []
+        },
+        {
+          "ruleId": "Rule 13(a)",
+          "text": "Rule 18 does not apply to an overtaking situation: Rule 13(a) overrides Rules 4-18, so the overtaking vessel gives way regardless of vessel type.",
+          "facts": ["vesselAType", "vesselBType"]
+        }
+      ],
+      "exampleFixtures": ["overtakingHysteresisHoldsCase", "overtakingHysteresisNearBoundaryCase"]
+    },
+    {
+      "id": "overtaking-fresh-b-gives-way",
+      "encounterType": "overtaking",
+      "summary": "Fresh dispatch (no sticky hysteresis in effect): bearing from A to B exceeds 112.5 degrees abaft A's beam, so vessel B is overtaking vessel A.",
+      "riskOfCollision": "either",
+      "giveWay": "vesselB",
+      "standOn": "vesselA",
+      "doubt": "depends",
+      "doubtBoundary": "near-overtaking-crossing-boundary (when doubt is true)",
+      "trail": [
+        {
+          "ruleId": "Rule 7",
+          "text": {
+            "whenRiskOfCollision": "Risk of collision exists: the vessels are closing (positive TCPA) with a projected closest-approach distance at or under the 1.0nm threshold.",
+            "whenNoRisk": "No risk of collision: either the vessels are not closing, closest approach already occurred, or the projected closest-approach distance exceeds the 1.0nm threshold."
+          },
+          "facts": ["riskOfCollision", "tcpaMinutes", "dcpaNm"]
+        },
+        {
+          "ruleId": "Rule 13(a)-(b)",
+          "text": "Vessel B is overtaking Vessel A (bearing from A to B is more than 22.5 degrees abaft A's beam).",
+          "facts": ["relativeBearingAtoB"]
+        },
+        {
+          "ruleId": "Rule 13(a)",
+          "text": "Rule 18 does not apply to an overtaking situation: Rule 13(a) overrides Rules 4-18, so the overtaking vessel gives way regardless of vessel type.",
+          "facts": ["vesselAType", "vesselBType"]
+        }
+      ],
+      "exampleFixtures": [
+        "overtakingBothDirectionsCase",
+        "overtakingRule18NoOverrideCase",
+        "doubtBandJustOverOvertakingBoundaryCase"
+      ]
+    },
+    {
+      "id": "overtaking-fresh-a-gives-way",
+      "encounterType": "overtaking",
+      "summary": "Fresh dispatch where bearing from B to A exceeds 112.5 degrees abaft B's beam (aOvertakesB true, or the WR-02 both-true tie-break resolved the other way), so vessel A is overtaking vessel B.",
+      "riskOfCollision": "either",
+      "giveWay": "vesselA",
+      "standOn": "vesselB",
+      "doubt": "depends",
+      "doubtBoundary": "near-overtaking-crossing-boundary (when doubt is true)",
+      "trail": [
+        {
+          "ruleId": "Rule 7",
+          "text": {
+            "whenRiskOfCollision": "Risk of collision exists: the vessels are closing (positive TCPA) with a projected closest-approach distance at or under the 1.0nm threshold.",
+            "whenNoRisk": "No risk of collision: either the vessels are not closing, closest approach already occurred, or the projected closest-approach distance exceeds the 1.0nm threshold."
+          },
+          "facts": ["riskOfCollision", "tcpaMinutes", "dcpaNm"]
+        },
+        {
+          "ruleId": "Rule 13(a)-(b)",
+          "text": "Vessel A is overtaking Vessel B (bearing from B to A is more than 22.5 degrees abaft B's beam).",
+          "facts": ["relativeBearingBtoA"]
+        },
+        {
+          "ruleId": "Rule 13(a)",
+          "text": "Rule 18 does not apply to an overtaking situation: Rule 13(a) overrides Rules 4-18, so the overtaking vessel gives way regardless of vessel type.",
+          "facts": ["vesselAType", "vesselBType"]
+        }
+      ],
+      "exampleFixtures": ["overtakingBothTrueDivergingCase"]
+    },
+    {
+      "id": "head-on-rule18-override",
+      "encounterType": "head-on",
+      "summary": "Not overtaking, both relative bearings are within +/-5 degrees (head-on sector), and the two vessels' Rule 18 priority tiers differ, so the lower-priority vessel type is assigned give-way.",
+      "riskOfCollision": "either",
+      "giveWay": "the vessel whose type has the higher PRIORITY number (lower real-world priority) per vesselPriority() -- populated at Stage 6, not null",
+      "standOn": "the other vessel (the one with the lower PRIORITY number / higher real-world priority)",
+      "doubt": true,
+      "doubtBoundary": "near-head-on-boundary",
+      "trail": [
+        {
+          "ruleId": "Rule 7",
+          "text": {
+            "whenRiskOfCollision": "Risk of collision exists: the vessels are closing (positive TCPA) with a projected closest-approach distance at or under the 1.0nm threshold.",
+            "whenNoRisk": "No risk of collision: either the vessels are not closing, closest approach already occurred, or the projected closest-approach distance exceeds the 1.0nm threshold."
+          },
+          "facts": ["riskOfCollision", "tcpaMinutes", "dcpaNm"]
+        },
+        {
+          "ruleId": "Rule 13(a)-(b)",
+          "text": "Not overtaking in either direction -- both relative bearings are forward of the 112.5 degree abaft-the-beam threshold.",
+          "facts": ["relativeBearingAtoB", "relativeBearingBtoA"]
+        },
+        {
+          "ruleId": "Rule 14(a)-(b)",
+          "text": "Head-on: the vessels are meeting on reciprocal or nearly reciprocal courses, each seeing the other ahead or nearly ahead.",
+          "facts": ["relativeBearingAtoB", "relativeBearingBtoA"]
+        },
+        {
+          "ruleId": "Rule 18(a)-(c)",
+          "text": "Rule 18 hierarchy applies even to a head-on encounter: the lower-priority vessel type must give way.",
+          "facts": ["vesselAType", "vesselBType"]
+        }
+      ],
+      "exampleFixtures": ["headOnRule18OverrideCase"]
+    },
+    {
+      "id": "head-on-mutual-obligation",
+      "encounterType": "head-on",
+      "summary": "Not overtaking, both relative bearings are within +/-5 degrees (head-on sector), and the two vessels' Rule 18 priority tiers are equal (including the not-under-command/restricted-in-ability-to-maneuver tie), so no give-way/stand-on is assigned -- mutual obligation stands.",
+      "riskOfCollision": "either",
+      "giveWay": null,
+      "standOn": null,
+      "doubt": true,
+      "doubtBoundary": "near-head-on-boundary",
+      "trail": [
+        {
+          "ruleId": "Rule 7",
+          "text": {
+            "whenRiskOfCollision": "Risk of collision exists: the vessels are closing (positive TCPA) with a projected closest-approach distance at or under the 1.0nm threshold.",
+            "whenNoRisk": "No risk of collision: either the vessels are not closing, closest approach already occurred, or the projected closest-approach distance exceeds the 1.0nm threshold."
+          },
+          "facts": ["riskOfCollision", "tcpaMinutes", "dcpaNm"]
+        },
+        {
+          "ruleId": "Rule 13(a)-(b)",
+          "text": "Not overtaking in either direction -- both relative bearings are forward of the 112.5 degree abaft-the-beam threshold.",
+          "facts": ["relativeBearingAtoB", "relativeBearingBtoA"]
+        },
+        {
+          "ruleId": "Rule 14(a)-(b)",
+          "text": "Head-on: the vessels are meeting on reciprocal or nearly reciprocal courses, each seeing the other ahead or nearly ahead.",
+          "facts": ["relativeBearingAtoB", "relativeBearingBtoA"]
+        },
+        {
+          "ruleId": "Rule 18(a)-(c)",
+          "text": "Rule 18 does not apply: both vessels share the same priority tier (including the not-under-command/restricted-in-ability-to-maneuver tie) -- mutual obligation stands, no give-way/stand-on assigned.",
+          "facts": ["vesselAType", "vesselBType"]
+        }
+      ],
+      "exampleFixtures": [
+        "headOnGenuineCase",
+        "headOnBoundaryInclusiveCase",
+        "headOnNucRiatmTieCase",
+        "headOnInDoubtCase"
+      ]
+    },
+    {
+      "id": "crossing-rule18-override",
+      "encounterType": "crossing",
+      "summary": "Not overtaking, not head-on (residual Rule 15 crossing), and the geometric give-way vessel's type outranks the geometric stand-on vessel's type in the Rule 18 hierarchy, so the verdict is flipped.",
+      "riskOfCollision": "either",
+      "giveWay": "the geometric baseline's stand-on label, swapped by the Rule 18 override (i.e. the vessel whose type outranks the other's)",
+      "standOn": "the geometric baseline's give-way label, swapped by the Rule 18 override",
+      "doubt": "depends",
+      "doubtBoundary": "near-overtaking-crossing-boundary (when doubt is true)",
+      "trail": [
+        {
+          "ruleId": "Rule 7",
+          "text": {
+            "whenRiskOfCollision": "Risk of collision exists: the vessels are closing (positive TCPA) with a projected closest-approach distance at or under the 1.0nm threshold.",
+            "whenNoRisk": "No risk of collision: either the vessels are not closing, closest approach already occurred, or the projected closest-approach distance exceeds the 1.0nm threshold."
+          },
+          "facts": ["riskOfCollision", "tcpaMinutes", "dcpaNm"]
+        },
+        {
+          "ruleId": "Rule 13(a)-(b)",
+          "text": "Not overtaking in either direction -- both relative bearings are forward of the 112.5 degree abaft-the-beam threshold.",
+          "facts": ["relativeBearingAtoB", "relativeBearingBtoA"]
+        },
+        {
+          "ruleId": "Rule 14(a)-(b)",
+          "text": "Not head-on -- at least one vessel does not see the other ahead or nearly ahead.",
+          "facts": ["relativeBearingAtoB", "relativeBearingBtoA"]
+        },
+        {
+          "ruleId": "Rule 15",
+          "text": "Crossing: the vessel that has the other on her own starboard side must keep out of the way.",
+          "facts": ["relativeBearingAtoB"]
+        },
+        {
+          "ruleId": "Rule 18(a)-(c)",
+          "text": "Rule 18 override: the geometric give-way vessel outranks the geometric stand-on vessel in the Rule 18 hierarchy -- verdict flipped.",
+          "facts": ["vesselAType", "vesselBType"]
+        }
+      ],
+      "exampleFixtures": ["crossingRule18OverrideCase"]
+    },
+    {
+      "id": "crossing-no-rule18-override",
+      "encounterType": "crossing",
+      "summary": "Same dispatch path as crossing-rule18-override, but the geometric give-way vessel's type does not outrank the stand-on vessel's type, so the geometric baseline stands unmodified.",
+      "riskOfCollision": "either",
+      "giveWay": "vesselA if relativeBearingAtoB > 0, otherwise vesselB (geometric baseline)",
+      "standOn": "the other vessel from the geometric baseline",
+      "doubt": "depends",
+      "doubtBoundary": "near-overtaking-crossing-boundary (when doubt is true)",
+      "trail": [
+        {
+          "ruleId": "Rule 7",
+          "text": {
+            "whenRiskOfCollision": "Risk of collision exists: the vessels are closing (positive TCPA) with a projected closest-approach distance at or under the 1.0nm threshold.",
+            "whenNoRisk": "No risk of collision: either the vessels are not closing, closest approach already occurred, or the projected closest-approach distance exceeds the 1.0nm threshold."
+          },
+          "facts": ["riskOfCollision", "tcpaMinutes", "dcpaNm"]
+        },
+        {
+          "ruleId": "Rule 13(a)-(b)",
+          "text": "Not overtaking in either direction -- both relative bearings are forward of the 112.5 degree abaft-the-beam threshold.",
+          "facts": ["relativeBearingAtoB", "relativeBearingBtoA"]
+        },
+        {
+          "ruleId": "Rule 14(a)-(b)",
+          "text": "Not head-on -- at least one vessel does not see the other ahead or nearly ahead.",
+          "facts": ["relativeBearingAtoB", "relativeBearingBtoA"]
+        },
+        {
+          "ruleId": "Rule 15",
+          "text": "Crossing: the vessel that has the other on her own starboard side must keep out of the way.",
+          "facts": ["relativeBearingAtoB"]
+        },
+        {
+          "ruleId": "Rule 18(a)-(c)",
+          "text": "Rule 18 does not override the geometric baseline -- the geometric give-way vessel's type does not outrank the stand-on vessel's type.",
+          "facts": ["vesselAType", "vesselBType"]
+        }
+      ],
+      "exampleFixtures": [
+        "crossingResidualBasicCase",
+        "headOnPitfall2OneSidedCase",
+        "crossingRule18NonOverrideCase",
+        "crossingSailingPriorityCase",
+        "crossingNotUnderCommandCase",
+        "doubtBandNearOvertakingBoundaryCase",
+        "justOutsideHeadOnSectorCase",
+        "deadAheadNonReciprocalCase",
+        "noClosureDoesNotPropagateCase"
+      ]
+    }
+  ]
+}
