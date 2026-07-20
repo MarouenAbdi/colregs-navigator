@@ -104,7 +104,7 @@ Plans:
   4. `VesselGroup.tsx` (hull polygon, rotate-handle circle, `pointerEvents="none"` badge overlay) is extracted as one atomic unit; dragging and rotating both vessels at heading 0 in a real browser shows no hit-testing regression, confirmed by both the point-in-polygon regression check and manual testing.
   5. Both `ChartPanel.tsx` and `SandboxContainer.tsx` land under the project's ~150-200 line convention, and the full existing Vitest/RTL suite passes with only import-path updates (no behavior-driven test changes).
 
-**Plans:** 2/4 plans executed
+**Plans:** 3/4 plans executed
 Plans:
 **Wave 1**
 
@@ -113,7 +113,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion — shares ChartPanel.tsx with 12-01)*
 
-- [ ] 12-03-PLAN.md — Extract useContainerSize() hook + ChartBackdrop.tsx from ChartPanel.tsx
+- [x] 12-03-PLAN.md — Extract useContainerSize() hook + ChartBackdrop.tsx from ChartPanel.tsx
 
 **Wave 3** *(blocked on Wave 2 completion — VesselGroup.tsx lands last per D-03)*
 
@@ -146,5 +146,5 @@ Phases execute in numeric order: 10 → 11 → 12 → 13
 | 9. Gallery | v1.1 | 4/4 | Complete | 2026-07-19 |
 | 10. ESLint Setup & Lint-Clean Baseline | v1.2 | 3/3 | Complete    | 2026-07-19 |
 | 11. Tailwind Deprecated Class-Name Fixes | v1.2 | 3/3 | Complete    | 2026-07-20 |
-| 12. ChartPanel/SandboxContainer Decomposition Refactor | v1.2 | 2/4 | In Progress|  |
+| 12. ChartPanel/SandboxContainer Decomposition Refactor | v1.2 | 3/4 | In Progress|  |
 | 13. Comment Cleanup | v1.2 | 0/TBD | Not started | - |
