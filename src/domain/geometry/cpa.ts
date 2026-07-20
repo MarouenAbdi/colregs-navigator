@@ -2,9 +2,12 @@ import type { Vessel } from "../vessel/vessel.js";
 import { err, ok, type Result } from "../shared/result.js";
 
 /**
- * cpa()/tcpa() — closest point of approach vector math. Resolves
- * RESEARCH.md Open Questions 1 (negative TCPA) and 2 (epsilon threshold),
- * both locked explicitly here rather than left ambiguous:
+ * cpa()/tcpa() — closest point of approach vector math. Resolves two open
+ * questions this project settled during design: how to handle a negative
+ * TCPA (closest approach already happened), and what epsilon threshold
+ * distinguishes a genuine parallel/matching course from floating-point
+ * noise in the relative-velocity vector, both locked explicitly here
+ * rather than left ambiguous:
  *  - Negative tcpaMinutes is returned as a normal ok() result (closest
  *    approach was in the past) — never clamped to 0, never a degenerate tag.
  *  - "No closure" (parallel/matching-course vessels) is detected via an
@@ -13,7 +16,7 @@ import { err, ok, type Result } from "../shared/result.js";
  *    velocity components would make exact equality unreliable).
  */
 
-// Squared-knots units. Resolves RESEARCH.md Open Question 2: a raw
+// Squared-knots units. Resolves the epsilon-threshold question: a raw
 // `vDotV === 0` check is fragile against floating-point noise from
 // sin/cos-derived velocity components, so use a small epsilon threshold
 // instead of exact equality (D-06's "≈ zero", not "=== zero").
@@ -73,8 +76,9 @@ export function cpa(
   const dcpaNm = Math.hypot(posAtCpa.x, posAtCpa.y);
 
   // Negative tcpaMinutes is intentionally allowed through as a valid ok()
-  // result (closest approach was in the past) — resolves RESEARCH.md Open
-  // Question 1 per its own recommendation, consistent with D-04's "return
-  // raw" philosophy. Do not clamp to 0; do not add a new tagged reason.
+  // result (closest approach was in the past) — this resolves the
+  // negative-TCPA question per its own recommendation, consistent with
+  // D-04's "return raw" philosophy. Do not clamp to 0; do not add a new
+  // tagged reason.
   return ok({ tcpaMinutes, dcpaNm });
 }

@@ -9,8 +9,9 @@
 export type DegenerateCaseReason =
   | "coincident-position" // D-07: bearing/relativeBearing when positions are identical
   | "no-closure" // D-06: cpa/tcpa when relative velocity is ~zero (parallel/matching course)
-  // Reserved for Plans 02-03's Number.isFinite input guard (T-01-02/T-01-03).
-  // No function in this plan emits this reason yet — it exists so geometry
+  // Reserved for a future Number.isFinite input guard on the geometry
+  // functions (see bearing.ts/relative-bearing.ts's own guards) --
+  // No function in this file emits this reason yet — it exists so geometry
   // functions can defensively reject NaN/Infinity inputs that bypass
   // VesselSchema via direct object-literal construction.
   | "invalid-input";
@@ -32,8 +33,9 @@ export function err<T>(
 
 /**
  * Exhaustiveness guard for `switch (result.reason)` handling once
- * `DegenerateCaseReason` grows past a couple of variants (used by Phase 2+
- * consumers, not this plan itself).
+ * `DegenerateCaseReason` grows past a couple of variants (used by the
+ * COLREGS rules-engine consumers built on top of this module, not by this
+ * file itself).
  */
 export function assertUnreachable(x: never): never {
   throw new Error(`Unhandled case: ${JSON.stringify(x)}`);
