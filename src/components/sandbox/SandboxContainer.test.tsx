@@ -24,7 +24,7 @@ import {
 import type { Position } from "../../domain/vessel/vessel.js";
 import type { VesselLabel } from "../../domain/colregs/types.js";
 
-// 05-03 Task 2: mock next/navigation's useRouter and the trpc client's
+// Mock next/navigation's useRouter and the trpc client's
 // scenario.create mutation so Save's mutate-args + onSuccess-redirect +
 // isPending-disables-button behaviors can be asserted without a real
 // tRPC/HTTP round-trip.
@@ -229,7 +229,7 @@ describe("SandboxContainer", () => {
     expect(screen.queryByText("Unable to classify")).not.toBeInTheDocument();
   });
 
-  // 05-03 Task 1: seed-from-saved-scenario (SCEN-01, D-02, Assumption A3)
+  // Seed-from-saved-scenario (SCEN-01, D-02, Assumption A3)
   it("seeds the initial classification from initialScenario vessels instead of the default crossing fixture", () => {
     render(
       <SandboxContainer
@@ -274,7 +274,7 @@ describe("SandboxContainer", () => {
     expect(screen.queryByText("Unable to classify")).not.toBeInTheDocument();
   });
 
-  it("does not show any chip as active when a saved/shared scenario is loaded, even though it defaults to Classic crossing on the plain seedless route (code review CR-02)", () => {
+  it("does not show any chip as active when a saved/shared scenario is loaded, even though it defaults to Classic crossing on the plain seedless route", () => {
     // Regression test: activeChipId used to default to "classic-crossing"
     // unconditionally, so every /s/[shareId] page showed that chip as
     // active/pressed regardless of the actually-loaded (arbitrary) vessel
@@ -320,7 +320,7 @@ describe("SandboxContainer", () => {
     expect(screen.getByText("Loaded from a shared link.")).toBeInTheDocument();
   });
 
-  // 05-03 Task 2: Save button wired to scenario.create + redirect (SCEN-01)
+  // Save button wired to scenario.create + redirect (SCEN-01)
   it("calls scenario.create's mutate with the current vesselA/vesselB when Save is clicked", async () => {
     const user = userEvent.setup();
     render(<SandboxContainer />);

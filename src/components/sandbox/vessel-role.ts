@@ -1,8 +1,8 @@
 /**
- * Shared give-way/stand-on/mutual role derivation (04-01). Reused by
- * ChartPanel (hull color coding, D-02) and ReasoningPanel (role badges) so
- * both components agree on the same role for a given vessel/classification
- * pair rather than each re-deriving it independently.
+ * Shared give-way/stand-on/mutual role derivation. Reused by ChartPanel
+ * (hull color coding, D-02) and ReasoningPanel (role badges) so both
+ * components agree on the same role for a given vessel/classification pair
+ * rather than each re-deriving it independently.
  */
 
 import type { ClassificationResult, VesselLabel } from "../../domain/colregs/types.js";
@@ -45,10 +45,9 @@ export const ROLE_BADGE_TEXT: Record<VesselRole, string> = {
   mutual: "MUTUAL",
 };
 
-// 10%/35% opacity convention established by Phase 7's rule-banner
-// precedent (bg-primary/10, border-primary/30) -- reused here, not
-// reinvented, per 08-UI-SPEC.md's Color section measurement of the design
-// mock's own badge tints.
+// 10%/35% opacity convention established by the Hero rule-banner precedent
+// (bg-primary/10, border-primary/30) -- reused here, not reinvented,
+// matching the design mock's own badge-tint measurements.
 export const ROLE_BADGE_CLASSNAME: Record<VesselRole, string> = {
   "give-way": "bg-give-way/10 border-give-way/35 text-give-way",
   "stand-on": "bg-stand-on/10 border-stand-on/35 text-stand-on",
