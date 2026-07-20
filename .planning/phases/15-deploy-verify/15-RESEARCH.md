@@ -319,17 +319,19 @@ npx vercel promote <newer-deployment-id> --token "$VERCEL_TOKEN"
 | A2 | Vercel personal access tokens do not offer a granular "read-only vs. trigger-deploy" scope tier in the current dashboard UI — CONTEXT.md's D-04 scope distinction is a documented *usage* convention (which commands Claude actually runs), not an enforced *token* permission tier | Code Examples, Environment Availability | Low — if a granular scope tier does exist and isn't surfaced in general CLI/token docs, the practical effect is the same (full-account token, restrained by which commands are actually invoked); worth a quick dashboard glance by the user at token-creation time |
 | A3 | Neon cold-start latency after a genuine multi-hour idle period remains in the sub-few-seconds range described in Neon's general docs, rather than degrading further with idle duration | Common Pitfalls #7 | Medium — if wrong, HEALTH-03's pass/fail framing ("expect elevated latency, not timeout") may need a longer curl timeout than assumed; Neon's docs describe steady-state cold-start behavior, not explicitly tested against "8+ hours idle" specifically |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Exact Neon compute size/plan the user will provision (free tier vs. paid Launch/Scale)**
    - What we know: Free tier auto-suspends after a fixed 5-minute inactivity window (not user-configurable); paid plans can adjust or disable auto-suspend entirely.
    - What's unclear: Which tier the user will actually select during their manual Neon sign-up (CONTEXT.md D-01/D-02) — this affects whether HEALTH-03's "genuine idle period" test is even meaningful (a paid plan with auto-suspend disabled would trivially "pass" without exercising any real cold-start path).
    - Recommendation: Planner should have the user confirm which Neon plan was selected as part of the provisioning checklist, and adjust HEALTH-03's verification framing accordingly (free tier = genuine cold-start test; paid-with-auto-suspend-disabled = document that no cold-start path exists to test, which is a legitimate but different outcome).
+   - **(RESOLVED)**: 15-02-PLAN.md Task 1, step 2, has the user report which Neon compute/plan tier was selected as part of the provisioning checklist's resume-signal, so Plan 15-05's HEALTH-03 idle-check framing is grounded in the actual tier chosen rather than an assumption.
 
 2. **Whether the user will create the Vercel/Neon projects via each platform's own dashboard independently, or via Vercel's "Add Integration -> Neon" marketplace flow (which auto-injects env vars)**
    - What we know: CONTEXT.md D-02 says the user does 100% manual entry; this research found the marketplace integration defaults to the *pooled* connection string, which would break `migrate deploy`.
    - What's unclear: Whether "manual entry" in D-02 already implicitly means "skip the marketplace integration, create Neon project independently, copy the direct string by hand" — or whether the user might still click the integration button for convenience and then just override the injected value.
    - Recommendation: The plan's provisioning checklist should say explicitly: create the Neon project directly on neon.tech (not via Vercel's marketplace/integrations tab), copy the **non-pooled** connection string from Neon's Connection Details panel, and paste it manually into Vercel's Production env var UI as `DATABASE_URL`. This removes the ambiguity regardless of which path CONTEXT.md's authors had in mind.
+   - **(RESOLVED)**: 15-02-PLAN.md Task 1, step 1, mandates creating the Neon project directly on neon.tech and explicitly forbids Vercel's "Add Integration -> Neon" marketplace button; steps 3 and 6 mandate copying the direct/non-pooled connection string by hand into Vercel's Production `DATABASE_URL` — removing the ambiguity exactly as recommended, regardless of which reading of D-02 was originally intended.
 
 ## Environment Availability
 
