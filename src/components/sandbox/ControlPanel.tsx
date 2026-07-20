@@ -100,9 +100,9 @@ function VesselFormSection({
               Speed
             </Label>
             {/* Only element in this restyled section allowed to use
-                --primary, per 08-UI-SPEC.md's Color section -- every other
-                accent need here uses the give-way/stand-on/mutual role
-                tokens instead. */}
+                --primary, per this component's own color-token convention
+                -- every other accent need here uses the give-way/stand-on/
+                mutual role tokens instead. */}
             <span className="font-mono text-sm font-semibold text-primary">{`${vessel.speed} kn`}</span>
           </div>
           <Slider

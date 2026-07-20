@@ -2,9 +2,9 @@
 /**
  * ControlPanel interaction tests, rewritten for the Radix Select/Slider
  * primitive swap (SBOX-04). The old native-`<select>` interaction helper no
- * longer resolves against these Radix primitives -- Select/Slider require
- * the click+findByRole / focus+keyboard interaction patterns below, per
- * 08-RESEARCH.md's "Test rewrite pattern" Code Example.
+ * longer resolves against these Radix primitives -- this file uses the
+ * click+findByRole / focus+keyboard interaction pattern Radix's own
+ * Select/Slider primitives require.
  */
 import { cleanup, render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
@@ -68,7 +68,8 @@ const vesselBFixture: Vessel = {
 
 // Any valid crossing-shape fixture -- ControlPanelProps now requires
 // `classification` since the card header derives its role badge via
-// getVesselRole() (08-01 widened the prop contract).
+// getVesselRole() (this component's prop contract was widened to accept
+// the full classification, not just the two vessels).
 const classificationFixture: ClassificationResult = {
   encounterType: "crossing",
   riskOfCollision: true,

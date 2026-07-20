@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 /**
- * InstrumentReadouts tests (08-04 Task 2). Verifies the 4-tile
+ * InstrumentReadouts tests. Verifies the 4-tile
  * Range/Bearing/CPA/TCPA grid + status pill, both against a real
  * `crossingResidualBasicCase`-derived classification and against a
  * degenerate (coincident-position, matching heading+speed) pair where
@@ -27,7 +27,7 @@ const crossingClassification = classifyOrThrow(
   crossingResidualBasicCase.vesselB,
 );
 
-// Coincident position AND matching heading/speed -- per 08-01's own
+// Coincident position AND matching heading/speed -- per this codebase's own
 // degenerate-fixture correction, a coincident position alone with
 // differing headings still yields a defined (non-null) CPA; only a
 // genuinely zero relative-velocity vector triggers cpa()'s "no-closure"

@@ -8,7 +8,7 @@
 
 import { chartToScreen, type ChartViewBox, type ContainerSize } from "../../domain/geometry/screen-convert.js";
 
-// Fixed chart-space viewBox for this phase: 20nm x 20nm centered on the
+// Fixed chart-space viewBox for the Sandbox chart: 20nm x 20nm centered on the
 // origin -- comfortably contains the default crossingResidualBasicCase
 // scenario (vessels 5nm apart), with room to drag.
 export const CHART_VIEW_BOX: ChartViewBox = { minX: -10, minY: -10, width: 20, height: 20 };
@@ -34,7 +34,7 @@ export const RANGE_RING_OUTER_RADIUS_RATIO = 240 / 960;
 export const CROSSHAIR_STROKE = "#3F3F46"; // zinc-700, same as CONE_DEFAULT_STROKE below
 
 // Bigger hull + a stalk-mounted rotate handle set well clear of the bow
-// tip (04-HUMAN-UAT.md Gap 1 follow-up: separating two invisible padded
+// tip (a real usability finding: separating two invisible padded
 // hit-shapes by a numeric margin still left drag/rotate feeling
 // imprecise -- a padded invisible shape is inherently bigger than the
 // control it represents, so its boundary never quite matches what the
@@ -53,7 +53,8 @@ export const CROSSHAIR_STROKE = "#3F3F46"; // zinc-700, same as CONE_DEFAULT_STR
 // transcribed from the design source's renderVessel()) -- NOT a flat-back
 // triangle. Scaled up by the same ratio across all four points (factor
 // 28/13.8 ≈ 2.029) to preserve this panel's deliberately bigger interactive
-// hit target (04-HUMAN-UAT.md Gap 1) while matching Hero's exact
+// hit target (the same usability finding that motivated the bigger,
+// visible-shape-only hit-targets above) while matching Hero's exact
 // bow/stern/notch/half-width proportions, not an arbitrarily-chosen shape.
 export const HULL_BOW_Y = -28;
 export const HULL_STERN_Y = 21.77;
@@ -102,9 +103,10 @@ export const CONE_START_RELATIVE_BEARING_DEGREES = 112.5;
 export const CONE_END_RELATIVE_BEARING_DEGREES = 247.5;
 
 // SVG sector/wedge path for the overtaking-boundary reference cone
-// (04-RESEARCH.md Pattern 3). `startBearingDeg`/`endBearingDeg` are TRUE
-// bearings (already offset by the observing vessel's heading) -- this
-// function does no relative-to-true conversion itself.
+// (the overtaking-boundary reference-cone pattern used throughout this
+// component). `startBearingDeg`/`endBearingDeg` are TRUE bearings
+// (already offset by the observing vessel's heading) -- this function
+// does no relative-to-true conversion itself.
 export function wedgePath(
   center: { screenX: number; screenY: number },
   radiusPx: number,
