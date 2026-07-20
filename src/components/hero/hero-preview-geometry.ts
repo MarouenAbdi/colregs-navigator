@@ -5,9 +5,9 @@
  * c265c047) to reproduce its exact layout, not eyeballed from the PNG --
  * see each constant's comment for the derivation.
  */
-import type { ChartViewBox, ContainerSize } from "../../domain/geometry/screen-convert.js";
+import type { ChartViewBox, ContainerSize } from "../../domain/geometry/screen-convert/screen-convert.js";
 
-// UI-SPEC.md "Preview Card Dimensions": 8:5 (not square) aspect ratio,
+// Per the design's Preview Card Dimensions spec: 8:5 (not square) aspect ratio,
 // framed to comfortably contain both fixture vessels + the range rings.
 export const HERO_CONTAINER_SIZE: ContainerSize = { width: 320, height: 200 };
 
@@ -36,7 +36,7 @@ export const HERO_CHART_CENTER = {
 export const HERO_OUTER_RING_RADIUS_PX = HERO_CONTAINER_SIZE.width * (115 / 480);
 export const HERO_INNER_RING_RADIUS_PX = HERO_CONTAINER_SIZE.width * (60 / 480);
 
-// Domain-locked colors (UI-SPEC.md Color table): the fixture's verdict is
+// Domain-locked colors (per the design's fixed color table): the fixture's verdict is
 // fixed at authoring time, so hull/pill *colors* may stay hardcoded, but
 // "GW"/"SO" *text* must still be derived from the classification result.
 export const VESSEL_A_HULL_COLOR = "#EF4444"; // red-500, give-way

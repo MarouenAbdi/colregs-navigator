@@ -1,9 +1,8 @@
 /**
- * Shared prop contracts for Phase 4's sandbox UI (04-01). Every later
- * component in this phase -- ChartPanel, ControlPanel, ReasoningPanel,
- * SandboxContainer (04-02 through 04-06) -- imports these types rather than
- * inventing its own shape, so the components can be built in parallel
- * against one fixed interface.
+ * Shared prop contracts for the Sandbox UI. Every component -- ChartPanel,
+ * ControlPanel, ReasoningPanel, SandboxContainer -- imports these types
+ * rather than inventing its own shape, so the components can be built in
+ * parallel against one fixed interface.
  */
 
 import type { ClassificationResult, VesselLabel } from "../../domain/colregs/types.js";
@@ -63,7 +62,7 @@ export interface ReasoningTrailProps {
 export interface SandboxContainerProps {
   // When provided, seeds SandboxContainer's initial (and Reset-restored)
   // vessels from a saved/shared scenario instead of the app's hardcoded
-  // default demo fixture (05-03 Task 1, Assumption A3).
+  // default demo fixture (Assumption A3).
   initialScenario?: { vesselA: Vessel; vesselB: Vessel };
   // When provided, renders a banner communicating that a saved/shared
   // scenario is loaded (D-02).

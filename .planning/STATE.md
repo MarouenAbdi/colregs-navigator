@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Tech Debt & Stabilization
-status: "Phase 12 shipped — PR #13"
-stopped_at: Phase 12 complete — verified 8/8, all waves merged
-last_updated: "2026-07-20T10:11:43.609Z"
-last_activity: 2026-07-20
+status: "Phase 13 complete — v1.2 all 4 phases done, pending ship"
+stopped_at: Phase 13 complete — human sign-off approved, CMNT-01/CMNT-02 done
+last_updated: "2026-07-20T14:40:00.000Z"
+last_activity: 2026-07-20 -- Phase 13 approved and closed; v1.2 milestone's 4 phases all complete
 progress:
   total_phases: 4
-  completed_phases: 3
-  total_plans: 14
-  completed_plans: 10
-  percent: 75
+  completed_phases: 4
+  total_plans: 18
+  completed_plans: 18
+  percent: 100
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-19)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 13 — comment cleanup (next up)
+**Current focus:** v1.2 Tech Debt & Stabilization — all 4 phases complete, ready to ship
 
 ## Current Position
 
-Phase: 12 (chartpanel-sandboxcontainer-decomposition-refactor) — COMPLETE
-Plan: 4 of 4
-Status: Phase 12 shipped — PR #13
-Last activity: 2026-07-20
+Phase: 13 (comment-cleanup) — COMPLETE
+Plan: 8 of 8
+Status: Phase 13 complete, human-approved. v1.2 milestone's 4 phases (10/11/12/13) all done.
+Last activity: 2026-07-20 - Completed quick task 260720-kg5: Remove local/no-stale-id-comments ESLint rule causing errors everywhere
 
-Progress: [██████████] 100% (Phase 12)
+Progress: [██████████] 100% (Phase 13, v1.2 milestone)
 
 ## Performance Metrics
 
@@ -82,6 +82,9 @@ Recent decisions affecting current work:
 - [Phase 11]: D-03 (Plan 02): removed the now-dead better-tailwindcss/enforce-canonical-classes ignore pattern from eslint.config.mjs, since both rounded-[0.25rem] sites were renamed to rounded-sm in Plan 01; confirmed npx eslint . stays clean (0 errors)
 - [Phase 11]: D-04/D-05 (Plan 03): human confirmed in a real browser (no automated pre-check per D-05) that Hero, Header, Gallery, and Sandbox show no visual or keyboard-focus-outline regression after the outline-hidden/rounded-sm renames — Phase 11 closed, TWFX-04 complete
 - [Phase 12]: 4 plans across 3 waves — ChartPanel geometry/derivation split (12-01), SandboxContainer state hook (12-02), ChartPanel resize hook + ChartBackdrop (12-03), VesselGroup byte-for-byte extraction (12-04). Human confirmed real-browser drag/rotate hit-testing with zero regression after the VesselGroup move (RFCT-06). ChartPanel.tsx (176 lines) and SandboxContainer.tsx (147 lines) both land under the ~150-200 line convention (RFCT-07). Verifier confirmed 8/8 must-haves; full suite 216/216, tsc/eslint clean. Phase 12 closed, RFCT-01..08 complete.
+- [Phase 13 Wave 1]: 6 parallel worktree-executor agents (13-01..13-06) were killed mid-execution by a session interruption (`/login` re-auth); recovered by orchestrator manual close-out rather than re-running from scratch, since diffs were small, plausible, and independently reviewable — each incomplete plan's remaining tasks were applied by hand against the plan's own action list, verified against its acceptance-criteria greps and test suite, committed, and summarized. Caught and fixed two real content bugs during review: a dangling comment reference in `curated-scenarios.ts` (13-03, pointed to a "research-gap note above" that didn't exist) and a duplicated "by design (by design):" phrase in `Hero.test.tsx` (13-06, from a literal find-replace that didn't account for existing wording) — both fixed with self-contained rewrites instead of following the plan's literal suggested text. All 6 plans merged clean (no conflicts, no deletions); post-merge gate: 216/216 tests, tsc clean, eslint 0 errors.
+- [Phase 13 closed]: Waves 2 (13-07, test-name string literals) and 3 (13-08, final verification) completed after Wave 1. 13-08's own verification sweep found and fixed 3 more residual gaps: a self-inflicted "Rule-18" (hyphenated) regex collision introduced by 13-02's own rewrite, a stray CLAS-05 tag in a SandboxContainer.test.tsx test name, and a bare "(Task 2)" comment in scenario.test.ts missed by 13-03's scoping. eslint-suppressions.json pruned 122->51 (local/no-stale-id-comments only). Human sign-off approved 2026-07-20 — Phase 13 closed, CMNT-01/CMNT-02 complete. **v1.2 Tech Debt & Stabilization milestone's all 4 phases (10/11/12/13) are now complete** — not yet formally shipped/archived via /gsd:complete-milestone.
+- [Quick task 260720-jko]: Between Phase 13's execution and its human sign-off, reorganized 4 flat directories (sandbox 36 files, domain/colregs 13 files, domain/geometry 15 files, gallery 8 files) into topic/feature subfolders per user request — see Quick Tasks Completed table below. Explicitly reverses CLAUDE.md's "domain/ stays flat" research decision for domain/geometry, per direct user override (confirmed via AskUserQuestion). Zero logic change, 216/216 tests throughout, 4 atomic commits.
 
 ### Pending Todos
 
@@ -105,13 +108,15 @@ Items acknowledged and carried forward from previous milestone close:
 | Quick ID | Description | Date |
 |----------|------|------|
 | 260719-t8r | Generate `docs/reasoning-trails.json` design reference (catalog of all COLREGS reasoning-trail shapes) | 2026-07-19 |
+| 260720-jko | Reorganize sandbox/, domain/colregs/, domain/geometry/, gallery/ into topic/feature subfolders — zero logic change, 216/216 tests pass | 2026-07-20 |
+| 260720-kg5 | Remove local/no-stale-id-comments ESLint rule (deregistered, deleted rule file, pruned suppressions) — 0 lint errors after | 2026-07-20 |
 
 ## Session Continuity
 
-Last session: 2026-07-20T09:11:31.692Z
-Stopped at: Phase 12 complete — verified 8/8, all waves merged
-Resume file: .planning/phases/12-chartpanel-sandboxcontainer-decomposition-refactor/VERIFICATION.md
+Last session: 2026-07-20T14:40:00.000Z
+Stopped at: Phase 13 complete and human-approved; v1.2 milestone's 4 phases all done
+Resume file: .planning/phases/13-comment-cleanup/13-08-SUMMARY.md
 
 ## Operator Next Steps
 
-- Run `/gsd-plan-phase 13` to plan the comment cleanup phase
+- v1.2 Tech Debt & Stabilization's 4 planned phases (10/11/12/13) are all complete. Options: ship this branch (PR + merge, following the Phase 11/12 pattern), or run `/gsd:complete-milestone` to formally close out v1.2 (requirement re-validation, PROJECT.md updates, milestone archive) before shipping.

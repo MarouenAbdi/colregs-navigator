@@ -11,7 +11,7 @@ afterEach(() => {
   cleanup();
 });
 
-describe("Hero (HERO-01, HERO-03)", () => {
+describe("Hero", () => {
   it("renders the locked headline and both CTAs with correct anchor targets", () => {
     render(<Hero />);
 
@@ -24,7 +24,7 @@ describe("Hero (HERO-01, HERO-03)", () => {
     expect(galleryLink).toHaveAttribute("href", "#gallery");
 
     expect(screen.getByText("Rule 15")).toBeInTheDocument();
-    // "2.99 NM" appears twice by design (07-UI-SPEC.md): once in the
+    // "2.99 NM" appears twice by design: once in the
     // mini-chart's floating distance-label chip on the connector line, and
     // once in the RANGE readout tile -- both derived from the same
     // computed `range` value, not independently hand-typed literals.

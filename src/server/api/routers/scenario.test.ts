@@ -3,7 +3,7 @@
  * tRPC's `createCallerFactory` server-side caller (no HTTP server needed).
  * This is the test that proves SCEN-02's re-derive-on-read guarantee holds
  * across the FULL router -> service -> repository -> domain chain, not
- * just at the service-unit-test level already covered in Plan 02.
+ * just at the service-unit-test level already covered.
  */
 
 import { afterAll, describe, expect, it } from "vitest";
@@ -49,9 +49,9 @@ describe("appRouter (scenario + gallery) -- end-to-end integration", () => {
   });
 
   describe("gallery.list", () => {
-    // 05-02-PLAN.md Task 3: this replaces the now-stale assumption that an
+    // prisma/seed.ts follow-up: this replaces the now-stale assumption that an
     // empty array is always returned when no curated scenarios exist --
-    // now that prisma/seed.ts (Task 2) populates the shared dev database
+    // now that prisma/seed.ts populates the shared dev database
     // with curated rows, that assumption no longer holds. This test
     // creates and promotes its OWN row, then asserts containment (never
     // exact array equality) so it passes regardless of whether the seed

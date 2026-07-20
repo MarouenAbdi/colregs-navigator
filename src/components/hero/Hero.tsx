@@ -1,6 +1,6 @@
 /**
- * Hero (07-01) -- net-new marketing Hero section (Direction A only, per
- * PROJECT.md's locked v1.1 decision). Plain Server Component (no
+ * Net-new marketing Hero section (Direction A only, per PROJECT.md's
+ * locked v1.1 decision). Plain Server Component (no
  * "use client" -- no state/effects), matching this repo's existing default
  * (src/components/layout/Header.tsx).
  *

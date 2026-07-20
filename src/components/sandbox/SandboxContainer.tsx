@@ -13,11 +13,11 @@
  */
 
 import { RotateCcw, Link2 } from "lucide-react";
-import { ChartPanel } from "./ChartPanel.js";
-import { ControlPanel } from "./ControlPanel.js";
-import { VerdictBanner } from "./VerdictBanner.js";
-import { InstrumentReadouts } from "./InstrumentReadouts.js";
-import { ReasoningTrail } from "./ReasoningTrail.js";
+import { ChartPanel } from "./chart/ChartPanel.js";
+import { ControlPanel } from "./control-panel/ControlPanel.js";
+import { VerdictBanner } from "./reasoning/VerdictBanner.js";
+import { InstrumentReadouts } from "./instruments/InstrumentReadouts.js";
+import { ReasoningTrail } from "./reasoning/ReasoningTrail.js";
 import { CHIP_ORDER } from "./chip-scenarios.js";
 import { useSandboxState } from "./hooks/useSandboxState.js";
 import { Button } from "@/components/ui/button";

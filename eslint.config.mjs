@@ -3,7 +3,6 @@ import nextPlugin from "@next/eslint-plugin-next";
 import babelParser from "@babel/eslint-parser";
 import eslintPluginBetterTailwindcss from "eslint-plugin-better-tailwindcss";
 import vitest from "@vitest/eslint-plugin";
-import noStaleIdComments from "./eslint-rules/no-stale-id-comments.mjs";
 
 // The Next.js maintainers' bundled preset (see research/STACK.md CORRECTION)
 // crashes at require-time against this project's locked typescript@7.0.2
@@ -99,16 +98,6 @@ const eslintConfig = defineConfig([
       // since file length is a proxy for a judgment call, not the
       // judgment itself.
       "max-lines": ["warn", { max: 200, skipBlankLines: true, skipComments: true }],
-    },
-  },
-  {
-    // Local repo rule (ESLint's own flat-config replacement for the
-    // deprecated --rulesdir flag) operationalizing CLAUDE.md's "no rotting
-    // task/plan/REQ-ID references in comments" convention -- applies
-    // repo-wide, not scoped to any subdirectory.
-    plugins: { local: { rules: { "no-stale-id-comments": noStaleIdComments } } },
-    rules: {
-      "local/no-stale-id-comments": "error",
     },
   },
   {

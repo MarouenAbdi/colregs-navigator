@@ -4,9 +4,10 @@
  * file imports (`createTRPCRouter`, `publicProcedure`, `createCallerFactory`).
  *
  * T-3-07: the custom `errorFormatter` strips verbose Prisma error internals
- * from responses when `NODE_ENV === "production"`, per RESEARCH.md's
- * Security Domain guidance (Information Disclosure mitigation) -- prevents
- * leaking connection details/SQL text through the tRPC error channel.
+ * from responses when `NODE_ENV === "production"`, per this project's own
+ * decision to strip stack traces from responses in production while
+ * keeping them in development for debuggability -- prevents leaking
+ * connection details/SQL text through the tRPC error channel.
  */
 
 import { initTRPC } from "@trpc/server";

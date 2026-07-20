@@ -76,7 +76,7 @@ describe("classifyEncounter() overtaking direction (Rule 13)", () => {
     }
   });
 
-  it("WR-02 regression: both vessels simultaneously satisfy the abaft-the-beam test (diverging vessels) -- bOvertakesA precedence wins and Rule 7 reports no risk", () => {
+  it("both vessels simultaneously satisfy the abaft-the-beam test (diverging vessels) -- bOvertakesA precedence wins and Rule 7 reports no risk", () => {
     const result = classifyEncounter(
       overtakingBothTrueDivergingCase.vesselA,
       overtakingBothTrueDivergingCase.vesselB,
@@ -113,7 +113,7 @@ describe("classifyEncounter() hysteresis (D-01-D-04)", () => {
     }
   });
 
-  it("WR-01 regression: raises doubt in the sticky path when the current bearing has drifted close to the 112.5 deg boundary", () => {
+  it("raises doubt in the sticky path when the current bearing has drifted close to the 112.5 deg boundary", () => {
     const result = classifyEncounter(
       overtakingHysteresisNearBoundaryCase.vesselA,
       overtakingHysteresisNearBoundaryCase.vesselB,
@@ -193,7 +193,7 @@ describe("classifyEncounter() crossing residual (Rule 15)", () => {
     }
   });
 
-  it("WR-03 regression: rbAtoB exactly 0 with a non-reciprocal rbBtoA survives Stage 4's head-on exclusion and pins the Stage 5 tie-break", () => {
+  it("rbAtoB exactly 0 with a non-reciprocal rbBtoA survives Stage 4's head-on exclusion and pins the Stage 5 tie-break", () => {
     const result = classifyEncounter(
       deadAheadNonReciprocalCase.vesselA,
       deadAheadNonReciprocalCase.vesselB,
@@ -266,7 +266,7 @@ describe("classifyEncounter() doubt band (D-09-D-12)", () => {
   });
 });
 
-describe("classifyEncounter() Rule 18 override (DETM-02)", () => {
+describe("classifyEncounter() Rule 18 override", () => {
   it("flips give-way for a fishing/power-driven crossing encounter (fishing outranks power-driven)", () => {
     const result = classifyEncounter(
       crossingRule18OverrideCase.vesselA,
@@ -316,7 +316,7 @@ describe("classifyEncounter() Rule 18 override (DETM-02)", () => {
     }
   });
 
-  it("CR-01 regression: does NOT apply Rule 18 to an overtaking encounter -- the overtaking vessel keeps give-way even though it outranks the vessel being overtaken", () => {
+  it("does NOT apply Rule 18 to an overtaking encounter -- the overtaking vessel keeps give-way even though it outranks the vessel being overtaken", () => {
     const result = classifyEncounter(
       overtakingRule18NoOverrideCase.vesselA,
       overtakingRule18NoOverrideCase.vesselB,

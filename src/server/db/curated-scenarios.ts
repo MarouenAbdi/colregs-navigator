@@ -7,14 +7,14 @@
  * Every vessel object here is imported verbatim from
  * `classify-encounter.fixtures.ts` -- never re-typed as a new literal --
  * so this file can never drift from already-tested fixture geometry.
- * Per 05-RESEARCH.md's Fixture Catalog (Pitfall 3), only fixtures with no
- * `previous` field are safe to reuse here; hysteresis-dependent fixtures
- * are NOT used.
+ * Per this project's fixture-catalog design constraint, only fixtures with
+ * no `previous` field are safe to reuse here; hysteresis-dependent
+ * fixtures are NOT used.
  *
  * These 6 entries match Main-Design.png's Gallery section exactly (D-01):
  * Classic crossing (Rule 15), Head-on meeting (Rule 14), Overtaking
  * (Rule 13), Sailing has priority (Rule 18), Not under command (Rule 18),
- * In doubt (Rule 7) -- the same 6 labels Phase 8's Sandbox chip row uses.
+ * In doubt (Rule 7) -- the same 6 labels the Sandbox chip row uses.
  */
 
 import type { Vessel } from "../../domain/vessel/vessel.js";
@@ -77,8 +77,10 @@ export const curatedScenarios: CuratedScenario[] = [
   {
     // 3: Rule 18 vessel-type-priority, crossing (crossingSailingPriorityCase
     // -- vesselA power-driven, vesselB sailing). Geometric baseline already
-    // matches Rule 18's outcome -- see Task 2's research-gap note in
-    // 09-01-PLAN.md for why `ruleLabel` is a static field, not derived.
+    // matches Rule 18's outcome -- `ruleLabel` is a static, hand-verified
+    // display string rather than derived from classifyEncounter()'s
+    // reasoning trail at seed time, since these curated entries' expected
+    // rule is already fixed and known via the imported fixture.
     vesselA: crossingSailingPriorityCase.vesselA,
     vesselB: crossingSailingPriorityCase.vesselB,
     title: "Sailing has priority",

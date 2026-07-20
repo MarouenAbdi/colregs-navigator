@@ -1,11 +1,12 @@
 /**
- * Domain type contracts for Phase 2's COLREGS rules engine (D-11-D-16).
+ * Domain type contracts for this project's COLREGS rules engine (D-11-D-16).
  *
  * Plain TypeScript type/interface declarations only — no Zod. These types
  * describe pure internal domain output (the result of classifying an
  * encounter), not an external input boundary, so no runtime schema
- * validation belongs here (per 02-RESEARCH.md's Standard Stack note).
- * `classify-encounter.ts` (Plan 02) imports all six of these directly.
+ * validation belongs here (per this project's Standard Stack decision to
+ * keep domain output types free of Zod runtime validation).
+ * `classify-encounter.ts` imports all six of these directly.
  */
 
 /**
@@ -28,7 +29,7 @@ export type VesselLabel = "vesselA" | "vesselB";
 
 /**
  * Identifies which specific sector boundary a doubt flag was triggered by
- * (D-12) — richer than a single generic "doubt" boolean, since Phase 4's
+ * (D-12) — richer than a single generic "doubt" boolean, since the Sandbox
  * UI needs to know which boundary to render a caveat against.
  */
 export type DoubtBoundary =
@@ -38,8 +39,9 @@ export type DoubtBoundary =
 /**
  * One step of the ordered reasoning trail (D-13-D-16). Self-contained: the
  * rule citation, plain-language explanation, AND the raw geometric facts
- * that were matched/ruled-out are bundled together, so Phase 4 can render
- * the citation and overlay exact geometry without recomputing anything.
+ * that were matched/ruled-out are bundled together, so the Sandbox chart
+ * can render the citation and overlay exact geometry without recomputing
+ * anything.
  */
 export interface ReasoningTrailEntry {
   ruleId: string;
@@ -58,7 +60,7 @@ export interface GiveWayResult {
 }
 
 /**
- * The full output of `classifyEncounter()` (Plan 02).
+ * The full output of `classifyEncounter()`.
  *
  * `giveWay`/`standOn` nullable design: Rule 14 head-on situations have no
  * distinct give-way vessel when both vessels share the same Rule 18
@@ -66,9 +68,10 @@ export interface GiveWayResult {
  * starboard (mutual obligation). `null`/`null` represents this genuine
  * mutual-obligation case, not a missing/error value. When Rule 18's
  * vessel-type hierarchy applies to a head-on encounter between vessels of
- * *different* priority tiers, `giveWay`/`standOn` ARE populated (Plan 02's
- * Stage 6 override). For `'crossing'`/`'overtaking'` encounters,
- * `giveWay`/`standOn` are always non-null.
+ * *different* priority tiers, `giveWay`/`standOn` ARE populated (via
+ * `classifyEncounter()`'s own Stage 6 Rule 18 override). For
+ * `'crossing'`/`'overtaking'` encounters, `giveWay`/`standOn` are always
+ * non-null.
  */
 export interface ClassificationResult {
   encounterType: EncounterType;

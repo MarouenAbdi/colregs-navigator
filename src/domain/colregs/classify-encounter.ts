@@ -1,24 +1,24 @@
 /**
- * classifyEncounter() -- the Rule 7 -> 13 -> 14 -> 15 -> 18 dispatch (CLAS-01
- * through CLAS-04, DETM-01, DETM-02, RSON-02).
+ * classifyEncounter() -- the Rule 7 -> 13 -> 14 -> 15 -> 18 dispatch.
  *
  * The entire portfolio-value proposition of this project: given two vessels
  * (and, optionally, the previously-classified encounter type for
  * hysteresis), derive the COLREGS encounter type, the give-way/stand-on
  * verdict, and an ordered reasoning trail -- built inline at each dispatch
- * stage, never re-derived after the verdict is already known (RSON-02).
+ * stage, never re-derived after the verdict is already known.
  *
- * Composes Phase 1's `relativeBearing()`/`cpa()` and Plan 01's
- * `riskOfCollision`/`rule18Overrides()`/`vesselPriority()` functions
- * exclusively -- no new trigonometry or threshold logic is introduced here.
+ * Composes this codebase's own `relativeBearing()`/`cpa()` geometry
+ * functions and `riskOfCollision`/`rule18Overrides()`/`vesselPriority()`
+ * domain functions exclusively -- no new trigonometry or threshold logic is
+ * introduced here.
  */
 
 import type { Vessel } from "../vessel/vessel.js";
 import { ok, type Result } from "../shared/result.js";
-import { relativeBearing } from "../geometry/relative-bearing.js";
-import { cpa } from "../geometry/cpa.js";
-import { riskOfCollision } from "./risk-of-collision.js";
-import { rule18Overrides, vesselPriority } from "./vessel-priority.js";
+import { relativeBearing } from "../geometry/relative-bearing/relative-bearing.js";
+import { cpa } from "../geometry/cpa/cpa.js";
+import { riskOfCollision } from "./risk-of-collision/risk-of-collision.js";
+import { rule18Overrides, vesselPriority } from "./vessel-priority/vessel-priority.js";
 import type {
   ClassificationResult,
   EncounterType,
@@ -114,7 +114,7 @@ export function classifyEncounter(
       standOn = "vesselB";
       stickyTriggeringBearing = rbBtoA;
     }
-    // WR-01: mirror Stage 3's doubt-band check against the same 112.5 deg
+    // Sticky-hysteresis doubt-band check: mirror Stage 3's doubt-band check against the same 112.5 deg
     // boundary, using the larger-magnitude bearing (the one driving the
     // direction tie-break above). Hysteresis intentionally skips the
     // >112.5 threshold test itself (that is the whole point of "sticky"),
@@ -135,7 +135,7 @@ export function classifyEncounter(
     if (bOvertakesA || aOvertakesB) {
       encounterType = "overtaking";
       const triggeringBearing = bOvertakesA ? rbAtoB : rbBtoA;
-      // WR-02: bOvertakesA and aOvertakesB CAN both be true simultaneously
+      // bOvertakesA/aOvertakesB simultaneity: bOvertakesA and aOvertakesB CAN both be true simultaneously
       // (e.g. two vessels heading directly apart along the same line, each
       // seeing the other dead astern of its own beam). `bOvertakesA` wins
       // the tie deliberately, not by oversight: this geometry only arises
@@ -198,7 +198,7 @@ export function classifyEncounter(
           facts: { relativeBearingAtoB: rbAtoB, relativeBearingBtoA: rbBtoA },
         });
 
-        // Stage 5: Rule 15, residual. WR-03: rbAtoB CAN be exactly 0 here --
+        // Stage 5: Rule 15, residual. One-sided dead-ahead bearing: rbAtoB CAN be exactly 0 here --
         // Stage 4's head-on exclusion requires BOTH |rbAtoB| <= 5 AND
         // |rbBtoA| <= 5, so a one-sided dead-ahead bearing (rbAtoB === 0
         // with a non-reciprocal rbBtoA) survives to this stage (see

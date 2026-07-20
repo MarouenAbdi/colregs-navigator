@@ -3,9 +3,9 @@
  * hook (VESL-02/D-01). Converts pointermove screen coordinates to
  * chart-space Position via screenToChart() and forwards them through
  * onVesselPositionChange -- this hook holds no state of its own and does
- * not persist/validate the forwarded value itself (04-03-PLAN.md's threat
- * model T-04-09: the actual VesselSchema validation boundary is
- * SandboxContainer.applyVesselUpdate, 04-06).
+ * not persist/validate the forwarded value itself (the actual VesselSchema
+ * validation boundary is `SandboxContainer`'s `applyVesselUpdate`, not this
+ * hook).
  */
 
 import type { PointerEvent } from "react";
@@ -13,7 +13,7 @@ import {
   screenToChart,
   type ChartViewBox,
   type ContainerSize,
-} from "../../../domain/geometry/screen-convert.js";
+} from "../../../domain/geometry/screen-convert/screen-convert.js";
 import type { VesselLabel } from "../../../domain/colregs/types.js";
 import type { ChartPanelProps } from "../types.js";
 

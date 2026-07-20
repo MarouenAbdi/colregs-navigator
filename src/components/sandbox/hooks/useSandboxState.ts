@@ -44,9 +44,8 @@ export function useSandboxState(initialScenario?: { vesselA: Vessel; vesselB: Ve
   handleSave: () => void;
 } {
   const router = useRouter();
-  // 05-03 Task 2: Save persists the current vesselA/vesselB via
-  // scenario.create (no login step, SCEN-01) and redirects to the
-  // resulting share URL on success.
+  // Save persists the current vesselA/vesselB via scenario.create (no login
+  // step, SCEN-01) and redirects to the resulting share URL on success.
   const [saveError, setSaveError] = useState<string | null>(null);
   const createScenario = trpc.scenario.create.useMutation({
     onSuccess: ({ shareId }) => router.push(`/s/${shareId}`),
@@ -56,7 +55,7 @@ export function useSandboxState(initialScenario?: { vesselA: Vessel; vesselB: Ve
     // server-side reasons, so this must not be a silent no-op either way.
     onError: () => setSaveError("Couldn't save this scenario. Try again."),
   });
-  // 05-03: when `initialScenario` is provided (saved/shared scenario), seed
+  // When `initialScenario` is provided (saved/shared scenario), seed
   // from it instead of the app's hardcoded default demo fixture. When
   // absent (plain "/" route), falls back to the pre-existing default --
   // Assumption A3: Reset restores THIS instance's seed, not an unrelated
@@ -86,7 +85,7 @@ export function useSandboxState(initialScenario?: { vesselA: Vessel; vesselB: Ve
   const [isDegenerate, setIsDegenerate] = useState<boolean>(false);
 
   // Tracks which chip (if any) is the source of the currently-loaded
-  // scenario -- purely a client-side visual highlight (T-08-07), cleared by
+  // scenario -- purely a client-side visual highlight, cleared by
   // any manual drag/heading/speed/type edit so it never goes stale. Only
   // defaults to "classic-crossing" on the plain, seedless "/" route, where
   // the default seed genuinely IS that chip's fixture (byte-identical,
@@ -105,8 +104,8 @@ export function useSandboxState(initialScenario?: { vesselA: Vessel; vesselB: Ve
 
   // Single choke point: every drag handler AND every ControlPanel
   // onChange handler funnels through this function. Validates both
-  // vessels with VesselSchema before classifyEncounter() ever sees them
-  // (T-04-01), then re-derives the verdict from scratch every time --
+  // vessels with VesselSchema before classifyEncounter() ever sees them,
+  // then re-derives the verdict from scratch every time --
   // never a stale/cached result -- respecting Rule 13(d) hysteresis via
   // previousEncounterTypeRef.
   function applyVesselUpdate(nextA: Vessel, nextB: Vessel): void {

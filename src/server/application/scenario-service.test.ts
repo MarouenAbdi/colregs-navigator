@@ -2,9 +2,10 @@
  * Tests for scenario-service.ts -- SCEN-02's core mechanism: getScenario/
  * listGallery must genuinely re-run classifyEncounter() on every read, and
  * createScenario must reject unclassifiable input before persistence
- * (Open Question 1, resolved in this plan's Task 2).
+ * (resolved by validating unclassifiable input at `createScenario` time,
+ * before persistence).
  *
- * Runs against the live Docker Postgres instance from Plan 01 (D-01) --
+ * Runs against the live Docker Postgres instance (D-01) --
  * repository calls are real, not mocked, except in Test 2 where a spy
  * asserts `create` is never invoked for rejected input.
  */
@@ -101,7 +102,7 @@ describe("scenario-service", () => {
   });
 
   it("listGallery() returns an array shape, tolerant of curated rows from prisma/seed.ts (D-07)", async () => {
-    // 05-02-PLAN.md Task 2 side effect: prisma/seed.ts now populates this
+    // prisma/seed.ts side effect: prisma/seed.ts now populates this
     // same shared dev database with 6 curated rows, so an empty array is no
     // longer guaranteed here (this suite creates no curated rows of its own
     // before this assertion runs, but a prior `npx prisma db seed` run

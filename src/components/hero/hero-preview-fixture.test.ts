@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { classifyEncounter } from "../../domain/colregs/classify-encounter.js";
-import { bearing } from "../../domain/geometry/bearing.js";
-import { cpa } from "../../domain/geometry/cpa.js";
+import { bearing } from "../../domain/geometry/bearing/bearing.js";
+import { cpa } from "../../domain/geometry/cpa/cpa.js";
 import { heroPreviewVesselA, heroPreviewVesselB } from "./hero-preview-fixture.js";
 
 /**
- * Hero (07-01) -- fixture-drift guard (HERO-02). Asserts
+ * Fixture-drift guard (HERO-02). Asserts
  * `heroPreviewVesselA`/`heroPreviewVesselB` still reproduce the design
  * mock's displayed Rule 15/crossing/vesselA-gives-way verdict and its
  * RANGE/BEARING/CPA readouts, so a future change to the domain formulas
  * cannot silently desync the Hero preview card's canned numbers from
  * what `classifyEncounter()`/`bearing()`/`cpa()` actually compute.
  */
-describe("hero-preview-fixture (HERO-02 drift guard)", () => {
+describe("hero-preview-fixture drift guard", () => {
   it("classifies as a crossing encounter with Vessel A giving way, doubt-free", () => {
     const result = classifyEncounter(heroPreviewVesselA, heroPreviewVesselB);
     expect(result.ok).toBe(true);

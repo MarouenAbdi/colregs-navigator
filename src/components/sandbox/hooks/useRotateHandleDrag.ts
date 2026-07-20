@@ -3,16 +3,17 @@
  * heading-drag hook (VESL-02/D-01). Computes the new heading via
  * bearing() -- the project's already-implemented, already-tested
  * atan2-argument-order convention -- never a second hand-rolled atan2
- * call (04-RESEARCH.md Anti-Patterns).
+ * call -- duplicating this project's own atan2-argument-order convention
+ * in a second place would risk the two implementations drifting apart.
  */
 
 import type { PointerEvent } from "react";
-import { bearing } from "../../../domain/geometry/bearing.js";
+import { bearing } from "../../../domain/geometry/bearing/bearing.js";
 import {
   screenToChart,
   type ChartViewBox,
   type ContainerSize,
-} from "../../../domain/geometry/screen-convert.js";
+} from "../../../domain/geometry/screen-convert/screen-convert.js";
 import type { Position } from "../../../domain/vessel/vessel.js";
 import type { VesselLabel } from "../../../domain/colregs/types.js";
 import type { ChartPanelProps } from "../types.js";

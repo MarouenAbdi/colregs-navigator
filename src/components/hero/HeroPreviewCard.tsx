@@ -3,14 +3,14 @@
  * fully static, illustrative SVG chart driven by a real
  * `classifyEncounter()`/`bearing()`/`cpa()` call against a fixed fixture
  * (`hero-preview-fixture.ts`) -- not hand-typed literals. Shares zero code
- * with the real interactive `ChartPanel.tsx` (CONTEXT.md D-03) and is
- * never wired to live Sandbox state (CONTEXT.md D-01: no pulsing dot, no
+ * with the real interactive `ChartPanel.tsx` (D-03) and is
+ * never wired to live Sandbox state (D-01: no pulsing dot, no
  * animated bearing line).
  */
 import { classifyEncounter } from "../../domain/colregs/classify-encounter.js";
-import { bearing } from "../../domain/geometry/bearing.js";
-import { cpa } from "../../domain/geometry/cpa.js";
-import { chartToScreen } from "../../domain/geometry/screen-convert.js";
+import { bearing } from "../../domain/geometry/bearing/bearing.js";
+import { cpa } from "../../domain/geometry/cpa/cpa.js";
+import { chartToScreen } from "../../domain/geometry/screen-convert/screen-convert.js";
 import type { EncounterType, VesselLabel } from "../../domain/colregs/types.js";
 import { heroPreviewVesselA, heroPreviewVesselB } from "./hero-preview-fixture.js";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -135,7 +135,7 @@ export function HeroPreviewCard() {
         font-semibold text-muted-foreground
       ">
         <span className="flex items-center gap-1.75">
-          {/* Static, non-pulsing dot per CONTEXT.md D-01 -- no animation classes. */}
+          {/* Static, non-pulsing dot per D-01 -- no animation classes. */}
           <span className="size-1.5 rounded-full bg-accent" aria-hidden="true" />
           <span className="text-foreground">Live classification</span>
         </span>

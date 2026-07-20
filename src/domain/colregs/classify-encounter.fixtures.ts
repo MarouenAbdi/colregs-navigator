@@ -1,9 +1,9 @@
 /**
  * Hand-derived fixtures for `classifyEncounter()` (D-01 through D-16) -- the
- * auditable proof-of-correctness suite CONTEXT.md calls for. Each fixture
- * documents the worked `relativeBearing()`/`cpa()` derivation behind its
- * expected values inline (transcribed from 02-02-PLAN.md's own worked math,
- * not re-derived here).
+ * auditable proof-of-correctness suite this project's design process called
+ * for. Each fixture documents the worked `relativeBearing()`/`cpa()`
+ * derivation behind its expected values inline (hand-transcribed from the
+ * original worked math, not re-derived here).
  */
 
 import type { Vessel } from "../vessel/vessel.js";
@@ -12,8 +12,8 @@ import {
   coincidentPropagationCase as relativeBearingCoincidentPropagationCase,
   crossingCase,
   headOnCase,
-} from "../geometry/relative-bearing.fixtures.js";
-import { parallelNoClosureCase } from "../geometry/cpa.fixtures.js";
+} from "../geometry/relative-bearing/relative-bearing.fixtures.js";
+import { parallelNoClosureCase } from "../geometry/cpa/cpa.fixtures.js";
 
 interface ClassificationCase {
   vesselA: Vessel;
@@ -35,7 +35,7 @@ interface PropagationCase {
 
 // vesselA is being overtaken (heading 000, speed 8); vesselB approaches
 // from 150 deg relative bearing (well abaft A's beam, |150| > 112.5) at a
-// higher speed (15kn), same geometry shape as Phase 1's overtakingCase
+// higher speed (15kn), same geometry shape as relative-bearing.fixtures.ts's overtakingCase
 // scaled to 1/10 magnitude so DCPA falls under the 1.0nm threshold.
 // relativeBearing(A,B) = 150. cpa(A,B): tcpaMinutes ~= 7.42, dcpaNm ~= 0.5
 // (under threshold -> risk of collision holds).
@@ -116,7 +116,7 @@ export const overtakingHysteresisReleasesCase: ClassificationCase = {
   expectedDoubt: false,
 };
 
-// WR-02 regression: both bOvertakesA and aOvertakesB are simultaneously
+// Regression case: both bOvertakesA and aOvertakesB are simultaneously
 // true -- vesselA and vesselB are positioned on the same line, each heading
 // directly away from the other (A heading 180 away from B to its north, B
 // heading 0 away from A to its south). relativeBearing(A,B) = 180,
@@ -145,7 +145,7 @@ export const overtakingBothTrueDivergingCase: ClassificationCase = {
   expectedDoubt: false,
 };
 
-// WR-01 regression: sticky-overtaking hysteresis with the current bearing
+// Regression case: sticky-overtaking hysteresis with the current bearing
 // drifted close to the 112.5 deg overtaking/crossing boundary.
 // relativeBearing(A,B) = 110, relativeBearing(B,A) = -70. |110| >= |-70| so
 // the direction tie-break selects vesselB as the overtaking vessel; the
@@ -174,8 +174,8 @@ export const overtakingHysteresisNearBoundaryCase: ClassificationCase = {
   expectedDoubtBoundary: "near-overtaking-crossing-boundary",
 };
 
-// Genuine head-on: reuse Phase 1's headOnCase vessels directly (D-16 cross-
-// phase reuse). Both relativeBearing directions = 0. Same vessel type on
+// Genuine head-on: reuse this codebase's headOnCase vessels directly (D-16
+// cross-module reuse). Both relativeBearing directions = 0. Same vessel type on
 // both sides -> Rule 18 has no tie-break preference -> mutual obligation
 // (giveWay/standOn both null).
 export const headOnGenuineCase: ClassificationCase = {
@@ -213,7 +213,7 @@ export const headOnPitfall2OneSidedCase: ClassificationCase = {
   expectedDoubt: false,
 };
 
-// Basic crossing residual: reuse Phase 1's crossingCase vessels directly.
+// Basic crossing residual: reuse this codebase's crossingCase vessels directly.
 // relativeBearing(A,B) = 90, relativeBearing(B,A) = 0. Neither overtaking
 // (90/0 both under 112.5) nor head-on (90 is far outside +/-5). Same vessel
 // type on both sides -> no Rule 18 override.
@@ -328,7 +328,7 @@ export const justOutsideHeadOnSectorCase: ClassificationCase = {
   expectedDoubt: false,
 };
 
-// WR-03 regression: rbAtoB is exactly 0 (vesselB dead ahead of vesselA) but
+// Regression case: rbAtoB is exactly 0 (vesselB dead ahead of vesselA) but
 // rbBtoA is non-reciprocal (60 deg -- a genuine crossing course), so Stage
 // 4's head-on exclusion (which requires BOTH bearings within +/-5 deg) does
 // NOT catch this case; it survives to Stage 5's residual crossing dispatch.
@@ -355,7 +355,7 @@ export const deadAheadNonReciprocalCase: ClassificationCase = {
   expectedDoubt: false,
 };
 
-// --- Task 2: Rule 18 interaction matrix + Stage 0 propagation -----------
+// --- Rule 18 interaction matrix + Stage 0 propagation -----------
 
 // Same positions as crossingResidualBasicCase, but vesselA is 'fishing' and
 // vesselB is 'power-driven'. Geometric baseline: giveWay='vesselA'(fishing),
@@ -438,7 +438,7 @@ export const headOnNucRiatmTieCase: ClassificationCase = {
   expectedDoubtBoundary: "near-head-on-boundary",
 };
 
-// CR-01 regression: same geometry as overtakingBothDirectionsCase (vesselB
+// Regression case (found via manual code review): same geometry as overtakingBothDirectionsCase (vesselB
 // overtaking vesselA, bearing 150 deg abaft A's beam), but vesselA is
 // 'power-driven' and vesselB (the overtaking vessel) is 'fishing'.
 // rule18Overrides('fishing', 'power-driven') = true (fishing outranks
@@ -527,7 +527,7 @@ export const headOnInDoubtCase: ClassificationCase = {
   expectedDoubtBoundary: "near-head-on-boundary",
 };
 
-// Reuse Phase 1's coincidentPropagationCase vessels directly (identical
+// Reuse this codebase's coincidentPropagationCase vessels directly (identical
 // positions). classifyEncounter() must propagate relativeBearing()'s own
 // 'coincident-position' failure unchanged -- no re-wrapping.
 export const stage0CoincidentPropagationCase: PropagationCase = {
@@ -536,7 +536,7 @@ export const stage0CoincidentPropagationCase: PropagationCase = {
   expectedReason: "coincident-position",
 };
 
-// Reuse Phase 1's parallelNoClosureCase vessels directly. relativeBearing
+// Reuse this codebase's parallelNoClosureCase vessels directly. relativeBearing
 // (A,B) = 90, relativeBearing(B,A) = -90 (270 raw, normalized). cpa()
 // returns a degenerate parallel/matching-course result -- per D-07, this
 // must NOT propagate as a classifyEncounter() failure; it is consumed by

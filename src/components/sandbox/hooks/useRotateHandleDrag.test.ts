@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 /**
- * useRotateHandleDrag test (04-03 Task 3): drives a real
+ * useRotateHandleDrag test: drives a real
  * pointerdown+pointermove sequence against ChartPanel's rendered
  * rotate-handle hit-circle, asserts onVesselHeadingChange fires with a
  * heading, and regression-tests Pitfall 1 -- the hull hit-rect's own
@@ -10,7 +10,7 @@
 import { createElement } from "react";
 import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ChartPanel } from "../ChartPanel.js";
+import { ChartPanel } from "../chart/ChartPanel.js";
 import { classifyEncounter } from "../../../domain/colregs/classify-encounter.js";
 import { crossingResidualBasicCase } from "../../../domain/colregs/classify-encounter.fixtures.js";
 

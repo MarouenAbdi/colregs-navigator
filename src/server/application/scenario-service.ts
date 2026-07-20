@@ -1,12 +1,12 @@
 /**
  * scenario-service.ts -- the sole place `classifyEncounter()` is invoked in
- * this phase (SCEN-02's core mechanism). This is the one file in the entire
- * codebase that both fetches stored rows AND calls `classifyEncounter()` on
- * them, on every single read -- never caching or persisting the verdict
- * (D-06).
+ * this codebase (SCEN-02's core mechanism). This is the one file in the
+ * entire codebase that both fetches stored rows AND calls
+ * `classifyEncounter()` on them, on every single read -- never caching or
+ * persisting the verdict (D-06).
  *
- * Open Question 1 (RESEARCH.md) resolution: validate at `createScenario`
- * time by calling `classifyEncounter()` once, discarding `.value` on
+ * Design resolution: validate at `createScenario` time by calling
+ * `classifyEncounter()` once, discarding `.value` on
  * success (never persisted) and rejecting with `TRPCError({ code:
  * "BAD_REQUEST" })` when `result.ok` is false. This guarantees every row
  * `getScenario`/`listGallery` subsequently read is classifiable, so their
@@ -31,9 +31,9 @@ import {
  * Reconstructs `Vessel` objects from a `ScenarioRow`'s flat columns.
  * Casting `vesselAType`/`vesselBType` as `VesselType` is safe because the
  * only write path (`createScenario`, below) already validated these values
- * against `VesselTypeSchema` at the Zod-validated tRPC input boundary
- * (Open Question 3, RESEARCH.md) -- there is no other write path in this
- * project's scope that could bypass that validation.
+ * against `VesselTypeSchema` at the Zod-validated tRPC input boundary --
+ * there is no other write path in this project's scope that could bypass
+ * that validation.
  */
 export function rowToVessels(row: ScenarioRow): {
   vesselA: Vessel;
