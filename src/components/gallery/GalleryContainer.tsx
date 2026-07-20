@@ -3,7 +3,7 @@
  * Component that fetches curated scenarios via the real tRPC caller (no
  * client-side fetch, no "use client") and composes them into the responsive
  * card grid. Reuses SandboxContainer.tsx's exact section-container className
- * convention, per 09-UI-SPEC.md's Layout section.
+ * convention, matching the design's Layout section.
  */
 
 import { getCaller } from "../../lib/trpc/server.js";

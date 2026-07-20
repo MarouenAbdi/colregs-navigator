@@ -2,7 +2,7 @@
  * One Gallery card (GAL-01/GAL-02): mini-chart illustration, static Rule-N
  * badge, dynamic verdict badge, title, and description, all wrapped in a
  * single accessible Link -- the whole card is the click target, matching
- * the design's "no labeled CTA" affordance (09-UI-SPEC.md Copywriting
+ * the design's "no labeled CTA" affordance (per the design's Copywriting
  * Contract).
  */
 
@@ -24,7 +24,7 @@ type GalleryCardProps = {
   classification: ClassificationResult;
 };
 
-// Card-footer-specific presentation choice (09-UI-SPEC.md's Typography
+// Card-footer-specific presentation choice (per the design's Typography
 // section: "A GIVES WAY"/"MUTUAL", not the 2-letter mini-chart pill text) --
 // kept local, not shared, since no other component needs this exact string
 // shape.

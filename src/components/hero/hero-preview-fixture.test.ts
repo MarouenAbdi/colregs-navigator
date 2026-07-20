@@ -5,7 +5,7 @@ import { cpa } from "../../domain/geometry/cpa.js";
 import { heroPreviewVesselA, heroPreviewVesselB } from "./hero-preview-fixture.js";
 
 /**
- * Hero (07-01) -- fixture-drift guard (HERO-02). Asserts
+ * Fixture-drift guard (HERO-02). Asserts
  * `heroPreviewVesselA`/`heroPreviewVesselB` still reproduce the design
  * mock's displayed Rule 15/crossing/vesselA-gives-way verdict and its
  * RANGE/BEARING/CPA readouts, so a future change to the domain formulas

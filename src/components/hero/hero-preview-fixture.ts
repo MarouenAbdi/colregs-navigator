@@ -1,11 +1,11 @@
 /**
- * Hero (07-01) -- fixed vessel fixture for the illustrative "Live
- * classification" preview card (HERO-02, CONTEXT.md D-07). These values are
+ * Fixed vessel fixture for the illustrative "Live
+ * classification" preview card (HERO-02, D-07). These values are
  * NOT hand-derived -- they were computed [Verified: via a standalone script
  * replicating bearing.ts/relative-bearing.ts/cpa.ts/classify-encounter.ts's
  * exact formulas, not hand arithmetic] by iterating vesselB's speed until
  * dcpaNm converged on the design mock's displayed 1.18 NM. Transcribed
- * verbatim from 07-RESEARCH.md's Code Examples section -- do not alter.
+ * verbatim from this project's original worked-math derivation -- do not alter.
  *
  * Reproduces `classifyEncounter(heroPreviewVesselA, heroPreviewVesselB)`
  * output of: encounterType "crossing", giveWay "vesselA", standOn

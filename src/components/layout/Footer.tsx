@@ -1,7 +1,7 @@
 /**
- * Footer (06-01) -- static page-shell chrome wired into app/layout.tsx.
+ * Static page-shell chrome wired into app/layout.tsx.
  * Plain Server Component (no "use client"). Copy is locked verbatim by
- * 06-UI-SPEC.md's Copywriting Contract -- do not paraphrase.
+ * the design's Copywriting Contract -- do not paraphrase.
  */
 export function Footer() {
   return (

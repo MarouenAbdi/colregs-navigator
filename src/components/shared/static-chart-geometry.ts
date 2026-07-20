@@ -2,8 +2,8 @@
  * Pure, framework-free geometry shared by every independent static-
  * illustration chart component (Hero's preview card, Gallery's mini-chart)
  * -- extracted from `hero-preview-geometry.ts` once Gallery became a real
- * second consumer of these primitives (09-CONTEXT.md D-09, CLAUDE.md's
- * "extract only on a real second consumer" convention). Each of these two
+ * second consumer of these primitives (D-09, CLAUDE.md's "extract only on
+ * a real second consumer" convention). Each of these two
  * components computes its own container size/viewBox and calls into these
  * shared primitives with its own screen coordinates -- nothing here is
  * component-specific.
