@@ -51,7 +51,7 @@ describe("appRouter (scenario + gallery) -- end-to-end integration", () => {
   describe("gallery.list", () => {
     // prisma/seed.ts follow-up: this replaces the now-stale assumption that an
     // empty array is always returned when no curated scenarios exist --
-    // now that prisma/seed.ts (Task 2) populates the shared dev database
+    // now that prisma/seed.ts populates the shared dev database
     // with curated rows, that assumption no longer holds. This test
     // creates and promotes its OWN row, then asserts containment (never
     // exact array equality) so it passes regardless of whether the seed

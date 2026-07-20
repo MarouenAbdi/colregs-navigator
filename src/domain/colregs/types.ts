@@ -69,7 +69,7 @@ export interface GiveWayResult {
  * mutual-obligation case, not a missing/error value. When Rule 18's
  * vessel-type hierarchy applies to a head-on encounter between vessels of
  * *different* priority tiers, `giveWay`/`standOn` ARE populated (via
- * `classifyEncounter()`'s own Stage 6 Rule-18 override). For
+ * `classifyEncounter()`'s own Stage 6 Rule 18 override). For
  * `'crossing'`/`'overtaking'` encounters, `giveWay`/`standOn` are always
  * non-null.
  */

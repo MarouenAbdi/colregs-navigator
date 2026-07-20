@@ -153,7 +153,7 @@ describe("SandboxContainer", () => {
     ).toBeInTheDocument();
   });
 
-  it("re-derives the classification live when a ControlPanel speed slider changes, with no submit step (CLAS-05)", async () => {
+  it("re-derives the classification live when a ControlPanel speed slider changes, with no submit step", async () => {
     const user = userEvent.setup();
     render(<SandboxContainer />);
 
