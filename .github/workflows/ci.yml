@@ -52,6 +52,7 @@ jobs:
         run: docker compose up -d --wait
       - run: npx prisma generate
       - run: npx prisma migrate deploy
+      - run: npx prisma db seed
       - run: npm test
 
   build:
@@ -69,4 +70,5 @@ jobs:
         run: docker compose up -d --wait
       - run: npx prisma generate
       - run: npx prisma migrate deploy
+      - run: npx prisma db seed
       - run: npm run build
