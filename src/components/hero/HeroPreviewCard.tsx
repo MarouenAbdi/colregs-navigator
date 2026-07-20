@@ -3,8 +3,8 @@
  * fully static, illustrative SVG chart driven by a real
  * `classifyEncounter()`/`bearing()`/`cpa()` call against a fixed fixture
  * (`hero-preview-fixture.ts`) -- not hand-typed literals. Shares zero code
- * with the real interactive `ChartPanel.tsx` (CONTEXT.md D-03) and is
- * never wired to live Sandbox state (CONTEXT.md D-01: no pulsing dot, no
+ * with the real interactive `ChartPanel.tsx` (D-03) and is
+ * never wired to live Sandbox state (D-01: no pulsing dot, no
  * animated bearing line).
  */
 import { classifyEncounter } from "../../domain/colregs/classify-encounter.js";
@@ -135,7 +135,7 @@ export function HeroPreviewCard() {
         font-semibold text-muted-foreground
       ">
         <span className="flex items-center gap-1.75">
-          {/* Static, non-pulsing dot per CONTEXT.md D-01 -- no animation classes. */}
+          {/* Static, non-pulsing dot per D-01 -- no animation classes. */}
           <span className="size-1.5 rounded-full bg-accent" aria-hidden="true" />
           <span className="text-foreground">Live classification</span>
         </span>
