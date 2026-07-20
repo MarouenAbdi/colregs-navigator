@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Tech Debt & Stabilization
-status: ready_to_plan
-stopped_at: Phase 11 complete (3/3) — ready to discuss Phase 12
-last_updated: 2026-07-20T07:18:23.212Z
-last_activity: 2026-07-19
+status: "Phase 11 shipped — PR #12"
+stopped_at: Phase 11 complete (3/3) — human-verified, no regressions
+last_updated: "2026-07-20T07:27:04.979Z"
+last_activity: 2026-07-20
 progress:
   total_phases: 4
   completed_phases: 2
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-07-19)
 
 Phase: 12
 Plan: Not started
-Status: Ready to plan
+Status: Phase 11 shipped — PR #12
 Last activity: 2026-07-20
 
 Progress: [██████████] 100% (Phase 11)
