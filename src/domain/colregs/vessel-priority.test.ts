@@ -16,7 +16,7 @@ describe("vesselPriority() tier ranking", () => {
   }
 });
 
-describe("rule18Overrides() tie-break mechanics (DETM-02)", () => {
+describe("rule18Overrides() tie-break mechanics", () => {
   it("does not override for the co-equal not-under-command/RIATM tie", () => {
     expect(rule18Overrides(nucRiatmTieCase.giveWayType, nucRiatmTieCase.standOnType)).toBe(
       nucRiatmTieCase.expectedOverride,
