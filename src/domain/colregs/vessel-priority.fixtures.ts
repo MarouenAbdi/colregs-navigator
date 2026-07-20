@@ -3,8 +3,9 @@ import type { VesselType } from "../vessel/vessel.js";
 /**
  * Rule 18 priority-tier and tie-break fixtures (DETM-02). `priorityTierCases`
  * covers all 5 vessel types' expected numeric priority; the named consts
- * below cover each `rule18Overrides()` behavior case from CONTEXT.md's
- * "Claude's Discretion" note on tie-break mechanics.
+ * below cover each `rule18Overrides()` behavior case left to engineering
+ * discretion during this module's design: how to break a tie when two
+ * different vessel types are equally prioritized.
  */
 
 // Lower number = higher priority = "must be given way to" (Rule 18(a)-(c)).

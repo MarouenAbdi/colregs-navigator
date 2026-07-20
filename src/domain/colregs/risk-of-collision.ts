@@ -3,8 +3,8 @@ import type { Result } from "../shared/result.js";
 /**
  * riskOfCollision() — Rule 7 gate (CLAS-03, D-05-D-08).
  *
- * Consumes the `Result<{ tcpaMinutes, dcpaNm }>` produced by Phase 1's
- * `cpa()` and reduces it to a plain `boolean` — deliberately NOT
+ * Consumes the `Result<{ tcpaMinutes, dcpaNm }>` produced by this codebase's
+ * own `cpa()` and reduces it to a plain `boolean` — deliberately NOT
  * `Result<boolean>`, because "no risk" is a valid classification outcome,
  * not a degenerate/error case. This mirrors relative-bearing.ts's
  * "propagate unchanged, don't re-wrap" philosophy applied one level up:

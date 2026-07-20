@@ -5,9 +5,9 @@ import {
   parallelNoClosureCase,
 } from "../geometry/cpa.fixtures.js";
 
-// Re-export Phase 1's cpa.fixtures.ts cases directly (RESEARCH.md: "Phase 2
-// can reuse these as known-correct starting inputs" — do not re-derive
-// their trigonometry).
+// Re-export cpa.fixtures.ts's own cases directly -- this rules-engine layer
+// can reuse these as known-correct starting inputs; do not re-derive their
+// trigonometry.
 export { headOnClosingCase, negativeTcpaCase, parallelNoClosureCase };
 
 /**
@@ -24,7 +24,7 @@ export { headOnClosingCase, negativeTcpaCase, parallelNoClosureCase };
  * it — fine for `toBeCloseTo`, but wrong for testing an inclusive `<=`
  * boundary with `toBe`. `riskOfCollision()`'s own boundary logic (D-05,
  * D-08) is the unit under test here, not `cpa()`'s trigonometry (already
- * fixture-tested in Phase 1 via `toBeCloseTo`).
+ * fixture-tested elsewhere in this codebase via `toBeCloseTo`).
  */
 
 // DCPA exactly AT the 1.0nm threshold (D-05's "at or under" is inclusive).
