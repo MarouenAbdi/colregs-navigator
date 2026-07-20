@@ -15,27 +15,21 @@
  * hit-targets.
  */
 
-import { useEffect, useRef, useState } from "react";
 import type { ChartPanelProps } from "./types.js";
 import { ROLE_BADGE_TEXT, ROLE_HULL_FILL_CLASS, type VesselRole } from "./vessel-role.js";
-import { type ContainerSize } from "../../domain/geometry/screen-convert.js";
 import type { Vessel } from "../../domain/vessel/vessel.js";
 import { useHullDrag, type DragHandlers } from "./hooks/useHullDrag.js";
 import { useRotateHandleDrag } from "./hooks/useRotateHandleDrag.js";
+import { useContainerSize } from "./hooks/useContainerSize.js";
 import type { VesselLabel } from "../../domain/colregs/types.js";
 import {
   BADGE_OFFSET_X,
   BADGE_OFFSET_Y,
   BADGE_RECT_HEIGHT,
   BADGE_RECT_WIDTH,
-  buildGridLineSegments,
   CHART_VIEW_BOX,
   CONE_DEFAULT_STROKE,
-  CROSSHAIR_STROKE,
   DOUBT_STROKE,
-  FINE_GRID_CELL_PX,
-  FINE_GRID_STROKE,
-  GRID_STROKE,
   HULL_BOW_Y,
   HULL_HALF_WIDTH,
   HULL_NOTCH_Y,
@@ -46,12 +40,12 @@ import {
   LETTER_CIRCLE_R,
   LETTER_OFFSET_X,
   LETTER_OFFSET_Y,
-  RANGE_RING_STROKE,
   ROTATE_HANDLE_CY,
   ROTATE_HANDLE_VISIBLE_R,
   ROTATE_STALK_Y2,
 } from "./chart-panel-geometry.js";
 import { deriveChartOverlayState } from "./chart-panel-derivation.js";
+import { ChartBackdrop } from "./ChartBackdrop.js";
 
 interface VesselGroupProps {
   label: VesselLabel;
@@ -201,21 +195,7 @@ export function ChartPanel({
   onVesselPositionChange,
   onVesselHeadingChange,
 }: ChartPanelProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [containerSize, setContainerSize] = useState<ContainerSize | null>(null);
-
-  useEffect(() => {
-    const element = containerRef.current;
-    if (!element) return;
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) return;
-      const { width, height } = entry.contentRect;
-      setContainerSize({ width, height });
-    });
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
+  const { containerRef, containerSize } = useContainerSize();
 
   const hullDragA = useHullDrag("vesselA", onVesselPositionChange, containerSize, CHART_VIEW_BOX);
   const hullDragB = useHullDrag("vesselB", onVesselPositionChange, containerSize, CHART_VIEW_BOX);
@@ -263,60 +243,12 @@ export function ChartPanel({
         height={containerSize.height}
         className="rounded-sm border border-border bg-chart-surface"
       >
-        <defs>
-          <pattern
-            id="chart-fine-grid"
-            width={FINE_GRID_CELL_PX}
-            height={FINE_GRID_CELL_PX}
-            patternUnits="userSpaceOnUse"
-          >
-            <path
-              d={`M ${FINE_GRID_CELL_PX} 0 H 0 V ${FINE_GRID_CELL_PX}`}
-              fill="none"
-              stroke={FINE_GRID_STROKE}
-              strokeWidth={1}
-            />
-          </pattern>
-        </defs>
-        <rect width={containerSize.width} height={containerSize.height} fill="url(#chart-fine-grid)" />
-        <g>
-          {buildGridLineSegments(containerSize, CHART_VIEW_BOX).map((seg) => (
-            <line
-              key={seg.key}
-              x1={seg.x1}
-              y1={seg.y1}
-              x2={seg.x2}
-              y2={seg.y2}
-              stroke={GRID_STROKE}
-              strokeWidth={1}
-            />
-          ))}
-        </g>
-        <g stroke={RANGE_RING_STROKE} fill="none">
-          <circle cx={chartCenter.screenX} cy={chartCenter.screenY} r={innerRingRadiusPx} />
-          <circle cx={chartCenter.screenX} cy={chartCenter.screenY} r={outerRingRadiusPx} />
-        </g>
-        <g stroke={CROSSHAIR_STROKE} strokeWidth={1}>
-          <line
-            x1={chartCenter.screenX}
-            y1={chartCenter.screenY - innerRingRadiusPx}
-            x2={chartCenter.screenX}
-            y2={chartCenter.screenY + innerRingRadiusPx}
-          />
-          <line
-            x1={chartCenter.screenX - innerRingRadiusPx}
-            y1={chartCenter.screenY}
-            x2={chartCenter.screenX + innerRingRadiusPx}
-            y2={chartCenter.screenY}
-          />
-        </g>
-        <text
-          x={chartCenter.screenX + 4}
-          y={chartCenter.screenY - innerRingRadiusPx + 12}
-          className="fill-muted-foreground font-mono text-[11px]"
-        >
-          N
-        </text>
+        <ChartBackdrop
+          containerSize={containerSize}
+          chartCenter={chartCenter}
+          innerRingRadiusPx={innerRingRadiusPx}
+          outerRingRadiusPx={outerRingRadiusPx}
+        />
         <g>
           <path
             data-testid="cone-vesselA"
