@@ -132,6 +132,6 @@ Phases execute in numeric order: 10 → 11 → 12 → 13
 | 8. Sandbox | v1.1 | 6/6 | Complete | 2026-07-18 |
 | 9. Gallery | v1.1 | 4/4 | Complete | 2026-07-19 |
 | 10. ESLint Setup & Lint-Clean Baseline | v1.2 | 3/3 | Complete    | 2026-07-19 |
-| 11. Tailwind Deprecated Class-Name Fixes | v1.2 | 3/3 | Complete   | 2026-07-19 |
+| 11. Tailwind Deprecated Class-Name Fixes | v1.2 | 3/3 | Complete    | 2026-07-20 |
 | 12. ChartPanel/SandboxContainer Decomposition Refactor | v1.2 | 0/TBD | Not started | - |
 | 13. Comment Cleanup | v1.2 | 0/TBD | Not started | - |

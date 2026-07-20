@@ -23,7 +23,7 @@ This milestone is a tech-debt/hygiene milestone, not a new-feature milestone. No
 - [x] **TWFX-01**: `outline-none` is replaced with `outline-hidden` in the 4 flagged files (`button.tsx`, `select.tsx`, `Header.tsx`, `GalleryCard.tsx`) — these are semantically different utilities in Tailwind v4, not synonyms, so leaving `outline-none` unchanged silently ships an accessibility regression
 - [x] **TWFX-02**: Bare `rounded` is replaced with `rounded-sm` in the 2 flagged files (`SandboxContainer.tsx`, `ChartPanel.tsx`), matching Tailwind v4's renamed scale
 - [x] **TWFX-03**: Both fixes are applied by hand, file-by-file, scoped only to actual `className` Tailwind usages — not a blanket find-replace, since this codebase contains real false-positive traps (`"Grounded in "` UI copy, a "rounded to clean numbers" code comment)
-- [ ] **TWFX-04**: Manual browser verification confirms no visual or accessibility regression in Hero, Header, Gallery, and Sandbox after the class-name fixes — jsdom cannot verify visual/paint output
+- [x] **TWFX-04**: Manual browser verification confirms no visual or accessibility regression in Hero, Header, Gallery, and Sandbox after the class-name fixes — jsdom cannot verify visual/paint output
 
 ### Sandbox Refactor
 
@@ -82,7 +82,7 @@ Populated by roadmap creation.
 | TWFX-01 | Phase 11 | Complete |
 | TWFX-02 | Phase 11 | Complete |
 | TWFX-03 | Phase 11 | Complete |
-| TWFX-04 | Phase 11 | Pending |
+| TWFX-04 | Phase 11 | Complete |
 | RFCT-01 | Phase 12 | Pending |
 | RFCT-02 | Phase 12 | Pending |
 | RFCT-03 | Phase 12 | Pending |

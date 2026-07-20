@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Tech Debt & Stabilization
 status: ready_to_plan
-stopped_at: Phase 11 complete (3/3) — ready to plan Phase 12
-last_updated: "2026-07-19T21:35:00.000Z"
+stopped_at: Phase 11 complete (3/3) — ready to discuss Phase 12
+last_updated: 2026-07-20T07:18:23.212Z
 last_activity: 2026-07-19
 progress:
   total_phases: 4
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-19)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 12 — sandbox refactor (not yet planned)
+**Current focus:** Phase 12 — chartpanel/sandboxcontainer decomposition refactor
 
 ## Current Position
 
-Phase: 11 (tailwind-deprecated-class-name-fixes) — COMPLETE
-Plan: 3 of 3
-Status: Ready to plan Phase 12
-Last activity: 2026-07-19
+Phase: 12
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-07-20
 
 Progress: [██████████] 100% (Phase 11)
 
@@ -36,7 +36,7 @@ Progress: [██████████] 100% (Phase 11)
 
 **Velocity:**
 
-- Total plans completed: 36 (19 v1.0 + 14 v1.1)
+- Total plans completed: 39 (19 v1.0 + 14 v1.1)
 - Average duration: - min
 - Total execution time: - hours (v1.2 not started)
 
@@ -54,6 +54,7 @@ Progress: [██████████] 100% (Phase 11)
 | 12 (Sandbox Refactor) | TBD | - | - |
 | 13 (Comment Cleanup) | TBD | - | - |
 | 10 | 3 | - | - |
+| 11 | 3 | - | - |
 
 **Recent Trend:**
 
