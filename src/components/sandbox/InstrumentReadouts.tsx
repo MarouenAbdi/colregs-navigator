@@ -1,10 +1,11 @@
 /**
  * InstrumentReadouts -- the 2x2 Range/Bearing/CPA/TCPA tile grid plus the
- * status pill, both inside one `Card` (08-UI-SPEC.md: "the status pill is
- * NOT a separate card"). Values come from `deriveInstrumentReadouts()`
- * (direct geometry calls against live vessel state, D-05) -- never scanned
- * from `classification.trail[].facts`, which cannot reliably supply these
- * across every code path (see instrument-readouts.ts).
+ * status pill, both inside one `Card` (the status pill is deliberately NOT
+ * a separate card, per the design). Values come from
+ * `deriveInstrumentReadouts()` (direct geometry calls against live vessel
+ * state, D-05) -- never scanned from `classification.trail[].facts`, which
+ * cannot reliably supply these across every code path (see
+ * instrument-readouts.ts).
  */
 
 import type { InstrumentReadoutsProps } from "./types.js";
@@ -30,11 +31,11 @@ function formatTcpa(tcpaMinutes: number | null): string {
 }
 
 // Tone-to-Tailwind-utility mapping -- one step lighter than the give-way/
-// stand-on badge shade, per 08-UI-SPEC.md's Status Pill color table (plain
-// default-palette utilities, not new @theme tokens -- a distinct, one-off
-// convention from the give-way/stand-on badge shades). "opening" reuses
-// muted-foreground -- a neutral/informational tone, never red or green,
-// since it is not a risk verdict.
+// stand-on badge shade, per this component's own status-pill color-token
+// convention (plain default-palette utilities, not new @theme tokens --
+// a distinct, one-off convention from the give-way/stand-on badge shades).
+// "opening" reuses muted-foreground -- a neutral/informational tone, never
+// red or green, since it is not a risk verdict.
 const STATUS_PILL_TONE_CLASSNAME: Record<StatusPillTone, string> = {
   clear: "text-green-400 bg-green-400/10 border-green-400/35",
   risk: "text-red-400 bg-red-400/10 border-red-400/35",

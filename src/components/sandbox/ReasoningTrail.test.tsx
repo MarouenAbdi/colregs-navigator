@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 /**
- * ReasoningTrail tests (08-04 Task 3). Verifies dynamic step count/order,
+ * ReasoningTrail tests. Verifies dynamic step count/order,
  * tag+tone derivation for all 3 tone buckets (GEOMETRY/RULE N/VERDICT),
  * the doubt-substitution override, empty-facts suppression, and both
  * doubt-caveat strings verbatim -- collectively covering every behavior

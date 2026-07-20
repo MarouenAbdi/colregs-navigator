@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 /**
- * VerdictBanner tests (08-04 Task 1). Verifies the 3 behavior cases split
+ * VerdictBanner tests. Verifies the 3 behavior cases split
  * out of the former single combined reasoning aside: give-way (standalone
  * title + Rule N badge + GW/SO role badges), mutual (MUTUAL badges, Rule 7
  * badge, mutual description), and degenerate (title/description replaced,

@@ -2,8 +2,9 @@
  * VerdictBanner -- the full-width verdict card (SBOX-02): rule badge,
  * standalone title, one-line plain-English description, and per-vessel
  * role badges. Split out of the former single combined reasoning aside so
- * the design's exact card boundary can be expressed directly (08-UI-SPEC.md
- * Layout: "verdict banner ... is not nested inside the reasoning column").
+ * the design's exact card boundary can be expressed directly (the design
+ * places the verdict banner as its own top-level card, not nested inside
+ * the reasoning column).
  */
 
 import type { VerdictBannerProps } from "./types.js";
