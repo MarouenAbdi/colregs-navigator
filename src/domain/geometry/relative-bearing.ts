@@ -13,9 +13,9 @@ import { bearing } from "./bearing.js";
 
 export function relativeBearing(own: Vessel, contact: Vessel): Result<number> {
   // bearing() alone would not catch a non-finite heading (it only
-  // inspects positions), so this guard is unique to this function
-  // (T-01-04). Position-level non-finite values are already caught by
-  // the composed bearing() call below (T-01-02) -- no duplicate guard
+  // inspects positions), so this guard is unique to this function.
+  // Position-level non-finite values are already caught by
+  // the composed bearing() call below -- no duplicate guard
   // needed here.
   if (!Number.isFinite(own.heading)) {
     return err("invalid-input", { own });

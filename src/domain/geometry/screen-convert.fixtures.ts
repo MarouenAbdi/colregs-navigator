@@ -2,8 +2,8 @@ import type { Position } from "../vessel/vessel.js";
 
 /**
  * Hand-derived screen<->chart coordinate conversion fixtures (D-13-style,
- * for consistency with the rest of this phase's fixtures even though D-13
- * itself is trigonometry-specific).
+ * for consistency with the rest of this project's hand-derived fixture
+ * files even though D-13 itself is trigonometry-specific).
  *
  * Shared container/viewBox configuration used across all cases:
  * containerSize = {width: 800, height: 600}, viewBox = {minX: -50, minY: -50,

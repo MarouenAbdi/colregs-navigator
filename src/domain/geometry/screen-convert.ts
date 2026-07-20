@@ -2,8 +2,8 @@ import type { Position } from "../vessel/vessel.js";
 
 /**
  * Pure screen-pixel <-> chart {x,y} conversion. Plain number-in/number-out
- * — zero DOM/browser-observer/graphics-element API dependency (ROADMAP
- * Phase 1 Success Criterion #3). The only Phase-4-owned piece is the
+ * — zero DOM/browser-observer/graphics-element API dependency by design.
+ * The only piece owned by the Interactive Chart Sandbox feature is the
  * *caller* that measures containerSize via a live browser size-tracking
  * API and supplies the chart's viewBox; these functions take both as
  * plain arguments and never touch the DOM.

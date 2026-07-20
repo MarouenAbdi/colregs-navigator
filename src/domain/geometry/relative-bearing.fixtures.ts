@@ -60,8 +60,9 @@ export const overtakingCase: OkCase = {
   expected: 150,
 };
 
-// Reciprocal-heading-but-off-axis-bearing (D-16, ROADMAP Phase 1 Success
-// Criterion #2): own heading 000, contact heading 180 (reciprocal --
+// Reciprocal-heading-but-off-axis-bearing (D-16 -- a reciprocal heading
+// alone must not be treated as head-on without checking the actual bearing
+// to the contact): own heading 000, contact heading 180 (reciprocal --
 // matches a naive "head-on by heading alone" check), but contact is
 // positioned abeam (bearing 90 deg, dx=5,dy=0), not dead ahead/astern.
 // raw = 90 - 0 = 90 -> relative bearing 90, nowhere near 0/180 -- proving
@@ -112,7 +113,7 @@ export const coincidentPropagationCase: ErrCase = {
 // Non-finite heading (NaN) bypasses VesselSchema's runtime validation via
 // direct object-literal construction (see threat_model trust boundary).
 // bearing() alone would not catch this since it only inspects positions --
-// relativeBearing() must guard own.heading itself (T-01-04).
+// relativeBearing() must guard own.heading itself.
 export const nonFiniteHeadingCase: ErrCase = {
   own: { position: { x: 0, y: 0 }, heading: NaN, speed: 10, type: "power-driven" },
   contact: {

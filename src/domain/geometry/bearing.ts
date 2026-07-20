@@ -6,7 +6,8 @@
  * clockwise from North, not counterclockwise from East. Result is raw,
  * unrounded degrees in [0, 360) (D-04, D-08). Degenerate/invalid inputs
  * return a tagged `Result` failure instead of NaN/Infinity/a
- * silently-wrong 0 (D-07, T-01-02).
+ * silently-wrong 0 (D-07: degenerate/invalid inputs must be caught
+ * explicitly, never silently coerced to 0).
  */
 
 import type { Position } from "../vessel/vessel.js";
