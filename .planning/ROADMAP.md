@@ -44,7 +44,7 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details (goals, succes
 
 **Milestone Goal:** Demonstrate basic, portfolio-credible full-stack DevOps competency — a GitHub Actions CI/CD pipeline and a real, live-deployed instance of the app with a production Postgres database.
 
-- [ ] **Phase 14: Pipeline & Hooks** - GitHub Actions CI/CD pipeline (lint/typecheck/test/build gate + auto-deploy wiring), Husky/lint-staged pre-commit hooks, and CONTRIBUTING.md
+- [x] **Phase 14: Pipeline & Hooks** - GitHub Actions CI/CD pipeline (lint/typecheck/test/build gate + auto-deploy wiring), Husky/lint-staged pre-commit hooks, and CONTRIBUTING.md
 - [ ] **Phase 15: Deploy & Verify** - Live Vercel + Neon production deployment, provisioned and go-live-verified end-to-end
 
 ## Phase Details
