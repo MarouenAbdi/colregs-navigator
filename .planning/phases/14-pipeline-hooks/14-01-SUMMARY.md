@@ -117,6 +117,10 @@ None - no external service configuration required. This plan is entirely repo-lo
 - Ready for plan 14-02 to open a real PR and confirm all four jobs (`lint`, `typecheck`, `test`, `build`) actually run and pass against GitHub's runners, and to make the branch-protection decision flagged by this plan's README comment (private-repo Free-plan limitation).
 - No blockers.
 
+## Self-Check: PASSED
+
+All created/modified files confirmed to exist on disk (`.nvmrc`, `.github/workflows/ci.yml`, `README.md`, `package.json`, `.planning/phases/14-pipeline-hooks/14-01-SUMMARY.md`). All task/plan commit hashes confirmed present in `git log --oneline --all` (`ef36da3`, `200bd01`, `c199a8e`, `d5d1afc`).
+
 ---
 *Phase: 14-pipeline-hooks*
 *Completed: 2026-07-20*
