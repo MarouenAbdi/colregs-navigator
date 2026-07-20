@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Tech Debt & Stabilization
 status: executing
-stopped_at: Phase 12 context gathered
-last_updated: "2026-07-20T08:24:42.439Z"
-last_activity: 2026-07-20 -- Phase 12 execution started
+stopped_at: Phase 12 complete — verified 8/8, all waves merged
+last_updated: "2026-07-20T09:11:31.692Z"
+last_activity: 2026-07-20 -- Phase 12 execution complete, verified 8/8
 progress:
   total_phases: 4
-  completed_phases: 2
-  total_plans: 10
-  completed_plans: 6
-  percent: 50
+  completed_phases: 3
+  total_plans: 14
+  completed_plans: 10
+  percent: 75
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-19)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 12 — chartpanel-sandboxcontainer-decomposition-refactor
+**Current focus:** Phase 13 — comment cleanup (next up)
 
 ## Current Position
 
-Phase: 12 (chartpanel-sandboxcontainer-decomposition-refactor) — EXECUTING
-Plan: 1 of 4
-Status: Executing Phase 12
-Last activity: 2026-07-20 -- Phase 12 execution started
+Phase: 12 (chartpanel-sandboxcontainer-decomposition-refactor) — COMPLETE
+Plan: 4 of 4
+Status: Phase 12 complete, verified 8/8 must-haves
+Last activity: 2026-07-20 -- Phase 12 execution complete, verified 8/8
 
-Progress: [██████████] 100% (Phase 11)
+Progress: [██████████] 100% (Phase 12)
 
 ## Performance Metrics
 
@@ -81,6 +81,7 @@ Recent decisions affecting current work:
 - [Phase 11]: outline-none renamed to outline-hidden and rounded-[0.25rem] renamed to rounded-sm across 6 components (plan 11-01) — Canonical Tailwind v4 class names; radius increase (0.25rem -> 0.375rem) accepted deliberately per D-01/D-02
 - [Phase 11]: D-03 (Plan 02): removed the now-dead better-tailwindcss/enforce-canonical-classes ignore pattern from eslint.config.mjs, since both rounded-[0.25rem] sites were renamed to rounded-sm in Plan 01; confirmed npx eslint . stays clean (0 errors)
 - [Phase 11]: D-04/D-05 (Plan 03): human confirmed in a real browser (no automated pre-check per D-05) that Hero, Header, Gallery, and Sandbox show no visual or keyboard-focus-outline regression after the outline-hidden/rounded-sm renames — Phase 11 closed, TWFX-04 complete
+- [Phase 12]: 4 plans across 3 waves — ChartPanel geometry/derivation split (12-01), SandboxContainer state hook (12-02), ChartPanel resize hook + ChartBackdrop (12-03), VesselGroup byte-for-byte extraction (12-04). Human confirmed real-browser drag/rotate hit-testing with zero regression after the VesselGroup move (RFCT-06). ChartPanel.tsx (176 lines) and SandboxContainer.tsx (147 lines) both land under the ~150-200 line convention (RFCT-07). Verifier confirmed 8/8 must-haves; full suite 216/216, tsc/eslint clean. Phase 12 closed, RFCT-01..08 complete.
 
 ### Pending Todos
 
@@ -107,10 +108,10 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-20T07:55:06.977Z
-Stopped at: Phase 12 context gathered
-Resume file: .planning/phases/12-chartpanel-sandboxcontainer-decomposition-refactor/12-CONTEXT.md
+Last session: 2026-07-20T09:11:31.692Z
+Stopped at: Phase 12 complete — verified 8/8, all waves merged
+Resume file: .planning/phases/12-chartpanel-sandboxcontainer-decomposition-refactor/VERIFICATION.md
 
 ## Operator Next Steps
 
-- Run `/gsd:plan-phase 12` to plan the Sandbox Refactor phase
+- Run `/gsd-plan-phase 13` to plan the comment cleanup phase
