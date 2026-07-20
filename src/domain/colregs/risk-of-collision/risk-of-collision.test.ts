@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cpa } from "../../geometry/cpa.js";
+import { cpa } from "../../geometry/cpa/cpa.js";
 import { ok } from "../../shared/result.js";
 import { riskOfCollision } from "./risk-of-collision.js";
 import {

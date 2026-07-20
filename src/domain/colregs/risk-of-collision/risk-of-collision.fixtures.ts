@@ -3,7 +3,7 @@ import {
   headOnClosingCase,
   negativeTcpaCase,
   parallelNoClosureCase,
-} from "../../geometry/cpa.fixtures.js";
+} from "../../geometry/cpa/cpa.fixtures.js";
 
 // Re-export cpa.fixtures.ts's own cases directly -- this rules-engine layer
 // can reuse these as known-correct starting inputs; do not re-derive their

@@ -8,9 +8,9 @@
  * animated bearing line).
  */
 import { classifyEncounter } from "../../domain/colregs/classify-encounter.js";
-import { bearing } from "../../domain/geometry/bearing.js";
-import { cpa } from "../../domain/geometry/cpa.js";
-import { chartToScreen } from "../../domain/geometry/screen-convert.js";
+import { bearing } from "../../domain/geometry/bearing/bearing.js";
+import { cpa } from "../../domain/geometry/cpa/cpa.js";
+import { chartToScreen } from "../../domain/geometry/screen-convert/screen-convert.js";
 import type { EncounterType, VesselLabel } from "../../domain/colregs/types.js";
 import { heroPreviewVesselA, heroPreviewVesselB } from "./hero-preview-fixture.js";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";

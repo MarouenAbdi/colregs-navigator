@@ -15,8 +15,8 @@
 
 import type { Vessel } from "../vessel/vessel.js";
 import { ok, type Result } from "../shared/result.js";
-import { relativeBearing } from "../geometry/relative-bearing.js";
-import { cpa } from "../geometry/cpa.js";
+import { relativeBearing } from "../geometry/relative-bearing/relative-bearing.js";
+import { cpa } from "../geometry/cpa/cpa.js";
 import { riskOfCollision } from "./risk-of-collision/risk-of-collision.js";
 import { rule18Overrides, vesselPriority } from "./vessel-priority/vessel-priority.js";
 import type {

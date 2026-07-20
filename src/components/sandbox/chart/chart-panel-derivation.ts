@@ -8,7 +8,7 @@
  * the same classified-vessel-pair inputs.
  */
 
-import { chartToScreen, type ChartViewBox, type ContainerSize } from "../../../domain/geometry/screen-convert.js";
+import { chartToScreen, type ChartViewBox, type ContainerSize } from "../../../domain/geometry/screen-convert/screen-convert.js";
 import { getVesselRole, type VesselRole } from "../vessel-role.js";
 import { resolveDoubtGeometry } from "../../../domain/colregs/doubt-geometry/resolve-doubt-geometry.js";
 import {

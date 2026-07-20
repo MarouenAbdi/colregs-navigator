@@ -10,7 +10,7 @@
  * independent of the live chart" precedent as `HeroPreviewCard.tsx`, D-08).
  */
 import { classifyEncounter } from "../../domain/colregs/classify-encounter.js";
-import { chartToScreen, type ContainerSize } from "../../domain/geometry/screen-convert.js";
+import { chartToScreen, type ContainerSize } from "../../domain/geometry/screen-convert/screen-convert.js";
 import type { Vessel } from "../../domain/vessel/vessel.js";
 import { getVesselRole, ROLE_HULL_FILL_CLASS, ROLE_STROKE_CLASS, type VesselRole } from "../sandbox/vessel-role.js";
 import { HULL_PATH, HULL_STROKE, HULL_STROKE_WIDTH, headingVectorEndpoint, midpoint } from "../shared/static-chart-geometry.js";

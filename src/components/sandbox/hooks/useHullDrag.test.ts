@@ -17,7 +17,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChartPanel } from "../chart/ChartPanel.js";
 import { classifyEncounter } from "../../../domain/colregs/classify-encounter.js";
 import { crossingResidualBasicCase } from "../../../domain/colregs/classify-encounter.fixtures.js";
-import { screenToChart } from "../../../domain/geometry/screen-convert.js";
+import { screenToChart } from "../../../domain/geometry/screen-convert/screen-convert.js";
 
 const MOCK_CONTAINER_SIZE = { width: 400, height: 400 };
 const CHART_VIEW_BOX = { minX: -10, minY: -10, width: 20, height: 20 };

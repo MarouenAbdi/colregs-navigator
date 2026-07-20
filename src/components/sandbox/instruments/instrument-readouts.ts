@@ -13,8 +13,8 @@
  * surface.
  */
 
-import { relativeBearing } from "../../../domain/geometry/relative-bearing.js";
-import { cpa } from "../../../domain/geometry/cpa.js";
+import { relativeBearing } from "../../../domain/geometry/relative-bearing/relative-bearing.js";
+import { cpa } from "../../../domain/geometry/cpa/cpa.js";
 import type { Vessel } from "../../../domain/vessel/vessel.js";
 
 export interface InstrumentReadouts {

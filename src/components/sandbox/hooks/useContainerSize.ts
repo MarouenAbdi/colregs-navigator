@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { type ContainerSize } from "../../../domain/geometry/screen-convert.js";
+import { type ContainerSize } from "../../../domain/geometry/screen-convert/screen-convert.js";
 
 export function useContainerSize(): {
   containerRef: React.RefObject<HTMLDivElement | null>;

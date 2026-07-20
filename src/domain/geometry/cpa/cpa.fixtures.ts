@@ -1,4 +1,4 @@
-import type { Vessel } from "../vessel/vessel.js";
+import type { Vessel } from "../../vessel/vessel.js";
 
 /**
  * Hand-derived CPA/TCPA fixtures (D-13). Velocity components use the

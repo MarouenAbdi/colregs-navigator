@@ -6,7 +6,7 @@
  * trigonometry behind its expected value.
  */
 
-import type { Vessel } from "../vessel/vessel.js";
+import type { Vessel } from "../../vessel/vessel.js";
 
 type OkCase = { own: Vessel; contact: Vessel; expected: number };
 type ErrCase = { own: Vessel; contact: Vessel };

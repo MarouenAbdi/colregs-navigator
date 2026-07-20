@@ -6,7 +6,7 @@
  * normalized to [0, 360) — 0=N, 90=E, 180=S, 270=W (D-08).
  */
 
-import type { Position } from "../vessel/vessel.js";
+import type { Position } from "../../vessel/vessel.js";
 
 type OkCase = { a: Position; b: Position; expected: number };
 type ErrCase = { a: Position; b: Position };

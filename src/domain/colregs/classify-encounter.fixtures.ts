@@ -12,8 +12,8 @@ import {
   coincidentPropagationCase as relativeBearingCoincidentPropagationCase,
   crossingCase,
   headOnCase,
-} from "../geometry/relative-bearing.fixtures.js";
-import { parallelNoClosureCase } from "../geometry/cpa.fixtures.js";
+} from "../geometry/relative-bearing/relative-bearing.fixtures.js";
+import { parallelNoClosureCase } from "../geometry/cpa/cpa.fixtures.js";
 
 interface ClassificationCase {
   vesselA: Vessel;

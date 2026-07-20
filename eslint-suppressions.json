@@ -162,17 +162,17 @@
       "count": 1
     }
   },
-  "src/domain/geometry/bearing.test.ts": {
+  "src/domain/geometry/bearing/bearing.test.ts": {
     "vitest/no-conditional-expect": {
       "count": 10
     }
   },
-  "src/domain/geometry/cpa.test.ts": {
+  "src/domain/geometry/cpa/cpa.test.ts": {
     "vitest/no-conditional-expect": {
       "count": 14
     }
   },
-  "src/domain/geometry/relative-bearing.test.ts": {
+  "src/domain/geometry/relative-bearing/relative-bearing.test.ts": {
     "vitest/no-conditional-expect": {
       "count": 10
     }

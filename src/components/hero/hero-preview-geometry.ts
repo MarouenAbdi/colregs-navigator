@@ -5,7 +5,7 @@
  * c265c047) to reproduce its exact layout, not eyeballed from the PNG --
  * see each constant's comment for the derivation.
  */
-import type { ChartViewBox, ContainerSize } from "../../domain/geometry/screen-convert.js";
+import type { ChartViewBox, ContainerSize } from "../../domain/geometry/screen-convert/screen-convert.js";
 
 // Per the design's Preview Card Dimensions spec: 8:5 (not square) aspect ratio,
 // framed to comfortably contain both fixture vessels + the range rings.

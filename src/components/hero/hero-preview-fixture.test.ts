@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { classifyEncounter } from "../../domain/colregs/classify-encounter.js";
-import { bearing } from "../../domain/geometry/bearing.js";
-import { cpa } from "../../domain/geometry/cpa.js";
+import { bearing } from "../../domain/geometry/bearing/bearing.js";
+import { cpa } from "../../domain/geometry/cpa/cpa.js";
 import { heroPreviewVesselA, heroPreviewVesselB } from "./hero-preview-fixture.js";
 
 /**

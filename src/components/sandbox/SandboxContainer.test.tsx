@@ -16,7 +16,7 @@ import { act, cleanup, render, screen, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SandboxContainer } from "./SandboxContainer.js";
-import { chartToScreen } from "../../domain/geometry/screen-convert.js";
+import { chartToScreen } from "../../domain/geometry/screen-convert/screen-convert.js";
 import {
   crossingResidualBasicCase,
   overtakingBothDirectionsCase,

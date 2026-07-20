@@ -1,5 +1,5 @@
-import type { Vessel } from "../vessel/vessel.js";
-import { err, ok, type Result } from "../shared/result.js";
+import type { Vessel } from "../../vessel/vessel.js";
+import { err, ok, type Result } from "../../shared/result.js";
 
 /**
  * cpa()/tcpa() — closest point of approach vector math. Resolves two open

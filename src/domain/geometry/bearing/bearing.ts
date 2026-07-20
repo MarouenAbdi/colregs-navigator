@@ -10,8 +10,8 @@
  * explicitly, never silently coerced to 0).
  */
 
-import type { Position } from "../vessel/vessel.js";
-import { err, ok, type Result } from "../shared/result.js";
+import type { Position } from "../../vessel/vessel.js";
+import { err, ok, type Result } from "../../shared/result.js";
 
 export function bearing(a: Position, b: Position): Result<number> {
   if (

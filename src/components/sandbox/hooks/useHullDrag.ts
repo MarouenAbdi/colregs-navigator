@@ -13,7 +13,7 @@ import {
   screenToChart,
   type ChartViewBox,
   type ContainerSize,
-} from "../../../domain/geometry/screen-convert.js";
+} from "../../../domain/geometry/screen-convert/screen-convert.js";
 import type { VesselLabel } from "../../../domain/colregs/types.js";
 import type { ChartPanelProps } from "../types.js";
 

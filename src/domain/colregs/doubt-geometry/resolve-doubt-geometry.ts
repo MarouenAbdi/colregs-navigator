@@ -18,7 +18,7 @@
 
 import type { Vessel } from "../../vessel/vessel.js";
 import { ok, type Result } from "../../shared/result.js";
-import { relativeBearing } from "../../geometry/relative-bearing.js";
+import { relativeBearing } from "../../geometry/relative-bearing/relative-bearing.js";
 import { OVERTAKING_BOUNDARY_DEGREES } from "../classify-encounter.js";
 import type { DoubtBoundary, VesselLabel } from "../types.js";
 

@@ -1,4 +1,4 @@
-import type { Position } from "../vessel/vessel.js";
+import type { Position } from "../../vessel/vessel.js";
 
 /**
  * Pure screen-pixel <-> chart {x,y} conversion. Plain number-in/number-out

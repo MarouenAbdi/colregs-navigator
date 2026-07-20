@@ -1,4 +1,4 @@
-import type { Position } from "../vessel/vessel.js";
+import type { Position } from "../../vessel/vessel.js";
 
 /**
  * Hand-derived screen<->chart coordinate conversion fixtures (D-13-style,

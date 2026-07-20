@@ -7,9 +7,9 @@
  * convention. Result is raw, unrounded degrees (D-04).
  */
 
-import type { Vessel } from "../vessel/vessel.js";
-import { err, ok, type Result } from "../shared/result.js";
-import { bearing } from "./bearing.js";
+import type { Vessel } from "../../vessel/vessel.js";
+import { err, ok, type Result } from "../../shared/result.js";
+import { bearing } from "../bearing/bearing.js";
 
 export function relativeBearing(own: Vessel, contact: Vessel): Result<number> {
   // bearing() alone would not catch a non-finite heading (it only

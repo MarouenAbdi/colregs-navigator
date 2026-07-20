@@ -6,7 +6,7 @@
  * Every comment below is preserved from its original site in ChartPanel.tsx.
  */
 
-import { chartToScreen, type ChartViewBox, type ContainerSize } from "../../../domain/geometry/screen-convert.js";
+import { chartToScreen, type ChartViewBox, type ContainerSize } from "../../../domain/geometry/screen-convert/screen-convert.js";
 
 // Fixed chart-space viewBox for the Sandbox chart: 20nm x 20nm centered on the
 // origin -- comfortably contains the default crossingResidualBasicCase

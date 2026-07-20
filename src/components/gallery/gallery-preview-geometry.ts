@@ -6,7 +6,7 @@
  * consumer" convention, it stays here until a second consumer of this
  * specific function exists.
  */
-import type { ChartViewBox } from "../../domain/geometry/screen-convert.js";
+import type { ChartViewBox } from "../../domain/geometry/screen-convert/screen-convert.js";
 import type { Position } from "../../domain/vessel/vessel.js";
 
 export function computeCardViewBox(
