@@ -73,29 +73,29 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CI-01 | TBD | Pending |
-| CI-02 | TBD | Pending |
-| CI-03 | TBD | Pending |
-| CI-04 | TBD | Pending |
-| CI-05 | TBD | Pending |
-| CI-06 | TBD | Pending |
-| CD-01 | TBD | Pending |
-| CD-02 | TBD | Pending |
-| HOOKS-01 | TBD | Pending |
-| DOCS-CONTRIB-01 | TBD | Pending |
-| DEPLOY-01 | TBD | Pending |
-| DEPLOY-02 | TBD | Pending |
-| DEPLOY-03 | TBD | Pending |
-| HEALTH-01 | TBD | Pending |
-| HEALTH-02 | TBD | Pending |
-| HEALTH-03 | TBD | Pending |
-| HEALTH-04 | TBD | Pending |
+| CI-01 | Phase 14 | Planned |
+| CI-02 | Phase 14 | Planned |
+| CI-03 | Phase 14 | Planned |
+| CI-04 | Phase 14 | Planned |
+| CI-05 | Phase 14 | Planned |
+| CI-06 | Phase 14 | Planned |
+| CD-01 | Phase 14 | Planned |
+| CD-02 | Phase 14 | Planned |
+| HOOKS-01 | Phase 14 | Planned |
+| DOCS-CONTRIB-01 | Phase 14 | Planned |
+| DEPLOY-01 | Phase 15 | Planned |
+| DEPLOY-02 | Phase 15 | Planned |
+| DEPLOY-03 | Phase 15 | Planned |
+| HEALTH-01 | Phase 15 | Planned |
+| HEALTH-02 | Phase 15 | Planned |
+| HEALTH-03 | Phase 15 | Planned |
+| HEALTH-04 | Phase 15 | Planned |
 
 **Coverage:**
 - v1.3 requirements: 17 total
-- Mapped to phases: 0 (pending roadmap creation)
-- Unmapped: 17 ⚠️
+- Mapped to phases: 17/17 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-07-20*
-*Last updated: 2026-07-20 after milestone scoping*
+*Last updated: 2026-07-20 after roadmap creation (Phases 14-15)*
