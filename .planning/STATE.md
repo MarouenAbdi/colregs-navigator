@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Tech Debt & Stabilization
-status: "Phase 12 shipped — PR #13"
-stopped_at: Phase 12 complete — verified 8/8, all waves merged
-last_updated: "2026-07-20T10:11:43.609Z"
-last_activity: 2026-07-20
+status: executing
+stopped_at: Phase 13 Wave 1 complete (13-01..13-06 merged) — Wave 2 (13-07) next
+last_updated: "2026-07-20T13:47:41.000Z"
+last_activity: 2026-07-20 -- Phase 13 Wave 1 merged, post-merge tests 216/216, lint clean
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 14
-  completed_plans: 10
-  percent: 75
+  total_plans: 18
+  completed_plans: 16
+  percent: 89
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-19)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 13 — comment cleanup (next up)
+**Current focus:** Phase 13 — comment-cleanup (Wave 2 of 3)
 
 ## Current Position
 
-Phase: 12 (chartpanel-sandboxcontainer-decomposition-refactor) — COMPLETE
-Plan: 4 of 4
-Status: Phase 12 shipped — PR #13
-Last activity: 2026-07-20
+Phase: 13 (comment-cleanup) — EXECUTING
+Plan: 7 of 8
+Status: Wave 1 complete (13-01..13-06), Wave 2 (13-07) next
+Last activity: 2026-07-20 -- Phase 13 Wave 1 merged, post-merge tests 216/216, lint clean
 
 Progress: [██████████] 100% (Phase 12)
 
@@ -82,6 +82,7 @@ Recent decisions affecting current work:
 - [Phase 11]: D-03 (Plan 02): removed the now-dead better-tailwindcss/enforce-canonical-classes ignore pattern from eslint.config.mjs, since both rounded-[0.25rem] sites were renamed to rounded-sm in Plan 01; confirmed npx eslint . stays clean (0 errors)
 - [Phase 11]: D-04/D-05 (Plan 03): human confirmed in a real browser (no automated pre-check per D-05) that Hero, Header, Gallery, and Sandbox show no visual or keyboard-focus-outline regression after the outline-hidden/rounded-sm renames — Phase 11 closed, TWFX-04 complete
 - [Phase 12]: 4 plans across 3 waves — ChartPanel geometry/derivation split (12-01), SandboxContainer state hook (12-02), ChartPanel resize hook + ChartBackdrop (12-03), VesselGroup byte-for-byte extraction (12-04). Human confirmed real-browser drag/rotate hit-testing with zero regression after the VesselGroup move (RFCT-06). ChartPanel.tsx (176 lines) and SandboxContainer.tsx (147 lines) both land under the ~150-200 line convention (RFCT-07). Verifier confirmed 8/8 must-haves; full suite 216/216, tsc/eslint clean. Phase 12 closed, RFCT-01..08 complete.
+- [Phase 13 Wave 1]: 6 parallel worktree-executor agents (13-01..13-06) were killed mid-execution by a session interruption (`/login` re-auth); recovered by orchestrator manual close-out rather than re-running from scratch, since diffs were small, plausible, and independently reviewable — each incomplete plan's remaining tasks were applied by hand against the plan's own action list, verified against its acceptance-criteria greps and test suite, committed, and summarized. Caught and fixed two real content bugs during review: a dangling comment reference in `curated-scenarios.ts` (13-03, pointed to a "research-gap note above" that didn't exist) and a duplicated "by design (by design):" phrase in `Hero.test.tsx` (13-06, from a literal find-replace that didn't account for existing wording) — both fixed with self-contained rewrites instead of following the plan's literal suggested text. All 6 plans merged clean (no conflicts, no deletions); post-merge gate: 216/216 tests, tsc clean, eslint 0 errors.
 
 ### Pending Todos
 

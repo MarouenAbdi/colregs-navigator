@@ -130,16 +130,16 @@ Plans:
   2. Every rewritten comment retains its full substantive WHY explanation — reviewed diff shows only identifier removal, no loss of reasoning.
   3. The broader re-grep pass is documented as having been run, confirming the original scoping count was not treated as exhaustive.
 
-**Plans:** 0/8 plans complete
+**Plans:** 6/8 plans complete
 Plans:
 **Wave 1**
 
-- [ ] 13-01-PLAN.md — Rewrite stale comments in src/domain/geometry/ + src/domain/shared/ (9 files)
-- [ ] 13-02-PLAN.md — Rewrite stale comments in src/domain/colregs/ (10 files)
-- [ ] 13-03-PLAN.md — Rewrite stale comments in src/server/ + tRPC-adjacent files (9 files)
-- [ ] 13-04-PLAN.md — Rewrite stale comments in Sandbox cluster A: ChartPanel/ControlPanel/InstrumentReadouts/ReasoningTrail/VerdictBanner (12 files)
-- [ ] 13-05-PLAN.md — Rewrite stale comments in Sandbox cluster B: SandboxContainer state + drag hooks (9 files)
-- [ ] 13-06-PLAN.md — Rewrite stale comments in Hero/Gallery/shared/layout (14 files)
+- [x] 13-01-PLAN.md — Rewrite stale comments in src/domain/geometry/ + src/domain/shared/ (9 files)
+- [x] 13-02-PLAN.md — Rewrite stale comments in src/domain/colregs/ (10 files)
+- [x] 13-03-PLAN.md — Rewrite stale comments in src/server/ + tRPC-adjacent files (9 files)
+- [x] 13-04-PLAN.md — Rewrite stale comments in Sandbox cluster A: ChartPanel/ControlPanel/InstrumentReadouts/ReasoningTrail/VerdictBanner (12 files)
+- [x] 13-05-PLAN.md — Rewrite stale comments in Sandbox cluster B: SandboxContainer state + drag hooks (9 files)
+- [x] 13-06-PLAN.md — Rewrite stale comments in Hero/Gallery/shared/layout (14 files)
 
 **Wave 2** *(blocked on Wave 1 completion — touches files 13-06 also modifies)*
 
@@ -164,4 +164,4 @@ Phases execute in numeric order: 10 → 11 → 12 → 13
 | 10. ESLint Setup & Lint-Clean Baseline | v1.2 | 3/3 | Complete    | 2026-07-19 |
 | 11. Tailwind Deprecated Class-Name Fixes | v1.2 | 3/3 | Complete    | 2026-07-20 |
 | 12. ChartPanel/SandboxContainer Decomposition Refactor | v1.2 | 4/4 | Complete   | 2026-07-20 |
-| 13. Comment Cleanup | v1.2 | 0/8 | Not started | - |
+| 13. Comment Cleanup | v1.2 | 6/8 | In progress | - |
