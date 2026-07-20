@@ -3,8 +3,8 @@ import type { CSSProperties } from "react";
 /**
  * SectionGridBackground -- decorative nautical-chart-style grid overlay,
  * shared across marketing sections. First real occupant of
- * src/components/shared/ (see README.md): Hero (07-01) and the future
- * Gallery section (Phase 9) both use the exact same repeating-grid pattern
+ * src/components/shared/ (see README.md): Hero and the
+ * Gallery section both use the exact same repeating-grid pattern
  * from the Claude Design source, differing only in grid-line opacity and
  * Hero's extra radial glow -- a real second consumer, not a speculative one.
  *

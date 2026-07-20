@@ -1,8 +1,9 @@
 /**
  * Gallery card's static, illustrative SVG mini-chart (GAL-01, D-06/D-08):
  * a parametrized version of Hero's "static, fixture-driven,
- * classifyEncounter()-backed illustration" pattern (09-RESEARCH.md Pattern
- * 1), accepting any `vesselA`/`vesselB` pair rather than one hardcoded
+ * classifyEncounter()-backed illustration" pattern (the same static-
+ * illustration pattern Hero's preview card established), accepting any
+ * `vesselA`/`vesselB` pair rather than one hardcoded
  * fixture -- rendered 6 times, once per curated gallery card. Shares zero
  * code with the live interactive `ChartPanel.tsx` and is never wired to
  * live Sandbox state (same "decorative static illustration stays
@@ -15,18 +16,18 @@ import { getVesselRole, ROLE_HULL_FILL_CLASS, ROLE_STROKE_CLASS, type VesselRole
 import { HULL_PATH, HULL_STROKE, HULL_STROKE_WIDTH, headingVectorEndpoint, midpoint } from "../shared/static-chart-geometry.js";
 import { computeCardViewBox } from "./gallery-preview-geometry.js";
 
-// UI-SPEC.md "Mini-Chart Contract": fixed 3:2 aspect ratio (358:238
+// Per the design's Mini-Chart Contract: fixed 3:2 aspect ratio (358:238
 // logical, rounded to clean numbers), a correction to Hero's own 8:5
 // ratio -- Gallery's mini-chart is proportionally slightly less
 // wide/more square than Hero's.
 const GALLERY_CONTAINER_SIZE: ContainerSize = { width: 360, height: 240 };
 
-// Engineering default (09-RESEARCH.md's confidence note, Pattern 1) --
-// visually compared against Main-Design.png's 6 gallery cards; adjust if
-// a card's vessels look clipped or too small/centered.
+// Engineering default -- visually compared against Main-Design.png's 6
+// gallery cards; adjust if a card's vessels look clipped or too
+// small/centered.
 const PADDING_FRACTION = 0.35;
 
-// UI-SPEC.md's "Mini-chart per-vessel role pill" correction (Pitfall 3):
+// Per the design's Mini-chart per-vessel role pill correction (Pitfall 3):
 // the small hull-adjacent pill uses a 2-letter "MU" for mutual, NOT
 // vessel-role.ts's ROLE_BADGE_TEXT.mutual ("MUTUAL", 6 characters, sized
 // for the card's separate footer verdict badge) -- reusing that constant
@@ -47,8 +48,8 @@ type VesselMarkerProps = {
 // headingVectorEndpoint's HEADING_VECTOR_LENGTH_PX is a fixed screen-pixel
 // length correct for Hero's one hand-solved, constant-scale viewBox. Gallery's
 // viewBox is recomputed per card by computeCardViewBox() from each curated
-// scenario's real vessel separation (1.0-10.0 NM across the 6 cards per
-// 09-RESEARCH.md), so screen-px-per-NM varies by roughly an order of
+// scenario's real vessel separation (1.0-10.0 NM across the 6 curated
+// cards), so screen-px-per-NM varies by roughly an order of
 // magnitude between cards -- on close-together pairs (e.g. the "Overtaking"
 // card, 1 NM apart) the fixed-length vector can extend past this chart's own
 // viewBox and be clipped by the wrapping div's overflow-hidden. Clamping the
@@ -74,7 +75,7 @@ function VesselMarker({ screen, heading, role, label }: VesselMarkerProps) {
   };
   return (
     <>
-      {/* z-order per UI-SPEC.md's Mini-Chart Contract: hull (3), label
+      {/* z-order per the design's Mini-Chart Contract: hull (3), label
           badge (4), pill (5), then the dashed heading vector (6) on top. */}
       <g transform={`translate(${screen.screenX} ${screen.screenY}) rotate(${heading})`}>
         <path d={HULL_PATH} className={ROLE_HULL_FILL_CLASS[role]} stroke={HULL_STROKE} strokeWidth={HULL_STROKE_WIDTH} />
@@ -145,7 +146,7 @@ export function GalleryPreviewChart({ vesselA, vesselB }: GalleryPreviewChartPro
       >
         <defs>
           {/* Reuses Hero's heroGrid <pattern> technique verbatim, at a
-              lower stroke opacity (UI-SPEC.md Mini-Chart Contract item 1:
+              lower stroke opacity (per the design's Mini-Chart Contract:
               ~8-10% here vs. Hero's declared 14%) and its own pattern id
               (SVG pattern ids must be unique per document, and both
               components can render on the same page). */}

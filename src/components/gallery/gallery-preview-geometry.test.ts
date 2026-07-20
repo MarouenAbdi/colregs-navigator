@@ -2,10 +2,11 @@ import { describe, expect, it } from "vitest";
 import { computeCardViewBox } from "./gallery-preview-geometry.js";
 
 /**
- * computeCardViewBox() (09-02) -- unit tests against the 1.0-10.0 NM
- * vessel-pair range this phase's actual 6 gallery cards span (per
- * 09-RESEARCH.md's verified per-card range table), plus the coincident-
- * axis edge case its own `Math.max(..., 0.001)` guard exists for.
+ * computeCardViewBox() unit tests against the 1.0-10.0 NM
+ * vessel-pair range the actual 6 curated gallery cards span
+ * (verified against the curated scenario set's own per-card range), plus
+ * the coincident-axis edge case its own `Math.max(..., 0.001)` guard
+ * exists for.
  */
 describe("computeCardViewBox", () => {
   it("enforces the given aspect ratio and keeps both vessels strictly inside the viewBox (5 NM apart, x-axis)", () => {
