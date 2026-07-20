@@ -1,6 +1,5 @@
 # COLREGS Navigator
 
-<!-- This repo is currently private -- the badge and linked workflow runs are only visible to accounts with repo read access (branch-protection/rulesets require a public repo or GitHub Pro on the Free plan, confirmed live via `gh api` at planning time). -->
 [![CI](https://github.com/MarouenAbdi/colregs-navigator/actions/workflows/ci.yml/badge.svg)](https://github.com/MarouenAbdi/colregs-navigator/actions/workflows/ci.yml)
 
 Maritime collision-avoidance rules engine and visualizer. Users place two vessels on a
