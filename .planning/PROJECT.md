@@ -1,6 +1,13 @@
 # COLREGS Navigator
 
-## Current Milestone: v1.2 Tech Debt & Stabilization
+## Current State
+
+**Shipped:** v1.2 Tech Debt & Stabilization — 2026-07-20. A tech-debt/hygiene milestone (no new user-facing features, zero change to domain logic outcomes): ESLint installed and configured via flat config, reaching a lint-clean baseline (`npm run lint`, 0 errors) with a lint-enforced `src/domain/` architecture boundary; deprecated Tailwind v3→v4 class names fixed by hand across 6 files with human-verified zero visual/accessibility regression; `ChartPanel.tsx`/`SandboxContainer.tsx` decomposed into focused single-concern modules with zero hit-testing regression; and a hand-rewritten comment cleanup retiring stale Phase/Plan/REQ-ID references across 66 files. All 22/22 v1.2 requirements validated across 4 phases / 18 plans (2026-07-19 → 2026-07-20). See `.planning/milestones/v1.2-ROADMAP.md` and `.planning/milestones/v1.2-REQUIREMENTS.md` for full detail.
+
+**Next:** No milestone currently active — run `/gsd:new-milestone` to scope v2.
+
+<details>
+<summary>v1.2 milestone details (shipped 2026-07-20)</summary>
 
 **Goal:** Review and clean up the codebase — long/confusing files, stale comments, deprecated Tailwind v4 class names — and set up ESLint (`npm run lint`) as a first step toward demonstrating professional engineering hygiene to a tech lead or interviewer reviewing the repo.
 
@@ -14,7 +21,9 @@
 
 **Why:** Portfolio project — the app has shipped two milestones' worth of features; this milestone demonstrates the same engineering discipline (clean structure, clean lint, clean commit/comment hygiene) a tech lead would expect from a real collaborative codebase, ahead of using it as an interview artifact.
 
-**Progress:** Phase 11 (Tailwind Deprecated Class-Name Fixes) complete 2026-07-20 — 2/4 phases done. Phase 10 (ESLint Setup & Lint-Clean Baseline) complete 2026-07-19. Mid-execution on Phase 10, a real architectural blocker was found: `typescript-eslint`/`eslint-config-next` are incompatible with this project's locked TypeScript 7.0.2 (tsgo compiler) — no published version of either supports it. Resolved (user-approved) by bypassing to `@next/eslint-plugin-next` standalone + `@babel/eslint-parser` for syntax-only TS/TSX parsing, keeping TypeScript 7.0.2 locked as-is; type safety remains fully covered by the existing `npm run typecheck` script. `npm run lint` now exists and reaches a lint-clean baseline (0 errors) via a reviewed two-pass `eslint --fix` + `--fix --suppress-all`, plus two zero-dependency differentiators: a `no-restricted-imports` rule that lint-enforces the `src/domain/` architecture boundary (not just documents it), and a custom rule catching stale Phase/Plan/REQ-ID comment references. Code review caught and fixed a real regression during closeout: the lint-clean autofix pass silently changed the Sandbox chart border/save-banner corner radius (a `rounded`→`rounded-sm` rename it applied on its own, ahead of Phase 11's planned, human-verified version of that exact change) — restored to the exact original pixel value and pinned against a repeat via a scoped rule-config `ignore` pattern. Phase 11 then applied that exact planned rename by hand across 6 files (`outline-none`→`outline-hidden` in 4, `rounded-[0.25rem]`→`rounded-sm` in 2), removed the now-dead ESLint ignore pattern once the value it protected no longer existed, and closed with a human-verified browser walkthrough (Hero, Header, Gallery, Sandbox) confirming no visual or keyboard-focus-outline regression — TWFX-01 through TWFX-04 all validated, code review clean (0 critical/warning).
+**Outcome:** All 4 phases shipped 2026-07-20. Phase 10 (ESLint Setup & Lint-Clean Baseline) complete 2026-07-19 — mid-execution, a real architectural blocker was found: `typescript-eslint`/`eslint-config-next` are incompatible with this project's locked TypeScript 7.0.2 (tsgo compiler) — no published version of either supports it. Resolved (user-approved) by bypassing to `@next/eslint-plugin-next` standalone + `@babel/eslint-parser` for syntax-only TS/TSX parsing, keeping TypeScript 7.0.2 locked as-is; type safety remains fully covered by the existing `npm run typecheck` script. `npm run lint` reaches a lint-clean baseline (0 errors) via a reviewed two-pass `eslint --fix` + `--fix --suppress-all`, plus two zero-dependency differentiators: a `no-restricted-imports` rule that lint-enforces the `src/domain/` architecture boundary (not just documents it), and a custom rule catching stale Phase/Plan/REQ-ID comment references. Code review caught and fixed a real regression during closeout: the lint-clean autofix pass silently changed the Sandbox chart border/save-banner corner radius ahead of Phase 11's planned, human-verified version of that exact change — restored and pinned against a repeat. Phase 11 (Tailwind Deprecated Class-Name Fixes) complete 2026-07-20 — applied the planned rename by hand across 6 files, removed the now-dead ESLint ignore pattern, closed with a human-verified browser walkthrough confirming no visual or keyboard-focus-outline regression — TWFX-01–04 validated, code review clean. Phase 12 (ChartPanel/SandboxContainer Decomposition Refactor) complete 2026-07-20 — both files decomposed into focused modules (geometry, derivation, resize hook, `useSandboxState()`, and a byte-for-byte `VesselGroup.tsx` extraction moved last per this project's two prior hit-testing-regression precedent), both landing under the ~150-200 line convention with zero behavior/hit-testing regression, human-confirmed. Phase 13 (Comment Cleanup) complete 2026-07-20 — stale Phase/Plan/REQ-ID comments rewritten by hand across 66 files preserving full WHY content; survived a session interruption mid-Wave-1 (6 killed worktree-executor agents) via manual orchestrator recovery with zero lost work; a broader re-grep pass (CMNT-02) caught additional real gaps the original scoping undercounted; human sign-off approved 2026-07-20 — CMNT-01/CMNT-02 complete.
+
+</details>
 
 <details>
 <summary>v1.1 milestone details (shipped 2026-07-19)</summary>
@@ -55,10 +64,11 @@ Given any two-vessel encounter, correctly classify it under COLREGS and clearly 
 - [x] Visual chart rendering shows vessel positions, headings, and encounter geometry clearly — Validated in Phase 4 (Interactive Chart Sandbox)
 - [x] User can save a scenario and get a shareable link (no login required) — Validated in Phase 5 (Save, Share & Gallery); confirmed end-to-end via live human verification
 - [x] User can browse a curated gallery of preset classic encounters (e.g. textbook head-on, classic crossing, overtaking case) — Validated in Phase 5 (Save, Share & Gallery); gallery placement follow-up resolved in Phase 9 (Gallery) — the section is now embedded on the home page below the Sandbox, `/gallery` redirects to `/#gallery`
+- [x] Codebase reaches a lint-clean baseline with an enforced `src/domain/` architecture boundary, no deprecated Tailwind v4 class names, decomposed Sandbox files, and no stale Phase/Plan/REQ-ID comment references — Validated in v1.2 Tech Debt & Stabilization (Phases 10-13), 22/22 requirements; see `.planning/milestones/v1.2-REQUIREMENTS.md`
 
 ### Active
 
-- [ ] v1.2 Tech Debt & Stabilization requirements — being scoped in `.planning/REQUIREMENTS.md` (ESLint setup, deprecated Tailwind class fixes, long-file refactor, comment-convention cleanup)
+_None — awaiting next milestone scoping via `/gsd:new-milestone`._
 
 ### Out of Scope
 
@@ -74,7 +84,7 @@ Given any two-vessel encounter, correctly classify it under COLREGS and clearly 
 - **Domain source**: COLREGS (International Regulations for Preventing Collisions at Sea) — Rules 11–18 govern steering and sailing responsibilities between vessels in sight of one another. This is public, well-documented maritime law, not proprietary or company-specific.
 - **Why this domain was chosen**: evaluated against 9 other candidate ideas (music theory voice-leading validator, SAR search-pattern planner, escape-room solvability engine, ATC sequencing simulator, orbital mission planner, fairy chess engine, D&D encounter balancer, whiskey substitution engine, ER triage allocator) on memorability, backend/frontend depth, scope fit, and interview value. COLREGS Navigator scored highest: it's a domain almost nobody builds a portfolio project around, and the core logic (classify encounter → determine obligations under a real published rulebook) is a textbook case for a rules-engine/state-machine domain layer — letting Clean Architecture/DDD-lite actually earn its keep rather than being over-engineering for a CRUD app.
 - **Full engineering spec** (persona, workflow, practices) originally captured in `prompt.json` at repo root — see Constraints below for the concrete decisions pulled from it.
-- **Current state**: Milestone v1.0 complete — Phase 5 (Save, Share & Gallery) was the final phase; all 6 requirements validated across 5 phases / 19 plans. Milestone v1.1 (UI Redesign) complete 2026-07-19 — all 4 phases done (Scaffolding, Hero, Sandbox, Gallery), 19/19 v1.1 requirements validated.
+- **Current state**: Milestone v1.0 complete — Phase 5 (Save, Share & Gallery) was the final phase; all 6 requirements validated across 5 phases / 19 plans. Milestone v1.1 (UI Redesign) complete 2026-07-19 — all 4 phases done (Scaffolding, Hero, Sandbox, Gallery), 19/19 v1.1 requirements validated. Milestone v1.2 (Tech Debt & Stabilization) complete 2026-07-20 — all 4 phases done (ESLint Setup, Tailwind Fixes, Sandbox Refactor, Comment Cleanup), 22/22 v1.2 requirements validated. No milestone currently active.
 
 ## Constraints
 
@@ -105,13 +115,21 @@ Given any two-vessel encounter, correctly classify it under COLREGS and clearly 
 | Hero ships as Direction A only (split headline + live-preview card); Direction B ("bridge display" full-bleed variant) is not built | The design file's two directions were an authoring-tool toggle for comparing options, not a runtime feature; user picked A as the shipped design | ✓ Good — HERO-01–04 verified in Phase 7, no request to revisit Direction B |
 | `/gallery` route removed in favor of a `/#gallery` section embedded on the home page, with `/gallery` redirecting there | Closes the v1.0 pending todo about gallery placement; a redirect (not a hard 404) preserves any existing bookmarked links | ✓ Good — GAL-01–04 verified in Phase 9, redirect confirmed from both fresh-tab and in-app navigation |
 | Dark-mode only, no light theme/toggle | The source design file only defines a dark palette (#09090B base, teal #2dd4bf accent); inventing a light palette would be scope beyond "follow the design exactly" | ✓ Good — SCAF-02 verified in Phase 6, held through all 4 phases with no toggle regressions |
+| v1.2 is a tech-debt/hygiene milestone only — no new user-facing features, `classifyEncounter()` and all COLREGS rule outputs stayed byte-identical | User chose to demonstrate professional engineering hygiene (clean lint, clean file structure, clean comment/commit history) as a portfolio signal ahead of using the repo as an interview artifact | ✓ Good — shipped 2026-07-20, 22/22 v1.2 requirements validated, zero domain-logic change confirmed by unchanged test suite (216/216) throughout |
+| `typescript-eslint`/`eslint-config-next` bypassed via `@next/eslint-plugin-next` + `@babel/eslint-parser` (syntax-only TS/TSX parsing) | Neither library supports this project's locked TypeScript 7.0.2 (tsgo compiler) — no published version of either does. Bypassing kept TypeScript 7.0.2 locked as-is; `npm run typecheck` still covers type safety | ✓ Good — Phase 10 lint-clean baseline reached with zero rule downgrades; documented as a known limitation |
+| `VesselGroup.tsx` extracted last, as one atomic verbatim cut-paste, in the Phase 12 Sandbox refactor | This exact code (hull polygon, rotate-handle circle, badge overlay) caused two prior hit-testing regressions (Phase 4, Phase 8) — moving it as one unit rather than incrementally rewriting avoided a third | ✓ Good — Phase 12 closed with zero hit-testing regression, human-confirmed drag/rotate at heading 0 |
 
 ## Next Milestone Goals
 
-Deferred to v1.2+ (see `.planning/milestones/v1.0-REQUIREMENTS.md` for full v2 list and rationale):
+Deferred to v2+ (see `.planning/milestones/v1.0-REQUIREMENTS.md` and `.planning/milestones/v1.2-REQUIREMENTS.md` for full v2 lists and rationale):
 
 - RSON-V2-01: ambiguous/edge-case scenarios in the curated gallery (near-boundary head-on/crossing, Rule 17(a)(ii) doubt situations)
 - SCEN-V2-01: auto-generated social preview image (OG image) per shared scenario
+- CI-01: GitHub Actions workflow running lint + typecheck + test + build on every PR, with a status badge in the README
+- HOOKS-01: Husky + lint-staged pre-commit hooks
+- DOCS-CONTRIB-01: `CONTRIBUTING.md`
+- FMT-01: repo-wide Prettier reformatting pass (scoped to new/touched files only if pursued)
+- RFCT-V2-01: `ChipRow.tsx` extraction and a `SandboxContainer` header-block split
 
 ## Evolution
 
@@ -131,4 +149,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-20 — Phase 11 (Tailwind Deprecated Class-Name Fixes) complete, 2/4 v1.2 phases done. `outline-none`→`outline-hidden` (4 files) and `rounded-[0.25rem]`→`rounded-sm` (2 files) renamed by hand, scoped around known false-positive text traps; the now-dead ESLint ignore pattern protecting the old radius class was removed once it was no longer needed. Closed with a human-verified browser walkthrough (Hero, Header, Gallery, Sandbox) confirming no visual or keyboard-focus-outline regression. Code review clean (0 critical/warning); all 4 requirements (TWFX-01–04) validated. Phase 10 (ESLint Setup & Lint-Clean Baseline) complete 2026-07-19 — ESLint installed and reaching a lint-clean baseline (`npm run lint`, 0 errors) despite a real mid-execution blocker: `typescript-eslint`/`eslint-config-next` don't support this project's locked TypeScript 7.0.2 (tsgo) — bypassed via `@next/eslint-plugin-next` + `@babel/eslint-parser`, with `npm run typecheck` still covering type safety. Domain-boundary and stale-ID-comment conventions are now lint-enforced, not just documented. Code review caught a real corner-radius regression from the autofix pass (fixed, pinned against recurrence). v1.0 shipped all 6 functional requirements across 5 phases / 19 plans (2026-07-14 → 2026-07-18); v1.1 re-implemented the entire front end against an imported Claude Design file using shadcn/ui across 4 branch+PR phases (2026-07-18 → 2026-07-19, 166 commits, 215 files changed), no functional/REQ-ID changes, presentation layer only, 19/19 requirements validated.*
+*Last updated: 2026-07-20 — v1.2 Tech Debt & Stabilization archived and shipped. All 4 phases (10-13) complete, 22/22 v1.2 requirements validated across 18 plans (2026-07-19 → 2026-07-20). No milestone currently active — next step is `/gsd:new-milestone` to scope v2. v1.0 shipped all 6 functional requirements across 5 phases / 19 plans (2026-07-14 → 2026-07-18); v1.1 re-implemented the entire front end against an imported Claude Design file using shadcn/ui across 4 branch+PR phases (2026-07-18 → 2026-07-19, 166 commits, 215 files changed), no functional/REQ-ID changes, presentation layer only, 19/19 requirements validated.*

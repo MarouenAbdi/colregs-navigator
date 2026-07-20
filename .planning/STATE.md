@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Tech Debt & Stabilization
-status: "Phase 13 complete — v1.2 all 4 phases done, pending ship"
-stopped_at: Phase 13 complete — human sign-off approved, CMNT-01/CMNT-02 done
-last_updated: "2026-07-20T14:40:00.000Z"
-last_activity: 2026-07-20 -- Phase 13 approved and closed; v1.2 milestone's 4 phases all complete
+milestone: none
+milestone_name: null
+status: "v1.2 Tech Debt & Stabilization archived and shipped 2026-07-20 — no milestone active"
+stopped_at: v1.2 milestone complete-milestone workflow finished; awaiting /gsd:new-milestone
+last_updated: "2026-07-20T15:15:00.000Z"
+last_activity: 2026-07-20 -- v1.2 archived to .planning/milestones/, ROADMAP.md/PROJECT.md/MILESTONES.md updated, git tagged v1.2
 progress:
   total_phases: 4
   completed_phases: 4
@@ -18,10 +18,10 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-19)
+See: .planning/PROJECT.md (updated 2026-07-20)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** v1.2 Tech Debt & Stabilization — all 4 phases complete, ready to ship
+**Current focus:** No milestone active — v1.2 Tech Debt & Stabilization shipped 2026-07-20. Run `/gsd:new-milestone` to scope v2.
 
 ## Current Position
 
@@ -100,8 +100,10 @@ Items acknowledged and carried forward from previous milestone close:
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| Functional/domain | RSON-V2-01 (ambiguous/edge-case gallery scenarios), SCEN-V2-01 (auto-generated OG image) | Deferred to v1.2+ | v1.0 milestone close |
+| Functional/domain | RSON-V2-01 (ambiguous/edge-case gallery scenarios), SCEN-V2-01 (auto-generated OG image) | Deferred to v2 | v1.0 milestone close |
 | Tooling | CI-01 (GitHub Actions), HOOKS-01 (Husky/lint-staged), DOCS-CONTRIB-01 (CONTRIBUTING.md), FMT-01 (repo-wide Prettier pass), RFCT-V2-01 (ChipRow extraction) | Deferred to v2 | v1.2 requirements scoping |
+
+Acknowledged at v1.2 close (2026-07-20): the open-artifact audit (`gsd-sdk query audit-open`) flagged 4 quick tasks (260718-qgs, 260719-t8r, 260720-jko, 260720-kg5) as "missing." All 4 have a `PLAN.md` and `SUMMARY.md` with `status: complete`, matching the Quick Tasks Completed table below — treated as a stale/false-positive read in the audit tool (likely a slug-matching issue), confirmed by direct file inspection, user-approved to proceed.
 
 ## Quick Tasks Completed
 
@@ -113,10 +115,10 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-20T14:40:00.000Z
-Stopped at: Phase 13 complete and human-approved; v1.2 milestone's 4 phases all done
-Resume file: .planning/phases/13-comment-cleanup/13-08-SUMMARY.md
+Last session: 2026-07-20T15:15:00.000Z
+Stopped at: v1.2 milestone archived and shipped via /gsd:complete-milestone
+Resume file: .planning/milestones/v1.2-ROADMAP.md
 
 ## Operator Next Steps
 
-- v1.2 Tech Debt & Stabilization's 4 planned phases (10/11/12/13) are all complete. Options: ship this branch (PR + merge, following the Phase 11/12 pattern), or run `/gsd:complete-milestone` to formally close out v1.2 (requirement re-validation, PROJECT.md updates, milestone archive) before shipping.
+- v1.2 Tech Debt & Stabilization is archived and shipped (git tag `v1.2` pending user confirmation to push). Run `/gsd:new-milestone` to scope v2 — candidate carry-forward items are listed in PROJECT.md's "Next Milestone Goals" section (CI-01, HOOKS-01, DOCS-CONTRIB-01, FMT-01, RFCT-V2-01, RSON-V2-01, SCEN-V2-01).

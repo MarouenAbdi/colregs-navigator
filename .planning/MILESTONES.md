@@ -1,5 +1,19 @@
 # Milestones
 
+## v1.2 Tech Debt & Stabilization (Shipped: 2026-07-20)
+
+**Phases completed:** 4 phases, 18 plans, 41 tasks
+
+**Key accomplishments:**
+
+- ESLint installed and configured via flat config, reaching a lint-clean baseline (`npm run lint`, 0 errors) despite a real mid-execution blocker: `typescript-eslint`/`eslint-config-next` don't support this project's locked TypeScript 7.0.2 (tsgo) — bypassed via `@next/eslint-plugin-next` + `@babel/eslint-parser`, with `npm run typecheck` still covering type safety. A `no-restricted-imports` rule lint-enforces the `src/domain/` architecture boundary (not just documents it), and a custom rule catches stale Phase/Plan/REQ-ID comment references going forward.
+- Deprecated Tailwind v3 class names (`outline-none`→`outline-hidden` in 4 files, bare `rounded`→`rounded-sm` in 2 files) renamed by hand, scoped around known false-positive text traps; closed with a human-verified browser walkthrough (Hero, Header, Gallery, Sandbox) confirming no visual or keyboard-focus-outline regression.
+- `ChartPanel.tsx` and `SandboxContainer.tsx` decomposed into focused single-concern modules (geometry, derivation, resize hook, `useSandboxState()`, and a byte-for-byte `VesselGroup.tsx` extraction moved last per this project's two prior hit-testing-regression precedent); both files now land under the ~150-200 line convention with zero behavior or hit-testing regression, human-confirmed in a real browser.
+- Stale Phase/Plan/REQ-ID comment references rewritten by hand across 66 files, preserving full WHY content; a broader re-grep beyond the original strict pattern caught additional real gaps the initial scoping undercounted, including a self-inflicted regex collision introduced by an earlier rewrite in the same phase. `eslint-suppressions.json` pruned 122→51. Human sign-off approved 2026-07-20.
+- A session interruption mid-Phase-13 (6 parallel worktree-executor agents killed by a `/login` re-auth) was recovered via manual orchestrator close-out rather than a from-scratch re-run, with zero lost work and two real content bugs caught during the recovery review.
+
+---
+
 ## v1.1 UI Redesign (shadcn) (Shipped: 2026-07-19)
 
 **Phases completed:** 4 phases, 14 plans, 31 tasks
