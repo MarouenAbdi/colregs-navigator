@@ -94,7 +94,24 @@ Plans:
   6. The live deployment is verified to survive a request after a genuine overnight idle period, with no cold-start or DB-suspend failure (HEALTH-03)
   7. A documented rollback procedure (the host's one-click "promote a previous deployment") exists and is confirmed to work (HEALTH-04)
 
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+**Wave 1**
+
+- [ ] 15-01-PLAN.md — `/api/health` DB-connectivity Route Handler, locally verified (HEALTH-01)
+- [ ] 15-02-PLAN.md — Neon + Vercel provisioning checklist, DATABASE_URL wiring, Vercel CLI token handoff (DEPLOY-01, DEPLOY-02, DEPLOY-03)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 15-03-PLAN.md — Live CLI verification of deploy/migrate/env-vars, real end-to-end request, README update (DEPLOY-01, DEPLOY-02, DEPLOY-03, HEALTH-01, HEALTH-02)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 15-04-PLAN.md — Live rollback/promote exercise via Vercel CLI, documented runbook (HEALTH-04)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 15-05-PLAN.md — Genuine 8+ hour idle-window verification of `/api/health` survival, README result recorded (HEALTH-03)
 
 ## Progress
 
