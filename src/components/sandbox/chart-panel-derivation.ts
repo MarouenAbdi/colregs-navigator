@@ -1,11 +1,11 @@
 /**
- * Per-render chart-overlay derivation for ChartPanel (RFCT-02): screen
- * positions, role, bearing/cone styling, range, and doubt-vessel
- * resolution, all recomputed from `vesselA`/`vesselB`/`classification` on
- * every call rather than buried inline in the component body. Mirrors
- * instrument-readouts.ts's shape (doc comment, named domain imports, one
- * exported interface + one exported derive function) -- both are pure,
- * zero-React derivations over the same classified-vessel-pair inputs.
+ * Per-render chart-overlay derivation for ChartPanel: screen positions,
+ * role, bearing/cone styling, range, and doubt-vessel resolution, all
+ * recomputed from `vesselA`/`vesselB`/`classification` on every call rather
+ * than buried inline in the component body. Mirrors instrument-readouts.ts's
+ * shape (doc comment, named domain imports, one exported interface + one
+ * exported derive function) -- both are pure, zero-React derivations over
+ * the same classified-vessel-pair inputs.
  */
 
 import { chartToScreen, type ChartViewBox, type ContainerSize } from "../../domain/geometry/screen-convert.js";

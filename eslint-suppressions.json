@@ -79,7 +79,7 @@
   },
   "src/components/sandbox/ChartPanel.tsx": {
     "local/no-stale-id-comments": {
-      "count": 10
+      "count": 1
     }
   },
   "src/components/sandbox/ControlPanel.test.tsx": {
@@ -117,6 +117,11 @@
       "count": 1
     }
   },
+  "src/components/sandbox/chart-panel-geometry.ts": {
+    "local/no-stale-id-comments": {
+      "count": 9
+    }
+  },
   "src/components/sandbox/chip-scenarios.test.ts": {
     "vitest/no-conditional-expect": {
       "count": 1
@@ -144,7 +149,7 @@
   },
   "src/components/sandbox/hooks/useSandboxState.ts": {
     "local/no-stale-id-comments": {
-      "count": 4
+      "count": 3
     }
   },
   "src/components/sandbox/instrument-readouts.test.ts": {

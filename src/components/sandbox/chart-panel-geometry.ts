@@ -1,10 +1,9 @@
 /**
- * Pure, framework-free geometry for ChartPanel's SVG chart (RFCT-01):
- * fixed layout constants (viewBox, grid, range rings, hull shape, badge/
- * handle offsets, cone/bearing styling) plus `wedgePath()` and
- * `buildGridLineSegments()`, both relocated verbatim from ChartPanel.tsx
- * with no behavior change. Every comment below is preserved from its
- * original site in ChartPanel.tsx.
+ * Pure, framework-free geometry for ChartPanel's SVG chart: fixed layout
+ * constants (viewBox, grid, range rings, hull shape, badge/handle offsets,
+ * cone/bearing styling) plus `wedgePath()` and `buildGridLineSegments()`,
+ * both relocated verbatim from ChartPanel.tsx with no behavior change.
+ * Every comment below is preserved from its original site in ChartPanel.tsx.
  */
 
 import { chartToScreen, type ChartViewBox, type ContainerSize } from "../../domain/geometry/screen-convert.js";
