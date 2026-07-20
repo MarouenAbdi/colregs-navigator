@@ -1,11 +1,10 @@
 /**
- * Phase 1 scope: compass<->math angle conversion only. The pure
- * screen-pixel <-> chart {x,y} coordinate-conversion functions are
- * implemented in this same phase, in a sibling file (screen-convert.ts,
- * this plan's Task 3) — kept separate from this file because they convert
+ * Compass<->math angle conversion only. The pure screen-pixel <-> chart
+ * {x,y} coordinate-conversion functions live in a sibling file
+ * (screen-convert.ts) -- kept separate from this file because they convert
  * screen-space pixel coordinates, not compass/math angles. Only the
  * *caller* that measures live containerSize via ResizeObserver and
- * supplies the chart's viewBox is Phase 4's (Interactive Chart Sandbox)
+ * supplies the chart's viewBox is the Interactive Chart Sandbox feature's
  * responsibility, per CLAUDE.md's SVG + Pointer Events architecture note;
  * the conversion functions themselves are not deferred.
  *
@@ -47,8 +46,9 @@ export function normalizeRelativeBearingDegrees(degrees: number): number {
   }
   // D-08: relative bearing normalized into (-180, 180], upper-inclusive.
   // This duplicates ~2 lines of relative-bearing.ts's own inline
-  // normalization intentionally (kept file-independent so this plan and
-  // Plan 02 can execute in the same wave without a file dependency; not
+  // normalization intentionally (kept file-independent so this file's
+  // angle-conversion functions and the sibling screen-space conversion
+  // functions can be implemented without a cross-file dependency; not
   // worth extracting into a shared helper at this scale per CLAUDE.md's
   // "justify every abstraction" persona).
   const normalized = (((degrees + 180) % 360) + 360) % 360 - 180;

@@ -58,13 +58,13 @@ export const coincidentPositionCase: ErrCase = {
 };
 
 // Non-finite coordinate (NaN) must be rejected before any atan2/normalize
-// arithmetic runs (T-01-02).
+// arithmetic runs.
 export const nonFiniteInputCase: ErrCase = {
   a: { x: NaN, y: 0 },
   b: { x: 1, y: 1 },
 };
 
-// Non-finite coordinate (Infinity) must also be rejected (T-01-02).
+// Non-finite coordinate (Infinity) must also be rejected.
 export const infiniteInputCase: ErrCase = {
   a: { x: 0, y: 0 },
   b: { x: Infinity, y: 0 },
