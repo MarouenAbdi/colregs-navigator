@@ -14,17 +14,17 @@
       "count": 6
     }
   },
-  "src/components/gallery/GalleryCard.tsx": {
-    "local/no-stale-id-comments": {
-      "count": 1
-    }
-  },
   "src/components/gallery/GalleryContainer.tsx": {
     "local/no-stale-id-comments": {
       "count": 1
     }
   },
-  "src/components/gallery/GalleryPreviewChart.tsx": {
+  "src/components/gallery/card/GalleryCard.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/gallery/chart/GalleryPreviewChart.tsx": {
     "local/no-stale-id-comments": {
       "count": 1
     }

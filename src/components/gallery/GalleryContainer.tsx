@@ -9,7 +9,7 @@
 import { getCaller } from "../../lib/trpc/server.js";
 import { rowToVessels } from "../../server/application/scenario-service.js";
 import { SectionGridBackground } from "@/components/shared/SectionGridBackground";
-import { GalleryCard } from "./GalleryCard.js";
+import { GalleryCard } from "./card/GalleryCard.js";
 
 export async function GalleryContainer() {
   const scenarios = await getCaller().gallery.list();

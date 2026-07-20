@@ -6,7 +6,7 @@ import {
   crossingResidualBasicCase,
   headOnGenuineCase,
   overtakingBothDirectionsCase,
-} from "../../domain/colregs/classify-encounter.fixtures.js";
+} from "../../../domain/colregs/classify-encounter.fixtures.js";
 
 // Rule 3 (blocking): `vitest.config.ts` sets `globals: false` project-wide
 // (CLAUDE.md's "no magic" persona) -- matches every other `.test.tsx` file

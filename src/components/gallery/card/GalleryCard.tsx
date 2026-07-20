@@ -9,10 +9,10 @@
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { GalleryPreviewChart } from "./GalleryPreviewChart.js";
-import { getVesselRole, ROLE_BADGE_CLASSNAME } from "../sandbox/vessel-role.js";
-import type { ClassificationResult, VesselLabel } from "../../domain/colregs/types.js";
-import type { Vessel } from "../../domain/vessel/vessel.js";
+import { GalleryPreviewChart } from "../chart/GalleryPreviewChart.js";
+import { getVesselRole, ROLE_BADGE_CLASSNAME } from "../../sandbox/vessel-role.js";
+import type { ClassificationResult, VesselLabel } from "../../../domain/colregs/types.js";
+import type { Vessel } from "../../../domain/vessel/vessel.js";
 
 type GalleryCardProps = {
   id: string;

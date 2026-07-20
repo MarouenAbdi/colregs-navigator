@@ -5,8 +5,8 @@ import { GalleryCard } from "./GalleryCard.js";
 import {
   crossingResidualBasicCase,
   headOnGenuineCase,
-} from "../../domain/colregs/classify-encounter.fixtures.js";
-import { classifyEncounter } from "../../domain/colregs/classify-encounter.js";
+} from "../../../domain/colregs/classify-encounter.fixtures.js";
+import { classifyEncounter } from "../../../domain/colregs/classify-encounter.js";
 
 // Rule 3 (blocking): `vitest.config.ts` sets `globals: false` project-wide
 // (CLAUDE.md's "no magic" persona) -- matches every other `.test.tsx` file
