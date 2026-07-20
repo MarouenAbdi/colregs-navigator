@@ -13,7 +13,7 @@ afterEach(() => {
 // RTL cannot render an async Server Component directly via JSX -- `await`
 // the component call first, then render its resolved JSX, matching this
 // codebase's only other async-Server-Component test precedent's approach.
-describe("GalleryContainer (09-03)", () => {
+describe("GalleryContainer", () => {
   it("renders the section heading, eyebrow, and exactly 6 links to /s/*", async () => {
     render(await GalleryContainer());
 

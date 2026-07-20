@@ -21,7 +21,7 @@ function classify(vesselA: typeof crossingResidualBasicCase.vesselA, vesselB: ty
   return result.value;
 }
 
-describe("GalleryCard (09-03)", () => {
+describe("GalleryCard", () => {
   it("renders the passed ruleLabel/title/description verbatim and an 'A GIVES WAY' verdict badge for a give-way scenario", () => {
     const classification = classify(crossingResidualBasicCase.vesselA, crossingResidualBasicCase.vesselB);
     render(

@@ -11,7 +11,7 @@ afterEach(() => {
   cleanup();
 });
 
-describe("Hero (HERO-01, HERO-03)", () => {
+describe("Hero", () => {
   it("renders the locked headline and both CTAs with correct anchor targets", () => {
     render(<Hero />);
 

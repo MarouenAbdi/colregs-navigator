@@ -15,7 +15,7 @@ afterEach(() => {
   cleanup();
 });
 
-describe("GalleryPreviewChart (09-02)", () => {
+describe("GalleryPreviewChart", () => {
   it("renders a give-way-type vessel pair with role-correct GW/SO pills, not MUTUAL", () => {
     render(
       <GalleryPreviewChart
@@ -58,7 +58,7 @@ describe("GalleryPreviewChart (09-02)", () => {
     expect(() => render(<GalleryPreviewChart vesselA={coincident} vesselB={coincident} />)).toThrow();
   });
 
-  it("keeps both vessels' dashed heading vectors inside the chart's viewBox on the real 'Overtaking' card geometry (WR-01 regression)", () => {
+  it("keeps both vessels' dashed heading vectors inside the chart's viewBox on the real 'Overtaking' card geometry", () => {
     // Matches curated-scenarios.ts's displayOrder:2 card exactly: vesselA/B
     // slots swapped from the fixture so give-way resolves to vesselA. This
     // pair's 1 NM separation (vs. Hero's fixed ~6 NM viewBox) previously

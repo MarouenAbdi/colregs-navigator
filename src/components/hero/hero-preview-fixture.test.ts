@@ -12,7 +12,7 @@ import { heroPreviewVesselA, heroPreviewVesselB } from "./hero-preview-fixture.j
  * cannot silently desync the Hero preview card's canned numbers from
  * what `classifyEncounter()`/`bearing()`/`cpa()` actually compute.
  */
-describe("hero-preview-fixture (HERO-02 drift guard)", () => {
+describe("hero-preview-fixture drift guard", () => {
   it("classifies as a crossing encounter with Vessel A giving way, doubt-free", () => {
     const result = classifyEncounter(heroPreviewVesselA, heroPreviewVesselB);
     expect(result.ok).toBe(true);
