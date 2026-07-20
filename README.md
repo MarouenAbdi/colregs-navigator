@@ -1,5 +1,7 @@
 # COLREGS Navigator
 
+[![CI](https://github.com/MarouenAbdi/colregs-navigator/actions/workflows/ci.yml/badge.svg)](https://github.com/MarouenAbdi/colregs-navigator/actions/workflows/ci.yml)
+
 Maritime collision-avoidance rules engine and visualizer. Users place two vessels on a
 nautical-chart-style sandbox and the app classifies the encounter (head-on, crossing, or
 overtaking) under the International Regulations for Preventing Collisions at Sea (COLREGS
@@ -31,6 +33,24 @@ defined in `docker-compose.yml`, matching the connection string in `.env.example
 `npx prisma migrate dev` applies the committed migrations under `prisma/migrations/` and
 generates the Prisma client. `npm test` runs the Vitest suite (domain rules engine plus any
 persistence/API tests).
+
+## Deployment
+
+**No live hosted deployment exists yet** -- provisioning a real host and database is Phase 15
+scope, not this milestone's current phase. What already exists, fully authored and locally
+verified against this repo's own docker-compose Postgres, is the production build path itself:
+
+- `"vercel-build"` (`package.json`): `prisma generate` -> an environment-gated
+  `scripts/migrate-if-production.mjs` -> `next build --webpack`. The migration step only runs
+  `prisma migrate deploy` when `VERCEL_ENV === "production"`, so a PR/branch preview build (which
+  runs this identical script with a different `VERCEL_ENV` value) can never apply a migration to
+  a live database. Both gate states, and the full three-step sequence ending in a confirmed
+  webpack build, have been verified locally.
+- CD-01's actual auto-deploy-on-merge mechanism will be the eventual host's native Git
+  integration (e.g. Vercel watching `main`), not a hand-rolled GitHub Actions deploy step -- this
+  milestone's locked architecture decision keeps GitHub Actions scoped to CI only.
+- The same `.nvmrc` this repo already uses for CI is what the eventual host will resolve its Node
+  version from -- no separate host-specific Node version configuration is expected.
 
 ## Linting & Code Quality
 

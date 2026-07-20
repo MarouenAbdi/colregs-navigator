@@ -4,7 +4,22 @@
 
 **Shipped:** v1.2 Tech Debt & Stabilization — 2026-07-20. A tech-debt/hygiene milestone (no new user-facing features, zero change to domain logic outcomes): ESLint installed and configured via flat config, reaching a lint-clean baseline (`npm run lint`, 0 errors) with a lint-enforced `src/domain/` architecture boundary; deprecated Tailwind v3→v4 class names fixed by hand across 6 files with human-verified zero visual/accessibility regression; `ChartPanel.tsx`/`SandboxContainer.tsx` decomposed into focused single-concern modules with zero hit-testing regression; and a hand-rewritten comment cleanup retiring stale Phase/Plan/REQ-ID references across 66 files. All 22/22 v1.2 requirements validated across 4 phases / 18 plans (2026-07-19 → 2026-07-20). See `.planning/milestones/v1.2-ROADMAP.md` and `.planning/milestones/v1.2-REQUIREMENTS.md` for full detail.
 
-**Next:** No milestone currently active — run `/gsd:new-milestone` to scope v2.
+**Next:** v1.3 CI/CD & Deployment — see Current Milestone below.
+
+## Current Milestone: v1.3 CI/CD & Deployment
+
+**Goal:** Demonstrate basic, portfolio-credible full-stack DevOps competency — a GitHub Actions CI/CD pipeline and a real, live-deployed instance of the app with a production Postgres database — so the repo shows the same engineering discipline in deployment/operations that v1.2 demonstrated in code hygiene.
+
+**Target features:**
+- GitHub Actions CI: lint + typecheck + test + build running on every PR, with a passing status badge in the README (carries forward CI-01)
+- CD: automatic deployment to production on merge to `main` (continuous deployment, not just continuous integration)
+- A live, publicly reachable deployment of the app backed by a real production Postgres database — hosting platform and DB provider to be selected via research (free/hobby-tier fit for a portfolio project)
+- Husky + lint-staged pre-commit hooks (carries forward HOOKS-01)
+- `CONTRIBUTING.md` (carries forward DOCS-CONTRIB-01)
+
+**Locked decisions:** Research-first — hosting platform and Postgres provider are not pre-decided; the research phase compares options and the user picks before requirements lock. CD means real auto-deploy on merge to main, not a manual/staged release process.
+
+**Why:** Portfolio project — v1.0-v1.2 proved product/domain depth, UI polish, and code hygiene; a working CI/CD pipeline plus a live deployment is the remaining piece an interviewer or tech lead would expect to see from a "professional engineering practices" showcase.
 
 <details>
 <summary>v1.2 milestone details (shipped 2026-07-20)</summary>
@@ -68,7 +83,7 @@ Given any two-vessel encounter, correctly classify it under COLREGS and clearly 
 
 ### Active
 
-_None — awaiting next milestone scoping via `/gsd:new-milestone`._
+_Being scoped for v1.3 CI/CD & Deployment — see REQUIREMENTS.md once defined._
 
 ### Out of Scope
 
@@ -149,4 +164,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-20 — v1.2 Tech Debt & Stabilization archived and shipped. All 4 phases (10-13) complete, 22/22 v1.2 requirements validated across 18 plans (2026-07-19 → 2026-07-20). No milestone currently active — next step is `/gsd:new-milestone` to scope v2. v1.0 shipped all 6 functional requirements across 5 phases / 19 plans (2026-07-14 → 2026-07-18); v1.1 re-implemented the entire front end against an imported Claude Design file using shadcn/ui across 4 branch+PR phases (2026-07-18 → 2026-07-19, 166 commits, 215 files changed), no functional/REQ-ID changes, presentation layer only, 19/19 requirements validated.*
+*Last updated: 2026-07-20 — Milestone v1.3 CI/CD & Deployment started: GitHub Actions CI/CD, live deployment with production Postgres, Husky/lint-staged, and CONTRIBUTING.md. v1.2 Tech Debt & Stabilization archived and shipped 2026-07-20 — all 4 phases (10-13) complete, 22/22 v1.2 requirements validated across 18 plans (2026-07-19 → 2026-07-20). v1.0 shipped all 6 functional requirements across 5 phases / 19 plans (2026-07-14 → 2026-07-18); v1.1 re-implemented the entire front end against an imported Claude Design file using shadcn/ui across 4 branch+PR phases (2026-07-18 → 2026-07-19, 166 commits, 215 files changed), no functional/REQ-ID changes, presentation layer only, 19/19 requirements validated.*

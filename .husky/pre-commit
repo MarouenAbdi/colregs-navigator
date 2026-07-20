@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+# Pre-commit hook: reject staged .env* files (except .env.example), then run lint-staged.
+#
+# The .env* guard runs FIRST and unconditionally -- it must reject the commit before
+# lint-staged (or any other step) ever runs, closing PITFALLS.md Pitfall 9 (accidental
+# credential commit). Deliberately no typecheck/test here -- the full suite is CI-only
+# (see CONTRIBUTING.md "Pre-commit Hooks").
+
+# `|| true` on each grep guards against husky's `sh -e` wrapper: grep exits 1 on "no
+# match" (not an error), which would otherwise abort this script under `set -e` on every
+# commit that has no staged .env* files -- i.e. almost every commit.
+staged_env_files=$(git diff --cached --name-only | grep -E '(^|/)\.env(\..+)?$' | grep -v -E '(^|/)\.env\.example$' || true)
+
+if [ -n "$staged_env_files" ]; then
+  echo "COMMIT REJECTED: staged .env file(s) detected (only .env.example is allowed):"
+  echo "$staged_env_files"
+  echo "Unstage these file(s) before committing -- .env variants must never enter git history."
+  exit 1
+fi
+
+npx lint-staged
