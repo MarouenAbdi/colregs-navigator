@@ -5,10 +5,11 @@
  * ControlPanel, and the 3 split reasoning cards (VerdictBanner,
  * InstrumentReadouts, ReasoningTrail) together. Delegates all
  * vesselA/vesselB state, the Rule 13(d) hysteresis, and the
- * validate-then-classify choke point to useSandboxState() (RFCT-04) --
- * satisfying CLAS-05's "live update regardless of input modality"
- * requirement. This file is now JSX composition + the chip-row/reset/save
- * CTAs only.
+ * validate-then-classify choke point to useSandboxState() so state and
+ * presentation stay separate concerns -- this file is now JSX composition
+ * plus the chip-row/reset/save CTAs only, ensuring the live classification
+ * update behaves identically regardless of which input (drag, form field,
+ * or chip preset) triggered it.
  */
 
 import { RotateCcw, Link2 } from "lucide-react";

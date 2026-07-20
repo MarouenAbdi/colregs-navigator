@@ -2,10 +2,11 @@
  * useSandboxState -- SandboxContainer's "brain": owns `vesselA`/`vesselB`
  * state, the `previousEncounterTypeRef` Rule 13(d) hysteresis ref, and the
  * single `applyVesselUpdate` validate-then-classify choke point every
- * drag, form update, AND chip-preset load funnels through (RFCT-04).
- * Preserves Rule 13(d) hysteresis semantics and the Pitfall 5
- * degenerate-frame handling exactly as they existed inline in
- * SandboxContainer.tsx -- moved here unchanged.
+ * drag, form update, AND chip-preset load funnels through. Separated from
+ * SandboxContainer's JSX so the state machine can be reasoned about and
+ * tested independently of rendering. Preserves Rule 13(d) hysteresis
+ * semantics and the Pitfall 5 degenerate-frame handling exactly as they
+ * existed inline in SandboxContainer.tsx -- moved here unchanged.
  */
 
 import { useRef, useState } from "react";
