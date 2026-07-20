@@ -84,3 +84,5 @@ reintroduce that crash, so this toolchain instead parses `.ts`/`.tsx` files with
 itself is unaffected and fully covered separately by `npm run typecheck` (`tsc --noEmit`), which
 runs against the real tsgo compiler. Revisit this limitation if/when a `typescript-eslint` release
 adds tsgo support.
+
+<!-- ci-verify: scratch commit for plan 14-02 CI verification, PR to be closed unmerged -->
