@@ -1,4 +1,4 @@
-import type { VesselType } from "../vessel/vessel.js";
+import type { VesselType } from "../../vessel/vessel.js";
 
 /**
  * Rule 18 priority-tier and tie-break fixtures (DETM-02). `priorityTierCases`

@@ -132,17 +132,17 @@
       "count": 79
     }
   },
-  "src/domain/colregs/resolve-doubt-geometry.test.ts": {
+  "src/domain/colregs/doubt-geometry/resolve-doubt-geometry.test.ts": {
     "vitest/no-conditional-expect": {
       "count": 9
     }
   },
-  "src/domain/colregs/risk-of-collision.test.ts": {
+  "src/domain/colregs/risk-of-collision/risk-of-collision.test.ts": {
     "vitest/no-conditional-expect": {
       "count": 4
     }
   },
-  "src/domain/colregs/risk-of-collision.ts": {
+  "src/domain/colregs/risk-of-collision/risk-of-collision.ts": {
     "local/no-stale-id-comments": {
       "count": 1
     }
@@ -152,12 +152,12 @@
       "count": 1
     }
   },
-  "src/domain/colregs/vessel-priority.fixtures.ts": {
+  "src/domain/colregs/vessel-priority/vessel-priority.fixtures.ts": {
     "local/no-stale-id-comments": {
       "count": 1
     }
   },
-  "src/domain/colregs/vessel-priority.ts": {
+  "src/domain/colregs/vessel-priority/vessel-priority.ts": {
     "local/no-stale-id-comments": {
       "count": 1
     }

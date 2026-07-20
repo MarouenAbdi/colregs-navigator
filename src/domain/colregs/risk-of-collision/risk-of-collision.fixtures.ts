@@ -1,9 +1,9 @@
-import type { Vessel } from "../vessel/vessel.js";
+import type { Vessel } from "../../vessel/vessel.js";
 import {
   headOnClosingCase,
   negativeTcpaCase,
   parallelNoClosureCase,
-} from "../geometry/cpa.fixtures.js";
+} from "../../geometry/cpa.fixtures.js";
 
 // Re-export cpa.fixtures.ts's own cases directly -- this rules-engine layer
 // can reuse these as known-correct starting inputs; do not re-derive their

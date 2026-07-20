@@ -7,8 +7,8 @@
  * geometry -- never from a reasoning-trail `facts` entry.
  */
 
-import type { Vessel } from "../vessel/vessel.js";
-import type { DoubtBoundary, VesselLabel } from "./types.js";
+import type { Vessel } from "../../vessel/vessel.js";
+import type { DoubtBoundary, VesselLabel } from "../types.js";
 
 interface DoubtGeometryOkCase {
   vesselA: Vessel;

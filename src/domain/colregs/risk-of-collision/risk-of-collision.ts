@@ -1,4 +1,4 @@
-import type { Result } from "../shared/result.js";
+import type { Result } from "../../shared/result.js";
 
 /**
  * riskOfCollision() — Rule 7 gate (CLAS-03, D-05-D-08).

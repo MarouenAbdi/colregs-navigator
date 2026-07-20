@@ -10,7 +10,7 @@
 
 import { chartToScreen, type ChartViewBox, type ContainerSize } from "../../../domain/geometry/screen-convert.js";
 import { getVesselRole, type VesselRole } from "../vessel-role.js";
-import { resolveDoubtGeometry } from "../../../domain/colregs/resolve-doubt-geometry.js";
+import { resolveDoubtGeometry } from "../../../domain/colregs/doubt-geometry/resolve-doubt-geometry.js";
 import {
   BEARING_LINE_DEFAULT_STROKE,
   CONE_END_RELATIVE_BEARING_DEGREES,

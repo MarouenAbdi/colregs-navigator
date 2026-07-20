@@ -1,4 +1,4 @@
-import type { VesselType } from "../vessel/vessel.js";
+import type { VesselType } from "../../vessel/vessel.js";
 
 /**
  * vesselPriority() / rule18Overrides() — Rule 18 vessel-type priority
