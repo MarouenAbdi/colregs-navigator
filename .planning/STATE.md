@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: CI/CD & Deployment
 status: executing
-stopped_at: v1.3 ROADMAP.md and REQUIREMENTS.md traceability written (Phases 14-15, 17/17 requirements mapped)
-last_updated: "2026-07-20T17:27:11.117Z"
-last_activity: 2026-07-20 -- Phase 14 execution started
+stopped_at: Phase 14 Wave 2 complete (14-02 CI live-PR verification + branch protection, 14-03 Husky/lint-staged hooks) -- Wave 3 (14-04) remaining
+last_updated: "2026-07-20T20:17:00.000Z"
+last_activity: 2026-07-20 -- Phase 14 Wave 2 merged (plans 14-02, 14-03), post-merge build/test gate green
 progress:
   total_phases: 2
   completed_phases: 0
   total_plans: 4
-  completed_plans: 1
+  completed_plans: 3
   percent: 0
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-20)
 ## Current Position
 
 Phase: 14 (pipeline-hooks) — EXECUTING
-Plan: 1 of 4
+Plan: 3 of 4 (Wave 3 / 14-04 remaining)
 Status: Executing Phase 14
-Last activity: 2026-07-20 -- Phase 14 execution started
+Last activity: 2026-07-20 -- Phase 14 Wave 2 merged (plans 14-02, 14-03), post-merge build/test gate green
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [███████░░░] 75%
 
 ## Performance Metrics
 
@@ -66,6 +66,8 @@ Recent decisions affecting current work:
 - Research recommends Vercel (hosting) + Neon (Postgres) — native Git integration for CD, Neon's scale-to-zero compute fits sporadic portfolio traffic, `@prisma/adapter-pg` needs no driver change. GitHub Actions owns CI only; the host's native Git integration owns CD — no redundant hand-rolled Actions deploy step (named anti-pattern).
 - Known first-deploy risks flagged by research to verify explicitly, not assume: `generated/prisma` has never been regenerated on a clean checkout (no `postinstall` script yet), `next build --webpack` has never been verified against a host's auto-detected build command (direct precedent: Turbopack's silent `resolve.extensionAlias` incompatibility went undetected for 4 phases), and free-tier DB auto-suspend could stack with serverless cold starts on the exact demo request that matters most.
 - v1.2 Tech Debt & Stabilization shipped 2026-07-20, 22/22 requirements validated across Phases 10-13 — see `.planning/milestones/v1.2-ROADMAP.md`.
+- Plan 14-02: repo `MarouenAbdi/colregs-navigator` made public (user decision, resolving CI-05's blocked-on-billing checkpoint) — branch protection on `main` is now configured and GET-verified (`required_status_checks.contexts: [lint, typecheck, test, build]`, `strict: true`, `enforce_admins: true`). CI-01 and CI-05 both fully satisfied, not deferred.
+- Plan 14-02 found and fixed three real CI bugs only surfaced by exercising the pipeline against a live PR: package-lock.json peer-dep drift under strict resolution, missing `prisma db seed` step in `test`/`build` jobs, and a `typescript@7.0.2` (tsgo)/Next.js 16.2.10 build-time compatibility gap (fixed via `@typescript/native-preview` devDependency, Next's own official escape hatch for tsgo detection — does not change the pinned typescript version).
 
 ### Pending Todos
 

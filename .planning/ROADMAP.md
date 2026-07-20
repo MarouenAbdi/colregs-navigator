@@ -72,8 +72,8 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 14-02-PLAN.md — Trigger a real CI run against a live PR; branch protection decision + configuration for CI-05
-- [ ] 14-03-PLAN.md — Husky + lint-staged pre-commit hooks (staged eslint --fix, .env* guard) and CONTRIBUTING.md
+- [x] 14-02-PLAN.md — Trigger a real CI run against a live PR; branch protection decision + configuration for CI-05
+- [x] 14-03-PLAN.md — Husky + lint-staged pre-commit hooks (staged eslint --fix, .env* guard) and CONTRIBUTING.md
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -112,6 +112,6 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15
 | 11. Tailwind Deprecated Class-Name Fixes | v1.2 | 3/3 | Complete    | 2026-07-20 |
 | 12. ChartPanel/SandboxContainer Decomposition Refactor | v1.2 | 4/4 | Complete   | 2026-07-20 |
 | 13. Comment Cleanup | v1.2 | 8/8 | Complete | 2026-07-20 |
-| 14. Pipeline & Hooks | v1.3 | 1/4 | In Progress|  |
+| 14. Pipeline & Hooks | v1.3 | 3/4 | In Progress | - |
 | 15. Deploy & Verify | v1.3 | 0/TBD | Not started | - |
 </content>
