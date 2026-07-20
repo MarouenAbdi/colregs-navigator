@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
 /**
- * useHullDrag test (04-03 Task 3): drives a real pointerdown+pointermove
+ * useHullDrag test: drives a real pointerdown+pointermove
  * sequence against ChartPanel's rendered hull hit-rect and asserts
  * onVesselPositionChange receives the expected screenToChart-converted
  * chart-space Position.
  *
- * Written as a plain `.ts` file per this plan's own file list -- no JSX
- * syntax is used (React.createElement instead), and jsdom's missing
+ * Written as a plain `.ts` file deliberately -- no JSX syntax is used
+ * (React.createElement instead), matching this hook's own plain-function
+ * shape, and jsdom's missing
  * ResizeObserver/Pointer-Capture APIs are polyfilled the same way as
  * ChartPanel.test.tsx.
  */

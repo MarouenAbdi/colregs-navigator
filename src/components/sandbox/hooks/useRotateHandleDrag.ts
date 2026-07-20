@@ -3,7 +3,8 @@
  * heading-drag hook (VESL-02/D-01). Computes the new heading via
  * bearing() -- the project's already-implemented, already-tested
  * atan2-argument-order convention -- never a second hand-rolled atan2
- * call (04-RESEARCH.md Anti-Patterns).
+ * call -- duplicating this project's own atan2-argument-order convention
+ * in a second place would risk the two implementations drifting apart.
  */
 
 import type { PointerEvent } from "react";
