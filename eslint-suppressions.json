@@ -57,38 +57,28 @@
       "count": 3
     }
   },
-  "src/components/sandbox/ChartPanel.tsx": {
-    "local/no-stale-id-comments": {
-      "count": 1
-    }
-  },
-  "src/components/sandbox/ControlPanel.test.tsx": {
-    "local/no-stale-id-comments": {
-      "count": 1
-    }
-  },
-  "src/components/sandbox/ReasoningTrail.tsx": {
-    "local/no-stale-id-comments": {
-      "count": 1
-    }
-  },
   "src/components/sandbox/SandboxContainer.test.tsx": {
     "local/no-stale-id-comments": {
       "count": 3
     }
   },
-  "src/components/sandbox/VerdictBanner.tsx": {
+  "src/components/sandbox/chart/ChartPanel.tsx": {
     "local/no-stale-id-comments": {
       "count": 1
     }
   },
-  "src/components/sandbox/chart-panel-geometry.ts": {
+  "src/components/sandbox/chart/chart-panel-geometry.ts": {
     "local/no-stale-id-comments": {
       "count": 5
     }
   },
   "src/components/sandbox/chip-scenarios.test.ts": {
     "vitest/no-conditional-expect": {
+      "count": 1
+    }
+  },
+  "src/components/sandbox/control-panel/ControlPanel.test.tsx": {
+    "local/no-stale-id-comments": {
       "count": 1
     }
   },
@@ -107,9 +97,19 @@
       "count": 1
     }
   },
-  "src/components/sandbox/instrument-readouts.test.ts": {
+  "src/components/sandbox/instruments/instrument-readouts.test.ts": {
     "vitest/no-conditional-expect": {
       "count": 2
+    }
+  },
+  "src/components/sandbox/reasoning/ReasoningTrail.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 1
+    }
+  },
+  "src/components/sandbox/reasoning/VerdictBanner.tsx": {
+    "local/no-stale-id-comments": {
+      "count": 1
     }
   },
   "src/components/sandbox/vessel-role.ts": {

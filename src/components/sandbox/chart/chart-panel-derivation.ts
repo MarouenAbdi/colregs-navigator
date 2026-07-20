@@ -8,9 +8,9 @@
  * the same classified-vessel-pair inputs.
  */
 
-import { chartToScreen, type ChartViewBox, type ContainerSize } from "../../domain/geometry/screen-convert.js";
-import { getVesselRole, type VesselRole } from "./vessel-role.js";
-import { resolveDoubtGeometry } from "../../domain/colregs/resolve-doubt-geometry.js";
+import { chartToScreen, type ChartViewBox, type ContainerSize } from "../../../domain/geometry/screen-convert.js";
+import { getVesselRole, type VesselRole } from "../vessel-role.js";
+import { resolveDoubtGeometry } from "../../../domain/colregs/resolve-doubt-geometry.js";
 import {
   BEARING_LINE_DEFAULT_STROKE,
   CONE_END_RELATIVE_BEARING_DEGREES,
@@ -21,9 +21,9 @@ import {
   RANGE_RING_OUTER_RADIUS_RATIO,
   wedgePath,
 } from "./chart-panel-geometry.js";
-import { deriveInstrumentReadouts } from "./instrument-readouts.js";
-import type { Vessel } from "../../domain/vessel/vessel.js";
-import type { ClassificationResult, VesselLabel } from "../../domain/colregs/types.js";
+import { deriveInstrumentReadouts } from "../instruments/instrument-readouts.js";
+import type { Vessel } from "../../../domain/vessel/vessel.js";
+import type { ClassificationResult, VesselLabel } from "../../../domain/colregs/types.js";
 
 export interface ChartOverlayState {
   screenA: { screenX: number; screenY: number };

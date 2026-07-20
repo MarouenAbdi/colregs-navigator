@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { crossingResidualBasicCase } from "../../domain/colregs/classify-encounter.fixtures.js";
-import { cpa } from "../../domain/geometry/cpa.js";
-import type { Vessel } from "../../domain/vessel/vessel.js";
+import { crossingResidualBasicCase } from "../../../domain/colregs/classify-encounter.fixtures.js";
+import { cpa } from "../../../domain/geometry/cpa.js";
+import type { Vessel } from "../../../domain/vessel/vessel.js";
 import { deriveInstrumentReadouts } from "./instrument-readouts.js";
 
 describe("deriveInstrumentReadouts", () => {

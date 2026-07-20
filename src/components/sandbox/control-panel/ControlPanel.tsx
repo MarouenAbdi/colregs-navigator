@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { VesselTypeSchema, type VesselType } from "../../domain/vessel/vessel.js";
-import { getVesselRole, ROLE_BADGE_CLASSNAME, ROLE_BADGE_TEXT } from "./vessel-role.js";
-import type { ControlPanelProps } from "./types.js";
+import { VesselTypeSchema, type VesselType } from "../../../domain/vessel/vessel.js";
+import { getVesselRole, ROLE_BADGE_CLASSNAME, ROLE_BADGE_TEXT } from "../vessel-role.js";
+import type { ControlPanelProps } from "../types.js";
 
 // D-12: display labels are UI-only presentation strings; the underlying
 // option values are always VesselTypeSchema's own enum members (never a

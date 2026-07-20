@@ -8,9 +8,9 @@
  * degenerate flag (the degenerate note itself now lives in VerdictBanner).
  */
 
-import type { ReasoningTrailProps } from "./types.js";
+import type { ReasoningTrailProps } from "../types.js";
 import { classifyingEntryIndex, ruleNumber } from "./reasoning-trail-tag.js";
-import type { ClassificationResult, ReasoningTrailEntry } from "../../domain/colregs/types.js";
+import type { ClassificationResult, ReasoningTrailEntry } from "../../../domain/colregs/types.js";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 

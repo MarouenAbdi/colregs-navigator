@@ -4,7 +4,7 @@ import { getCaller } from "../../../src/lib/trpc/server.js";
 import { rowToVessels } from "../../../src/server/application/scenario-service.js";
 import { buildScenarioBanner } from "../../../src/lib/trpc/banner.js";
 import { SandboxContainer } from "../../../src/components/sandbox/SandboxContainer.js";
-import { CopyLinkButton } from "../../../src/components/sandbox/CopyLinkButton.js";
+import { CopyLinkButton } from "../../../src/components/sandbox/control-panel/CopyLinkButton.js";
 
 export default async function SharedScenarioPage({
   params,

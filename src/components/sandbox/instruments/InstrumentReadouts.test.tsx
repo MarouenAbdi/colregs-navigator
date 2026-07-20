@@ -9,10 +9,10 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { InstrumentReadouts } from "./InstrumentReadouts.js";
-import { classifyEncounter } from "../../domain/colregs/classify-encounter.js";
-import { crossingResidualBasicCase } from "../../domain/colregs/classify-encounter.fixtures.js";
-import type { Vessel } from "../../domain/vessel/vessel.js";
-import type { ClassificationResult } from "../../domain/colregs/types.js";
+import { classifyEncounter } from "../../../domain/colregs/classify-encounter.js";
+import { crossingResidualBasicCase } from "../../../domain/colregs/classify-encounter.fixtures.js";
+import type { Vessel } from "../../../domain/vessel/vessel.js";
+import type { ClassificationResult } from "../../../domain/colregs/types.js";
 
 afterEach(cleanup);
 

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { classifyEncounter } from "../../domain/colregs/classify-encounter.js";
+import { classifyEncounter } from "../../../domain/colregs/classify-encounter.js";
 import {
   crossingResidualBasicCase,
   overtakingBothDirectionsCase,
-} from "../../domain/colregs/classify-encounter.fixtures.js";
+} from "../../../domain/colregs/classify-encounter.fixtures.js";
 import { classifyingEntryIndex, ruleNumber } from "./reasoning-trail-tag.js";
 
 describe("classifyingEntryIndex", () => {

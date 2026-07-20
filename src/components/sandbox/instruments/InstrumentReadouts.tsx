@@ -8,7 +8,7 @@
  * instrument-readouts.ts).
  */
 
-import type { InstrumentReadoutsProps } from "./types.js";
+import type { InstrumentReadoutsProps } from "../types.js";
 import { deriveInstrumentReadouts } from "./instrument-readouts.js";
 import { statusPillCopy, type StatusPillTone } from "./status-pill.js";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";

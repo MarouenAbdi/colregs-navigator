@@ -10,7 +10,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { ReasoningTrail } from "./ReasoningTrail.js";
-import type { ClassificationResult } from "../../domain/colregs/types.js";
+import type { ClassificationResult } from "../../../domain/colregs/types.js";
 
 afterEach(cleanup);
 

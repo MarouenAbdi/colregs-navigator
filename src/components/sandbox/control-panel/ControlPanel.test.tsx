@@ -10,8 +10,8 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Vessel, VesselType } from "../../domain/vessel/vessel.js";
-import type { ClassificationResult, VesselLabel } from "../../domain/colregs/types.js";
+import type { Vessel, VesselType } from "../../../domain/vessel/vessel.js";
+import type { ClassificationResult, VesselLabel } from "../../../domain/colregs/types.js";
 import { ControlPanel } from "./ControlPanel.js";
 
 // Rule 3 (blocking): `vitest.config.ts` sets `globals: false` (project-wide,

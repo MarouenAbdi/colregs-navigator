@@ -15,10 +15,10 @@
  * hit-targets.
  */
 
-import type { ChartPanelProps } from "./types.js";
-import { useHullDrag } from "./hooks/useHullDrag.js";
-import { useRotateHandleDrag } from "./hooks/useRotateHandleDrag.js";
-import { useContainerSize } from "./hooks/useContainerSize.js";
+import type { ChartPanelProps } from "../types.js";
+import { useHullDrag } from "../hooks/useHullDrag.js";
+import { useRotateHandleDrag } from "../hooks/useRotateHandleDrag.js";
+import { useContainerSize } from "../hooks/useContainerSize.js";
 import {
   CHART_VIEW_BOX,
   CONE_DEFAULT_STROKE,

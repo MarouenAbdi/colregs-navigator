@@ -1,7 +1,7 @@
-import type { DragHandlers } from "./hooks/useHullDrag.js";
-import type { Vessel } from "../../domain/vessel/vessel.js";
-import type { VesselLabel } from "../../domain/colregs/types.js";
-import { ROLE_BADGE_TEXT, ROLE_HULL_FILL_CLASS, type VesselRole } from "./vessel-role.js";
+import type { DragHandlers } from "../hooks/useHullDrag.js";
+import type { Vessel } from "../../../domain/vessel/vessel.js";
+import type { VesselLabel } from "../../../domain/colregs/types.js";
+import { ROLE_BADGE_TEXT, ROLE_HULL_FILL_CLASS, type VesselRole } from "../vessel-role.js";
 import {
   BADGE_OFFSET_X,
   BADGE_OFFSET_Y,

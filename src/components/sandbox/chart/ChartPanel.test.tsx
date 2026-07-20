@@ -14,13 +14,13 @@
 import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChartPanel } from "./ChartPanel.js";
-import { classifyEncounter } from "../../domain/colregs/classify-encounter.js";
+import { classifyEncounter } from "../../../domain/colregs/classify-encounter.js";
 import {
   crossingResidualBasicCase,
   doubtBandNearOvertakingBoundaryCase,
   headOnBoundaryInclusiveCase,
-} from "../../domain/colregs/classify-encounter.fixtures.js";
-import type { ChartPanelProps } from "./types.js";
+} from "../../../domain/colregs/classify-encounter.fixtures.js";
+import type { ChartPanelProps } from "../types.js";
 
 const MOCK_CONTAINER_SIZE = { width: 400, height: 400 };
 

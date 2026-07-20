@@ -16,11 +16,11 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { VerdictBanner } from "./VerdictBanner.js";
-import { classifyEncounter } from "../../domain/colregs/classify-encounter.js";
+import { classifyEncounter } from "../../../domain/colregs/classify-encounter.js";
 import {
   crossingResidualBasicCase,
   headOnNucRiatmTieCase,
-} from "../../domain/colregs/classify-encounter.fixtures.js";
+} from "../../../domain/colregs/classify-encounter.fixtures.js";
 
 // vitest.config.ts sets `globals: false` -- register cleanup explicitly
 // per this project's no-magic-globals convention.

@@ -14,7 +14,7 @@
 import { createElement } from "react";
 import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ChartPanel } from "../ChartPanel.js";
+import { ChartPanel } from "../chart/ChartPanel.js";
 import { classifyEncounter } from "../../../domain/colregs/classify-encounter.js";
 import { crossingResidualBasicCase } from "../../../domain/colregs/classify-encounter.fixtures.js";
 import { screenToChart } from "../../../domain/geometry/screen-convert.js";

@@ -15,7 +15,7 @@ import {
   GRID_STROKE,
   RANGE_RING_STROKE,
 } from "./chart-panel-geometry.js";
-import { type ContainerSize } from "../../domain/geometry/screen-convert.js";
+import { type ContainerSize } from "../../../domain/geometry/screen-convert.js";
 
 export interface ChartBackdropProps {
   containerSize: ContainerSize;

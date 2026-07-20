@@ -3,9 +3,9 @@ import {
   crossingResidualBasicCase,
   doubtBandNearOvertakingBoundaryCase,
   headOnBoundaryInclusiveCase,
-} from "../../domain/colregs/classify-encounter.fixtures.js";
-import { classifyEncounter } from "../../domain/colregs/classify-encounter.js";
-import { deriveInstrumentReadouts } from "./instrument-readouts.js";
+} from "../../../domain/colregs/classify-encounter.fixtures.js";
+import { classifyEncounter } from "../../../domain/colregs/classify-encounter.js";
+import { deriveInstrumentReadouts } from "../instruments/instrument-readouts.js";
 import { deriveChartOverlayState } from "./chart-panel-derivation.js";
 
 const CONTAINER_SIZE = { width: 400, height: 400 };

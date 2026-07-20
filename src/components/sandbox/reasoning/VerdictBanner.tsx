@@ -7,10 +7,10 @@
  * the reasoning column).
  */
 
-import type { VerdictBannerProps } from "./types.js";
-import { getVesselRole, ROLE_BADGE_CLASSNAME, type VesselRole } from "./vessel-role.js";
+import type { VerdictBannerProps } from "../types.js";
+import { getVesselRole, ROLE_BADGE_CLASSNAME, type VesselRole } from "../vessel-role.js";
 import { classifyingEntryIndex, ruleNumber } from "./reasoning-trail-tag.js";
-import type { ClassificationResult, VesselLabel } from "../../domain/colregs/types.js";
+import type { ClassificationResult, VesselLabel } from "../../../domain/colregs/types.js";
 
 const ENCOUNTER_TYPE_TITLE: Record<string, string> = {
   "head-on": "Head-on",
