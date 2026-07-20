@@ -62,7 +62,12 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details (goals, succes
   5. Committing a staged file with a lint violation triggers Husky + lint-staged to auto-fix it before the commit completes, while the full typecheck/test suite runs in CI only, not pre-commit (HOOKS-01)
   6. `CONTRIBUTING.md` documents setup, running checks locally, the real (not aspirational) pre-commit hook behavior, branch/commit conventions, PR expectations, and a rollback note (DOCS-CONTRIB-01)
   7. The deploy script/workflow is fully authored — Prisma client generation, an environment-gated `prisma migrate deploy` (production builds only, never PR previews), and the mandatory `next build --webpack` flag — and ready to execute the moment a real host is provisioned in Phase 15 (CD-01, CD-02 wiring; live verification deferred to Phase 15)
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 14-01-PLAN.md — CI pipeline foundation (.nvmrc, postinstall prisma generate, ci.yml with lint/typecheck/test/build jobs reusing docker-compose.yml, README CI badge)
+- [ ] 14-02-PLAN.md — Trigger a real CI run against a live PR; branch protection decision + configuration for CI-05
+- [ ] 14-03-PLAN.md — Husky + lint-staged pre-commit hooks (staged eslint --fix, .env* guard) and CONTRIBUTING.md
+- [ ] 14-04-PLAN.md — Environment-gated vercel-build deploy script (prisma generate -> gated migrate deploy -> next build --webpack), locally verified
 
 ### Phase 15: Deploy & Verify
 
@@ -95,6 +100,6 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15
 | 11. Tailwind Deprecated Class-Name Fixes | v1.2 | 3/3 | Complete    | 2026-07-20 |
 | 12. ChartPanel/SandboxContainer Decomposition Refactor | v1.2 | 4/4 | Complete   | 2026-07-20 |
 | 13. Comment Cleanup | v1.2 | 8/8 | Complete | 2026-07-20 |
-| 14. Pipeline & Hooks | v1.3 | 0/TBD | Not started | - |
+| 14. Pipeline & Hooks | v1.3 | 0/4 | Not started | - |
 | 15. Deploy & Verify | v1.3 | 0/TBD | Not started | - |
 </content>
