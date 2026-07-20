@@ -106,6 +106,7 @@ Items acknowledged and carried forward from previous milestone close:
 | Quick ID | Description | Date |
 |----------|------|------|
 | 260719-t8r | Generate `docs/reasoning-trails.json` design reference (catalog of all COLREGS reasoning-trail shapes) | 2026-07-19 |
+| 260720-jko | Reorganize sandbox/, domain/colregs/, domain/geometry/, gallery/ into topic/feature subfolders — zero logic change, 216/216 tests pass | 2026-07-20 |
 
 ## Session Continuity
 
