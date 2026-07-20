@@ -109,8 +109,8 @@ All three ROADMAP Phase 13 success criteria are demonstrably met:
 2. **Full WHY retention** — diff self-review across all 66 files confirms every hunk is comment-text or test-name-string-only; zero logic/behavior change (216/216 tests, clean typecheck).
 3. **Broader re-grep documented as run, not assumed** — all 4 sub-patterns run and recorded above, surfacing 2 genuine gaps the original 54-file/109-occurrence strict-pattern count would have missed.
 
-Task 3 (human sign-off checkpoint) is next — pending explicit approval before Phase 13 closes.
+**Task 3 (human sign-off checkpoint): APPROVED 2026-07-20.** User reviewed sample diffs across the geometry, colregs, and server clusters and confirmed the rewritten comments retain full WHY content. Phase 13 is closed — CMNT-01 and CMNT-02 complete.
 
 ---
 *Phase: 13-comment-cleanup*
-*Completed: 2026-07-20 (pending human sign-off)*
+*Completed: 2026-07-20*

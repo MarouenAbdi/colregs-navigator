@@ -34,7 +34,7 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full phase details (goals, succes
 - [x] **Phase 10: ESLint Setup & Lint-Clean Baseline** - Install ESLint (flat config), wire `npm run lint`, and reach a lint-clean baseline with architecture-boundary and convention-enforcing custom rules (completed 2026-07-19)
 - [x] **Phase 11: Tailwind Deprecated Class-Name Fixes** - Replace deprecated Tailwind v3 class names with v4 canonical equivalents in the 6 flagged files, verified by hand (completed 2026-07-19)
 - [x] **Phase 12: ChartPanel/SandboxContainer Decomposition Refactor** - Decompose the two oversized Sandbox files into focused modules, preserving all existing behavior and hit-testing (completed 2026-07-20)
-- [ ] **Phase 13: Comment Cleanup** - Rewrite stale Phase/Plan/REQ-ID comment references by hand, preserving substantive WHY content
+- [x] **Phase 13: Comment Cleanup** - Rewrite stale Phase/Plan/REQ-ID comment references by hand, preserving substantive WHY content (completed 2026-07-20)
 
 ## Phase Details
 
@@ -130,7 +130,7 @@ Plans:
   2. Every rewritten comment retains its full substantive WHY explanation — reviewed diff shows only identifier removal, no loss of reasoning.
   3. The broader re-grep pass is documented as having been run, confirming the original scoping count was not treated as exhaustive.
 
-**Plans:** 7/8 plans complete
+**Plans:** 8/8 plans complete
 Plans:
 **Wave 1**
 
@@ -147,7 +147,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 13-08-PLAN.md — Final verification: re-run strict + broader grep sweeps, prune eslint-suppressions.json, full-suite regression check, human sign-off
+- [x] 13-08-PLAN.md — Final verification: re-run strict + broader grep sweeps, prune eslint-suppressions.json, full-suite regression check, human sign-off
 
 ## Progress
 
@@ -164,4 +164,4 @@ Phases execute in numeric order: 10 → 11 → 12 → 13
 | 10. ESLint Setup & Lint-Clean Baseline | v1.2 | 3/3 | Complete    | 2026-07-19 |
 | 11. Tailwind Deprecated Class-Name Fixes | v1.2 | 3/3 | Complete    | 2026-07-20 |
 | 12. ChartPanel/SandboxContainer Decomposition Refactor | v1.2 | 4/4 | Complete   | 2026-07-20 |
-| 13. Comment Cleanup | v1.2 | 7/8 | In progress | - |
+| 13. Comment Cleanup | v1.2 | 8/8 | Complete | 2026-07-20 |
