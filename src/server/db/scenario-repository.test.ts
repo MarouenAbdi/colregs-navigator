@@ -1,6 +1,6 @@
 /**
  * Integration tests for scenario-repository.ts against the live Docker
- * Postgres instance from Plan 01 (D-01) -- no mocking of `prisma`, these
+ * Postgres instance (D-01) -- no mocking of `prisma`, these
  * tests exercise the real Prisma Client + adapter.
  */
 

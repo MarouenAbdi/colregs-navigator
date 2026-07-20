@@ -1,10 +1,10 @@
 /**
  * Thin Prisma query wrapper for the `Scenario` model -- three plain
- * module-level functions, no generic `Repository<T>` base class (RESEARCH.md
- * Anti-Patterns: one table, three query shapes does not warrant that
- * abstraction). Every query goes through Prisma Client's generated,
- * parameterized methods -- no `$queryRawUnsafe`/string-concatenated SQL
- * (T-3-03).
+ * module-level functions, no generic `Repository<T>` base class -- this
+ * project has exactly one repository and three query shapes, so a generic
+ * abstraction would add indirection without a second consumer to justify
+ * it. Every query goes through Prisma Client's generated, parameterized
+ * methods -- no `$queryRawUnsafe`/string-concatenated SQL (T-3-03).
  *
  * D-10: `findByShareId` returns a bare `null` for "not found", not a
  * `Result<T>` -- that discriminated-union shape stays domain-internal, it
