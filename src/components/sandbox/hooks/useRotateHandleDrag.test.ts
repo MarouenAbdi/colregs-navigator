@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 /**
- * useRotateHandleDrag test (04-03 Task 3): drives a real
+ * useRotateHandleDrag test: drives a real
  * pointerdown+pointermove sequence against ChartPanel's rendered
  * rotate-handle hit-circle, asserts onVesselHeadingChange fires with a
  * heading, and regression-tests Pitfall 1 -- the hull hit-rect's own
