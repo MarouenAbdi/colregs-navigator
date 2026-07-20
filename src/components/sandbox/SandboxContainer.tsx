@@ -3,182 +3,27 @@
 /**
  * SandboxContainer -- the top-level state owner that wires ChartPanel,
  * ControlPanel, and the 3 split reasoning cards (VerdictBanner,
- * InstrumentReadouts, ReasoningTrail) together. Owns `vesselA`/`vesselB`
- * state, the `previousEncounterTypeRef` Rule 13(d) hysteresis ref, and the
- * single `applyVesselUpdate` validate-then-classify choke point every drag,
- * form update, AND chip-preset load funnels through -- satisfying CLAS-05's
- * "live update regardless of input modality" requirement. Seeds state from
- * the locked default scenario (`crossingResidualBasicCase`) and implements
- * the reset-scenario CTA and the 6-chip preset row (D-01/D-02).
+ * InstrumentReadouts, ReasoningTrail) together. Delegates all
+ * vesselA/vesselB state, the Rule 13(d) hysteresis, and the
+ * validate-then-classify choke point to useSandboxState() (RFCT-04) --
+ * satisfying CLAS-05's "live update regardless of input modality"
+ * requirement. This file is now JSX composition + the chip-row/reset/save
+ * CTAs only.
  */
 
-import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { RotateCcw, Link2 } from "lucide-react";
 import { ChartPanel } from "./ChartPanel.js";
 import { ControlPanel } from "./ControlPanel.js";
 import { VerdictBanner } from "./VerdictBanner.js";
 import { InstrumentReadouts } from "./InstrumentReadouts.js";
 import { ReasoningTrail } from "./ReasoningTrail.js";
-import { CHIP_ORDER, CHIP_SCENARIOS, type ChipId } from "./chip-scenarios.js";
-import { classifyEncounter } from "../../domain/colregs/classify-encounter.js";
-import { crossingResidualBasicCase } from "../../domain/colregs/classify-encounter.fixtures.js";
-import { trpc } from "../../lib/trpc/client.js";
+import { CHIP_ORDER } from "./chip-scenarios.js";
+import { useSandboxState } from "./hooks/useSandboxState.js";
 import { Button } from "@/components/ui/button";
-import {
-  VesselSchema,
-  type Position,
-  type Vessel,
-  type VesselType,
-} from "../../domain/vessel/vessel.js";
-import type {
-  ClassificationResult,
-  EncounterType,
-  VesselLabel,
-} from "../../domain/colregs/types.js";
 import type { SandboxContainerProps } from "./types.js";
 
 export function SandboxContainer({ initialScenario, banner }: SandboxContainerProps = {}) {
-  const router = useRouter();
-  // 05-03 Task 2: Save persists the current vesselA/vesselB via
-  // scenario.create (no login step, SCEN-01) and redirects to the
-  // resulting share URL on success.
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const createScenario = trpc.scenario.create.useMutation({
-    onSuccess: ({ shareId }) => router.push(`/s/${shareId}`),
-    // scenario-service.ts's createScenario() throws BAD_REQUEST for a
-    // degenerate (coincident) vessel pair -- the button is also disabled
-    // while isDegenerate, but the mutation can still reject for other
-    // server-side reasons, so this must not be a silent no-op either way.
-    onError: () => setSaveError("Couldn't save this scenario. Try again."),
-  });
-  // 05-03: when `initialScenario` is provided (saved/shared scenario), seed
-  // from it instead of the app's hardcoded default demo fixture. When
-  // absent (plain "/" route), falls back to the pre-existing default --
-  // Assumption A3: Reset restores THIS instance's seed, not an unrelated
-  // global default.
-  const seedA = initialScenario?.vesselA ?? crossingResidualBasicCase.vesselA;
-  const seedB = initialScenario?.vesselB ?? crossingResidualBasicCase.vesselB;
-
-  const [vesselA, setVesselA] = useState<Vessel>(seedA);
-  const [vesselB, setVesselB] = useState<Vessel>(seedB);
-
-  // Lazy initializer: the ONE place in this file that unwraps a
-  // classifyEncounter() Result's `.value` without a preceding `.ok`
-  // check. Safe specifically because the seed vessels come from either
-  // the known-good, already-tested, doubt-free default fixture, or a
-  // previously-persisted (already-validated on create) saved scenario --
-  // not user-editable at mount time -- so its classification can never
-  // fail.
-  const [lastGoodClassification, setLastGoodClassification] = useState<ClassificationResult>(
-    () => {
-      const initialResult = classifyEncounter(seedA, seedB) as {
-        ok: true;
-        value: ClassificationResult;
-      };
-      return initialResult.value;
-    },
-  );
-  const [isDegenerate, setIsDegenerate] = useState<boolean>(false);
-
-  // Tracks which chip (if any) is the source of the currently-loaded
-  // scenario -- purely a client-side visual highlight (T-08-07), cleared by
-  // any manual drag/heading/speed/type edit so it never goes stale. Only
-  // defaults to "classic-crossing" on the plain, seedless "/" route, where
-  // the default seed genuinely IS that chip's fixture (byte-identical,
-  // matching the design's default-active chip) -- a saved/shared scenario
-  // (`initialScenario` provided) has arbitrary geometry that has nothing to
-  // do with that fixture, so it must start with no chip highlighted.
-  const [activeChipId, setActiveChipId] = useState<ChipId | null>(
-    initialScenario ? null : "classic-crossing",
-  );
-
-  // Seeded from the default scenario's own encounter type, so a drag
-  // immediately after mount already has correct hysteresis context.
-  const previousEncounterTypeRef = useRef<EncounterType | undefined>(
-    lastGoodClassification.encounterType,
-  );
-
-  // Single choke point: every drag handler AND every ControlPanel
-  // onChange handler funnels through this function. Validates both
-  // vessels with VesselSchema before classifyEncounter() ever sees them
-  // (T-04-01), then re-derives the verdict from scratch every time --
-  // never a stale/cached result -- respecting Rule 13(d) hysteresis via
-  // previousEncounterTypeRef.
-  function applyVesselUpdate(nextA: Vessel, nextB: Vessel): void {
-    const parsedA = VesselSchema.safeParse(nextA);
-    const parsedB = VesselSchema.safeParse(nextB);
-    if (!parsedA.success || !parsedB.success) return;
-
-    setVesselA(nextA);
-    setVesselB(nextB);
-
-    const result = classifyEncounter(nextA, nextB, previousEncounterTypeRef.current);
-    if (result.ok) {
-      setLastGoodClassification(result.value);
-      setIsDegenerate(false);
-      previousEncounterTypeRef.current = result.value.encounterType;
-    } else {
-      // Pitfall 5: a transient coincident-position drag frame must not
-      // corrupt hysteresis or discard the last-good verdict -- leave
-      // lastGoodClassification and previousEncounterTypeRef.current
-      // untouched, only flip the degenerate flag.
-      setIsDegenerate(true);
-    }
-  }
-
-  function onVesselPositionChange(vessel: VesselLabel, position: Position): void {
-    setActiveChipId(null);
-    applyVesselUpdate(
-      vessel === "vesselA" ? { ...vesselA, position } : vesselA,
-      vessel === "vesselB" ? { ...vesselB, position } : vesselB,
-    );
-  }
-
-  function onVesselHeadingChange(vessel: VesselLabel, heading: number): void {
-    setActiveChipId(null);
-    applyVesselUpdate(
-      vessel === "vesselA" ? { ...vesselA, heading } : vesselA,
-      vessel === "vesselB" ? { ...vesselB, heading } : vesselB,
-    );
-  }
-
-  function onVesselSpeedChange(vessel: VesselLabel, speed: number): void {
-    setActiveChipId(null);
-    applyVesselUpdate(
-      vessel === "vesselA" ? { ...vesselA, speed } : vesselA,
-      vessel === "vesselB" ? { ...vesselB, speed } : vesselB,
-    );
-  }
-
-  function onVesselTypeChange(vessel: VesselLabel, type: VesselType): void {
-    setActiveChipId(null);
-    applyVesselUpdate(
-      vessel === "vesselA" ? { ...vesselA, type } : vesselA,
-      vessel === "vesselB" ? { ...vesselB, type } : vesselB,
-    );
-  }
-
-  function handleReset(): void {
-    // Reset scenario is a deliberate FULL state reset, including
-    // hysteresis -- unlike every other applyVesselUpdate call site above
-    // (a normal drag/form update must never clear hysteresis on its
-    // own, see the degenerate branch in applyVesselUpdate). These are
-    // intentionally different code paths, not an inconsistency. The seed
-    // scenario is not necessarily one of the 6 chip fixtures, so this
-    // deliberately does NOT set activeChipId -- it stays whatever it was.
-    previousEncounterTypeRef.current = undefined;
-    applyVesselUpdate(seedA, seedB);
-  }
-
-  function handleChipSelect(chipId: ChipId): void {
-    // Mirrors handleReset()'s exact shape (D-01/D-02: full replace + full
-    // hysteresis reset) -- routes through the same applyVesselUpdate choke
-    // point every other update site uses, never a parallel state path.
-    previousEncounterTypeRef.current = undefined;
-    applyVesselUpdate(CHIP_SCENARIOS[chipId].vesselA, CHIP_SCENARIOS[chipId].vesselB);
-    setActiveChipId(chipId);
-  }
+  const sandboxState = useSandboxState(initialScenario);
 
   return (
     <div className="
@@ -210,21 +55,18 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
               variant="outline"
               size="icon-sm"
               aria-label="Save and share this scenario"
-              onClick={() => {
-                setSaveError(null);
-                createScenario.mutate({ vesselA, vesselB });
-              }}
-              disabled={createScenario.isPending || isDegenerate}
+              onClick={sandboxState.handleSave}
+              disabled={sandboxState.isSaving || sandboxState.isDegenerate}
             >
               <Link2 aria-hidden="true" />
             </Button>
-            <Button type="button" variant="outline" onClick={handleReset}>
+            <Button type="button" variant="outline" onClick={sandboxState.handleReset}>
               <RotateCcw aria-hidden="true" />
               Reset scenario
             </Button>
           </div>
         </div>
-        {saveError ? <p className="text-sm text-doubt">{saveError}</p> : null}
+        {sandboxState.saveError ? <p className="text-sm text-doubt">{sandboxState.saveError}</p> : null}
         {banner ? (
           <div className="
             rounded-sm border border-border bg-card px-3 py-2 text-sm
@@ -244,13 +86,13 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
           <button
             key={id}
             type="button"
-            onClick={() => handleChipSelect(id)}
-            aria-pressed={activeChipId === id}
+            onClick={() => sandboxState.handleChipSelect(id)}
+            aria-pressed={sandboxState.activeChipId === id}
             className={`
               flex h-[30px] items-center rounded-full border px-[13px] font-sans
               text-[12.5px] font-medium transition-colors
               ${
-              activeChipId === id
+              sandboxState.activeChipId === id
                 ? "border-rule-accent bg-rule-accent text-white"
                 : `
                   border-border bg-card text-muted-foreground
@@ -264,37 +106,40 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
         ))}
       </div>
 
-      <VerdictBanner classification={lastGoodClassification} isDegenerate={isDegenerate} />
+      <VerdictBanner
+        classification={sandboxState.lastGoodClassification}
+        isDegenerate={sandboxState.isDegenerate}
+      />
 
       <div className="
         mt-4 grid grid-cols-1 gap-4
         min-[900px]:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]
       ">
         <ChartPanel
-          vesselA={vesselA}
-          vesselB={vesselB}
-          classification={lastGoodClassification}
-          onVesselPositionChange={onVesselPositionChange}
-          onVesselHeadingChange={onVesselHeadingChange}
+          vesselA={sandboxState.vesselA}
+          vesselB={sandboxState.vesselB}
+          classification={sandboxState.lastGoodClassification}
+          onVesselPositionChange={sandboxState.onVesselPositionChange}
+          onVesselHeadingChange={sandboxState.onVesselHeadingChange}
         />
         <div className="flex flex-col gap-4">
           <InstrumentReadouts
-            vesselA={vesselA}
-            vesselB={vesselB}
-            classification={lastGoodClassification}
+            vesselA={sandboxState.vesselA}
+            vesselB={sandboxState.vesselB}
+            classification={sandboxState.lastGoodClassification}
           />
           <ControlPanel
-            vesselA={vesselA}
-            vesselB={vesselB}
-            classification={lastGoodClassification}
-            onVesselSpeedChange={onVesselSpeedChange}
-            onVesselTypeChange={onVesselTypeChange}
+            vesselA={sandboxState.vesselA}
+            vesselB={sandboxState.vesselB}
+            classification={sandboxState.lastGoodClassification}
+            onVesselSpeedChange={sandboxState.onVesselSpeedChange}
+            onVesselTypeChange={sandboxState.onVesselTypeChange}
           />
         </div>
       </div>
 
       <div className="mt-4">
-        <ReasoningTrail classification={lastGoodClassification} />
+        <ReasoningTrail classification={sandboxState.lastGoodClassification} />
       </div>
     </div>
   );
