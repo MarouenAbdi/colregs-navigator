@@ -1,162 +1,200 @@
 # Feature Research
 
-**Domain:** Solo-built portfolio repo tooling/hygiene (v1.2 Tech Debt & Stabilization milestone — ESLint setup, refactor, comment cleanup)
-**Researched:** 2026-07-19
-**Confidence:** HIGH (Next.js/typescript-eslint claims verified via official docs and Context7; solo-vs-team tradeoff judgments are MEDIUM, cross-checked against multiple sources but inherently a project-context call)
+**Domain:** CI/CD pipeline, pre-commit hooks, and deployment for a solo-authored portfolio full-stack app (Next.js/tRPC/Prisma/PostgreSQL)
+**Researched:** 2026-07-20
+**Confidence:** HIGH (CI/CD structure, Husky/lint-staged division, badges — well-documented, multi-source corroborated) / MEDIUM (Vercel-vs-Actions redundancy specifics, health-check conventions — fewer authoritative primary sources, but internally consistent across sources)
 
 ## Scope Note
 
-This document supersedes the prior FEATURES.md (v1.1 UI Redesign, hero/gallery UX patterns) for this milestone. v1.2 adds no new user-facing features — the "feature landscape" here is a tooling/hygiene landscape: what a credible lint/code-quality setup looks like for a **solo-built portfolio repo** whose explicit audience is a hiring tech lead or interviewer, not a real multi-contributor team. Prior UI-feature research (v1.0 domain, v1.1 hero/gallery) is not re-litigated here and remains valid for its own milestones.
+This document supersedes the prior FEATURES.md (v1.2 Tech Debt & Stabilization — lint/hygiene tooling landscape) for this milestone. v1.3's feature landscape is CI/CD, pre-commit hooks, and deployment — a different domain than v1.2's lint/refactor hygiene, though the same "reviewer is a tech lead/interviewer, not a real team of users" framing applies and is carried forward below. Prior milestones' UI/domain-feature research (v1.0, v1.1) and lint-tooling research (v1.2) remain valid for their own milestones and are not re-litigated here.
+
+## Context Check Against Existing Codebase
+
+`package.json` already defines `lint`, `typecheck`, `test`, and `build` npm scripts (added across v1.0–v1.2). This milestone's CI work is **wiring existing scripts into a pipeline**, not creating new checks. This matters for complexity ratings below — "add lint to CI" is LOW complexity here specifically because the lint config, ESLint bypass workaround (`@next/eslint-plugin-next` + `@babel/eslint-parser`), and `tsc --noEmit` typecheck script already exist and are known-working locally.
 
 ## Framing
 
-The reviewer here is not "users" but a **tech lead or interviewer skimming the repo**. Their signal for
-"professional engineering hygiene" is different from a real team's: they're not checking whether tooling
-*prevents* bad commits (there's only one contributor — nothing to prevent), they're checking whether the
-repo *demonstrates the author knows what a real team's setup looks like and can build one*, sized correctly
-for this repo. Over-scoping the tooling (CI, git hooks, CONTRIBUTING.md for zero external contributors) reads
-as cargo-culting exactly as much as under-scoping it (no linter at all) reads as unfinished. Both failure
-modes are visible to an experienced reviewer — this is why the categorization below is stricter than a
-generic "ESLint best practices" list.
-
-PROJECT.md already locks part of the scope for this milestone: **local `npm run lint` script only, no GitHub
-Actions CI this milestone** (explicitly deferred to a future milestone). That locked decision is treated as
-a hard constraint below, not re-litigated.
+The reviewer here is a tech lead or interviewer skimming the repo, not a real multi-contributor team relying on these processes daily. Their signal for "professional DevOps practice" is: does the pipeline demonstrate the author understands what a real team's setup looks like and can build one, correctly sized for a solo two-person-max audience (author + reviewer)? Over-scoping (Kubernetes, staging environments, secrets managers for a repo with one contributor and one deployed instance) reads as cargo-culting/resume-driven development just as visibly as under-scoping (no CI at all) reads as unfinished. This is why the anti-features list below is as long and specific as the table-stakes list — proportional judgment is itself the thing being evaluated in this milestone, not tool-checklist completion.
 
 ## Feature Landscape
 
-### Table Stakes (A Reviewer Would Notice Absence)
+### Table Stakes (A Reviewer Expects These)
+
+Features a technical interviewer/tech lead would expect from a "professional engineering practices" showcase. Missing these makes the DevOps signal feel incomplete or performative.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| ESLint installed + configured for Next.js 16 + TypeScript, using flat config (`eslint.config.mjs`) | The repo currently has **zero** lint tooling — `npm run dev/build/test/typecheck` exist but no `lint`. For a project whose CLAUDE.md explicitly claims a "Staff Full-Stack Engineer" persona and DDD-lite discipline, shipping two full milestones with no linter at all is the single most visible gap an interviewer would find in 10 seconds of opening `package.json`. | LOW | Install `eslint` + `eslint-config-next` (which bundles `@next/eslint-plugin-next`, `eslint-plugin-react`, `eslint-plugin-react-hooks` recommended sets). **Next.js 16 removed `next lint` entirely** (confirmed via official docs, `nextjs.org/docs/app/api-reference/config/eslint`, `v16.0.0` changelog) — there is no `next lint` command to fall back to, and any stale `eslint` key in `next.config.ts` should be deleted. Use the ESLint CLI directly (`eslint .`) via the flat-config file, not the old `.eslintrc.*` format (deprecated, removed in ESLint v10). |
-| `eslint-config-next/typescript` layered on top of the base config | TypeScript is a locked core technology (STACK.md) — a JS-only lint config on a fully-TypeScript codebase would look like an oversight, not a deliberate choice. | LOW | This sub-config is itself based on `plugin:@typescript-eslint/recommended` (confirmed via Next.js official docs) — see the strictness discussion under Anti-Features for why `recommended`, not `strict-type-checked`, is the right starting tier here. |
-| `npm run lint` script wired into `package.json`, documented alongside `dev`/`build`/`test`/`typecheck` | PROJECT.md's own milestone goal names this exact script. A reviewer who runs `npm run test` and `npm run typecheck` (both already present) and finds no sibling `lint` script would read the milestone as incomplete regardless of whether ESLint is technically installed. | LOW | Trivial once ESLint is configured — `"lint": "eslint ."`. Consider `"lint:fix": "eslint . --fix"` as a paired convenience script; low cost, matches the shape of existing scripts. |
-| A lint-clean baseline — `npm run lint` exits 0 with no errors across the existing codebase | Introducing a linter to an already-built, two-milestone-old codebase and leaving it red is worse than not having one: a reviewer who runs `npm run lint` and sees a wall of unaddressed errors reads it as "tooling added but not actually used," undermining the whole hygiene narrative. | MEDIUM | This is the real cost driver of the milestone, not the ESLint install itself. PROJECT.md already flags concrete known violations to fix as part of this pass (deprecated Tailwind v4 class names in 6 files, long files, stale comments) — those and whatever else surfaces from turning the linter on for the first time need to be clean before the milestone closes. |
-| Removing the stale `eslint` option from `next.config.ts` (if present) | Next.js 16 explicitly deprecated/removed this config key alongside `next lint`'s removal — leaving it in place signals unfamiliarity with the exact framework version this project is pinned to (16.2.10, per STACK.md), which is a worse look than having no lint config at all for a project whose stated differentiator is engineering rigor. | LOW | One-line removal, verified via Next.js's own migration notes; pairs naturally with the flat-config setup work. |
+| GitHub Actions CI workflow: lint + typecheck + test + build, on every PR | This is the baseline signal of "CI exists" — a reviewer opening the Actions tab or a PR expects to see these four gates, all already scripted locally | LOW | One `.github/workflows/ci.yml` calling existing `npm run lint`/`typecheck`/`test`/`build`. No new tooling to write. |
+| CI triggers on `pull_request` (to `main`) AND `push` to `main` | PRs need pre-merge gating; a direct push to main (rare but possible) still needs the same gate re-run post-merge for badge accuracy | LOW | Standard `on: { pull_request: { branches: [main] }, push: { branches: [main] } }` — avoids the common gap where main's badge goes stale because CI only ever ran on PR branches |
+| Dependency caching (`actions/setup-node` with `cache: npm`, or lockfile-keyed cache) | Table stakes for not looking careless about pipeline speed; a 3-5 min CI run vs a 40s one is a visible signal of polish | LOW | Built into `actions/setup-node@v4`'s `cache: 'npm'` option — a single line, not a separate caching strategy to design |
+| Required status checks on `main` (branch protection) | Without this, a red CI run doesn't actually block a merge — the pipeline is theater. Branch protection is the difference between "CI runs" and "CI enforces" | LOW | GitHub repo setting (Settings → Branches → protect `main`, require the CI workflow's job(s) to pass). Zero code — a checklist/documentation item for the CD/CI phase, not a code deliverable, but must be explicitly done and verified, not assumed. |
+| README CI status badge | The single most common, most-expected visual signal of "this repo has CI" — nearly universal on maintained GitHub repos | LOW | `![CI](https://github.com/<owner>/<repo>/actions/workflows/ci.yml/badge.svg)`, optionally wrapped in a link to the workflow run. Confirmed syntax via GitHub Docs. |
+| Continuous Deployment: auto-deploy to production on merge to `main` | Explicitly locked in PROJECT.md ("CD means real auto-deploy on merge to main, not a manual/staged release process") — this is the difference between a CI-only repo (common) and a CI/CD repo (the stated goal) | LOW–MEDIUM | See "CD pattern" discussion below — the *mechanism* (host-native Git integration vs. Actions-driven deploy) is the open design question, not whether auto-deploy-on-merge happens at all. |
+| `prisma migrate deploy` run against production DB as part of the deploy step | A real production Postgres DB (per PROJECT.md's "live deployment... backed by a real production Postgres database") needs its schema kept in sync on every deploy — this is the standard, Prisma-documented CI/CD pattern, not an extra | MEDIUM | Confirmed via Prisma's own docs: `migrate deploy` (not `migrate dev`) is the CI/CD-safe, non-interactive command; needs `DATABASE_URL` as a CI secret. Prisma's own guidance also flags a real gotcha: concurrent merges within its 10s advisory-lock window — irrelevant at solo-author scale but worth a one-line note in docs so it doesn't read as an oversight. |
+| A basic health/status signal for the live deployment | A reviewer clicking the live URL expects some evidence the deployed instance is genuinely wired to its production DB, not just serving static pages | LOW | A `GET /api/health` (or `/api/trpc/health`) route doing a lightweight `SELECT 1`/`prisma.$queryRaw` check, returning `200`/`503` with `{status, timestamp}`. Keep it a plain JSON endpoint, not a dashboard — see anti-features below for what NOT to build here. |
+| Husky + lint-staged pre-commit hook running lint/format on staged files only | This is the standard, near-universal pattern in any JS/TS repo claiming git hygiene discipline; a portfolio repo with `CLAUDE.md`-documented conventions but no enforcement at commit-time reads as inconsistent | LOW | `npx husky init`, `lint-staged` config running `eslint --fix` (staged `.ts/.tsx` only) — reuses the already-working `eslint` config, no new lint rules to write |
+| `CONTRIBUTING.md` with setup, workflow, and code-style sections | Explicitly locked as a target feature (`DOCS-CONTRIB-01`); a reviewer treating the repo as an "open-source-style" portfolio artifact expects this file to exist and be genuine, not boilerplate | LOW | See detailed section breakdown below |
+| Documented rollback / "what happens on a broken deploy" note | Not a feature to build, but a documentation table-stake: a tech lead reviewing DevOps maturity will ask "what's your rollback story?" — for a portfolio project, "the host's dashboard lets you re-promote a prior deployment in one click" is a legitimate, sufficient answer if written down | LOW | Documentation only (README or CONTRIBUTING) — no pipeline code required if you pick a host with one-click rollback (Vercel/Railway/Render/Netlify all have this natively) |
 
-### Differentiators (Impressive, Not Expected)
+### Differentiators (Signal Above the Baseline)
+
+Not required to look "CI/CD exists," but these are what separate "checked a box" from "understands tradeoffs" — valuable specifically because this milestone's stated purpose is demonstrating *judgment*, not just tool usage.
 
 | Feature | Value Proposition | Complexity | Notes |
-|---------|--------------------|------------|-------|
-| Architecture-boundary enforcement via ESLint's core `no-restricted-imports` (or per-directory config overrides) — encoding "`src/domain/` never imports from `src/server/`, Next.js, tRPC, or Prisma" as an actual lint rule | This is the single highest-signal differentiator available here. STACK.md/CLAUDE.md already name this exact boundary as "the hard rule to enforce" for the domain-modeling-depth claim to be real rather than aspirational — turning a **written** convention into a **lint-enforced** one is precisely the kind of thing a tech lead notices and respects, because it shows the author understands conventions rot without automation. | LOW–MEDIUM | Confirmed via research: `no-restricted-imports` is a core ESLint rule (zero new dependency) capable of this via glob-scoped flat-config overrides (a `files: ['src/domain/**']` block restricting imports outside `src/domain/`). A dedicated plugin (`eslint-plugin-boundaries`) exists for larger/monorepo-scale layering but is unjustified overhead at this project's ~3-layer, single-package scale — same "don't add a dependency the project doesn't need" logic STACK.md already applies elsewhere. |
-| `no-restricted-syntax` rule banning stale task/plan/REQ-ID references in comments (e.g. matching `/Phase \d+|REQ-\d+|Plan \d+/i` against comment text) | This milestone is *manually* removing 10 found stale comment references right now — a lint rule is the difference between "we cleaned it up once" and "this can't recur." It directly operationalizes the "WHY-only, no rotting task IDs" convention already written in CLAUDE.md/CONVENTIONS. | LOW | Core ESLint rule, no new dependency; the pattern-matching half of the convention (does this comment cite an ID that will rot?) is fully mechanical and a genuinely good fit for a custom rule. See "What NOT to Automate" below for the half of this convention that isn't mechanical. |
-| `no-restricted-syntax` rule banning raw CSS built as template-literal strings in `.tsx` files (e.g. flagging a `TemplateLiteral` assigned to a JSX `style` attribute or a `background-image`/`animation` string) | Directly operationalizes the "no raw CSS composed as strings in component files" convention already written in CLAUDE.md — same rationale as above: a documented convention with no enforcement is one refactor away from being silently violated. | LOW | Same core rule, different AST selector; no new dependency. |
-| `max-lines` / `max-lines-per-function` as an early-warning proxy for "split computation from presentation" | CLAUDE.md's own convention names a concrete numeric signal ("growing past ~150-200 lines") — that's an unusually good match for a mechanical threshold rule, better than most style conventions. | LOW | Set as `warn`, not `error` — it's a proxy for a judgment call (mixing computation with markup), not the judgment itself; a long file that's legitimately just verbose JSX shouldn't hard-fail the build. Frame this as a nudge, not a strict gate. |
-| `typescript-eslint`'s `recommended-type-checked` tier (adds type-aware rules on top of the `eslint-config-next/typescript` default `recommended`) | A meaningful, well-established step up in rigor beyond what `eslint-config-next/typescript` ships by default, without the risk profile of the `strict` tiers (see Anti-Features). Shows deliberate calibration of strictness rather than just accepting a framework default. | MEDIUM | Requires wiring `parserOptions.project`/typed linting (points ESLint at `tsconfig.json`) and is slower to run than untyped rules — real cost, but well-trodden and stable. Confirmed via Context7 (`typescript-eslint`) that `recommended-type-checked` is explicitly positioned as "additional recommended rules requiring type information," one clear step above the default, not the most aggressive tier. |
-| `.editorconfig` at repo root | Near-zero cost, cheap signal that indentation/charset/line-ending conventions were considered, without asking anything of a reviewer skimming the repo. | LOW | Single static file, no runtime dependency. Optional polish, not required — most reviewers won't specifically check for its absence the way they would a missing linter. |
-| Prettier + `eslint-config-prettier`, format-on-save only (NOT a repo-wide reformat commit) | Consistent formatting is a genuine team-hygiene signal, and Next.js's own docs show the exact recommended pairing (`eslint-config-prettier` to disable ESLint's conflicting stylistic rules). | MEDIUM | Real risk: running Prettier's formatter across ~2 milestones of already-written code produces a large, low-value diff unrelated to this milestone's actual goal (lint rules + refactor + comment cleanup) and would visually swamp the meaningful changes in the PR. If added, scope it to "install + document, format new/touched files only" rather than a blanket reformat — otherwise this tips toward scope creep for a milestone that's explicitly not supposed to touch working code without reason. |
-| A short "Linting & Code Quality" section added to the README (not a new file) enumerating which CLAUDE.md conventions are lint-enforced vs. still human-reviewed | Ties the new tooling back to the conventions the project already documents by hand — shows the two are a coherent system, not tooling bolted on independently of the written philosophy. | LOW | README additions are already an expected deliverable per CLAUDE.md's Documentation constraint; this is additive to that existing obligation, not a new deliverable category. |
+|---------|-------------------|------------|-------|
+| Explicit "why we don't run a redundant Actions deploy step" note in docs, if using host-native Git integration | Shows the interviewer the engineer understands *when a tool should defer to a platform feature* rather than defaulting to "more pipeline = more impressive" — a senior-engineer signal, directly aligned with this project's existing "justify every abstraction and dependency" persona | LOW (documentation only) | See CD pattern discussion below — this is a near-zero-cost differentiator: one paragraph in README/CONTRIBUTING explaining the deploy architecture choice |
+| PR preview deployments (ephemeral URL per PR) | Lets a reviewer click a live preview of a specific PR's changes without pulling the branch locally — a genuinely useful, low-effort differentiator if the chosen host supports it out of the box | LOW (if host-native, e.g. Vercel/Netlify preview deploys) / not worth building manually | Free with Vercel/Netlify's native GitHub integration — do not hand-roll this with GitHub Actions if the host already does it; that would itself become the "redundant Actions deploy step" anti-pattern |
+| lint-staged running `tsc --noEmit` scoped only on genuinely fast paths, OR explicitly deferring full typecheck to CI with a documented rationale | Shows deliberate reasoning about the commit-time/CI-time tradeoff (many teams get this wrong by cramming full-repo typecheck into pre-commit and then quietly bypassing hooks when it gets slow) rather than cargo-culting a "kitchen sink" hook | LOW | Given this codebase's TypeScript 7.0.2/tsgo setup already has a known-fast `npm run typecheck`, benchmark it once; if it's fast (seconds, not tens of seconds) it's reasonable to include at pre-commit — document the decision either way in `CONTRIBUTING.md` |
+| A short "Architecture / Deployment" ADR-style doc entry specifically for the CI/CD decision (host choice, DB choice, deploy trigger mechanism) | PROJECT.md already commits this project to maintaining ADRs; adding one for this milestone's stack choice (which host? why?) is directly aligned with an existing project convention, not a new ask | LOW | Reuses the existing ADR practice — no new documentation format to invent |
+| `npm audit`/dependency vulnerability check as a non-blocking CI step (e.g. `npm audit --audit-level=high` reporting only, not failing the build) | Shows baseline security awareness without over-engineering a full SCA/Dependabot program | LOW | Optional, cheap addition; keep non-blocking (report-only) so a third-party CVE in a dev-dependency doesn't block ship-ability of a portfolio demo |
+| Dependabot (GitHub-native, zero-config) enabled for `npm` ecosystem | GitHub-native automated dependency PRs is a one-file (`dependabot.yml`) addition that reads as "keeps dependencies current" without building any custom tooling | LOW | Native GitHub feature, not a pipeline you build — appropriately scoped differentiator (shows awareness, costs almost nothing) |
 
-### Anti-Features (Would Read as Over-Engineering Here)
+### Anti-Features (Would Read as Overengineered / Resume-Driven for This Project's Scope)
 
-| Feature | Why Requested | Why Problematic (for THIS repo) | Alternative |
-|---------|---------------|----------------------------------|-------------|
-| Husky + lint-staged pre-commit hooks | Genuinely standard on real multi-contributor teams — commonly the first thing people reach for right after "add ESLint." Community sources frame it as "the professional workflow." | With exactly one contributor, there is no one else's commit to catch — the only person a pre-commit hook can block is the author themselves, who already has `npm run lint` one command away. It adds a git-hook installation step (a `prepare` script, `.husky/` directory, onboarding friction for anyone who clones the repo to review it) to solve a problem — "a teammate might skip lint" — that doesn't exist yet in a solo repo. PROJECT.md's own locked scope for this milestone ("local `npm run lint` script only") already signals this exact class of process machinery is meant to wait. | Document `npm run lint` in the README as a required pre-push step; revisit husky/lint-staged only if/when a CI workflow is added in a future milestone (the two pair naturally — CI as the actual enforcement backstop, hooks as a fast local mirror of it — but introducing hooks alone, ahead of CI, front-loads friction without the corresponding benefit). |
-| GitHub Actions CI workflow + status badge | Table stakes on a real team repo, and a badge is a highly visible "this is professional" signal on a README. | **Explicitly out of scope for this milestone per PROJECT.md's own locked decision** ("no GitHub Actions CI — that's a candidate for a future milestone"). Adding it now would both violate the milestone's stated scope and risk turning a "first step" milestone into a much larger one — CI setup for this stack (Next.js + Prisma + Postgres) means also wiring a test database, secrets, and a build step, none of which this milestone's goal calls for. | Leave as the next milestone's explicit target; this milestone's `npm run lint` is correctly framed as the prerequisite for a future CI job to call. |
-| `CONTRIBUTING.md` | Signals "welcoming to contributors," commonly bundled with CI/badge/community-health-file setups; several generic checklists list it as a default open-source hygiene file. | This is a single-author portfolio repo with **no external contributors, past or planned** — a contributor-onboarding guide for zero contributors reads as cargo-culting open-source ritual rather than genuine practice, which is the opposite of the impression this milestone is trying to create. | Fold the small amount of genuinely useful content (how to run lint/tests/build locally) into the README's existing "setup guide" section, which is already a stated CLAUDE.md documentation deliverable — don't create a second file whose entire premise (multiple contributors) doesn't apply. |
-| `typescript-eslint`'s `strict` / `strict-type-checked` config tier | Sounds like the more rigorous, more impressive choice — "strict" is a stronger word than "recommended." | typescript-eslint's own docs describe this tier as "highly opinionated," requiring "strong TypeScript proficiency," and explicitly **not stable under semver** (its rule set can change outside major version bumps) — confirmed via Context7. Turning this on retroactively across a codebase written to `recommended`-level expectations for two prior milestones would surface a large volume of stylistic-opinion violations disconnected from real bugs, right when the milestone's stated goal is a scoped, demonstrable "first step," not a rewrite. Doing this now risks a lint pass so noisy it either gets partially suppressed (undermining the exercise) or balloons the milestone's actual scope. | `eslint-config-next/typescript`'s own default (`recommended`) is the right starting tier; `recommended-type-checked` (see Differentiators) is the correct "more rigorous but still stable and well-trodden" next step, not `strict-type-checked`. |
-| Writing custom ESLint AST rules to fully automate the "no duplicated JSX for near-identical instances" and "comments must explain WHY not WHAT" conventions | Tempting once you've already written 2-3 custom `no-restricted-syntax` rules (see Differentiators) — it can feel like "why not go all the way and automate everything CLAUDE.md documents?" | Both are genuine judgment calls, not mechanical patterns. "Near-identical JSX" requires comparing two hand-authored blocks for semantic (not textual) similarity — CLAUDE.md's own example of this bug (a rotation fix applied to one vessel but not the other) was caught by a human, not tooling, and no off-the-shelf rule detects "these two blocks differ only in vessel-specific values." Whether a comment explains WHY vs. restates WHAT is a natural-language judgment ESLint's AST-based model has no access to. Writing and maintaining bespoke rules for these would itself become an unjustified dependency (a custom rule package to write, test, and keep working across ESLint upgrades) for a benefit — full automation of two judgment-based conventions — a solo repo doesn't need; PR self-review is sufficient at this scale. | Leave both conventions as documented-but-manual in CONVENTIONS/CLAUDE.md, exactly as they are today; catch violations via the same self-review discipline that's already caught them once. `eslint-plugin-sonarjs`'s `no-identical-functions` rule is a *partial*, narrower proxy (catches literally-duplicated function bodies, not "near-identical" hand-varied JSX) — not worth adding as a new dependency for that narrow a slice of the actual convention. |
+Features that are legitimate at larger scale but would actively hurt the "credible, right-sized engineering judgment" signal this milestone is going for — a tech lead reviewing this repo would read these as "doesn't understand proportionality," not "impressive."
 
-## What NOT to Automate — Direct Answer to "Should CLAUDE.md's Conventions Become ESLint Rules?"
+| Feature | Why It Looks Appealing | Why Problematic Here | Alternative |
+|---------|------------------------|-----------------------|-------------|
+| Manual GitHub Actions deploy step (build + push) running *alongside* the host's native Git integration (e.g. Vercel) | Feels like "more pipeline = more DevOps credit" | Produces duplicate builds, race conditions, and doubled build minutes — confirmed as a known anti-pattern; the fix (disabling the host's auto-deploy via `ignoreCommand` in `vercel.json`, or vice versa) is itself evidence the engineer didn't think through the interaction before shipping it | Pick exactly one deploy mechanism: either the host's native Git integration (recommended default for a Next.js-on-Vercel-style host — zero custom deploy code, preview URLs for free) OR a GitHub Actions deploy step with the host's auto-deploy explicitly disabled — never both |
+| Multi-environment staging + production pipeline (separate staging DB, staging URL, promotion gate between them) | Mirrors what "real" companies do, feels senior | This is a solo-authored portfolio project with a single reviewer-facing production instance; a staging environment with no team to protect and no real users to canary against is pure process overhead that will visibly sit unused — a reviewer will notice an empty/never-touched staging environment faster than they'd be impressed by its existence | One production environment; PR preview deployments (via the host's native feature, not hand-built) already cover the "see changes before merge" need without a second persistent environment |
+| Kubernetes / containerized deployment (Docker + k8s manifests + Helm) | Classic "resume-driven development" flag — reads as chasing keywords rather than solving this project's actual deployment problem | A single Next.js app + one Postgres instance has zero orchestration, scaling, or multi-service needs that Kubernetes exists to solve; adding k8s here is the textbook definition of a solution in search of a problem, and a technical interviewer will immediately ask "why does a 2-vessel portfolio app need pod autoscaling?" — a question with no good answer | Any PaaS/serverless-friendly host with native Next.js support (Vercel, Netlify, Railway, Render) — zero infra-as-code needed |
+| Blue-green / canary deployments, traffic-shifting, feature-flag-gated rollout | Sounds like "modern 2026 best practice" (some current-year DevOps content pushes this framing) | This is infrastructure for de-risking deploys to real concurrent user traffic at scale; a portfolio demo with intermittent single-reviewer traffic has no risk profile that justifies it, and building it would visibly not have been "tested" in any real sense | Simple full-replace deploy on merge; rollback via host's one-click "promote a previous deployment" feature is a sufficient, honest answer to "what if a deploy breaks prod" |
+| Custom secret-rotation tooling / a secrets manager (Vault, AWS Secrets Manager, etc.) | Sounds like "security maturity" | For a single `DATABASE_URL` and maybe one or two API keys stored as GitHub Actions secrets + the host's environment variable dashboard, a dedicated secrets-management system is solving an organizational-scale problem (many services, many rotating credentials, compliance requirements) this project doesn't have | GitHub Actions encrypted secrets + host's built-in environment variable store; document rotation as "regenerate the credential, update the two places it's stored" — a one-sentence policy, not a system |
+| A custom-built CI dashboard / Grafana/Prometheus observability stack | Feels like "full DevOps" | Massive overkill for a project whose "operational" surface is one Next.js app and one Postgres instance with no SLA and no on-call — this is the single clearest "resume-driven, didn't right-size to the problem" tell a reviewer would flag | The GitHub Actions tab (workflow history) + the `/api/health` endpoint + the host's own built-in deployment/runtime logs (Vercel/Railway/Render all ship this natively) are sufficient observability for this scope |
+| Matrix build strategy across multiple Node.js versions / OSes | Common CI pattern shown in generic tutorials | This is a single-stack, single-deployment-target app (Next.js only runs where you deploy it — one Node version, one OS). A matrix here tests nothing real; it multiplies CI minutes for zero risk-coverage benefit, since there is no library-consumer audience running arbitrary Node versions against this code | Pin one Node LTS version (matching the deployment host's runtime) in a single job; no matrix needed. (Contrast: matrix strategy earns its keep for published npm packages supporting multiple consumer environments — not the case here.) |
+| Full-repo `tsc --noEmit` + full test suite crammed into the Husky pre-commit hook (not lint-staged-scoped) | Feels like "maximum enforcement" | Multiple independent sources agree this is the most common Husky/lint-staged anti-pattern: slow, ambitious pre-commit hooks train developers to reach for `--no-verify`, which defeats the entire point of having hooks | Keep pre-commit to lint-staged's fast, staged-file-scoped checks (ESLint --fix, maybe Prettier if added); leave full typecheck + full test suite as CI-only gates (already true here — `npm run typecheck`/`npm run test` are the CI job steps, not the hook) |
+| A separate `pre-push` hook running the full test suite, in addition to the CI gate | Sounds like "extra safety layer" | Duplicates work CI already does authoritatively (CI is the real enforcement point since branch protection requires it), while adding local friction on every push — a false sense of thoroughness without new coverage | Skip a pre-push hook entirely; rely on the CI-required-status-check as the single source of truth for "did it pass," matching the "local hooks are fast/staged-only, CI is exhaustive/authoritative" split documented by multiple sources above |
 
-Splitting each of the 4 written conventions by whether the specific claim in each one is mechanically detectable:
+## CD Pattern Decision (Directly Answers the Milestone's Open Design Question)
 
-| Convention (as written in CLAUDE.md) | Automatable slice | Judgment-only slice (stays manual) |
-|---|---|---|
-| Split computation from presentation | File length crossing ~150-200 lines (`max-lines`, as a `warn`) | Whether the *mix* is actually computation+presentation vs. just verbose JSX — needs a human read |
-| No duplicated JSX for near-identical instances | None found that's worth a new dependency | Whether two blocks are "near-identical enough" to warrant extraction — inherently a similarity judgment |
-| No raw CSS as strings in component files | Template-literal-as-`style`/`background-image`/`animation` pattern (`no-restricted-syntax`) | None — this one is fully mechanical, a good candidate |
-| WHY-only comments, no rotting task/plan IDs | Detecting a stale-ID pattern (`Phase \d+`, `REQ-\d+`, etc.) in comment text (`no-restricted-syntax`) | Whether a comment explains WHY vs. restates WHAT — needs a human read |
+Research strongly converges on: **for a Next.js app, prefer the hosting platform's native Git integration (e.g. Vercel's GitHub App) for the actual deploy, and let GitHub Actions own only CI (lint/typecheck/test/build) plus, if a separate production Postgres needs schema sync, a `prisma migrate deploy` step.**
 
-**Recommendation:** convert the two fully-mechanical slices (stale-ID comments, raw-CSS-as-strings) into real custom ESLint rules this milestone — they're low-cost, zero-new-dependency (`no-restricted-syntax` is core ESLint), and directly prevent recurrence of problems this exact milestone found by hand. Use `max-lines` as a soft proxy nudge for the file-length signal. Leave the two judgment-based conventions (near-identical JSX, WHY-vs-WHAT comments) as documented-but-manual — don't chase full automation of conventions that are, by their own nature, human calls.
+- Running a hand-rolled GitHub Actions deploy step *and* leaving the host's native auto-deploy-on-push enabled at the same time is a confirmed, named anti-pattern (duplicate builds, race conditions) — multiple sources agree the fix is to explicitly disable one side (e.g., Vercel's `ignoreCommand` in `vercel.json`, or disabling GitHub Actions deploy in favor of the host).
+- Actions-driven deploy is legitimate specifically when you need "full control over the CI/CD pipeline" or are on GitHub Enterprise Server without native Git integration access — neither applies to a solo GitHub.com portfolio repo, so it's not the right default here.
+- **Recommendation for this project:** if the chosen host (per the separate hosting-platform research) has first-class Next.js Git integration (Vercel is the most likely candidate given Next.js is built by Vercel), use that for the actual "auto-deploy on merge to main" mechanism, and scope the GitHub Actions workflow to CI checks + the `prisma migrate deploy` step (run before or alongside the platform's build, via a documented ordering — e.g., a build hook or a dedicated Actions job gated on CI passing). This satisfies PROJECT.md's "CD means real auto-deploy on merge to main" requirement (the deploy is still automatic and still triggered by the merge) while avoiding the redundant-deploy-step anti-pattern.
+- If the chosen host instead has weak/no native Git integration, a GitHub Actions deploy job becomes the correct (not redundant) choice — this is a genuine either/or decision to make once the hosting platform is selected, not a "always add both" default.
 
 ## Feature Dependencies
 
 ```
-ESLint installed + flat config (eslint.config.mjs)
-    └──requires──> eslint-config-next, eslint-config-next/typescript installed
-                       └──requires──> npm run lint script wired
+GitHub Actions CI (lint+typecheck+test+build)
+    └──requires──> existing npm scripts (lint, typecheck, test, build) — already present, zero new tooling
 
-npm run lint script ──enables──> lint-clean baseline pass (fix existing violations)
-                                      └──enables──> custom no-restricted-syntax rules (stale-ID comments, raw-CSS-strings)
-                                                         (adding these BEFORE the codebase is lint-clean would just add more red to the same pass)
+Branch protection (required status checks)
+    └──requires──> GitHub Actions CI workflow existing and passing at least once
 
-Architecture-boundary rule (no-restricted-imports on src/domain/**) ──independent of──> the rest of the ESLint setup
-    (can be added in the same PR, but doesn't depend on eslint-config-next specifically — it's a plain core-ESLint config block)
+README CI badge
+    └──requires──> GitHub Actions CI workflow committed with a stable workflow file name/path
 
-typescript-eslint recommended-type-checked ──enhances──> the default eslint-config-next/typescript (recommended) tier
-    (optional upgrade, not a prerequisite for anything else in this list)
+CD (auto-deploy on merge to main)
+    └──requires──> hosting platform + production Postgres provider selected (separate research track)
+    └──requires──> GitHub Actions CI passing (deploy should be gated on CI, not parallel/independent)
 
-GitHub Actions CI (future milestone) ──requires──> npm run lint existing and lint-clean
-    (this milestone is explicitly the prerequisite step for that future one, per PROJECT.md)
+prisma migrate deploy (production schema sync)
+    └──requires──> production DATABASE_URL stored as a CI/host secret
+    └──requires──> CD mechanism decided (runs inside whichever pipeline owns the deploy — Actions job or host build hook)
 
-Husky + lint-staged (deferred) ──pairs naturally with, but does not require──> GitHub Actions CI
+/api/health endpoint
+    └──requires──> production DB connection configured (it's checking that exact connection)
+    └──enhances──> CD confidence (a post-deploy smoke check a reviewer or you can hit manually)
+
+Husky + lint-staged pre-commit hook
+    └──requires──> existing ESLint config (already present) — no new lint rules needed
+    └──conflicts with──> stuffing full typecheck/test suite into the same hook (see anti-features)
+
+CONTRIBUTING.md
+    └──enhances──> README (should link out to it, not duplicate its content)
+    └──requires──> Husky/lint-staged setup decided (CONTRIBUTING should document the actual hook behavior, not an aspirational one)
 ```
 
 ### Dependency Notes
 
-- **Lint-clean baseline requires the script to exist first:** you can't declare the codebase "lint-clean" without a way to run the linter — the script wiring and the baseline fix are sequential, not parallel, work within this milestone.
-- **Architecture-boundary enforcement is independent:** because it uses ESLint's own core `no-restricted-imports` rule rather than anything from `eslint-config-next`, it can be added in the same PR as the main setup without waiting on any other piece — there's no reason to sequence it after the Next.js-specific config.
-- **CI (future milestone) depends on this milestone's baseline being clean:** a CI job that runs `npm run lint` on every push is only useful once that command reliably exits 0 on `main` — this milestone is the explicit, correctly-ordered prerequisite PROJECT.md already frames it as.
+- **CD requires hosting platform selection first:** the CD mechanism (host-native Git integration vs. Actions-driven deploy) cannot be locked until the host is chosen — this is explicitly a research-then-decide item per PROJECT.md's locked decision ("hosting platform and Postgres provider are not pre-decided").
+- **`prisma migrate deploy` requires CD mechanism decided:** whether this step lives inside a GitHub Actions job or a host build-hook/command depends on which side owns the deploy trigger.
+- **CONTRIBUTING.md should be written after (or alongside) Husky/lint-staged, not before:** documenting hook behavior that doesn't match the shipped hook is worse than no documentation — sequence this file's pre-commit section last among the milestone's phases, or plan to revisit it once hooks are final.
+- **Branch protection conflicts with nothing but must not be skipped:** it's the one item on the table-stakes list that's pure GitHub configuration (no code, no PR) — worth calling out explicitly in the roadmap/requirements so it isn't silently dropped as "not a coding task."
+
+## CONTRIBUTING.md Table-Stakes Section Breakdown
+
+For a solo-authored-but-portfolio-quality repo, the file should be genuine (matches what actually happens in this repo) rather than a generic open-source boilerplate copy. Recommended sections, in order:
+
+1. **Intro/welcome** — one or two sentences: what this project is, that it's a portfolio project with a single maintainer, and what kind of contributions are realistically welcome (bug reports, small fixes, discussion — not large feature PRs from strangers, given the locked scope-discipline constraint in PROJECT.md)
+2. **Development environment setup** — link to README's existing setup instructions rather than duplicating them; add anything CONTRIBUTING-specific (e.g. how to get a local Postgres instance running against Prisma migrations)
+3. **Running checks locally** — the exact commands (`npm run lint`, `npm run typecheck`, `npm run test`, `npm run build`) a contributor should run before opening a PR — these are the same commands CI runs, stated explicitly so the loop is legible
+4. **Pre-commit hook behavior** — a short, accurate paragraph on what Husky/lint-staged actually does on `git commit` (which files, which checks) — written to match what's actually configured, not aspirational
+5. **Branch and commit conventions** — restates PROJECT.md's existing constraint ("feature branches, small logical conventional commits") so it's discoverable without reading internal planning docs
+6. **PR expectations** — what CI must pass before merge (branch protection), and an honest note on response time given single-maintainer reality (e.g. "reviewed on a best-effort basis")
+7. **Code style / architecture boundaries** — a pointer to the `src/domain/` architectural boundary (lint-enforced per v1.2) so a contributor understands the DDD-lite separation before touching domain code
+8. **Reporting bugs / requesting features** — standard GitHub issue-template pointer, kept lightweight
 
 ## MVP Definition
 
-### Launch With (this milestone)
+### Launch With (v1.3 — this milestone)
 
-- [ ] ESLint + `eslint-config-next` + `eslint-config-next/typescript`, flat config (`eslint.config.mjs`) — the entire premise of the milestone
-- [ ] `npm run lint` script in `package.json`, documented in README alongside existing scripts
-- [ ] Stale `eslint` key removed from `next.config.ts` if present (Next.js 16 no longer uses it)
-- [ ] Lint-clean baseline: zero errors on `npm run lint` after fixing existing known violations (deprecated Tailwind classes, etc.)
-- [ ] Architecture-boundary rule (`no-restricted-imports`, `src/domain/**` scope) — highest-signal differentiator, low cost, directly enforces an already-documented "hard rule"
-- [ ] Custom `no-restricted-syntax` rules for stale task/plan/REQ-ID comment patterns and raw-CSS-as-template-literal patterns — cheap, zero-new-dependency, prevents recurrence of exactly what this milestone is manually cleaning up
-- [ ] `max-lines` as a `warn`-level proxy nudge, tied to the same refactor sweep this milestone already scopes
+Minimum viable CI/CD signal for a portfolio DevOps showcase — everything here maps directly to PROJECT.md's stated target features.
 
-### Add After Validation (candidate for later in this same milestone, if time allows)
+- [ ] GitHub Actions CI: lint + typecheck + test + build on PR + push-to-main, with branch protection requiring it — this IS the "CI exists and is enforced" signal
+- [ ] README CI status badge — near-zero cost, universally expected
+- [ ] CD: auto-deploy to production on merge to `main`, via whichever mechanism (host-native or Actions) fits the selected hosting platform, with the redundant-dual-deploy anti-pattern explicitly avoided
+- [ ] `prisma migrate deploy` wired into the deploy path against the production Postgres instance
+- [ ] A minimal `/api/health` endpoint doing a real DB connectivity check — the honest, low-cost "is it actually working" signal for a live-linked portfolio deployment
+- [ ] Husky + lint-staged pre-commit hook (ESLint on staged files) — reuses existing lint config
+- [ ] `CONTRIBUTING.md` covering: intro/welcome, dev environment setup (link to README if duplicated), how to run tests/lint/typecheck locally, branch/commit conventions (matches PROJECT.md's existing "feature branches, small logical conventional commits" constraint), PR expectations, and a note on the pre-commit hook behavior
 
-- [ ] `typescript-eslint` `recommended-type-checked` tier — real value, but wire it after the base setup is lint-clean, since typed linting will surface additional, possibly-noisier findings on top of the base pass
-- [ ] `.editorconfig` — trivial to add whenever, no dependency ordering concern
-- [ ] README "Linting & Code Quality" section tying tooling back to CLAUDE.md's documented conventions
+### Add After Validation (not required for milestone completion, cheap to add if time allows)
 
-### Future Consideration (explicitly deferred, not this milestone)
+- [ ] Dependabot config for `npm` ecosystem — one file, GitHub-native, no custom code
+- [ ] `npm audit` as a non-blocking, report-only CI step
+- [ ] A short ADR entry documenting the CD mechanism decision (host-native vs. Actions) and why
 
-- [ ] GitHub Actions CI workflow (+ status badge) — PROJECT.md's own locked decision defers this
-- [ ] Husky + lint-staged pre-commit hooks — defer until/unless CI is added; premature without it for a solo repo
-- [ ] Prettier repo-wide reformat — if pursued at all, scope to new/touched files only, never a blanket reformat commit
-- [ ] `strict-type-checked` — reconsider only if a future milestone is an intentional "raise the bar" rewrite pass, not a first-pass setup
+### Future Consideration (explicitly out of scope — do not build this milestone)
+
+- [ ] Staging environment / multi-env promotion pipeline — no team, no real users, no canary need at this scale
+- [ ] Kubernetes / Docker orchestration — no multi-service or scaling problem this solves
+- [ ] Blue-green/canary/traffic-shifting deploys — de-risking infra for traffic patterns this portfolio app doesn't have
+- [ ] Dedicated secrets-management system (Vault, etc.) — GitHub Actions secrets + host env vars are sufficient for ~2-3 credentials
+- [ ] Custom observability stack (Grafana/Prometheus) — the host's own deployment logs + `/api/health` cover this scope
+- [ ] Matrix build strategy across Node versions/OSes — single deployment target, no multi-environment consumer audience
 
 ## Feature Prioritization Matrix
 
-| Feature | Reviewer-Visible Value | Implementation Cost | Priority |
+| Feature | Reviewer-Signal Value | Implementation Cost | Priority |
 |---------|------------------------|----------------------|----------|
-| ESLint + Next.js/TS config + `npm run lint` | HIGH | LOW | P1 |
-| Lint-clean baseline (fix existing violations) | HIGH | MEDIUM | P1 |
-| Architecture-boundary `no-restricted-imports` rule | HIGH | LOW–MEDIUM | P1 |
-| Custom `no-restricted-syntax` (stale IDs, raw CSS strings) | MEDIUM–HIGH | LOW | P1 |
-| `max-lines` proxy for file-length convention | MEDIUM | LOW | P2 |
-| `recommended-type-checked` upgrade | MEDIUM | MEDIUM | P2 |
-| `.editorconfig` | LOW | LOW | P2 |
-| README lint/quality section | MEDIUM | LOW | P2 |
-| Prettier (scoped, non-blanket) | LOW–MEDIUM | MEDIUM | P3 |
-| GitHub Actions CI + badge | HIGH (but deferred) | MEDIUM | P3 (future milestone) |
-| Husky + lint-staged | LOW (solo repo) | LOW | P3 (defer) |
-| CONTRIBUTING.md | LOW (no contributors) | LOW | Do not build |
-| `strict-type-checked` | LOW (risk > payoff now) | HIGH | Do not build (this milestone) |
+| GitHub Actions CI (lint/typecheck/test/build) + branch protection | HIGH | LOW | P1 |
+| README CI badge | MEDIUM | LOW | P1 |
+| CD auto-deploy on merge to main | HIGH | LOW–MEDIUM (depends on host choice) | P1 |
+| `prisma migrate deploy` in deploy path | HIGH (backs the "real production DB" claim) | MEDIUM | P1 |
+| `/api/health` endpoint | MEDIUM | LOW | P1 |
+| Husky + lint-staged | MEDIUM | LOW | P1 |
+| `CONTRIBUTING.md` | MEDIUM | LOW | P1 |
+| Dependabot | LOW–MEDIUM | LOW | P2 |
+| `npm audit` (non-blocking) | LOW | LOW | P2 |
+| CD-decision ADR entry | MEDIUM (judgment signal) | LOW | P2 |
+| Staging environment, k8s, canary, secrets manager, observability stack | NEGATIVE (reads as overengineering) | HIGH | Do not build |
 
 **Priority key:**
-- P1: Must have for this milestone to credibly close its own stated goal
-- P2: Should have if time allows within this milestone; genuine value, no urgency
-- P3: Correctly deferred to a future milestone or an explicit non-goal
+- P1: Must have for this milestone's stated goal
+- P2: Should have, low-cost polish if time allows
+- Do not build: explicitly flagged anti-features for this project's scope
 
 ## Sources
 
-- [Next.js: ESLint Plugin config reference](https://nextjs.org/docs/app/api-reference/config/eslint) — official docs, confirms Next.js 16 removed `next lint`, flat-config setup steps, `eslint-config-next`/`eslint-config-next/typescript`/`eslint-config-next/core-web-vitals` package boundaries, and the `eslint-config-prettier`/lint-staged integration recipes. HIGH confidence (official, dated `lastUpdated: 2025-11-10`, version-pinned to 16.2.10 matching this project's locked Next.js version).
-- Context7 `/typescript-eslint/typescript-eslint` — `recommended` / `recommended-type-checked` / `strict` / `strict-type-checked` tier definitions and stability guidance (`strict-type-checked` explicitly "not stable under Semantic Versioning"). HIGH confidence (official monorepo docs via Context7).
-- [eslint-plugin-tailwindcss (npm)](https://www.npmjs.com/package/eslint-plugin-tailwindcss) / [poupe-ui/eslint-plugin-tailwindcss](https://github.com/poupe-ui/eslint-plugin-tailwindcss) / [oxlint-tailwindcss writeup](https://sergioazocar.com/en/blog/oxlint-tailwindcss-the-linting-plugin-tailwind-v4-needed/) — confirms Tailwind v4 ESLint-plugin support is partial/fragmented across several competing community packages as of this research; treat any Tailwind-specific lint plugin choice as its own small research question if pursued, not a drop-in decision. MEDIUM confidence (community sources, no single authoritative "official Tailwind ESLint plugin").
-- WebSearch: "solo developer portfolio repo ESLint pre-commit hooks husky lint-staged" — cross-section of community writeups (Olivia Coumans, Built In, DEV Community, PkgPulse) converging on: lint-staged's value proposition is specifically fast checks on *other people's* staged files in a team; for a solo repo the enforcement benefit is much weaker. MEDIUM confidence (multiple independent sources agree, no single authoritative source since this is a project-context judgment, not a documented fact).
-- WebSearch: "CONTRIBUTING.md solo portfolio project" — GitHub's own community-health-file guidance and Open Source Guides both frame CONTRIBUTING.md as existing specifically to onboard *external* contributors; converges with the anti-feature reasoning above. MEDIUM confidence.
-- WebSearch: "eslint no-restricted-imports / eslint-plugin-boundaries architecture enforcement" — confirms `no-restricted-imports` is a core, zero-dependency ESLint rule sufficient for this project's scale, and that `eslint-plugin-boundaries`/monorepo-oriented tools exist but target a larger scale than this project's ~3-layer single package. MEDIUM-HIGH confidence (ESLint's own core-rules docs plus multiple independent architecture-enforcement writeups agree on the pattern).
+- [GitHub Docs: Adding a workflow status badge](https://docs.github.com/en/actions/how-tos/monitor-workflows/add-a-status-badge) — HIGH confidence, official docs, badge syntax and branch-scoping confirmed
+- [Vercel Knowledge Base: How can I use GitHub Actions with Vercel?](https://vercel.com/kb/guide/how-can-i-use-github-actions-with-vercel) — HIGH confidence, official Vercel documentation on when Actions-driven deploy is/isn't appropriate alongside native Git integration
+- [Vercel Docs: Deploying GitHub Projects with Vercel](https://vercel.com/docs/git/vercel-for-github) — HIGH confidence, official docs on native Git integration behavior
+- [The perfect Vercel + GitHub Actions deployment pipeline — Aaron Francis](https://aaronfrancis.com/2021/the-perfect-vercel-github-actions-deployment-pipeline-faa0d4ac) — MEDIUM confidence, single well-regarded community source, cross-checked against Vercel's own docs on the redundancy/`ignoreCommand` pattern
+- [Prisma Docs: Deploying database changes with Prisma Migrate](https://www.prisma.io/docs/orm/prisma-client/deployment/deploy-database-changes-with-prisma-migrate) — HIGH confidence, official Prisma documentation, `migrate deploy` CI/CD pattern and advisory-locking behavior
+- [Prisma Docs: Development and production workflows](https://www.prisma.io/docs/orm/prisma-migrate/workflows/development-and-production) — HIGH confidence, official docs
+- [prisma/prisma GitHub Discussion #11131: Prisma Migrate and CI/CD](https://github.com/prisma/prisma/discussions/11131) — MEDIUM confidence, first-party repo discussion, corroborates official docs pattern
+- [Better Stack: Prevent Bad Commits with Husky and lint-staged](https://betterstack.com/community/guides/scaling-nodejs/husky-and-lint-staged/) — MEDIUM-HIGH confidence, detailed community guide, consistent with multiple other sources on pre-commit/CI division
+- [Furkan Baytekin: Pre-Commit Hooks — Husky vs Native Git Hooks](https://furkanbaytekin.dev/blogs/pre-commit-hooks-husky-vs-native-git-hooks-for-clean-commits) — MEDIUM confidence, corroborates the "keep pre-commit fast/staged-only" consensus
+- [Contributing.md: How to Build a CONTRIBUTING.md - Best Practices](https://contributing.md/how-to-build-contributing-md/) — MEDIUM confidence, widely-cited community reference for CONTRIBUTING.md structure
+- [The Good Docs Project: About the Contributing Guide Template](https://www.thegooddocsproject.dev/template/contributing-guide) — MEDIUM-HIGH confidence, structured open-source documentation template project
+- [Nurbak: Next.js Health Check — Complete Guide to /api/health](https://nurbak.com/en/blog/how-to-add-health-checks-nextjs-app/) — MEDIUM confidence, single source but internally consistent (200/503, no-cache, SELECT 1 pattern) with general health-check conventions across other sources
+- [DEV Community / FullStackData Solutions: How to Add TypeCheck, Lint, Tests, and Build to Every PR with Husky and GitHub Actions](https://fullstackdatasolutions.com/blog/artificial-intelligence/cicd-pr-pipeline) — MEDIUM confidence, corroborates the standard lint+typecheck+test+build CI shape
+- Existing `package.json` (read directly from repo) — HIGH confidence, ground truth for already-present `lint`/`typecheck`/`test`/`build` scripts this CI pipeline wires up
+- `.planning/PROJECT.md` — HIGH confidence, ground truth for locked scope, locked CD definition, and existing carried-forward requirement IDs (CI-01, HOOKS-01, DOCS-CONTRIB-01)
 
 ---
-*Feature research for: v1.2 Tech Debt & Stabilization milestone, COLREGS Navigator*
-*Researched: 2026-07-19*
+*Feature research for: CI/CD, pre-commit hooks, and deployment for a portfolio full-stack project (v1.3 milestone)*
+*Researched: 2026-07-20*
