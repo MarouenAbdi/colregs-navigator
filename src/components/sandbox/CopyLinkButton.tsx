@@ -3,7 +3,7 @@
 /**
  * CopyLinkButton -- small affordance next to the /s/[shareId] banner that
  * copies the current page URL to the clipboard. Restyled to an icon-only
- * outline button matching the rest of Phase 8's dark palette; clipboard
+ * outline button matching the rest of the Sandbox's dark palette; clipboard
  * logic is unchanged.
  */
 

@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
 /**
- * ChartPanel render + doubt-overlay tests (04-03 Task 3).
+ * ChartPanel render + doubt-overlay tests.
  *
  * jsdom does not implement `ResizeObserver` or the Pointer Capture methods
  * (`setPointerCapture`/`hasPointerCapture`/`releasePointerCapture`) that
  * ChartPanel/useHullDrag/useRotateHandleDrag call directly, per the
- * project's own (correct, non-defensive) production code -- see
- * `04-RESEARCH.md`'s Standard Pointer-Events pattern. This file installs
+ * project's own (correct, non-defensive) production code -- see this
+ * project's own jsdom-polyfill pattern for ResizeObserver/Pointer-Capture,
+ * used consistently across every Sandbox component test. This file installs
  * minimal test-only polyfills for both so the component can render and be
  * drag-tested under jsdom without weakening the production implementation.
  */
@@ -82,7 +83,7 @@ describe("ChartPanel", () => {
   });
 
   it("gives the decorative letter/role-badge overlay pointer-events:none so it never shadows the hull's own drag hit-target underneath it", () => {
-    // Regression test for a real hit-testing dead zone (code review CR-01):
+    // Regression test for a real hit-testing dead zone found via manual code review:
     // at heading 0 (this app's default seed), the non-rotating badge's
     // painted rect geometrically overlapped ~45px^2 of the hull polygon's
     // own painted area. Without pointer-events:none, an unhandled solid
