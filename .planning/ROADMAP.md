@@ -33,7 +33,7 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full phase details (goals, succes
 
 - [x] **Phase 10: ESLint Setup & Lint-Clean Baseline** - Install ESLint (flat config), wire `npm run lint`, and reach a lint-clean baseline with architecture-boundary and convention-enforcing custom rules (completed 2026-07-19)
 - [x] **Phase 11: Tailwind Deprecated Class-Name Fixes** - Replace deprecated Tailwind v3 class names with v4 canonical equivalents in the 6 flagged files, verified by hand (completed 2026-07-19)
-- [ ] **Phase 12: ChartPanel/SandboxContainer Decomposition Refactor** - Decompose the two oversized Sandbox files into focused modules, preserving all existing behavior and hit-testing
+- [x] **Phase 12: ChartPanel/SandboxContainer Decomposition Refactor** - Decompose the two oversized Sandbox files into focused modules, preserving all existing behavior and hit-testing (completed 2026-07-20)
 - [ ] **Phase 13: Comment Cleanup** - Rewrite stale Phase/Plan/REQ-ID comment references by hand, preserving substantive WHY content
 
 ## Phase Details
@@ -104,7 +104,7 @@ Plans:
   4. `VesselGroup.tsx` (hull polygon, rotate-handle circle, `pointerEvents="none"` badge overlay) is extracted as one atomic unit; dragging and rotating both vessels at heading 0 in a real browser shows no hit-testing regression, confirmed by both the point-in-polygon regression check and manual testing.
   5. Both `ChartPanel.tsx` and `SandboxContainer.tsx` land under the project's ~150-200 line convention, and the full existing Vitest/RTL suite passes with only import-path updates (no behavior-driven test changes).
 
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 Plans:
 **Wave 1**
 
@@ -117,7 +117,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion — VesselGroup.tsx lands last per D-03)*
 
-- [ ] 12-04-PLAN.md — Extract VesselGroup.tsx (byte-for-byte), DOM-order regression test, human drag/rotate verification (RFCT-06)
+- [x] 12-04-PLAN.md — Extract VesselGroup.tsx (byte-for-byte), DOM-order regression test, human drag/rotate verification (RFCT-06)
 
 ### Phase 13: Comment Cleanup
 
@@ -146,5 +146,5 @@ Phases execute in numeric order: 10 → 11 → 12 → 13
 | 9. Gallery | v1.1 | 4/4 | Complete | 2026-07-19 |
 | 10. ESLint Setup & Lint-Clean Baseline | v1.2 | 3/3 | Complete    | 2026-07-19 |
 | 11. Tailwind Deprecated Class-Name Fixes | v1.2 | 3/3 | Complete    | 2026-07-20 |
-| 12. ChartPanel/SandboxContainer Decomposition Refactor | v1.2 | 3/4 | In Progress|  |
+| 12. ChartPanel/SandboxContainer Decomposition Refactor | v1.2 | 4/4 | Complete   | 2026-07-20 |
 | 13. Comment Cleanup | v1.2 | 0/TBD | Not started | - |
