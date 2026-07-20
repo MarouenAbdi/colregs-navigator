@@ -1,5 +1,6 @@
 # COLREGS Navigator
 
+<!-- ci-verify/14-02: scratch commit to trigger a real CI run against a live PR, reverted on close -->
 <!-- This repo is currently private -- the badge and linked workflow runs are only visible to accounts with repo read access (branch-protection/rulesets require a public repo or GitHub Pro on the Free plan, confirmed live via `gh api` at planning time). -->
 [![CI](https://github.com/MarouenAbdi/colregs-navigator/actions/workflows/ci.yml/badge.svg)](https://github.com/MarouenAbdi/colregs-navigator/actions/workflows/ci.yml)
 
