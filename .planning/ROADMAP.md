@@ -33,7 +33,7 @@ See `.planning/milestones/v1.1-ROADMAP.md` for full phase details (goals, succes
 
 - [x] **Phase 10: ESLint Setup & Lint-Clean Baseline** - Install ESLint (flat config), wire `npm run lint`, and reach a lint-clean baseline with architecture-boundary and convention-enforcing custom rules (completed 2026-07-19)
 - [x] **Phase 11: Tailwind Deprecated Class-Name Fixes** - Replace deprecated Tailwind v3 class names with v4 canonical equivalents in the 6 flagged files, verified by hand (completed 2026-07-19)
-- [ ] **Phase 12: ChartPanel/SandboxContainer Decomposition Refactor** - Decompose the two oversized Sandbox files into focused modules, preserving all existing behavior and hit-testing
+- [x] **Phase 12: ChartPanel/SandboxContainer Decomposition Refactor** - Decompose the two oversized Sandbox files into focused modules, preserving all existing behavior and hit-testing (completed 2026-07-20)
 - [ ] **Phase 13: Comment Cleanup** - Rewrite stale Phase/Plan/REQ-ID comment references by hand, preserving substantive WHY content
 
 ## Phase Details
@@ -104,7 +104,20 @@ Plans:
   4. `VesselGroup.tsx` (hull polygon, rotate-handle circle, `pointerEvents="none"` badge overlay) is extracted as one atomic unit; dragging and rotating both vessels at heading 0 in a real browser shows no hit-testing regression, confirmed by both the point-in-polygon regression check and manual testing.
   5. Both `ChartPanel.tsx` and `SandboxContainer.tsx` land under the project's ~150-200 line convention, and the full existing Vitest/RTL suite passes with only import-path updates (no behavior-driven test changes).
 
-**Plans**: TBD
+**Plans:** 4/4 plans complete
+Plans:
+**Wave 1**
+
+- [x] 12-01-PLAN.md — Extract chart-panel-geometry.ts + chart-panel-derivation.ts from ChartPanel.tsx (D-01 dedup)
+- [x] 12-02-PLAN.md — Extract useSandboxState() hook from SandboxContainer.tsx
+
+**Wave 2** *(blocked on Wave 1 completion — shares ChartPanel.tsx with 12-01)*
+
+- [x] 12-03-PLAN.md — Extract useContainerSize() hook + ChartBackdrop.tsx from ChartPanel.tsx
+
+**Wave 3** *(blocked on Wave 2 completion — VesselGroup.tsx lands last per D-03)*
+
+- [x] 12-04-PLAN.md — Extract VesselGroup.tsx (byte-for-byte), DOM-order regression test, human drag/rotate verification (RFCT-06)
 
 ### Phase 13: Comment Cleanup
 
@@ -117,7 +130,24 @@ Plans:
   2. Every rewritten comment retains its full substantive WHY explanation — reviewed diff shows only identifier removal, no loss of reasoning.
   3. The broader re-grep pass is documented as having been run, confirming the original scoping count was not treated as exhaustive.
 
-**Plans**: TBD
+**Plans:** 0/8 plans complete
+Plans:
+**Wave 1**
+
+- [ ] 13-01-PLAN.md — Rewrite stale comments in src/domain/geometry/ + src/domain/shared/ (9 files)
+- [ ] 13-02-PLAN.md — Rewrite stale comments in src/domain/colregs/ (10 files)
+- [ ] 13-03-PLAN.md — Rewrite stale comments in src/server/ + tRPC-adjacent files (9 files)
+- [ ] 13-04-PLAN.md — Rewrite stale comments in Sandbox cluster A: ChartPanel/ControlPanel/InstrumentReadouts/ReasoningTrail/VerdictBanner (12 files)
+- [ ] 13-05-PLAN.md — Rewrite stale comments in Sandbox cluster B: SandboxContainer state + drag hooks (9 files)
+- [ ] 13-06-PLAN.md — Rewrite stale comments in Hero/Gallery/shared/layout (14 files)
+
+**Wave 2** *(blocked on Wave 1 completion — touches files 13-06 also modifies)*
+
+- [ ] 13-07-PLAN.md — Broader re-grep (CMNT-02): rewrite describe()/it() test-name string literals embedding stale IDs (7 files)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 13-08-PLAN.md — Final verification: re-run strict + broader grep sweeps, prune eslint-suppressions.json, full-suite regression check, human sign-off
 
 ## Progress
 
@@ -133,5 +163,5 @@ Phases execute in numeric order: 10 → 11 → 12 → 13
 | 9. Gallery | v1.1 | 4/4 | Complete | 2026-07-19 |
 | 10. ESLint Setup & Lint-Clean Baseline | v1.2 | 3/3 | Complete    | 2026-07-19 |
 | 11. Tailwind Deprecated Class-Name Fixes | v1.2 | 3/3 | Complete    | 2026-07-20 |
-| 12. ChartPanel/SandboxContainer Decomposition Refactor | v1.2 | 0/TBD | Not started | - |
-| 13. Comment Cleanup | v1.2 | 0/TBD | Not started | - |
+| 12. ChartPanel/SandboxContainer Decomposition Refactor | v1.2 | 4/4 | Complete   | 2026-07-20 |
+| 13. Comment Cleanup | v1.2 | 0/8 | Not started | - |

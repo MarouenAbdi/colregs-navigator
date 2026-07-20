@@ -27,14 +27,14 @@ This milestone is a tech-debt/hygiene milestone, not a new-feature milestone. No
 
 ### Sandbox Refactor
 
-- [ ] **RFCT-01**: `ChartPanel.tsx`'s pure geometry constants, `wedgePath()`, and `buildGridLineSegments()` are extracted into `chart-panel-geometry.ts`, following the same pure-module pattern already proven in `hero-preview-geometry.ts`/`static-chart-geometry.ts`, with zero behavior change
-- [ ] **RFCT-02**: `ChartPanel.tsx`'s per-render derivation logic is extracted into a `deriveChartOverlayState()` function in `chart-panel-derivation.ts`
-- [ ] **RFCT-03**: Decorative chart chrome and resize observation are extracted into `ChartBackdrop.tsx` and `hooks/useContainerSize.ts`
-- [ ] **RFCT-04**: `SandboxContainer.tsx`'s state machine (`applyVesselUpdate`, chip/reset/save handlers) is extracted into a `useSandboxState()` hook, preserving Rule 13(d) hysteresis behavior exactly
-- [ ] **RFCT-05**: `VesselGroup.tsx` (hull polygon, rotate-handle circle, and the `pointerEvents="none"` badge overlay) is extracted last, as a single verbatim cut-paste — this exact code has caused two prior hit-testing regressions in this project (Phase 4, Phase 8), so it is moved as one atomic unit, not incrementally rewritten
-- [ ] **RFCT-06**: Zero regression to drag-to-reposition/drag-to-rotate hit-testing behavior after the `VesselGroup.tsx` extraction, verified via the existing point-in-polygon regression check plus manual drag/rotate testing of both vessels at heading 0 in a real browser
-- [ ] **RFCT-07**: `ChartPanel.tsx` and `SandboxContainer.tsx` both land under this project's established ~150-200 line file-length convention after extraction
-- [ ] **RFCT-08**: All existing Vitest/RTL tests continue passing, updated only for import-path changes where files moved — not for behavior changes
+- [x] **RFCT-01**: `ChartPanel.tsx`'s pure geometry constants, `wedgePath()`, and `buildGridLineSegments()` are extracted into `chart-panel-geometry.ts`, following the same pure-module pattern already proven in `hero-preview-geometry.ts`/`static-chart-geometry.ts`, with zero behavior change
+- [x] **RFCT-02**: `ChartPanel.tsx`'s per-render derivation logic is extracted into a `deriveChartOverlayState()` function in `chart-panel-derivation.ts`
+- [x] **RFCT-03**: Decorative chart chrome and resize observation are extracted into `ChartBackdrop.tsx` and `hooks/useContainerSize.ts`
+- [x] **RFCT-04**: `SandboxContainer.tsx`'s state machine (`applyVesselUpdate`, chip/reset/save handlers) is extracted into a `useSandboxState()` hook, preserving Rule 13(d) hysteresis behavior exactly
+- [x] **RFCT-05**: `VesselGroup.tsx` (hull polygon, rotate-handle circle, and the `pointerEvents="none"` badge overlay) is extracted last, as a single verbatim cut-paste — this exact code has caused two prior hit-testing regressions in this project (Phase 4, Phase 8), so it is moved as one atomic unit, not incrementally rewritten
+- [x] **RFCT-06**: Zero regression to drag-to-reposition/drag-to-rotate hit-testing behavior after the `VesselGroup.tsx` extraction, verified via the existing point-in-polygon regression check plus manual drag/rotate testing of both vessels at heading 0 in a real browser
+- [x] **RFCT-07**: `ChartPanel.tsx` and `SandboxContainer.tsx` both land under this project's established ~150-200 line file-length convention after extraction
+- [x] **RFCT-08**: All existing Vitest/RTL tests continue passing, updated only for import-path changes where files moved — not for behavior changes
 
 ### Comment Cleanup
 
@@ -83,14 +83,14 @@ Populated by roadmap creation.
 | TWFX-02 | Phase 11 | Complete |
 | TWFX-03 | Phase 11 | Complete |
 | TWFX-04 | Phase 11 | Complete |
-| RFCT-01 | Phase 12 | Pending |
-| RFCT-02 | Phase 12 | Pending |
-| RFCT-03 | Phase 12 | Pending |
-| RFCT-04 | Phase 12 | Pending |
-| RFCT-05 | Phase 12 | Pending |
-| RFCT-06 | Phase 12 | Pending |
-| RFCT-07 | Phase 12 | Pending |
-| RFCT-08 | Phase 12 | Pending |
+| RFCT-01 | Phase 12 | Complete |
+| RFCT-02 | Phase 12 | Complete |
+| RFCT-03 | Phase 12 | Complete |
+| RFCT-04 | Phase 12 | Complete |
+| RFCT-05 | Phase 12 | Complete |
+| RFCT-06 | Phase 12 | Complete |
+| RFCT-07 | Phase 12 | Complete |
+| RFCT-08 | Phase 12 | Complete |
 | CMNT-01 | Phase 13 | Pending |
 | CMNT-02 | Phase 13 | Pending |
 

@@ -96,6 +96,24 @@ describe("ChartPanel", () => {
     expect(overlayGroup?.getAttribute("pointer-events")).toBe("none");
   });
 
+  it("keeps the rotating hull/rotate-handle group before the non-rotating badge overlay group in document order", () => {
+    // DOM-order regression assertion, belt-and-suspenders alongside the
+    // pointer-events:none test above: the rotating `<g transform=
+    // "rotate(...)">` group (hull + rotate handle) MUST remain the first
+    // child so the non-rotating `pointer-events: none` badge overlay group
+    // stays its later sibling -- the exact source order the hit-testing
+    // regression fix above depends on.
+    const { container } = renderChartPanel();
+    const badgeText = within(container).getByText("GW");
+    const overlayGroup = badgeText.closest("g[pointer-events]");
+    const rotatingGroup = container.querySelector('g[transform^="rotate("]');
+    expect(overlayGroup).not.toBeNull();
+    expect(rotatingGroup).not.toBeNull();
+    expect(
+      overlayGroup!.compareDocumentPosition(rotatingGroup!) & Node.DOCUMENT_POSITION_PRECEDING,
+    ).toBeTruthy();
+  });
+
   it("renders the bearing line dashed amber when doubtBoundary is near-head-on-boundary", () => {
     const { vesselA, vesselB } = headOnBoundaryInclusiveCase;
     const result = classifyEncounter(vesselA, vesselB);
