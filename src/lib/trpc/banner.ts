@@ -1,6 +1,6 @@
 /**
  * buildScenarioBanner -- pure helper deriving the banner label/rationale
- * shown by SandboxContainer (05-03's `banner` prop) from a fetched
+ * shown by SandboxContainer (the `banner` prop) from a fetched
  * ScenarioRow's `isCurated`/`rationale` fields (D-02).
  *
  * Curated rows with a rationale get the gallery-specific label + rationale
