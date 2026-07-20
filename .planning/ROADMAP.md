@@ -55,6 +55,7 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details (goals, succes
 **Depends on**: Phase 13 (last completed phase; no code dependency — this is the first phase of v1.3)
 **Requirements**: CI-01, CI-02, CI-03, CI-04, CI-05, CI-06, CD-01, CD-02, HOOKS-01, DOCS-CONTRIB-01
 **Success Criteria** (what must be TRUE):
+
   1. Opening a PR with a lint, typecheck, test, or build failure shows a red required status check that blocks merging into `main` (CI-01, CI-05)
   2. The CI test job runs against a real Postgres instance by reusing the existing `docker-compose.yml` config, with no separate/duplicated DB service definition (CI-02)
   3. A fresh clone followed by `npm ci` succeeds without any manual `prisma generate` step, and local dev, CI, and the deploy script all resolve the same Node version from a committed `.nvmrc` (CI-03, CI-04)
@@ -62,11 +63,20 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details (goals, succes
   5. Committing a staged file with a lint violation triggers Husky + lint-staged to auto-fix it before the commit completes, while the full typecheck/test suite runs in CI only, not pre-commit (HOOKS-01)
   6. `CONTRIBUTING.md` documents setup, running checks locally, the real (not aspirational) pre-commit hook behavior, branch/commit conventions, PR expectations, and a rollback note (DOCS-CONTRIB-01)
   7. The deploy script/workflow is fully authored — Prisma client generation, an environment-gated `prisma migrate deploy` (production builds only, never PR previews), and the mandatory `next build --webpack` flag — and ready to execute the moment a real host is provisioned in Phase 15 (CD-01, CD-02 wiring; live verification deferred to Phase 15)
+
 **Plans**: 4 plans
 Plans:
+**Wave 1**
+
 - [ ] 14-01-PLAN.md — CI pipeline foundation (.nvmrc, postinstall prisma generate, ci.yml with lint/typecheck/test/build jobs reusing docker-compose.yml, README CI badge)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 14-02-PLAN.md — Trigger a real CI run against a live PR; branch protection decision + configuration for CI-05
 - [ ] 14-03-PLAN.md — Husky + lint-staged pre-commit hooks (staged eslint --fix, .env* guard) and CONTRIBUTING.md
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 14-04-PLAN.md — Environment-gated vercel-build deploy script (prisma generate -> gated migrate deploy -> next build --webpack), locally verified
 
 ### Phase 15: Deploy & Verify
@@ -75,6 +85,7 @@ Plans:
 **Depends on**: Phase 14 (CI pipeline must be green and the deploy script must already be authored/wired before the first real deploy is attempted)
 **Requirements**: DEPLOY-01, DEPLOY-02, DEPLOY-03, HEALTH-01, HEALTH-02, HEALTH-03, HEALTH-04
 **Success Criteria** (what must be TRUE):
+
   1. The app is reachable at a real, public Vercel production URL (DEPLOY-01)
   2. Production Postgres (Neon) is provisioned and wired to the app via Phase 14's deploy script, with migrations applied against it (DEPLOY-02, exercises CD-01/CD-02 live for the first time)
   3. Every environment variable listed in `.env.example` is configured in Vercel's production environment, confirmed by a successful production build and runtime (DEPLOY-03)
@@ -82,6 +93,7 @@ Plans:
   5. A real end-to-end request against the live deployment succeeds — not just a green build log (HEALTH-02)
   6. The live deployment is verified to survive a request after a genuine overnight idle period, with no cold-start or DB-suspend failure (HEALTH-03)
   7. A documented rollback procedure (the host's one-click "promote a previous deployment") exists and is confirmed to work (HEALTH-04)
+
 **Plans**: TBD
 
 ## Progress
