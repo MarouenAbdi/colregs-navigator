@@ -107,3 +107,14 @@ None - no external service configuration required. Hooks register automatically 
 ---
 *Phase: 14-pipeline-hooks*
 *Completed: 2026-07-20*
+
+## Self-Check: PASSED
+
+- FOUND: `.husky/pre-commit`
+- FOUND: `lint-staged.config.js`
+- FOUND: `CONTRIBUTING.md`
+- FOUND: `.planning/phases/14-pipeline-hooks/14-03-SUMMARY.md`
+- FOUND: `.planning/phases/14-pipeline-hooks/deferred-items.md`
+- FOUND commit: `e65a044` (Task 1)
+- FOUND commit: `ccb31e6` (Task 2)
+- FOUND commit: `ac6c1b3` (docs: plan summary + deferred-items)
