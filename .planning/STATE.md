@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-07-19)
 Phase: 13 (comment-cleanup) — COMPLETE
 Plan: 8 of 8
 Status: Phase 13 complete, human-approved. v1.2 milestone's 4 phases (10/11/12/13) all done.
-Last activity: 2026-07-20 -- Phase 13 approved and closed
+Last activity: 2026-07-20 - Completed quick task 260720-kg5: Remove local/no-stale-id-comments ESLint rule causing errors everywhere
 
 Progress: [██████████] 100% (Phase 13, v1.2 milestone)
 
@@ -109,6 +109,7 @@ Items acknowledged and carried forward from previous milestone close:
 |----------|------|------|
 | 260719-t8r | Generate `docs/reasoning-trails.json` design reference (catalog of all COLREGS reasoning-trail shapes) | 2026-07-19 |
 | 260720-jko | Reorganize sandbox/, domain/colregs/, domain/geometry/, gallery/ into topic/feature subfolders — zero logic change, 216/216 tests pass | 2026-07-20 |
+| 260720-kg5 | Remove local/no-stale-id-comments ESLint rule (deregistered, deleted rule file, pruned suppressions) — 0 lint errors after | 2026-07-20 |
 
 ## Session Continuity
 
