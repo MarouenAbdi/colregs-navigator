@@ -36,21 +36,28 @@ persistence/API tests).
 
 ## Deployment
 
-**No live hosted deployment exists yet** -- provisioning a real host and database is Phase 15
-scope, not this milestone's current phase. What already exists, fully authored and locally
-verified against this repo's own docker-compose Postgres, is the production build path itself:
+**Live at [https://colregs-navigator-kappa.vercel.app](https://colregs-navigator-kappa.vercel.app)**
+-- deployed to Vercel with a production Neon Postgres database, confirmed end-to-end via the
+Vercel CLI and a real external HTTP request, not just a green build log:
 
 - `"vercel-build"` (`package.json`): `prisma generate` -> an environment-gated
   `scripts/migrate-if-production.mjs` -> `next build --webpack`. The migration step only runs
   `prisma migrate deploy` when `VERCEL_ENV === "production"`, so a PR/branch preview build (which
   runs this identical script with a different `VERCEL_ENV` value) can never apply a migration to
-  a live database. Both gate states, and the full three-step sequence ending in a confirmed
-  webpack build, have been verified locally.
-- CD-01's actual auto-deploy-on-merge mechanism will be the eventual host's native Git
-  integration (e.g. Vercel watching `main`), not a hand-rolled GitHub Actions deploy step -- this
-  milestone's locked architecture decision keeps GitHub Actions scoped to CI only.
-- The same `.nvmrc` this repo already uses for CI is what the eventual host will resolve its Node
-  version from -- no separate host-specific Node version configuration is expected.
+  a live database. This full three-step sequence has run for real on the production deployment
+  above -- confirmed directly in the Vercel build log (`prisma generate`, `migrate deploy`
+  reporting no pending migrations, then a completed `next build --webpack` compile) -- not just
+  locally.
+- `GET /api/health` -- a public, unauthenticated Route Handler that runs a real DB-connectivity
+  check (`SELECT 1` via the app's existing Prisma singleton) against the production database and
+  returns `200 {"status":"ok"}` when reachable or `503 {"status":"error"}` otherwise. The response
+  is never cached (`Cache-Control: no-store`, confirmed against Vercel's real edge network across
+  repeated live requests, not just locally).
+- CD-01's auto-deploy-on-merge mechanism is Vercel's native Git integration watching `main`, not a
+  hand-rolled GitHub Actions deploy step -- this milestone's locked architecture decision keeps
+  GitHub Actions scoped to CI only.
+- The same `.nvmrc` this repo already uses for CI is what Vercel resolves its Node version from --
+  no separate host-specific Node version configuration was needed.
 
 ## Linting & Code Quality
 
