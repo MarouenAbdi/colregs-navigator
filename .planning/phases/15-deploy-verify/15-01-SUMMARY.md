@@ -110,3 +110,10 @@ None - no external service configuration required. This plan's endpoint is verif
 ---
 *Phase: 15-deploy-verify*
 *Completed: 2026-07-21*
+
+## Self-Check: PASSED
+
+- FOUND: `app/api/health/route.ts`
+- FOUND: `.planning/phases/15-deploy-verify/15-01-SUMMARY.md`
+- FOUND: commit `2841860` (Task 1: feat(15-01): add DB-connectivity health check Route Handler)
+- FOUND: commit `90a13a7` (docs(15-01): complete DB-connectivity health check plan)
