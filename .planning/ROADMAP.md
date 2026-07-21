@@ -98,7 +98,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 15-01-PLAN.md — `/api/health` DB-connectivity Route Handler, locally verified (HEALTH-01)
+- [x] 15-01-PLAN.md — `/api/health` DB-connectivity Route Handler, locally verified (HEALTH-01)
 - [ ] 15-02-PLAN.md — Neon + Vercel provisioning checklist, DATABASE_URL wiring, Vercel CLI token handoff (DEPLOY-01, DEPLOY-02, DEPLOY-03)
 
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -130,5 +130,5 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15
 | 12. ChartPanel/SandboxContainer Decomposition Refactor | v1.2 | 4/4 | Complete   | 2026-07-20 |
 | 13. Comment Cleanup | v1.2 | 8/8 | Complete | 2026-07-20 |
 | 14. Pipeline & Hooks | v1.3 | 4/4 | Complete | 2026-07-20 |
-| 15. Deploy & Verify | v1.3 | 0/TBD | Not started | - |
+| 15. Deploy & Verify | v1.3 | 1/5 | In Progress|  |
 </content>
