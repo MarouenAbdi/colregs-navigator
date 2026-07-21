@@ -9,3 +9,5 @@ prisma/generated/
 .next/
 *.tsbuildinfo
 docker-compose.override.yml
+.vercel
+.env*
