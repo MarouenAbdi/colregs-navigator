@@ -107,7 +107,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 15-04-PLAN.md — Live rollback/promote exercise via Vercel CLI, documented runbook (HEALTH-04)
+- [x] 15-04-PLAN.md — Live rollback/promote exercise via Vercel CLI, documented runbook (HEALTH-04)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -130,5 +130,5 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15
 | 12. ChartPanel/SandboxContainer Decomposition Refactor | v1.2 | 4/4 | Complete   | 2026-07-20 |
 | 13. Comment Cleanup | v1.2 | 8/8 | Complete | 2026-07-20 |
 | 14. Pipeline & Hooks | v1.3 | 4/4 | Complete | 2026-07-20 |
-| 15. Deploy & Verify | v1.3 | 2/5 | In Progress|  |
+| 15. Deploy & Verify | v1.3 | 3/5 | In Progress|  |
 </content>
