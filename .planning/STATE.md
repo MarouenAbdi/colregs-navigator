@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: CI/CD & Deployment
 status: executing
-stopped_at: Phase 15 context gathered
-last_updated: "2026-07-21T07:09:30.478Z"
-last_activity: 2026-07-21 -- Phase 15 execution started
+stopped_at: Phase 15 wave 3 complete (15-04) -- only 15-05 remains, blocked on 8h idle window
+last_updated: "2026-07-21T13:32:00.000Z"
+last_activity: 2026-07-21 -- Plan 15-04 (live rollback/promote) complete; 15-05 pending idle window
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 9
-  completed_plans: 4
-  percent: 44
+  completed_plans: 8
+  percent: 89
 ---
 
 # Project State
@@ -26,11 +26,14 @@ See: .planning/PROJECT.md (updated 2026-07-20)
 ## Current Position
 
 Phase: 15 (deploy-verify) — EXECUTING
-Plan: 1 of 5
-Status: Executing Phase 15
-Last activity: 2026-07-21 -- Phase 15 execution started
+Plan: 4 of 5 complete (15-01, 15-02, 15-03, 15-04 done; 15-05 remains)
+Status: Blocked on wall-clock time, not on work -- 15-05 (HEALTH-03) needs a genuine >=8h
+  idle window since the last live production traffic (15-04's rollback/promote exercise,
+  merged ~13:42 UTC 2026-07-21). Idle window settles ~21:42 UTC 2026-07-21; a wakeup is
+  scheduled to run 15-05 then.
+Last activity: 2026-07-21 -- Plan 15-04 (live rollback/promote exercise + README runbook) complete
 
-Progress: [█████░░░░░] 50% (v1.3 milestone: 1 of 2 phases complete)
+Progress: [████████░░] 89% (v1.3 milestone: Phase 14 complete, Phase 15 at 4/5 plans)
 
 ## Performance Metrics
 
@@ -97,12 +100,15 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-20T21:12:03.747Z
-Stopped at: Phase 15 context gathered
-Resume file: .planning/phases/15-deploy-verify/15-CONTEXT.md
+Last session: 2026-07-21T13:32:00.000Z
+Stopped at: Plan 15-04 complete; 15-05 (final plan of v1.3) blocked on genuine 8h idle window
+Resume file: .planning/phases/15-deploy-verify/15-05-PLAN.md
+Scheduled wakeup: ~21:42 UTC 2026-07-21, to execute 15-05 (HEALTH-03 idle-window curl check)
 
 ## Operator Next Steps
 
-- Roadmap approved and written. Run `/gsd:plan-phase 14` to begin planning Phase 14 (Pipeline & Hooks).
+- Wait for the scheduled ~21:42 UTC wakeup to execute 15-05-PLAN.md (single curl against
+  live production `/api/health` after the genuine idle window, README.md Deployment section
+  updated with the real result). This is the last plan in Phase 15 and in the v1.3 milestone.
 
 </content>

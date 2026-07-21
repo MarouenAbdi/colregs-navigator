@@ -99,7 +99,7 @@ Plans:
 **Wave 1**
 
 - [x] 15-01-PLAN.md — `/api/health` DB-connectivity Route Handler, locally verified (HEALTH-01)
-- [ ] 15-02-PLAN.md — Neon + Vercel provisioning checklist, DATABASE_URL wiring, Vercel CLI token handoff (DEPLOY-01, DEPLOY-02, DEPLOY-03)
+- [x] 15-02-PLAN.md — Neon + Vercel provisioning checklist, DATABASE_URL wiring, Vercel CLI token handoff (DEPLOY-01, DEPLOY-02, DEPLOY-03)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
