@@ -59,6 +59,20 @@ Vercel CLI and a real external HTTP request, not just a green build log:
 - The same `.nvmrc` this repo already uses for CI is what Vercel resolves its Node version from --
   no separate host-specific Node version configuration was needed.
 
+### Rollback Procedure
+
+Rolling back to a deployment that has already served production traffic is Vercel's
+**Instant Rollback** -- an alias-only reassignment, never a rebuild and never a migration
+re-run:
+
+- Roll back: `npx vercel rollback DEPLOYMENT_ID --token "$VERCEL_TOKEN"`
+- Restore forward: `npx vercel promote DEPLOYMENT_ID --token "$VERCEL_TOKEN"`
+
+Both commands only repoint the production alias to an existing, already-built deployment --
+neither triggers `next build` nor `prisma migrate deploy` again. A rollback restores that
+deployment's build-time environment variable snapshot, so review any env vars changed since
+the rollback target's original deploy before relying on it during a real incident.
+
 ## Linting & Code Quality
 
 ```bash
