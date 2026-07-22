@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: CI/CD & Deployment
-status: complete
-stopped_at: Phase 15 complete (15-05 HEALTH-03 idle-window verification passed) -- v1.3 milestone at 100%
-last_updated: "2026-07-22T08:12:00.000Z"
-last_activity: 2026-07-22 -- Plan 15-05 (overnight-idle HEALTH-03 verification) complete; v1.3 done
+status: Awaiting next milestone
+stopped_at: Plan 15-05 complete -- v1.3 milestone fully done, both phases (14-15) and all 9 plans complete
+last_updated: "2026-07-22T08:41:54.375Z"
+last_activity: 2026-07-22 — Milestone v1.3 completed and archived
 progress:
   total_phases: 2
   completed_phases: 2
@@ -18,42 +18,37 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-20)
+See: .planning/PROJECT.md (updated 2026-07-22)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** v1.3 milestone complete -- ready for milestone close / next milestone planning
+**Current focus:** v1.3 milestone archived -- ready for next milestone planning
 
 ## Current Position
 
-Phase: 15 (deploy-verify) — COMPLETE
-Plan: 5 of 5 complete (15-01, 15-02, 15-03, 15-04, 15-05 all done)
-Status: v1.3 "CI/CD & Deployment" milestone fully complete. HEALTH-03 (final requirement)
-  verified 2026-07-22T08:11Z: after a genuine ~18.5h idle window since 15-04's last live
-  traffic (13:42 UTC 2026-07-21), production `/api/health` returned 200 `{"status":"ok"}`
-  in 2.875084s. Result recorded in README.md's Deployment section (commit b8c1838).
-Last activity: 2026-07-22 -- Plan 15-05 (overnight-idle HEALTH-03 verification) complete
-
-Progress: [██████████] 100% (v1.3 milestone: Phase 14 complete, Phase 15 complete -- 9/9 plans)
+Phase: Milestone v1.3 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-07-22 — Milestone v1.3 completed and archived
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 41 (19 v1.0 + 14 v1.1 + 18 v1.2, some plans span multiple waves — see milestone ROADMAPs for exact per-phase counts)
+- Total plans completed: 50 (19 v1.0 + 14 v1.1 + 18 v1.2 + 9 v1.3 [incl. 15-02, no separate SUMMARY.md — manual provisioning verified downstream], some plans span multiple waves — see milestone ROADMAPs for exact per-phase counts)
 - Average duration: - min
-- Total execution time: - hours (v1.3 not started)
+- Total execution time: - hours
 
 **By Phase (v1.3):**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 14 (Pipeline & Hooks) | TBD | - | - |
-| 15 (Deploy & Verify) | TBD | - | - |
+| 14 (Pipeline & Hooks) | 4/4 | - | - |
+| 15 (Deploy & Verify) | 5/5 | - | - |
 
 **Recent Trend:**
 
-- Last 5 plans: - (v1.2 Phase 13 was the last executed phase)
-- Trend: -
+- Last 5 plans: 15-01 → 15-02 → 15-03 → 15-04 → 15-05, all v1.3 Phase 15 (Deploy & Verify)
+- Trend: v1.3 milestone complete, both phases shipped
 
 *Updated after each plan completion*
 
@@ -89,11 +84,14 @@ Items acknowledged and carried forward from previous milestone close:
 | Functional/domain | RSON-V2-01 (ambiguous/edge-case gallery scenarios), SCEN-V2-01 (auto-generated OG image) | Deferred to v2 | v1.0 milestone close |
 | DevOps differentiators | DEPENDABOT-01, AUDIT-01, ADR-CD-01, PREVIEW-01 | Deferred to a later milestone | v1.3 requirements scoping |
 | Tooling | FMT-01 (repo-wide Prettier pass), RFCT-V2-01 (ChipRow extraction) | Deferred to v2 | v1.2 requirements scoping |
+| Tech debt | `/api/health` has zero automated CI regression coverage (route lives outside `src/**`, invisible to `vitest.config.ts`'s glob) | Carried forward, not yet scheduled | v1.3 milestone close |
+| Tech debt | Spurious empty Vercel project `agent-a5473b04789dea3ed` (from a `vercel link` mis-detection bug) awaits manual deletion via the Vercel dashboard | Carried forward, user action required | v1.3 milestone close |
 
 ## Quick Tasks Completed
 
 | Quick ID | Description | Date |
 |----------|------|------|
+| 260718-qgs | Header design-fidelity + Phase 7 convention fixes, corrected against the raw Claude Design source | 2026-07-18 |
 | 260719-t8r | Generate `docs/reasoning-trails.json` design reference (catalog of all COLREGS reasoning-trail shapes) | 2026-07-19 |
 | 260720-jko | Reorganize sandbox/, domain/colregs/, domain/geometry/, gallery/ into topic/feature subfolders — zero logic change, 216/216 tests pass | 2026-07-20 |
 | 260720-kg5 | Remove local/no-stale-id-comments ESLint rule (deregistered, deleted rule file, pruned suppressions) — 0 lint errors after | 2026-07-20 |
@@ -106,7 +104,4 @@ Resume file: none -- no plans remain in v1.3
 
 ## Operator Next Steps
 
-- Run `/gsd:complete-milestone` (or equivalent) to formally archive v1.3 and prepare for the
-  next milestone -- no further phase work remains in this milestone.
-
-</content>
+- Start the next milestone with /gsd-new-milestone

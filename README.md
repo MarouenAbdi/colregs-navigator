@@ -13,9 +13,8 @@ specific rule citation and geometric reasoning behind it.
 Prerequisites:
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or an equivalent local
-  Docker daemon) -- provides the local Postgres database. **There is no hosted/live deployment
-  for this milestone** -- the project is demoed via local run instructions only, not a hosted
-  live link (local Docker Postgres only, no Neon/Supabase or other managed DB).
+  Docker daemon) -- provides the local Postgres database for development and tests. See
+  "Deployment" below for the live, hosted production instance.
 - Node.js 22+
 
 Steps, in order:

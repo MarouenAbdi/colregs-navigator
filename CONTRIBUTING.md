@@ -93,8 +93,11 @@ Free plan cannot configure branch protection or Repository Rulesets).
 
 ## Rollback
 
-There is no live hosted deployment in this phase -- that is a later phase's scope (a real
-production deployment with promote/rollback tooling). Until then, "rollback" means: `git revert`
-the bad merge commit on `main` (never a force-push/history rewrite of shared history). Once a
-live deployment exists, this section will be superseded by the hosting platform's own one-click
-"promote a previous deployment" mechanism.
+Two rollback paths exist, depending on what needs undoing:
+
+- **Production deployment rollback** -- the live app is deployed to Vercel with Instant
+  Rollback available (`npx vercel rollback DEPLOYMENT_ID`, `npx vercel promote DEPLOYMENT_ID`),
+  an alias-only reassignment that never rebuilds or re-runs `prisma migrate deploy`. See
+  README.md's "Rollback Procedure" section for the full, live-verified command reference.
+- **Bad merge commit on `main`** -- `git revert` the offending commit (never a force-push/history
+  rewrite of shared history), then let CI/CD redeploy the reverted state normally.

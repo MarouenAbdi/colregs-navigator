@@ -1,3 +1,37 @@
+---
+phase: 15-deploy-verify
+plan: 04
+subsystem: infra
+tags: [vercel, rollback, promote, health-check, deployment]
+
+requires:
+  - phase: 15-deploy-verify
+    plan: "03"
+    provides: "Live production deployment on Vercel, confirmed reachable via CLI and a real external request"
+provides:
+  - "Live-exercised HEALTH-04 rollback/promote cycle against real deployment IDs, plus README.md's Rollback Procedure subsection documenting the verified commands"
+affects: [15-05]
+
+tech-stack:
+  added: []
+  patterns:
+    - "Vercel Instant Rollback verification: capture the pre-change deployment ID, ship the change via a normal merge (creating a new deployment), rollback to the prior ID, confirm via vercel inspect timestamps that no rebuild occurred, then promote forward again -- proves the mechanism live without leaving production on a stale deployment"
+
+key-files:
+  created: []
+  modified: [README.md]
+
+key-decisions:
+  - "Committed the rollback runbook via PR #21 (reviewed and merged by the user) instead of a direct git push to main, per the user's explicit preference set earlier in this phase for a PR-review flow on all main-bound changes."
+
+patterns-established: []
+
+requirements-completed: [HEALTH-04]
+
+duration: unspecified
+completed: 2026-07-21
+---
+
 # Plan 15-04: Live Rollback/Promote Exercise + README Runbook
 
 ## Objective

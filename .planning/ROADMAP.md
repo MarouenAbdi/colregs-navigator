@@ -5,7 +5,7 @@
 - ✅ **v1.0** (2026-07-14 → 2026-07-18) — Domain foundations, COLREGS rules engine, persistence/API layer, interactive chart sandbox, save/share/gallery. 5 phases, 19 plans. See `.planning/milestones/v1.0-ROADMAP.md`.
 - ✅ **v1.1 UI Redesign (shadcn)** (2026-07-18 → 2026-07-19) — Re-implemented the entire front end against an imported Claude Design file using shadcn/ui, dark-mode only, across 4 branch+PR phases (Scaffolding, Hero, Sandbox, Gallery). Zero change to domain logic or existing validated requirements. 4 phases, 14 plans, 19/19 requirements validated. See `.planning/milestones/v1.1-ROADMAP.md`.
 - ✅ **v1.2 Tech Debt & Stabilization** (2026-07-19 → 2026-07-20) — ESLint tooling, deprecated Tailwind v4 class-name fixes, ChartPanel/SandboxContainer decomposition refactor, and comment-convention cleanup. No new user-facing features; zero change to domain logic outcomes. 4 phases, 18 plans, 22/22 requirements validated. See `.planning/milestones/v1.2-ROADMAP.md`.
-- 🚧 **v1.3 CI/CD & Deployment** (started 2026-07-20) — GitHub Actions CI/CD pipeline, Husky/lint-staged pre-commit hooks, CONTRIBUTING.md, and a live Vercel + Neon production deployment with go-live verification. 2 phases (14-15), 17/17 requirements mapped.
+- ✅ **v1.3 CI/CD & Deployment** (2026-07-20 → 2026-07-22) — GitHub Actions CI/CD pipeline, Husky/lint-staged pre-commit hooks, CONTRIBUTING.md, and a live Vercel + Neon production deployment with go-live verification. 2 phases (14-15), 9 plans, 17/17 requirements validated. See `.planning/milestones/v1.3-ROADMAP.md`.
 
 ## Phases
 
@@ -40,78 +40,15 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details (goals, succes
 
 </details>
 
-### 🚧 v1.3 CI/CD & Deployment (In Progress)
+<details>
+<summary>✅ v1.3 CI/CD & Deployment (Phases 14-15) — SHIPPED 2026-07-22</summary>
 
-**Milestone Goal:** Demonstrate basic, portfolio-credible full-stack DevOps competency — a GitHub Actions CI/CD pipeline and a real, live-deployed instance of the app with a production Postgres database.
+- [x] Phase 14: Pipeline & Hooks — GitHub Actions CI/CD pipeline (lint/typecheck/test/build gate + auto-deploy wiring), Husky/lint-staged pre-commit hooks, and CONTRIBUTING.md (completed 2026-07-20)
+- [x] Phase 15: Deploy & Verify — Live Vercel + Neon production deployment, provisioned and go-live-verified end-to-end (completed 2026-07-22)
 
-- [x] **Phase 14: Pipeline & Hooks** - GitHub Actions CI/CD pipeline (lint/typecheck/test/build gate + auto-deploy wiring), Husky/lint-staged pre-commit hooks, and CONTRIBUTING.md
-- [x] **Phase 15: Deploy & Verify** - Live Vercel + Neon production deployment, provisioned and go-live-verified end-to-end
+See `.planning/milestones/v1.3-ROADMAP.md` for full phase details (goals, success criteria, plans).
 
-## Phase Details
-
-### Phase 14: Pipeline & Hooks
-
-**Goal**: Every PR is gated by a real, required GitHub Actions CI pipeline (lint, typecheck, test against real Postgres, build); the production deploy path (Prisma generate → environment-gated migrate deploy → webpack build) is fully authored and wired though not yet exercised against real hosting; local commits are guarded by a fast pre-commit hook; and contributor documentation reflects real, not aspirational, tooling behavior.
-**Depends on**: Phase 13 (last completed phase; no code dependency — this is the first phase of v1.3)
-**Requirements**: CI-01, CI-02, CI-03, CI-04, CI-05, CI-06, CD-01, CD-02, HOOKS-01, DOCS-CONTRIB-01
-**Success Criteria** (what must be TRUE):
-
-  1. Opening a PR with a lint, typecheck, test, or build failure shows a red required status check that blocks merging into `main` (CI-01, CI-05)
-  2. The CI test job runs against a real Postgres instance by reusing the existing `docker-compose.yml` config, with no separate/duplicated DB service definition (CI-02)
-  3. A fresh clone followed by `npm ci` succeeds without any manual `prisma generate` step, and local dev, CI, and the deploy script all resolve the same Node version from a committed `.nvmrc` (CI-03, CI-04)
-  4. README displays a live, accurate GitHub Actions CI status badge (CI-06)
-  5. Committing a staged file with a lint violation triggers Husky + lint-staged to auto-fix it before the commit completes, while the full typecheck/test suite runs in CI only, not pre-commit (HOOKS-01)
-  6. `CONTRIBUTING.md` documents setup, running checks locally, the real (not aspirational) pre-commit hook behavior, branch/commit conventions, PR expectations, and a rollback note (DOCS-CONTRIB-01)
-  7. The deploy script/workflow is fully authored — Prisma client generation, an environment-gated `prisma migrate deploy` (production builds only, never PR previews), and the mandatory `next build --webpack` flag — and ready to execute the moment a real host is provisioned in Phase 15 (CD-01, CD-02 wiring; live verification deferred to Phase 15)
-
-**Plans**: 4 plans
-Plans:
-**Wave 1**
-
-- [x] 14-01-PLAN.md — CI pipeline foundation (.nvmrc, postinstall prisma generate, ci.yml with lint/typecheck/test/build jobs reusing docker-compose.yml, README CI badge)
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 14-02-PLAN.md — Trigger a real CI run against a live PR; branch protection decision + configuration for CI-05
-- [x] 14-03-PLAN.md — Husky + lint-staged pre-commit hooks (staged eslint --fix, .env* guard) and CONTRIBUTING.md
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
-- [x] 14-04-PLAN.md — Environment-gated vercel-build deploy script (prisma generate -> gated migrate deploy -> next build --webpack), locally verified
-
-### Phase 15: Deploy & Verify
-
-**Goal**: The app is live on a real, publicly-reachable Vercel URL backed by a provisioned production Neon Postgres database, with every `.env.example` variable configured in production, and the deployment is verified end-to-end — including surviving a real post-idle-period request — with a working, documented rollback path.
-**Depends on**: Phase 14 (CI pipeline must be green and the deploy script must already be authored/wired before the first real deploy is attempted)
-**Requirements**: DEPLOY-01, DEPLOY-02, DEPLOY-03, HEALTH-01, HEALTH-02, HEALTH-03, HEALTH-04
-**Success Criteria** (what must be TRUE):
-
-  1. The app is reachable at a real, public Vercel production URL (DEPLOY-01)
-  2. Production Postgres (Neon) is provisioned and wired to the app via Phase 14's deploy script, with migrations applied against it (DEPLOY-02, exercises CD-01/CD-02 live for the first time)
-  3. Every environment variable listed in `.env.example` is configured in Vercel's production environment, confirmed by a successful production build and runtime (DEPLOY-03)
-  4. `/api/health` performs a real database connectivity check and returns a meaningful, accurate status (HEALTH-01)
-  5. A real end-to-end request against the live deployment succeeds — not just a green build log (HEALTH-02)
-  6. The live deployment is verified to survive a request after a genuine overnight idle period, with no cold-start or DB-suspend failure (HEALTH-03)
-  7. A documented rollback procedure (the host's one-click "promote a previous deployment") exists and is confirmed to work (HEALTH-04)
-
-**Plans**: 5 plans
-Plans:
-**Wave 1**
-
-- [x] 15-01-PLAN.md — `/api/health` DB-connectivity Route Handler, locally verified (HEALTH-01)
-- [x] 15-02-PLAN.md — Neon + Vercel provisioning checklist, DATABASE_URL wiring, Vercel CLI token handoff (DEPLOY-01, DEPLOY-02, DEPLOY-03)
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 15-03-PLAN.md — Live CLI verification of deploy/migrate/env-vars, real end-to-end request, README update (DEPLOY-01, DEPLOY-02, DEPLOY-03, HEALTH-01, HEALTH-02)
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
-- [x] 15-04-PLAN.md — Live rollback/promote exercise via Vercel CLI, documented runbook (HEALTH-04)
-
-**Wave 4** *(blocked on Wave 3 completion)*
-
-- [x] 15-05-PLAN.md — Genuine 8+ hour idle-window verification of `/api/health` survival, README result recorded (HEALTH-03)
+</details>
 
 ## Progress
 
@@ -130,5 +67,5 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15
 | 12. ChartPanel/SandboxContainer Decomposition Refactor | v1.2 | 4/4 | Complete   | 2026-07-20 |
 | 13. Comment Cleanup | v1.2 | 8/8 | Complete | 2026-07-20 |
 | 14. Pipeline & Hooks | v1.3 | 4/4 | Complete | 2026-07-20 |
-| 15. Deploy & Verify | v1.3 | 3/5 | In Progress|  |
+| 15. Deploy & Verify | v1.3 | 5/5 | Complete | 2026-07-22 |
 </content>

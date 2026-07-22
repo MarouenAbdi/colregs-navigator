@@ -1,5 +1,22 @@
 # Milestones
 
+## v1.3 CI/CD & Deployment (Shipped: 2026-07-22)
+
+**Phases completed:** 2 phases, 9 plans, 16 tasks
+
+**Key accomplishments:**
+
+- GitHub Actions CI pipeline (lint/typecheck/test/build) reusing docker-compose.yml's Postgres, gated by a new .nvmrc-pinned Node version and an automatic postinstall Prisma-generate step
+- Proved plan 14-01's ci.yml actually runs and passes on a live PR, fixed three real CI bugs surfaced only by that live exercise, then made the repo public and enforced branch protection on main so all four checks genuinely gate merges (CI-01 and CI-05 both closed)
+- Husky 9 + lint-staged 17 pre-commit hook (staged-file `eslint --fix` + `.env*` commit guard) and a `CONTRIBUTING.md` documenting the actually-verified hook/setup/CI behavior
+- Environment-gated `prisma migrate deploy` wired into a new `vercel-build` script (`prisma generate` -> gate -> `next build --webpack`), verified locally in both gate states and end-to-end.
+- Public, unauthenticated `GET /api/health` Route Handler that runs a real `SELECT 1` through the app's existing Prisma singleton and returns 200/503 with no-store caching, locally verified end-to-end against a live Postgres container in both healthy and DB-down states.
+- Confirmed via Vercel CLI (not dashboard screenshots) that the real colregs-navigator production deployment is Ready, was built by the exact locked `vercel-build` sequence with zero PgBouncer/prepared-statement error, has `DATABASE_URL` configured, and serves both the front end and a real DB-backed `/api/health` check to genuine external HTTP requests -- then updated README.md to state this live, non-aspirational status.
+- Live-exercised the HEALTH-04 rollback/promote cycle against real Vercel deployment IDs, documenting the verified commands as a Rollback Procedure subsection in README.md
+- Confirmed production `/api/health` returns 200 `{"status":"ok"}` after a genuine 8+ hour zero-traffic idle window, closing out v1.3's last requirement (HEALTH-03)
+
+---
+
 ## v1.2 Tech Debt & Stabilization (Shipped: 2026-07-20)
 
 **Phases completed:** 4 phases, 18 plans, 41 tasks
