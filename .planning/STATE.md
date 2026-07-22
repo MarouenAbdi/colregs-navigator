@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: CI/CD & Deployment
-status: executing
-stopped_at: Phase 15 wave 3 complete (15-04) -- only 15-05 remains, blocked on 8h idle window
-last_updated: "2026-07-21T13:32:00.000Z"
-last_activity: 2026-07-21 -- Plan 15-04 (live rollback/promote) complete; 15-05 pending idle window
+status: complete
+stopped_at: Phase 15 complete (15-05 HEALTH-03 idle-window verification passed) -- v1.3 milestone at 100%
+last_updated: "2026-07-22T08:12:00.000Z"
+last_activity: 2026-07-22 -- Plan 15-05 (overnight-idle HEALTH-03 verification) complete; v1.3 done
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 9
-  completed_plans: 8
-  percent: 89
+  completed_plans: 9
+  percent: 100
 ---
 
 # Project State
@@ -21,19 +21,19 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-20)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 15 — deploy-verify
+**Current focus:** v1.3 milestone complete -- ready for milestone close / next milestone planning
 
 ## Current Position
 
-Phase: 15 (deploy-verify) — EXECUTING
-Plan: 4 of 5 complete (15-01, 15-02, 15-03, 15-04 done; 15-05 remains)
-Status: Blocked on wall-clock time, not on work -- 15-05 (HEALTH-03) needs a genuine >=8h
-  idle window since the last live production traffic (15-04's rollback/promote exercise,
-  merged ~13:42 UTC 2026-07-21). Idle window settles ~21:42 UTC 2026-07-21; a wakeup is
-  scheduled to run 15-05 then.
-Last activity: 2026-07-21 -- Plan 15-04 (live rollback/promote exercise + README runbook) complete
+Phase: 15 (deploy-verify) — COMPLETE
+Plan: 5 of 5 complete (15-01, 15-02, 15-03, 15-04, 15-05 all done)
+Status: v1.3 "CI/CD & Deployment" milestone fully complete. HEALTH-03 (final requirement)
+  verified 2026-07-22T08:11Z: after a genuine ~18.5h idle window since 15-04's last live
+  traffic (13:42 UTC 2026-07-21), production `/api/health` returned 200 `{"status":"ok"}`
+  in 2.875084s. Result recorded in README.md's Deployment section (commit b8c1838).
+Last activity: 2026-07-22 -- Plan 15-05 (overnight-idle HEALTH-03 verification) complete
 
-Progress: [████████░░] 89% (v1.3 milestone: Phase 14 complete, Phase 15 at 4/5 plans)
+Progress: [██████████] 100% (v1.3 milestone: Phase 14 complete, Phase 15 complete -- 9/9 plans)
 
 ## Performance Metrics
 
@@ -100,15 +100,13 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-21T13:32:00.000Z
-Stopped at: Plan 15-04 complete; 15-05 (final plan of v1.3) blocked on genuine 8h idle window
-Resume file: .planning/phases/15-deploy-verify/15-05-PLAN.md
-Scheduled wakeup: ~21:42 UTC 2026-07-21, to execute 15-05 (HEALTH-03 idle-window curl check)
+Last session: 2026-07-22T08:12:00.000Z
+Stopped at: Plan 15-05 complete -- v1.3 milestone fully done, all 15 phases/9 plans complete
+Resume file: none -- no plans remain in v1.3
 
 ## Operator Next Steps
 
-- Wait for the scheduled ~21:42 UTC wakeup to execute 15-05-PLAN.md (single curl against
-  live production `/api/health` after the genuine idle window, README.md Deployment section
-  updated with the real result). This is the last plan in Phase 15 and in the v1.3 milestone.
+- Run `/gsd:complete-milestone` (or equivalent) to formally archive v1.3 and prepare for the
+  next milestone -- no further phase work remains in this milestone.
 
 </content>
