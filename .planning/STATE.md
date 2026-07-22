@@ -2,55 +2,53 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: CI/CD & Deployment
-status: executing
-stopped_at: Phase 15 context gathered
-last_updated: "2026-07-21T07:09:30.478Z"
-last_activity: 2026-07-21 -- Phase 15 execution started
+status: Awaiting next milestone
+stopped_at: Plan 15-05 complete -- v1.3 milestone fully done, both phases (14-15) and all 9 plans complete
+last_updated: "2026-07-22T08:41:54.375Z"
+last_activity: 2026-07-22 — Milestone v1.3 completed and archived
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 9
-  completed_plans: 4
-  percent: 44
+  completed_plans: 9
+  percent: 100
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-20)
+See: .planning/PROJECT.md (updated 2026-07-22)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 15 — deploy-verify
+**Current focus:** v1.3 milestone archived -- ready for next milestone planning
 
 ## Current Position
 
-Phase: 15 (deploy-verify) — EXECUTING
-Plan: 1 of 5
-Status: Executing Phase 15
-Last activity: 2026-07-21 -- Phase 15 execution started
-
-Progress: [█████░░░░░] 50% (v1.3 milestone: 1 of 2 phases complete)
+Phase: Milestone v1.3 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-07-22 — Milestone v1.3 completed and archived
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 41 (19 v1.0 + 14 v1.1 + 18 v1.2, some plans span multiple waves — see milestone ROADMAPs for exact per-phase counts)
+- Total plans completed: 50 (19 v1.0 + 14 v1.1 + 18 v1.2 + 9 v1.3 [incl. 15-02, no separate SUMMARY.md — manual provisioning verified downstream], some plans span multiple waves — see milestone ROADMAPs for exact per-phase counts)
 - Average duration: - min
-- Total execution time: - hours (v1.3 not started)
+- Total execution time: - hours
 
 **By Phase (v1.3):**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 14 (Pipeline & Hooks) | TBD | - | - |
-| 15 (Deploy & Verify) | TBD | - | - |
+| 14 (Pipeline & Hooks) | 4/4 | - | - |
+| 15 (Deploy & Verify) | 5/5 | - | - |
 
 **Recent Trend:**
 
-- Last 5 plans: - (v1.2 Phase 13 was the last executed phase)
-- Trend: -
+- Last 5 plans: 15-01 → 15-02 → 15-03 → 15-04 → 15-05, all v1.3 Phase 15 (Deploy & Verify)
+- Trend: v1.3 milestone complete, both phases shipped
 
 *Updated after each plan completion*
 
@@ -86,23 +84,24 @@ Items acknowledged and carried forward from previous milestone close:
 | Functional/domain | RSON-V2-01 (ambiguous/edge-case gallery scenarios), SCEN-V2-01 (auto-generated OG image) | Deferred to v2 | v1.0 milestone close |
 | DevOps differentiators | DEPENDABOT-01, AUDIT-01, ADR-CD-01, PREVIEW-01 | Deferred to a later milestone | v1.3 requirements scoping |
 | Tooling | FMT-01 (repo-wide Prettier pass), RFCT-V2-01 (ChipRow extraction) | Deferred to v2 | v1.2 requirements scoping |
+| Tech debt | `/api/health` has zero automated CI regression coverage (route lives outside `src/**`, invisible to `vitest.config.ts`'s glob) | Carried forward, not yet scheduled | v1.3 milestone close |
+| Tech debt | Spurious empty Vercel project `agent-a5473b04789dea3ed` (from a `vercel link` mis-detection bug) awaits manual deletion via the Vercel dashboard | Carried forward, user action required | v1.3 milestone close |
 
 ## Quick Tasks Completed
 
 | Quick ID | Description | Date |
 |----------|------|------|
+| 260718-qgs | Header design-fidelity + Phase 7 convention fixes, corrected against the raw Claude Design source | 2026-07-18 |
 | 260719-t8r | Generate `docs/reasoning-trails.json` design reference (catalog of all COLREGS reasoning-trail shapes) | 2026-07-19 |
 | 260720-jko | Reorganize sandbox/, domain/colregs/, domain/geometry/, gallery/ into topic/feature subfolders — zero logic change, 216/216 tests pass | 2026-07-20 |
 | 260720-kg5 | Remove local/no-stale-id-comments ESLint rule (deregistered, deleted rule file, pruned suppressions) — 0 lint errors after | 2026-07-20 |
 
 ## Session Continuity
 
-Last session: 2026-07-20T21:12:03.747Z
-Stopped at: Phase 15 context gathered
-Resume file: .planning/phases/15-deploy-verify/15-CONTEXT.md
+Last session: 2026-07-22T08:12:00.000Z
+Stopped at: Plan 15-05 complete -- v1.3 milestone fully done, all 15 phases/9 plans complete
+Resume file: none -- no plans remain in v1.3
 
 ## Operator Next Steps
 
-- Roadmap approved and written. Run `/gsd:plan-phase 14` to begin planning Phase 14 (Pipeline & Hooks).
-
-</content>
+- Start the next milestone with /gsd-new-milestone

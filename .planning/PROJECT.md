@@ -2,11 +2,12 @@
 
 ## Current State
 
-**Shipped:** v1.2 Tech Debt & Stabilization — 2026-07-20. A tech-debt/hygiene milestone (no new user-facing features, zero change to domain logic outcomes): ESLint installed and configured via flat config, reaching a lint-clean baseline (`npm run lint`, 0 errors) with a lint-enforced `src/domain/` architecture boundary; deprecated Tailwind v3→v4 class names fixed by hand across 6 files with human-verified zero visual/accessibility regression; `ChartPanel.tsx`/`SandboxContainer.tsx` decomposed into focused single-concern modules with zero hit-testing regression; and a hand-rewritten comment cleanup retiring stale Phase/Plan/REQ-ID references across 66 files. All 22/22 v1.2 requirements validated across 4 phases / 18 plans (2026-07-19 → 2026-07-20). See `.planning/milestones/v1.2-ROADMAP.md` and `.planning/milestones/v1.2-REQUIREMENTS.md` for full detail.
+**Shipped:** v1.3 CI/CD & Deployment — 2026-07-22. A DevOps-competency milestone: a real, required GitHub Actions CI pipeline (lint, typecheck, test against live Postgres, build) gates every PR via branch protection; Husky + lint-staged pre-commit hooks auto-fix staged files; `CONTRIBUTING.md` documents real contributor workflow; and the app is live on a public Vercel production URL backed by a provisioned Neon Postgres database, with an environment-gated `prisma migrate deploy`, a `/api/health` DB-connectivity check, and a live-exercised rollback/promote path. Every requirement verified against real infrastructure — a live PR run, live branch protection, a live deployment, a real external HTTP request, a genuine ~18.5h idle window, and a live rollback cycle — not simulation. All 17/17 v1.3 requirements validated across 2 phases / 9 plans (2026-07-20 → 2026-07-22). See `.planning/milestones/v1.3-ROADMAP.md` and `.planning/milestones/v1.3-REQUIREMENTS.md` for full detail.
 
-**Next:** v1.3 CI/CD & Deployment — see Current Milestone below.
+**Next:** Planning next milestone — see Next Milestone Goals below.
 
-## Current Milestone: v1.3 CI/CD & Deployment
+<details>
+<summary>v1.3 milestone details (shipped 2026-07-22)</summary>
 
 **Goal:** Demonstrate basic, portfolio-credible full-stack DevOps competency — a GitHub Actions CI/CD pipeline and a real, live-deployed instance of the app with a production Postgres database — so the repo shows the same engineering discipline in deployment/operations that v1.2 demonstrated in code hygiene.
 
@@ -20,6 +21,10 @@
 **Locked decisions:** Research-first — hosting platform and Postgres provider are not pre-decided; the research phase compares options and the user picks before requirements lock. CD means real auto-deploy on merge to main, not a manual/staged release process.
 
 **Why:** Portfolio project — v1.0-v1.2 proved product/domain depth, UI polish, and code hygiene; a working CI/CD pipeline plus a live deployment is the remaining piece an interviewer or tech lead would expect to see from a "professional engineering practices" showcase.
+
+**Outcome:** Both phases shipped 2026-07-20 → 2026-07-22. Phase 14 (Pipeline & Hooks) complete 2026-07-20 — GitHub Actions CI (lint/typecheck/test/build) wired reusing `docker-compose.yml`'s Postgres, proved against a live PR (surfacing and fixing 3 real CI bugs), branch protection enforced on `main` after making the repo public, Husky + lint-staged pre-commit hooks shipped (with a real `set -e` trap bug fixed), `CONTRIBUTING.md` written, and an environment-gated `vercel-build` deploy script authored and locally verified. Phase 15 (Deploy & Verify) complete 2026-07-22 — `/api/health` DB-connectivity Route Handler shipped; Neon Postgres + Vercel provisioned; the live production deployment confirmed via Vercel CLI (not dashboard screenshots) to be built by the exact locked deploy script with zero PgBouncer errors; the rollback/promote mechanism live-exercised against real deployment IDs; and HEALTH-03 (the final requirement) confirmed via a genuine ~18.5h idle-window request. A milestone audit (2026-07-22) found and closed 4 doc/traceability gaps inline (stale README/CONTRIBUTING status text, a missing SUMMARY.md frontmatter block, a missing Phase 15 VERIFICATION.md) — none were functional gaps. Two non-blocking tech-debt items carried forward: `/api/health` has no CI regression coverage, and a spurious empty Vercel project from a `vercel link` mis-detection bug awaits manual deletion by the user.
+
+</details>
 
 <details>
 <summary>v1.2 milestone details (shipped 2026-07-20)</summary>
@@ -80,10 +85,12 @@ Given any two-vessel encounter, correctly classify it under COLREGS and clearly 
 - [x] User can save a scenario and get a shareable link (no login required) — Validated in Phase 5 (Save, Share & Gallery); confirmed end-to-end via live human verification
 - [x] User can browse a curated gallery of preset classic encounters (e.g. textbook head-on, classic crossing, overtaking case) — Validated in Phase 5 (Save, Share & Gallery); gallery placement follow-up resolved in Phase 9 (Gallery) — the section is now embedded on the home page below the Sandbox, `/gallery` redirects to `/#gallery`
 - [x] Codebase reaches a lint-clean baseline with an enforced `src/domain/` architecture boundary, no deprecated Tailwind v4 class names, decomposed Sandbox files, and no stale Phase/Plan/REQ-ID comment references — Validated in v1.2 Tech Debt & Stabilization (Phases 10-13), 22/22 requirements; see `.planning/milestones/v1.2-REQUIREMENTS.md`
+- [x] GitHub Actions CI (lint/typecheck/test/build) required on every PR via branch protection, Husky + lint-staged pre-commit hooks, and `CONTRIBUTING.md` — Validated in v1.3 CI/CD & Deployment (Phase 14), 10/10 requirements
+- [x] App is live on a real, publicly-reachable production URL (Vercel) backed by a provisioned production Postgres (Neon), with CD on merge to `main`, a `/api/health` DB-connectivity check, and a documented/live-exercised rollback path — Validated in v1.3 CI/CD & Deployment (Phase 15), 7/7 requirements; see `.planning/milestones/v1.3-REQUIREMENTS.md`
 
 ### Active
 
-_Being scoped for v1.3 CI/CD & Deployment — see REQUIREMENTS.md once defined._
+_Being scoped for the next milestone — see REQUIREMENTS.md once defined._
 
 ### Out of Scope
 
@@ -99,7 +106,8 @@ _Being scoped for v1.3 CI/CD & Deployment — see REQUIREMENTS.md once defined._
 - **Domain source**: COLREGS (International Regulations for Preventing Collisions at Sea) — Rules 11–18 govern steering and sailing responsibilities between vessels in sight of one another. This is public, well-documented maritime law, not proprietary or company-specific.
 - **Why this domain was chosen**: evaluated against 9 other candidate ideas (music theory voice-leading validator, SAR search-pattern planner, escape-room solvability engine, ATC sequencing simulator, orbital mission planner, fairy chess engine, D&D encounter balancer, whiskey substitution engine, ER triage allocator) on memorability, backend/frontend depth, scope fit, and interview value. COLREGS Navigator scored highest: it's a domain almost nobody builds a portfolio project around, and the core logic (classify encounter → determine obligations under a real published rulebook) is a textbook case for a rules-engine/state-machine domain layer — letting Clean Architecture/DDD-lite actually earn its keep rather than being over-engineering for a CRUD app.
 - **Full engineering spec** (persona, workflow, practices) originally captured in `prompt.json` at repo root — see Constraints below for the concrete decisions pulled from it.
-- **Current state**: Milestone v1.0 complete — Phase 5 (Save, Share & Gallery) was the final phase; all 6 requirements validated across 5 phases / 19 plans. Milestone v1.1 (UI Redesign) complete 2026-07-19 — all 4 phases done (Scaffolding, Hero, Sandbox, Gallery), 19/19 v1.1 requirements validated. Milestone v1.2 (Tech Debt & Stabilization) complete 2026-07-20 — all 4 phases done (ESLint Setup, Tailwind Fixes, Sandbox Refactor, Comment Cleanup), 22/22 v1.2 requirements validated. No milestone currently active.
+- **Current state**: Milestone v1.0 complete — Phase 5 (Save, Share & Gallery) was the final phase; all 6 requirements validated across 5 phases / 19 plans. Milestone v1.1 (UI Redesign) complete 2026-07-19 — all 4 phases done (Scaffolding, Hero, Sandbox, Gallery), 19/19 v1.1 requirements validated. Milestone v1.2 (Tech Debt & Stabilization) complete 2026-07-20 — all 4 phases done (ESLint Setup, Tailwind Fixes, Sandbox Refactor, Comment Cleanup), 22/22 v1.2 requirements validated. Milestone v1.3 (CI/CD & Deployment) complete 2026-07-22 — both phases done (Pipeline & Hooks, Deploy & Verify), 17/17 v1.3 requirements validated; app is live on Vercel with a provisioned Neon Postgres database, gated by a required GitHub Actions CI pipeline. No milestone currently active.
+- **Known tech debt (carried from v1.3)**: `/api/health` has zero automated CI regression coverage (`vitest.config.ts` only globs `src/**/*.test.{ts,tsx}`, and the route lives outside `src/`); a spurious empty Vercel project (`agent-a5473b04789dea3ed`) from a `vercel link` mis-detection bug awaits manual deletion via the Vercel dashboard.
 
 ## Constraints
 
@@ -133,18 +141,24 @@ _Being scoped for v1.3 CI/CD & Deployment — see REQUIREMENTS.md once defined._
 | v1.2 is a tech-debt/hygiene milestone only — no new user-facing features, `classifyEncounter()` and all COLREGS rule outputs stayed byte-identical | User chose to demonstrate professional engineering hygiene (clean lint, clean file structure, clean comment/commit history) as a portfolio signal ahead of using the repo as an interview artifact | ✓ Good — shipped 2026-07-20, 22/22 v1.2 requirements validated, zero domain-logic change confirmed by unchanged test suite (216/216) throughout |
 | `typescript-eslint`/`eslint-config-next` bypassed via `@next/eslint-plugin-next` + `@babel/eslint-parser` (syntax-only TS/TSX parsing) | Neither library supports this project's locked TypeScript 7.0.2 (tsgo compiler) — no published version of either does. Bypassing kept TypeScript 7.0.2 locked as-is; `npm run typecheck` still covers type safety | ✓ Good — Phase 10 lint-clean baseline reached with zero rule downgrades; documented as a known limitation |
 | `VesselGroup.tsx` extracted last, as one atomic verbatim cut-paste, in the Phase 12 Sandbox refactor | This exact code (hull polygon, rotate-handle circle, badge overlay) caused two prior hit-testing regressions (Phase 4, Phase 8) — moving it as one unit rather than incrementally rewriting avoided a third | ✓ Good — Phase 12 closed with zero hit-testing regression, human-confirmed drag/rotate at heading 0 |
+| GitHub Actions stays CI-only; CD is Vercel's native Git integration, not a 5th Actions deploy job | Avoids the "hand-rolled Actions deploy alongside host-native CD" anti-pattern identified in v1.3 research (duplicate builds/race conditions) | ✓ Good — CD-01/CD-02 shipped via Vercel's native integration, zero Actions deploy step added |
+| Repo made public to unlock branch protection (over upgrading to GitHub Pro or deferring CI-05) | Free, unlocks required status checks immediately, fits the project's portfolio/interview purpose; verified no `.env` was ever tracked in git history before making the switch | ✓ Good — CI-05 verified live via `gh api` branch protection, no historical-secrets exposure |
+| Neon's direct/unpooled connection string used for production `DATABASE_URL`, not the pooled one | `prisma migrate deploy` breaks against PgBouncer-pooled connections — a documented Neon+Prisma pitfall | ✓ Good — zero PgBouncer/prepared-statement errors in the live production build |
+| Rollback runbook (HEALTH-04) live-exercised against real Vercel deployment IDs, not just documented | A written-but-untested rollback procedure is not credibly "verified" for a go-live milestone | ✓ Good — real rollback/promote cycle confirmed via `vercel inspect` timestamps showing no rebuild occurred |
 
 ## Next Milestone Goals
 
-Deferred to v2+ (see `.planning/milestones/v1.0-REQUIREMENTS.md` and `.planning/milestones/v1.2-REQUIREMENTS.md` for full v2 lists and rationale):
+Deferred to v2+ (see `.planning/milestones/v1.0-REQUIREMENTS.md`, `.planning/milestones/v1.2-REQUIREMENTS.md`, and `.planning/milestones/v1.3-REQUIREMENTS.md` for full v2 lists and rationale):
 
 - RSON-V2-01: ambiguous/edge-case scenarios in the curated gallery (near-boundary head-on/crossing, Rule 17(a)(ii) doubt situations)
 - SCEN-V2-01: auto-generated social preview image (OG image) per shared scenario
-- CI-01: GitHub Actions workflow running lint + typecheck + test + build on every PR, with a status badge in the README
-- HOOKS-01: Husky + lint-staged pre-commit hooks
-- DOCS-CONTRIB-01: `CONTRIBUTING.md`
 - FMT-01: repo-wide Prettier reformatting pass (scoped to new/touched files only if pursued)
 - RFCT-V2-01: `ChipRow.tsx` extraction and a `SandboxContainer` header-block split
+- HEALTH-CI-01: add automated CI regression coverage for `/api/health` (currently invisible to `vitest.config.ts`'s `src/**` glob) — tech debt carried from v1.3
+- DEPENDABOT-01: Dependabot config for automated dependency update PRs (deferred from v1.3)
+- AUDIT-01: non-blocking `npm audit --audit-level=high` CI step (deferred from v1.3)
+- ADR-CD-01: ADR entry documenting the CD-mechanism decision, host-native vs. Actions-driven deploy (deferred from v1.3)
+- PREVIEW-01: PR preview deployments, free via Vercel's own git integration (deferred from v1.3)
 
 ## Evolution
 
@@ -164,4 +178,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-20 — Milestone v1.3 CI/CD & Deployment started: GitHub Actions CI/CD, live deployment with production Postgres, Husky/lint-staged, and CONTRIBUTING.md. v1.2 Tech Debt & Stabilization archived and shipped 2026-07-20 — all 4 phases (10-13) complete, 22/22 v1.2 requirements validated across 18 plans (2026-07-19 → 2026-07-20). v1.0 shipped all 6 functional requirements across 5 phases / 19 plans (2026-07-14 → 2026-07-18); v1.1 re-implemented the entire front end against an imported Claude Design file using shadcn/ui across 4 branch+PR phases (2026-07-18 → 2026-07-19, 166 commits, 215 files changed), no functional/REQ-ID changes, presentation layer only, 19/19 requirements validated.*
+*Last updated: 2026-07-22 after v1.3 milestone. v1.3 CI/CD & Deployment shipped 2026-07-22 — both phases (14-15) complete, 17/17 v1.3 requirements validated across 9 plans (2026-07-20 → 2026-07-22): GitHub Actions CI/CD, live Vercel+Neon deployment, Husky/lint-staged, and CONTRIBUTING.md, all verified against real infrastructure. v1.2 Tech Debt & Stabilization shipped 2026-07-20 — all 4 phases (10-13) complete, 22/22 v1.2 requirements validated across 18 plans (2026-07-19 → 2026-07-20). v1.0 shipped all 6 functional requirements across 5 phases / 19 plans (2026-07-14 → 2026-07-18); v1.1 re-implemented the entire front end against an imported Claude Design file using shadcn/ui across 4 branch+PR phases (2026-07-18 → 2026-07-19, 166 commits, 215 files changed), no functional/REQ-ID changes, presentation layer only, 19/19 requirements validated.*

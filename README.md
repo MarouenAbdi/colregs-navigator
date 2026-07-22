@@ -13,9 +13,8 @@ specific rule citation and geometric reasoning behind it.
 Prerequisites:
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or an equivalent local
-  Docker daemon) -- provides the local Postgres database. **There is no hosted/live deployment
-  for this milestone** -- the project is demoed via local run instructions only, not a hosted
-  live link (local Docker Postgres only, no Neon/Supabase or other managed DB).
+  Docker daemon) -- provides the local Postgres database for development and tests. See
+  "Deployment" below for the live, hosted production instance.
 - Node.js 22+
 
 Steps, in order:
@@ -58,6 +57,10 @@ Vercel CLI and a real external HTTP request, not just a green build log:
   GitHub Actions scoped to CI only.
 - The same `.nvmrc` this repo already uses for CI is what Vercel resolves its Node version from --
   no separate host-specific Node version configuration was needed.
+- confirmed HEALTH-03: after an 8+ hour idle window with zero traffic (from the last live action
+  at 13:42 UTC 2026-07-21 through the check at 08:11 UTC 2026-07-22), `/api/health` returned 200
+  `{"status":"ok"}` in `2.875084s` -- elevated latency consistent with a Vercel cold start plus a
+  Neon compute wake from its free-tier auto-suspend, not a failure.
 
 ### Rollback Procedure
 
