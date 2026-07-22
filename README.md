@@ -58,6 +58,10 @@ Vercel CLI and a real external HTTP request, not just a green build log:
   GitHub Actions scoped to CI only.
 - The same `.nvmrc` this repo already uses for CI is what Vercel resolves its Node version from --
   no separate host-specific Node version configuration was needed.
+- confirmed HEALTH-03: after an 8+ hour idle window with zero traffic (from the last live action
+  at 13:42 UTC 2026-07-21 through the check at 08:11 UTC 2026-07-22), `/api/health` returned 200
+  `{"status":"ok"}` in `2.875084s` -- elevated latency consistent with a Vercel cold start plus a
+  Neon compute wake from its free-tier auto-suspend, not a failure.
 
 ### Rollback Procedure
 
