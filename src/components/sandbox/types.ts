@@ -68,3 +68,30 @@ export interface SandboxContainerProps {
   // scenario is loaded (D-02).
   banner?: { label: string; rationale?: string };
 }
+
+// Phase 18's on-chart header/footer strips and floating vessel-control
+// overlay (SBOX-06/07/08) -- ChartPanelProps itself is extended later, in
+// Plan 18-03, alongside its actual consumption in ChartPanel.tsx.
+export interface ChartHeaderStripProps {
+  vesselA: Vessel;
+  vesselB: Vessel;
+  classification: ClassificationResult;
+  isDegenerate: boolean;
+}
+
+export interface ChartFooterStripProps {
+  vesselA: Vessel;
+  vesselB: Vessel;
+  classification: ClassificationResult;
+  isDegenerate: boolean;
+}
+
+export interface VesselOverlayCardProps {
+  label: VesselLabel;
+  letter: "A" | "B";
+  vessel: Vessel;
+  classification: ClassificationResult;
+  onVesselSpeedChange: VesselUpdateHandlers["onVesselSpeedChange"];
+  onVesselTypeChange: VesselUpdateHandlers["onVesselTypeChange"];
+  onClose: () => void;
+}
