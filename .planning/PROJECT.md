@@ -6,6 +6,19 @@
 
 **Next:** Planning next milestone — see Next Milestone Goals below.
 
+## Current Milestone: v1.4 Design Sync (Sandbox & Gallery)
+
+**Goal:** Re-sync the front end against the updated Claude Design file (`COLREGS Navigator (shadcn).dc.html`, same `claude.ai/design` project `c265c047-81a0-4446-bdf3-95d434adc3dc` used for v1.1) — restructure the Sandbox around the design's merged header/footer command strips and on-chart vessel overlays, add the net-new Guided Tour, replace the Gallery card's navigate-to-page click with an in-place "Try on Sandbox" load, and sync the Hero preview card's visual details. No domain/rules-engine logic changes.
+
+**Target features:**
+- Sandbox: merge `VerdictBanner` + risk badge into one chart header strip; merge `InstrumentReadouts` + per-vessel required-action text into one chart footer strip; replace the side `ControlPanel` with on-chart floating vessel-control overlays (opens on vessel click); replace vertical `ReasoningTrail` with horizontal "NAV DECISION CHAIN" connected node-cards
+- Remove the inline 6-chip preset row from Sandbox entirely
+- Net-new Guided Tour: 6-step modal walkthrough, triggered by a new "How to read this" button
+- Gallery: `GalleryCard` drops its whole-card `Link` to `/s/{id}`; replaced by a hover-reveal "Try on Sandbox" button that loads the scenario into the homepage Sandbox state and smooth-scrolls to it (no page navigation)
+- Hero preview card: sync visual details (bezel accents, radar sweep, readout styling) to the updated design, still fully static/fixture-driven
+
+**Locked decisions:** Match the design exactly on all three scope questions raised during milestone scoping — Guided Tour is in scope (not deferred), the chip row is removed (not kept alongside Gallery), and Gallery fully switches to load-in-place (not both Link + button). Zero change to `classifyEncounter()`/domain logic — presentation layer only, same pattern as v1.1.
+
 <details>
 <summary>v1.3 milestone details (shipped 2026-07-22)</summary>
 

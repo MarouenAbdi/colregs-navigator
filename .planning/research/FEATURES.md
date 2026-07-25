@@ -1,200 +1,151 @@
 # Feature Research
 
-**Domain:** CI/CD pipeline, pre-commit hooks, and deployment for a solo-authored portfolio full-stack app (Next.js/tRPC/Prisma/PostgreSQL)
-**Researched:** 2026-07-20
-**Confidence:** HIGH (CI/CD structure, Husky/lint-staged division, badges — well-documented, multi-source corroborated) / MEDIUM (Vercel-vs-Actions redundancy specifics, health-check conventions — fewer authoritative primary sources, but internally consistent across sources)
+**Domain:** Web app UI patterns — guided product tour, on-canvas contextual control overlay, load-example-into-live-workspace
+**Researched:** 2026-07-25
+**Confidence:** MEDIUM-HIGH (Radix/shadcn primitive behavior verified via Context7/official source = HIGH; general UX pattern conventions cross-referenced across 3+ independent sources = MEDIUM; no single canonical spec exists for "load example into workspace," so that section is pattern-synthesis, not a documented standard = MEDIUM)
 
 ## Scope Note
 
-This document supersedes the prior FEATURES.md (v1.2 Tech Debt & Stabilization — lint/hygiene tooling landscape) for this milestone. v1.3's feature landscape is CI/CD, pre-commit hooks, and deployment — a different domain than v1.2's lint/refactor hygiene, though the same "reviewer is a tech lead/interviewer, not a real team of users" framing applies and is carried forward below. Prior milestones' UI/domain-feature research (v1.0, v1.1) and lint-tooling research (v1.2) remain valid for their own milestones and are not re-litigated here.
-
-## Context Check Against Existing Codebase
-
-`package.json` already defines `lint`, `typecheck`, `test`, and `build` npm scripts (added across v1.0–v1.2). This milestone's CI work is **wiring existing scripts into a pipeline**, not creating new checks. This matters for complexity ratings below — "add lint to CI" is LOW complexity here specifically because the lint config, ESLint bypass workaround (`@next/eslint-plugin-next` + `@babel/eslint-parser`), and `tsc --noEmit` typecheck script already exist and are known-working locally.
-
-## Framing
-
-The reviewer here is a tech lead or interviewer skimming the repo, not a real multi-contributor team relying on these processes daily. Their signal for "professional DevOps practice" is: does the pipeline demonstrate the author understands what a real team's setup looks like and can build one, correctly sized for a solo two-person-max audience (author + reviewer)? Over-scoping (Kubernetes, staging environments, secrets managers for a repo with one contributor and one deployed instance) reads as cargo-culting/resume-driven development just as visibly as under-scoping (no CI at all) reads as unfinished. This is why the anti-features list below is as long and specific as the table-stakes list — proportional judgment is itself the thing being evaluated in this milestone, not tool-checklist completion.
+This document supersedes the prior FEATURES.md (v1.3 CI/CD & Deployment — pipeline/hosting feature landscape) for this milestone. v1.4's feature landscape is three specific front-end UI patterns net-new to this app (Guided Tour modal, on-chart contextual vessel overlay, Gallery load-in-place), matched against the locked v1.4 Design Sync scope in PROJECT.md. Prior milestones' research (CI/CD in v1.3, lint-tooling in v1.2, UI redesign in v1.1, core domain features in v1.0) remain valid for their own milestones and are not re-litigated here. No domain/rules-engine feature research is included — PROJECT.md and CLAUDE.md are both explicit that v1.4 makes zero change to `classifyEncounter()`/domain logic.
 
 ## Feature Landscape
 
-### Table Stakes (A Reviewer Expects These)
+### Table Stakes (Users Expect These)
 
-Features a technical interviewer/tech lead would expect from a "professional engineering practices" showcase. Missing these makes the DevOps signal feel incomplete or performative.
+Features users assume exist for each of the three new patterns. Missing these makes the feature feel broken or unfinished, not just "less polished."
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| GitHub Actions CI workflow: lint + typecheck + test + build, on every PR | This is the baseline signal of "CI exists" — a reviewer opening the Actions tab or a PR expects to see these four gates, all already scripted locally | LOW | One `.github/workflows/ci.yml` calling existing `npm run lint`/`typecheck`/`test`/`build`. No new tooling to write. |
-| CI triggers on `pull_request` (to `main`) AND `push` to `main` | PRs need pre-merge gating; a direct push to main (rare but possible) still needs the same gate re-run post-merge for badge accuracy | LOW | Standard `on: { pull_request: { branches: [main] }, push: { branches: [main] } }` — avoids the common gap where main's badge goes stale because CI only ever ran on PR branches |
-| Dependency caching (`actions/setup-node` with `cache: npm`, or lockfile-keyed cache) | Table stakes for not looking careless about pipeline speed; a 3-5 min CI run vs a 40s one is a visible signal of polish | LOW | Built into `actions/setup-node@v4`'s `cache: 'npm'` option — a single line, not a separate caching strategy to design |
-| Required status checks on `main` (branch protection) | Without this, a red CI run doesn't actually block a merge — the pipeline is theater. Branch protection is the difference between "CI runs" and "CI enforces" | LOW | GitHub repo setting (Settings → Branches → protect `main`, require the CI workflow's job(s) to pass). Zero code — a checklist/documentation item for the CD/CI phase, not a code deliverable, but must be explicitly done and verified, not assumed. |
-| README CI status badge | The single most common, most-expected visual signal of "this repo has CI" — nearly universal on maintained GitHub repos | LOW | `![CI](https://github.com/<owner>/<repo>/actions/workflows/ci.yml/badge.svg)`, optionally wrapped in a link to the workflow run. Confirmed syntax via GitHub Docs. |
-| Continuous Deployment: auto-deploy to production on merge to `main` | Explicitly locked in PROJECT.md ("CD means real auto-deploy on merge to main, not a manual/staged release process") — this is the difference between a CI-only repo (common) and a CI/CD repo (the stated goal) | LOW–MEDIUM | See "CD pattern" discussion below — the *mechanism* (host-native Git integration vs. Actions-driven deploy) is the open design question, not whether auto-deploy-on-merge happens at all. |
-| `prisma migrate deploy` run against production DB as part of the deploy step | A real production Postgres DB (per PROJECT.md's "live deployment... backed by a real production Postgres database") needs its schema kept in sync on every deploy — this is the standard, Prisma-documented CI/CD pattern, not an extra | MEDIUM | Confirmed via Prisma's own docs: `migrate deploy` (not `migrate dev`) is the CI/CD-safe, non-interactive command; needs `DATABASE_URL` as a CI secret. Prisma's own guidance also flags a real gotcha: concurrent merges within its 10s advisory-lock window — irrelevant at solo-author scale but worth a one-line note in docs so it doesn't read as an oversight. |
-| A basic health/status signal for the live deployment | A reviewer clicking the live URL expects some evidence the deployed instance is genuinely wired to its production DB, not just serving static pages | LOW | A `GET /api/health` (or `/api/trpc/health`) route doing a lightweight `SELECT 1`/`prisma.$queryRaw` check, returning `200`/`503` with `{status, timestamp}`. Keep it a plain JSON endpoint, not a dashboard — see anti-features below for what NOT to build here. |
-| Husky + lint-staged pre-commit hook running lint/format on staged files only | This is the standard, near-universal pattern in any JS/TS repo claiming git hygiene discipline; a portfolio repo with `CLAUDE.md`-documented conventions but no enforcement at commit-time reads as inconsistent | LOW | `npx husky init`, `lint-staged` config running `eslint --fix` (staged `.ts/.tsx` only) — reuses the already-working `eslint` config, no new lint rules to write |
-| `CONTRIBUTING.md` with setup, workflow, and code-style sections | Explicitly locked as a target feature (`DOCS-CONTRIB-01`); a reviewer treating the repo as an "open-source-style" portfolio artifact expects this file to exist and be genuine, not boilerplate | LOW | See detailed section breakdown below |
-| Documented rollback / "what happens on a broken deploy" note | Not a feature to build, but a documentation table-stake: a tech lead reviewing DevOps maturity will ask "what's your rollback story?" — for a portfolio project, "the host's dashboard lets you re-promote a prior deployment in one click" is a legitimate, sufficient answer if written down | LOW | Documentation only (README or CONTRIBUTING) — no pipeline code required if you pick a host with one-click rollback (Vercel/Railway/Render/Netlify all have this natively) |
+| Tour: Back/Next/Skip on every step (except first has no Back, last has "Done" not "Next") | Standard modal-walkthrough convention across SaaS onboarding (Appcues, Whatfix, UserGuiding all converge on this) | LOW | Trivial state machine: `currentStep: number`, clamp at bounds |
+| Tour: step-dot progress indicator, current step visually distinct | Users expect to see "how much is left" — a bare modal with no progress cue reads as an unbounded interruption | LOW | Simple, `steps.map(i => <Dot active={i === current} />)` |
+| Tour: Escape key closes it, and clicking the backdrop/outside closes it | Universal modal convention; both are separate dismiss paths users independently reach for | LOW | Native `<dialog>`/Radix `Dialog` gives this for free — see Architecture note |
+| Tour: focus is trapped inside the modal while open, and returns to the trigger button ("How to read this") on close | WCAG 2.1.2 / ARIA APG modal dialog pattern — screen-reader and keyboard-only users are otherwise stranded or lost in background content | MEDIUM | Radix `Dialog` (which shadcn's `Dialog` wraps) does this automatically per Context7-verified source (`FocusScope trapped`, background `aria-hidden`/inert) — do not hand-roll |
+| Tour: does not re-trigger automatically on every visit once seen | Repeat visitors find an auto-popping tour on every page load actively hostile | LOW | Persist a "seen" flag; for a no-auth/no-account, link-shareable portfolio app, `localStorage` is sufficient — no need for a DB-backed per-user flag |
+| Tour: manually re-launchable via a persistent, always-visible button ("How to read this") | Users who skipped or want a refresher need a way back in; if the only entry point is a one-time auto-launch, the feature becomes unreachable after first dismissal | LOW | Already locked into scope per PROJECT.md — the button itself is the re-trigger path, no auto-launch needed at all for this milestone |
+| On-chart overlay: dismissed by clicking outside it | Baseline popover/contextual-menu convention users apply everywhere (Figma, Miro, GitHub's PR review popovers, native `<select>`) | LOW | Radix `Popover`'s `DismissableLayer` gives `onPointerDownOutside` dismissal by default — confirmed via Context7 |
+| On-chart overlay: dismissed by pressing Escape | Same universal expectation as any transient overlay | LOW | Also default behavior of Radix's `DismissableLayer` (`onEscapeKeyDown` wired to the same `onDismiss`) |
+| On-chart overlay: re-selecting the same vessel toggles it closed; selecting the other vessel moves the overlay there (does not stack two overlays) | Users expect a single "currently selected thing has one active editor," not accumulating overlays — this matches the existing single-selection mental model already implied by "opens on vessel click" | LOW-MEDIUM | Because this project has exactly 2 selectable targets, model as one piece of state: `selectedVesselId: 'A' \| 'B' \| null`, not two independent open booleans — prevents an entire class of "both overlays open" bugs |
+| On-chart overlay: positioned near the selected vessel, not in a fixed page location | If it doesn't visually track the vessel it edits, users lose the "this control belongs to that shape" association the whole point of on-chart controls is to create | MEDIUM | Requires anchoring the overlay's floating position to the vessel's *current* screen coordinates (which change as the vessel is dragged) — Radix Popover supports a controlled `open` state and (per Radix Popper primitives) an `Anchor` element separate from the `Trigger`, which is the correct primitive for "position relative to an SVG element the user clicked," not the popover's own hidden trigger button |
+| Gallery card: clear, discoverable CTA for "load this into the sandbox" (not just an ambiguous hover-only affordance) | If the only way to discover the action is hovering (esp. on touch, where hover doesn't exist), touch/mobile users have no path to the feature at all | MEDIUM | This is a **flagged risk**, not just a note — see Pitfall below; hover-reveal alone fails on touch devices |
+| Gallery card → Sandbox: page auto-scrolls to bring the now-updated Sandbox into view after load | If the Sandbox is below the fold (which it structurally is — Gallery is below Sandbox on the home page per PROJECT.md's existing layout) and the state updates invisibly off-screen, users have no feedback that the click did anything | LOW-MEDIUM | `scrollIntoView({ behavior: 'smooth', block: 'start' })` on the Sandbox container ref, triggered after state update commits |
+| Gallery card → Sandbox: some visible acknowledgment that new data loaded (brief highlight/flash, or the scroll itself as the only cue) | Without *some* signal, a user who was already looking at the Sandbox (post-scroll, or on a tall viewport where both are visible) may not notice the vessel positions changed | LOW | Cheapest version: reuse whatever "state just changed" visual language the Sandbox already has, if any; otherwise a brief container flash/ring is the standard minimal solve |
 
-### Differentiators (Signal Above the Baseline)
+### Differentiators (Competitive Advantage)
 
-Not required to look "CI/CD exists," but these are what separate "checked a box" from "understands tradeoffs" — valuable specifically because this milestone's stated purpose is demonstrating *judgment*, not just tool usage.
+Not required for the pattern to "work," but meaningfully improve the portfolio-quality feel, and align with the project's Core Value (explainability of a rules engine) rather than generic feature-completeness.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Explicit "why we don't run a redundant Actions deploy step" note in docs, if using host-native Git integration | Shows the interviewer the engineer understands *when a tool should defer to a platform feature* rather than defaulting to "more pipeline = more impressive" — a senior-engineer signal, directly aligned with this project's existing "justify every abstraction and dependency" persona | LOW (documentation only) | See CD pattern discussion below — this is a near-zero-cost differentiator: one paragraph in README/CONTRIBUTING explaining the deploy architecture choice |
-| PR preview deployments (ephemeral URL per PR) | Lets a reviewer click a live preview of a specific PR's changes without pulling the branch locally — a genuinely useful, low-effort differentiator if the chosen host supports it out of the box | LOW (if host-native, e.g. Vercel/Netlify preview deploys) / not worth building manually | Free with Vercel/Netlify's native GitHub integration — do not hand-roll this with GitHub Actions if the host already does it; that would itself become the "redundant Actions deploy step" anti-pattern |
-| lint-staged running `tsc --noEmit` scoped only on genuinely fast paths, OR explicitly deferring full typecheck to CI with a documented rationale | Shows deliberate reasoning about the commit-time/CI-time tradeoff (many teams get this wrong by cramming full-repo typecheck into pre-commit and then quietly bypassing hooks when it gets slow) rather than cargo-culting a "kitchen sink" hook | LOW | Given this codebase's TypeScript 7.0.2/tsgo setup already has a known-fast `npm run typecheck`, benchmark it once; if it's fast (seconds, not tens of seconds) it's reasonable to include at pre-commit — document the decision either way in `CONTRIBUTING.md` |
-| A short "Architecture / Deployment" ADR-style doc entry specifically for the CI/CD decision (host choice, DB choice, deploy trigger mechanism) | PROJECT.md already commits this project to maintaining ADRs; adding one for this milestone's stack choice (which host? why?) is directly aligned with an existing project convention, not a new ask | LOW | Reuses the existing ADR practice — no new documentation format to invent |
-| `npm audit`/dependency vulnerability check as a non-blocking CI step (e.g. `npm audit --audit-level=high` reporting only, not failing the build) | Shows baseline security awareness without over-engineering a full SCA/Dependabot program | LOW | Optional, cheap addition; keep non-blocking (report-only) so a third-party CVE in a dev-dependency doesn't block ship-ability of a portfolio demo |
-| Dependabot (GitHub-native, zero-config) enabled for `npm` ecosystem | GitHub-native automated dependency PRs is a one-file (`dependabot.yml`) addition that reads as "keeps dependencies current" without building any custom tooling | LOW | Native GitHub feature, not a pipeline you build — appropriately scoped differentiator (shows awareness, costs almost nothing) |
+| Tour steps use real illustrations of *this app's actual chart UI* per step, not generic icon art | Generic onboarding libraries (Shepherd, Intro.js, Joyride) default to pointing arrows/tooltips at live DOM; a bespoke modal-with-illustration (as scoped) instead teaches the mental model (bearing lines, give-way color, decision-chain) which is the app's actual differentiator — worth the extra design effort here specifically | MEDIUM | Directly supports Core Value: teaching the *reasoning*, not just "here's a button" |
+| On-chart overlay content is scoped exactly to what's editable for that vessel (position/heading/speed/type) and nothing else — no generic "properties panel" chrome | A minimal, vessel-specific control surface (vs. porting the old side `ControlPanel`'s full layout into a popover) is what actually earns the "on-chart" framing rather than just moving the same panel to float | LOW-MEDIUM | This is presentation-layer work per the milestone's own framing — resist scope creep into new controls |
+| "Try on Sandbox" preserves current scroll-restoration/URL state cleanly (no page nav, no history entry added) so back-button behavior is unaffected | A load-in-place pattern that quietly pushes a new history entry (or worse, still navigates) breaks the "single page app doesn't navigate" promise that's the entire point of switching away from `Link`-per-card | LOW | Simple to get right (just call state setters + `scrollIntoView`, no `router.push`), easy to get wrong if any old routing logic is left half-removed |
 
-### Anti-Features (Would Read as Overengineered / Resume-Driven for This Project's Scope)
+### Anti-Features (Commonly Requested, Often Problematic)
 
-Features that are legitimate at larger scale but would actively hurt the "credible, right-sized engineering judgment" signal this milestone is going for — a tech lead reviewing this repo would read these as "doesn't understand proportionality," not "impressive."
+Patterns that look like the "obvious" implementation of this milestone's three features but create real problems for this project's scale and constraints.
 
-| Feature | Why It Looks Appealing | Why Problematic Here | Alternative |
-|---------|------------------------|-----------------------|-------------|
-| Manual GitHub Actions deploy step (build + push) running *alongside* the host's native Git integration (e.g. Vercel) | Feels like "more pipeline = more DevOps credit" | Produces duplicate builds, race conditions, and doubled build minutes — confirmed as a known anti-pattern; the fix (disabling the host's auto-deploy via `ignoreCommand` in `vercel.json`, or vice versa) is itself evidence the engineer didn't think through the interaction before shipping it | Pick exactly one deploy mechanism: either the host's native Git integration (recommended default for a Next.js-on-Vercel-style host — zero custom deploy code, preview URLs for free) OR a GitHub Actions deploy step with the host's auto-deploy explicitly disabled — never both |
-| Multi-environment staging + production pipeline (separate staging DB, staging URL, promotion gate between them) | Mirrors what "real" companies do, feels senior | This is a solo-authored portfolio project with a single reviewer-facing production instance; a staging environment with no team to protect and no real users to canary against is pure process overhead that will visibly sit unused — a reviewer will notice an empty/never-touched staging environment faster than they'd be impressed by its existence | One production environment; PR preview deployments (via the host's native feature, not hand-built) already cover the "see changes before merge" need without a second persistent environment |
-| Kubernetes / containerized deployment (Docker + k8s manifests + Helm) | Classic "resume-driven development" flag — reads as chasing keywords rather than solving this project's actual deployment problem | A single Next.js app + one Postgres instance has zero orchestration, scaling, or multi-service needs that Kubernetes exists to solve; adding k8s here is the textbook definition of a solution in search of a problem, and a technical interviewer will immediately ask "why does a 2-vessel portfolio app need pod autoscaling?" — a question with no good answer | Any PaaS/serverless-friendly host with native Next.js support (Vercel, Netlify, Railway, Render) — zero infra-as-code needed |
-| Blue-green / canary deployments, traffic-shifting, feature-flag-gated rollout | Sounds like "modern 2026 best practice" (some current-year DevOps content pushes this framing) | This is infrastructure for de-risking deploys to real concurrent user traffic at scale; a portfolio demo with intermittent single-reviewer traffic has no risk profile that justifies it, and building it would visibly not have been "tested" in any real sense | Simple full-replace deploy on merge; rollback via host's one-click "promote a previous deployment" feature is a sufficient, honest answer to "what if a deploy breaks prod" |
-| Custom secret-rotation tooling / a secrets manager (Vault, AWS Secrets Manager, etc.) | Sounds like "security maturity" | For a single `DATABASE_URL` and maybe one or two API keys stored as GitHub Actions secrets + the host's environment variable dashboard, a dedicated secrets-management system is solving an organizational-scale problem (many services, many rotating credentials, compliance requirements) this project doesn't have | GitHub Actions encrypted secrets + host's built-in environment variable store; document rotation as "regenerate the credential, update the two places it's stored" — a one-sentence policy, not a system |
-| A custom-built CI dashboard / Grafana/Prometheus observability stack | Feels like "full DevOps" | Massive overkill for a project whose "operational" surface is one Next.js app and one Postgres instance with no SLA and no on-call — this is the single clearest "resume-driven, didn't right-size to the problem" tell a reviewer would flag | The GitHub Actions tab (workflow history) + the `/api/health` endpoint + the host's own built-in deployment/runtime logs (Vercel/Railway/Render all ship this natively) are sufficient observability for this scope |
-| Matrix build strategy across multiple Node.js versions / OSes | Common CI pattern shown in generic tutorials | This is a single-stack, single-deployment-target app (Next.js only runs where you deploy it — one Node version, one OS). A matrix here tests nothing real; it multiplies CI minutes for zero risk-coverage benefit, since there is no library-consumer audience running arbitrary Node versions against this code | Pin one Node LTS version (matching the deployment host's runtime) in a single job; no matrix needed. (Contrast: matrix strategy earns its keep for published npm packages supporting multiple consumer environments — not the case here.) |
-| Full-repo `tsc --noEmit` + full test suite crammed into the Husky pre-commit hook (not lint-staged-scoped) | Feels like "maximum enforcement" | Multiple independent sources agree this is the most common Husky/lint-staged anti-pattern: slow, ambitious pre-commit hooks train developers to reach for `--no-verify`, which defeats the entire point of having hooks | Keep pre-commit to lint-staged's fast, staged-file-scoped checks (ESLint --fix, maybe Prettier if added); leave full typecheck + full test suite as CI-only gates (already true here — `npm run typecheck`/`npm run test` are the CI job steps, not the hook) |
-| A separate `pre-push` hook running the full test suite, in addition to the CI gate | Sounds like "extra safety layer" | Duplicates work CI already does authoritatively (CI is the real enforcement point since branch protection requires it), while adding local friction on every push — a false sense of thoroughness without new coverage | Skip a pre-push hook entirely; rely on the CI-required-status-check as the single source of truth for "did it pass," matching the "local hooks are fast/staged-only, CI is exhaustive/authoritative" split documented by multiple sources above |
-
-## CD Pattern Decision (Directly Answers the Milestone's Open Design Question)
-
-Research strongly converges on: **for a Next.js app, prefer the hosting platform's native Git integration (e.g. Vercel's GitHub App) for the actual deploy, and let GitHub Actions own only CI (lint/typecheck/test/build) plus, if a separate production Postgres needs schema sync, a `prisma migrate deploy` step.**
-
-- Running a hand-rolled GitHub Actions deploy step *and* leaving the host's native auto-deploy-on-push enabled at the same time is a confirmed, named anti-pattern (duplicate builds, race conditions) — multiple sources agree the fix is to explicitly disable one side (e.g., Vercel's `ignoreCommand` in `vercel.json`, or disabling GitHub Actions deploy in favor of the host).
-- Actions-driven deploy is legitimate specifically when you need "full control over the CI/CD pipeline" or are on GitHub Enterprise Server without native Git integration access — neither applies to a solo GitHub.com portfolio repo, so it's not the right default here.
-- **Recommendation for this project:** if the chosen host (per the separate hosting-platform research) has first-class Next.js Git integration (Vercel is the most likely candidate given Next.js is built by Vercel), use that for the actual "auto-deploy on merge to main" mechanism, and scope the GitHub Actions workflow to CI checks + the `prisma migrate deploy` step (run before or alongside the platform's build, via a documented ordering — e.g., a build hook or a dedicated Actions job gated on CI passing). This satisfies PROJECT.md's "CD means real auto-deploy on merge to main" requirement (the deploy is still automatic and still triggered by the merge) while avoiding the redundant-deploy-step anti-pattern.
-- If the chosen host instead has weak/no native Git integration, a GitHub Actions deploy job becomes the correct (not redundant) choice — this is a genuine either/or decision to make once the hosting platform is selected, not a "always add both" default.
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|------------------|-------------|
+| Pulling in a full onboarding-tour library (Shepherd.js, Intro.js, React Joyride, driver.js) for the Guided Tour | "Why hand-roll a wizard when libraries exist for exactly this" | These libraries are built for *spotlight/tooltip tours that point at live DOM elements* (with all the associated scroll-into-view, resize-observer, and z-index-stacking complexity that implies) — this milestone's scope is explicitly a **self-contained 6-step modal walkthrough with per-step illustrations**, i.e. closer to a plain paginated dialog than a DOM-spotlight tour. Adding a dependency for a fixed, small, non-DOM-anchored step sequence fails this project's own "justify every dependency" persona test, and duplicates work `Dialog` (already in the shadcn/ui set) + a `currentStep` state already does | A plain shadcn/ui `Dialog` + local step-array state + Back/Next/Skip buttons + dot progress — no new dependency |
+| Making the on-chart overlay a fully generic, reusable "floating panel" component abstraction from day one | DRY instinct — "vessel A and vessel B will both need this, so build the generic version first" | This project's own established convention (Phase 6, restated in CLAUDE.md: "don't pre-abstract... only move something there once a second real consumer actually needs it") argues against inventing a speculative generic floating-panel primitive before the two-vessel case proves out the actual shared shape; premature abstraction here risks guessing the wrong API surface (anchor logic, controlled-open logic) before it's been exercised twice | Build it once for the vessel-overlay use case (parameterized over vessel A/B per the existing "no duplicated JSX" convention), extract a shared primitive only if a third on-chart overlay consumer appears later |
+| Hover-only "Try on Sandbox" reveal with no persistent/always-visible affordance | Visually cleaner card in its default (unhovered) state — common in desktop-first template galleries (e.g. Canva-style "hover a template thumbnail to reveal the CTA") | Hover has no equivalent on touch input — a touch user gets no visible CTA at all unless the card is tapped first to simulate a hover state (inconsistent, easy to miss), which silently locks mobile/tablet users out of the feature entirely; also fails basic keyboard-only navigation (no visible focus-triggered reveal) unless explicitly built in | Reveal the CTA on hover **and** on keyboard focus (`:focus-within`) **and** always-show it (even subtly, e.g. lower opacity) on touch/coarse-pointer media queries (`@media (hover: none)`) — this is a known, solvable CSS pattern, not a reason to avoid the hover-reveal aesthetic entirely |
+| Tour auto-launching on every first visit without an explicit trigger, PLUS the required manual "How to read this" button | "Maximize activation" — many SaaS onboarding guides recommend auto-launching on first session | This milestone's locked scope is a manually-triggered tour only ("triggered by a new 'How to read this' button") — auto-launch is out of scope and would need its own `localStorage`-driven "seen" gate, first-visit detection, and a decision about interrupting a fresh visitor before they've even seen the Hero/Sandbox — meaningfully more design surface than what's scoped | Ship the manual-trigger button only, as locked; auto-launch-on-first-visit is a legitimate v2 candidate but a separate decision, not bundled into this milestone |
+| Building the "load example into workspace" data flow through a full page navigation + query-param + `useEffect`-on-mount rehydration (i.e., keep `/s/{id}` as the loader, just auto-navigate back to `/#sandbox`) | Reuses the existing `/s/{id}` scenario-loading code path that's already built and tested, feels lower-risk than writing a new same-page loader | This is exactly the pattern being explicitly removed this milestone ("no page navigation") — round-tripping through a route defeats the goal (perceived instant, in-place load) and reintroduces a page transition/flash the design is trying to eliminate | Call the same domain-level "load scenario into sandbox state" function directly from the Gallery card's click handler, in-process, no route change — see Architecture dependency note below |
 
 ## Feature Dependencies
 
 ```
-GitHub Actions CI (lint+typecheck+test+build)
-    └──requires──> existing npm scripts (lint, typecheck, test, build) — already present, zero new tooling
+[Guided Tour: modal shell + step state]
+    └──requires──> [shadcn/ui Dialog primitive already in the stack]
+                       (no new dependency — Dialog ships with the existing shadcn/ui set)
 
-Branch protection (required status checks)
-    └──requires──> GitHub Actions CI workflow existing and passing at least once
+[On-chart vessel control overlay]
+    └──requires──> [Vessel selection state: selectedVesselId: 'A' | 'B' | null]
+                       └──requires──> [Existing per-vessel position/heading/speed/type state
+                                        already owned by useSandboxState() (per v1.2 refactor)]
+    └──requires──> [Anchor-to-live-coordinate positioning
+                     (vessel's current screen position, which changes on drag)]
 
-README CI badge
-    └──requires──> GitHub Actions CI workflow committed with a stable workflow file name/path
+[Gallery "Try on Sandbox" load-in-place]
+    └──requires──> [A same-page, callable "load scenario data into Sandbox state" function
+                     that does NOT go through /s/{id} routing]
+                       └──requires──> [Sandbox state to be lifted/reachable from the Gallery
+                                        section's parent (both live on the same home page route
+                                        per the existing v1.1 layout — Gallery embedded below
+                                        Sandbox on '/')]
+    └──requires──> [scrollIntoView on a Sandbox container ref]
 
-CD (auto-deploy on merge to main)
-    └──requires──> hosting platform + production Postgres provider selected (separate research track)
-    └──requires──> GitHub Actions CI passing (deploy should be gated on CI, not parallel/independent)
-
-prisma migrate deploy (production schema sync)
-    └──requires──> production DATABASE_URL stored as a CI/host secret
-    └──requires──> CD mechanism decided (runs inside whichever pipeline owns the deploy — Actions job or host build hook)
-
-/api/health endpoint
-    └──requires──> production DB connection configured (it's checking that exact connection)
-    └──enhances──> CD confidence (a post-deploy smoke check a reviewer or you can hit manually)
-
-Husky + lint-staged pre-commit hook
-    └──requires──> existing ESLint config (already present) — no new lint rules needed
-    └──conflicts with──> stuffing full typecheck/test suite into the same hook (see anti-features)
-
-CONTRIBUTING.md
-    └──enhances──> README (should link out to it, not duplicate its content)
-    └──requires──> Husky/lint-staged setup decided (CONTRIBUTING should document the actual hook behavior, not an aspirational one)
+[Removing the 6-chip preset row]
+    └──conflicts-with-keeping──> [Gallery cards remaining Link-only]
+       (both are explicitly locked as mutually exclusive changes this milestone —
+        chip row removed, Gallery fully switches to load-in-place, not "both")
 ```
 
 ### Dependency Notes
 
-- **CD requires hosting platform selection first:** the CD mechanism (host-native Git integration vs. Actions-driven deploy) cannot be locked until the host is chosen — this is explicitly a research-then-decide item per PROJECT.md's locked decision ("hosting platform and Postgres provider are not pre-decided").
-- **`prisma migrate deploy` requires CD mechanism decided:** whether this step lives inside a GitHub Actions job or a host build-hook/command depends on which side owns the deploy trigger.
-- **CONTRIBUTING.md should be written after (or alongside) Husky/lint-staged, not before:** documenting hook behavior that doesn't match the shipped hook is worse than no documentation — sequence this file's pre-commit section last among the milestone's phases, or plan to revisit it once hooks are final.
-- **Branch protection conflicts with nothing but must not be skipped:** it's the one item on the table-stakes list that's pure GitHub configuration (no code, no PR) — worth calling out explicitly in the roadmap/requirements so it isn't silently dropped as "not a coding task."
-
-## CONTRIBUTING.md Table-Stakes Section Breakdown
-
-For a solo-authored-but-portfolio-quality repo, the file should be genuine (matches what actually happens in this repo) rather than a generic open-source boilerplate copy. Recommended sections, in order:
-
-1. **Intro/welcome** — one or two sentences: what this project is, that it's a portfolio project with a single maintainer, and what kind of contributions are realistically welcome (bug reports, small fixes, discussion — not large feature PRs from strangers, given the locked scope-discipline constraint in PROJECT.md)
-2. **Development environment setup** — link to README's existing setup instructions rather than duplicating them; add anything CONTRIBUTING-specific (e.g. how to get a local Postgres instance running against Prisma migrations)
-3. **Running checks locally** — the exact commands (`npm run lint`, `npm run typecheck`, `npm run test`, `npm run build`) a contributor should run before opening a PR — these are the same commands CI runs, stated explicitly so the loop is legible
-4. **Pre-commit hook behavior** — a short, accurate paragraph on what Husky/lint-staged actually does on `git commit` (which files, which checks) — written to match what's actually configured, not aspirational
-5. **Branch and commit conventions** — restates PROJECT.md's existing constraint ("feature branches, small logical conventional commits") so it's discoverable without reading internal planning docs
-6. **PR expectations** — what CI must pass before merge (branch protection), and an honest note on response time given single-maintainer reality (e.g. "reviewed on a best-effort basis")
-7. **Code style / architecture boundaries** — a pointer to the `src/domain/` architectural boundary (lint-enforced per v1.2) so a contributor understands the DDD-lite separation before touching domain code
-8. **Reporting bugs / requesting features** — standard GitHub issue-template pointer, kept lightweight
+- **On-chart overlay requires a single `selectedVesselId` state, not two independent booleans:** modeling "vessel A overlay open" and "vessel B overlay open" as separate flags allows an invalid state (both open) that a single selected-ID variable makes structurally impossible — cheaper to get right upfront than to patch later.
+- **On-chart overlay requires anchor-to-live-coordinate positioning:** because vessels are draggable, the overlay's popover anchor cannot be a static DOM ref set once at open-time — it must track the vessel's live screen position (the same `screenToChart()`/`chartToScreen()` transform functions this project already has per STACK.md's architecture note) each render while open, or use Radix's `Anchor` primitive re-pointed at the vessel's current bounding rect.
+- **Gallery load-in-place requires Sandbox state to be reachable without routing:** since Gallery is already embedded on the same home page below the Sandbox (v1.1's Phase 9 change), this is a lifting-state-up / shared-hook problem, not a cross-page data-passing problem — significantly simpler than it would have been before v1.1's Gallery-embedding change.
+- **Chip-row removal conflicts with keeping Gallery as pure `Link`:** explicitly locked as an either/or in PROJECT.md — both changes ship together, not incrementally, because leaving the old chip-based "load a preset" path alongside the new Gallery-based one would give users two inconsistent ways to load a scenario into the same Sandbox.
 
 ## MVP Definition
 
-### Launch With (v1.3 — this milestone)
+### Launch With (v1 of this milestone)
 
-Minimum viable CI/CD signal for a portfolio DevOps showcase — everything here maps directly to PROJECT.md's stated target features.
+- [ ] Guided Tour: shadcn `Dialog`-based 6-step modal, Back/Next/Skip, step-dot progress, per-step illustration slot, manual trigger only ("How to read this" button) — essential, this is the milestone's one net-new feature, explicitly locked in scope
+- [ ] Guided Tour: `localStorage`-based "seen" flag so it doesn't force-relaunch every visit, but is NOT wired to any auto-launch (manual trigger is the only launch path this milestone) — essential per locked scope; note this is deliberately the *minimum* viable persistence, not a decision to build auto-launch later without revisiting UX
+- [ ] On-chart vessel overlay: single `selectedVesselId` state, opens on vessel click, closes on outside-click/Escape/re-click-same-vessel, replaces the side `ControlPanel` — essential, directly named in Target features
+- [ ] Gallery card: hover-reveal CTA with `:focus-within` and touch-visible fallback (not hover-only) — essential; hover-only would silently break the feature on touch devices, which is not an acceptable MVP gap for a feature replacing a previously-working `Link`
+- [ ] Gallery load-in-place: direct state-setter call (no routing) + `scrollIntoView` to Sandbox — essential, this is the core ask of GAL card change
 
-- [ ] GitHub Actions CI: lint + typecheck + test + build on PR + push-to-main, with branch protection requiring it — this IS the "CI exists and is enforced" signal
-- [ ] README CI status badge — near-zero cost, universally expected
-- [ ] CD: auto-deploy to production on merge to `main`, via whichever mechanism (host-native or Actions) fits the selected hosting platform, with the redundant-dual-deploy anti-pattern explicitly avoided
-- [ ] `prisma migrate deploy` wired into the deploy path against the production Postgres instance
-- [ ] A minimal `/api/health` endpoint doing a real DB connectivity check — the honest, low-cost "is it actually working" signal for a live-linked portfolio deployment
-- [ ] Husky + lint-staged pre-commit hook (ESLint on staged files) — reuses existing lint config
-- [ ] `CONTRIBUTING.md` covering: intro/welcome, dev environment setup (link to README if duplicated), how to run tests/lint/typecheck locally, branch/commit conventions (matches PROJECT.md's existing "feature branches, small logical conventional commits" constraint), PR expectations, and a note on the pre-commit hook behavior
+### Add After Validation (v1.x)
 
-### Add After Validation (not required for milestone completion, cheap to add if time allows)
+- [ ] Auto-launch Guided Tour on genuine first visit (in addition to the manual button) — only add if user analytics/feedback shows most users never discover the manual trigger; requires its own first-visit-detection design, deliberately deferred rather than bundled in
+- [ ] Brief highlight/flash animation on the Sandbox after a Gallery load, beyond the scroll itself — nice confirmation polish, not required if scroll-then-visible-state-change is already sufficiently noticeable in testing
 
-- [ ] Dependabot config for `npm` ecosystem — one file, GitHub-native, no custom code
-- [ ] `npm audit` as a non-blocking, report-only CI step
-- [ ] A short ADR entry documenting the CD mechanism decision (host-native vs. Actions) and why
+### Future Consideration (v2+)
 
-### Future Consideration (explicitly out of scope — do not build this milestone)
-
-- [ ] Staging environment / multi-env promotion pipeline — no team, no real users, no canary need at this scale
-- [ ] Kubernetes / Docker orchestration — no multi-service or scaling problem this solves
-- [ ] Blue-green/canary/traffic-shifting deploys — de-risking infra for traffic patterns this portfolio app doesn't have
-- [ ] Dedicated secrets-management system (Vault, etc.) — GitHub Actions secrets + host env vars are sufficient for ~2-3 credentials
-- [ ] Custom observability stack (Grafana/Prometheus) — the host's own deployment logs + `/api/health` cover this scope
-- [ ] Matrix build strategy across Node versions/OSes — single deployment target, no multi-environment consumer audience
+- [ ] Multi-step "spotlight" tour that points at live Sandbox elements (DOM-anchored, not modal-only) — would justify evaluating a real tour library (Shepherd/driver.js) at that point, since the modal-only approach's "don't need a library" reasoning stops applying once DOM-anchoring/scroll-tracking is required
+- [ ] Overlay-based editing extended to more than 2 vessels — out of scope per PROJECT.md's existing "multi-vessel is a v2 extension" boundary; the `selectedVesselId: 'A' | 'B' | null` single-selection model would need revisiting (e.g. a set/array) if vessel count becomes dynamic
 
 ## Feature Prioritization Matrix
 
-| Feature | Reviewer-Signal Value | Implementation Cost | Priority |
-|---------|------------------------|----------------------|----------|
-| GitHub Actions CI (lint/typecheck/test/build) + branch protection | HIGH | LOW | P1 |
-| README CI badge | MEDIUM | LOW | P1 |
-| CD auto-deploy on merge to main | HIGH | LOW–MEDIUM (depends on host choice) | P1 |
-| `prisma migrate deploy` in deploy path | HIGH (backs the "real production DB" claim) | MEDIUM | P1 |
-| `/api/health` endpoint | MEDIUM | LOW | P1 |
-| Husky + lint-staged | MEDIUM | LOW | P1 |
-| `CONTRIBUTING.md` | MEDIUM | LOW | P1 |
-| Dependabot | LOW–MEDIUM | LOW | P2 |
-| `npm audit` (non-blocking) | LOW | LOW | P2 |
-| CD-decision ADR entry | MEDIUM (judgment signal) | LOW | P2 |
-| Staging environment, k8s, canary, secrets manager, observability stack | NEGATIVE (reads as overengineering) | HIGH | Do not build |
+| Feature | User Value | Implementation Cost | Priority |
+|---------|------------|----------------------|----------|
+| Guided Tour modal (6-step, Back/Next/Skip, dots) | MEDIUM | LOW | P1 |
+| On-chart vessel control overlay (replaces side panel) | HIGH | MEDIUM | P1 |
+| Gallery "Try on Sandbox" load-in-place + scroll | HIGH | MEDIUM | P1 |
+| Touch/keyboard-visible CTA fallback on Gallery cards | HIGH (accessibility/reach) | LOW | P1 |
+| Tour "seen" localStorage gate | LOW-MEDIUM | LOW | P1 (cheap, prevents annoyance) |
+| Post-load highlight/flash animation on Sandbox | LOW | LOW | P3 |
+| Auto-launch tour on first visit | MEDIUM | MEDIUM | P3 (explicitly deferred) |
 
 **Priority key:**
-- P1: Must have for this milestone's stated goal
-- P2: Should have, low-cost polish if time allows
-- Do not build: explicitly flagged anti-features for this project's scope
+- P1: Must have for this milestone (matches PROJECT.md's locked Target features)
+- P2: Should have, add when possible
+- P3: Nice to have, explicitly deferred this milestone
+
+## Reference Pattern Analysis
+
+| Feature | Where this pattern is well-established | Our approach |
+|---------|------------------------------------------|--------------|
+| Modal onboarding walkthrough (steps, dots, skip) | SaaS onboarding tools broadly (Appcues, Whatfix, UserGuiding all document the same core shape) | Same shape, hand-rolled on shadcn `Dialog` — no tour library, per Anti-Features above |
+| Contextual floating toolbar/popover on canvas-element select | Figma, Miro, and any Radix/shadcn-based app using `Popover` for "click a thing, get a small floating control surface" | Radix `Popover` (already implied by shadcn/ui in the stack) with controlled `open` driven by `selectedVesselId`, anchored to the vessel's live position |
+| "Use this template" → loads directly into open editor, no separate page | Canva's "Use this template" flow: click loads the design directly into the editing workspace, no intermediate page | Same shape, but simpler here — the "editor" (Sandbox) and the "gallery" already live on the same page/route (unlike Canva, where they're logically different views), so this is a same-page state update + scroll, not a navigation-then-load |
 
 ## Sources
 
-- [GitHub Docs: Adding a workflow status badge](https://docs.github.com/en/actions/how-tos/monitor-workflows/add-a-status-badge) — HIGH confidence, official docs, badge syntax and branch-scoping confirmed
-- [Vercel Knowledge Base: How can I use GitHub Actions with Vercel?](https://vercel.com/kb/guide/how-can-i-use-github-actions-with-vercel) — HIGH confidence, official Vercel documentation on when Actions-driven deploy is/isn't appropriate alongside native Git integration
-- [Vercel Docs: Deploying GitHub Projects with Vercel](https://vercel.com/docs/git/vercel-for-github) — HIGH confidence, official docs on native Git integration behavior
-- [The perfect Vercel + GitHub Actions deployment pipeline — Aaron Francis](https://aaronfrancis.com/2021/the-perfect-vercel-github-actions-deployment-pipeline-faa0d4ac) — MEDIUM confidence, single well-regarded community source, cross-checked against Vercel's own docs on the redundancy/`ignoreCommand` pattern
-- [Prisma Docs: Deploying database changes with Prisma Migrate](https://www.prisma.io/docs/orm/prisma-client/deployment/deploy-database-changes-with-prisma-migrate) — HIGH confidence, official Prisma documentation, `migrate deploy` CI/CD pattern and advisory-locking behavior
-- [Prisma Docs: Development and production workflows](https://www.prisma.io/docs/orm/prisma-migrate/workflows/development-and-production) — HIGH confidence, official docs
-- [prisma/prisma GitHub Discussion #11131: Prisma Migrate and CI/CD](https://github.com/prisma/prisma/discussions/11131) — MEDIUM confidence, first-party repo discussion, corroborates official docs pattern
-- [Better Stack: Prevent Bad Commits with Husky and lint-staged](https://betterstack.com/community/guides/scaling-nodejs/husky-and-lint-staged/) — MEDIUM-HIGH confidence, detailed community guide, consistent with multiple other sources on pre-commit/CI division
-- [Furkan Baytekin: Pre-Commit Hooks — Husky vs Native Git Hooks](https://furkanbaytekin.dev/blogs/pre-commit-hooks-husky-vs-native-git-hooks-for-clean-commits) — MEDIUM confidence, corroborates the "keep pre-commit fast/staged-only" consensus
-- [Contributing.md: How to Build a CONTRIBUTING.md - Best Practices](https://contributing.md/how-to-build-contributing-md/) — MEDIUM confidence, widely-cited community reference for CONTRIBUTING.md structure
-- [The Good Docs Project: About the Contributing Guide Template](https://www.thegooddocsproject.dev/template/contributing-guide) — MEDIUM-HIGH confidence, structured open-source documentation template project
-- [Nurbak: Next.js Health Check — Complete Guide to /api/health](https://nurbak.com/en/blog/how-to-add-health-checks-nextjs-app/) — MEDIUM confidence, single source but internally consistent (200/503, no-cache, SELECT 1 pattern) with general health-check conventions across other sources
-- [DEV Community / FullStackData Solutions: How to Add TypeCheck, Lint, Tests, and Build to Every PR with Husky and GitHub Actions](https://fullstackdatasolutions.com/blog/artificial-intelligence/cicd-pr-pipeline) — MEDIUM confidence, corroborates the standard lint+typecheck+test+build CI shape
-- Existing `package.json` (read directly from repo) — HIGH confidence, ground truth for already-present `lint`/`typecheck`/`test`/`build` scripts this CI pipeline wires up
-- `.planning/PROJECT.md` — HIGH confidence, ground truth for locked scope, locked CD definition, and existing carried-forward requirement IDs (CI-01, HOOKS-01, DOCS-CONTRIB-01)
+- [Onboarding UX: 10 patterns, best practices, and real examples — Appcues](https://www.appcues.com/blog/user-onboarding-ui-ux-patterns) — MEDIUM confidence, cross-referenced with 2 other sources below
+- [Product tour UI/UX: Best onboarding flow patterns — Appcues](https://www.appcues.com/blog/product-tours-ui-patterns) — MEDIUM confidence
+- [10 Product Tour Modal Examples — Kompassify](https://kompassify.com/blog/product-tour-modal-examples) — MEDIUM confidence, real modal examples
+- [How to Create Effective Product Tours in 2025 — Whatfix](https://whatfix.com/product-tour/) — MEDIUM confidence
+- [Building an Accessible Widget: WAI-ARIA Modal Alert Dialogs — Deque](https://www.deque.com/blog/aria-modal-alert-dialogs-a11y-support-series-part-2/) — HIGH confidence, accessibility vendor, matches ARIA APG
+- [How to Build Accessible Modals with Focus Traps — UXPin](https://www.uxpin.com/studio/blog/how-to-build-accessible-modals-with-focus-traps/) — MEDIUM-HIGH, cross-referenced with Deque
+- Context7 `/radix-ui/primitives` — Popover source (`popover.tsx`, `focus-scope.tsx`) — HIGH confidence, direct library source: confirms `DismissableLayer` default outside-click/Escape dismissal, `FocusScope trapped` focus-trap behavior, controlled `open`/`onOpenChange`, and `PopoverTrigger` toggle-on-click semantics — directly applicable since this project's stack (shadcn/ui) wraps this exact primitive
+- [Complete guide to building product tours on your React apps — LogRocket](https://blog.logrocket.com/complete-guide-to-build-product-tours-on-your-react-apps/) — MEDIUM confidence, tour library landscape (Shepherd/Popper-based responsiveness caveat, mobile modal caveat)
+- Canva "Use this template" flow — MEDIUM confidence (WebSearch-derived description of Canva's documented user-facing behavior, not an official API/architecture doc, but consistent across multiple third-party how-to guides)
+- Project's own CLAUDE.md conventions (no-pre-abstraction rule, separation-of-concerns rule) — used to source the Anti-Features "don't pre-abstract the floating panel" recommendation, applying this project's own established engineering conventions rather than external research
 
 ---
-*Feature research for: CI/CD, pre-commit hooks, and deployment for a portfolio full-stack project (v1.3 milestone)*
-*Researched: 2026-07-20*
+*Feature research for: guided tour modal, on-chart contextual overlay, load-example-into-live-workspace patterns (v1.4 Design Sync)*
+*Researched: 2026-07-25*
