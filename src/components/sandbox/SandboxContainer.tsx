@@ -103,8 +103,11 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
           vesselA={sandboxState.vesselA}
           vesselB={sandboxState.vesselB}
           classification={sandboxState.lastGoodClassification}
+          isDegenerate={sandboxState.isDegenerate}
           onVesselPositionChange={sandboxState.onVesselPositionChange}
           onVesselHeadingChange={sandboxState.onVesselHeadingChange}
+          onVesselSpeedChange={sandboxState.onVesselSpeedChange}
+          onVesselTypeChange={sandboxState.onVesselTypeChange}
         />
         <div className="flex flex-col gap-4">
           <InstrumentReadouts
