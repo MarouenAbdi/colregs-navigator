@@ -138,7 +138,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 18-03-PLAN.md — Hook onSelect wiring (D-04) + ChartPanel.tsx selection-state/composition wiring + regression tests for D-01's close-paths and Pitfall 1's overlap case (depends on 18-02)
+- [x] 18-03-PLAN.md — Hook onSelect wiring (D-04) + ChartPanel.tsx selection-state/composition wiring + regression tests for D-01's close-paths and Pitfall 1's overlap case (depends on 18-02)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -207,7 +207,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16 �
 | 15. Deploy & Verify | v1.3 | 5/5 | Complete | 2026-07-22 |
 | 16. Sandbox Mutation-Path Generalization | v1.4 | 2/2 | Complete    | 2026-07-25 |
 | 17. Gallery → Sandbox Bridge | v1.4 | 4/4 | Complete    | 2026-07-25 |
-| 18. On-Chart Vessel Control Overlay | v1.4 | 2/5 | In Progress|  |
+| 18. On-Chart Vessel Control Overlay | v1.4 | 3/5 | In Progress|  |
 | 19. Guided Tour | v1.4 | 0/TBD | Not started | - |
 | 20. Reasoning-Trail & Hero Visual Sync | v1.4 | 0/TBD | Not started | - |
 </content>
