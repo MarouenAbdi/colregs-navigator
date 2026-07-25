@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Design Sync (Sandbox & Gallery)
-status: ready_to_plan
-stopped_at: Phase 17 complete (4/4) — ready to discuss Phase 18
-last_updated: 2026-07-25T14:50:21.840Z
-last_activity: 2026-07-25 -- Phase 17 execution started
+status: "Phase 17 shipped — PR #26"
+stopped_at: Phase 17 UI-SPEC approved
+last_updated: "2026-07-25T14:53:24.211Z"
+last_activity: 2026-07-25
 progress:
   total_phases: 5
   completed_phases: 1
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-07-25)
 
 Phase: 18
 Plan: Not started
-Status: Ready to plan
+Status: Phase 17 shipped — PR #26
 Last activity: 2026-07-25
 
 Progress: [░░░░░░░░░░] 0%
