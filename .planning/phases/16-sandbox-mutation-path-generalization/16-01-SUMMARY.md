@@ -105,3 +105,7 @@ None beyond what CONTEXT.md/PATTERNS.md already locked (D-01 through D-06) — p
 ---
 *Phase: 16-sandbox-mutation-path-generalization*
 *Completed: 2026-07-25*
+
+## Self-Check: PASSED
+
+All created/modified files confirmed present on disk (`useSandboxState.ts`, `SandboxContainer.tsx`, `SandboxContainer.test.tsx`), both deleted files (`chip-scenarios.ts`, `chip-scenarios.test.ts`) confirmed absent, and all 4 commit hashes (`ae09491`, `6067e33`, `63c76b9`, `bdb504f`) confirmed present in `git log`.
