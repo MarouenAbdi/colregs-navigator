@@ -72,10 +72,11 @@ See `.planning/milestones/v1.3-ROADMAP.md` for full phase details (goals, succes
   2. `useSandboxState()` exposes a single `loadScenario(vesselA, vesselB)` entry point (replacing `handleChipSelect`) that every mutation source (drag, ControlPanel field edit, Reset) can call.
   3. Existing Sandbox interactions (drag/rotate a vessel, edit via ControlPanel, Reset) behave identically to before the refactor — human-verified in a real browser, not just green tests.
   4. No orphaned chip-row code remains (`activeChipId`, old `handleChipSelect`, `chip-scenarios.ts`) — removed, not merely hidden from the UI.
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 16-01: TBD
+- [ ] 16-01-PLAN.md — Generalize useSandboxState() into loadScenario(), delete chip-scenarios.ts/.test.ts, remove chip row from SandboxContainer.tsx, replace chip-dependent tests
+- [ ] 16-02-PLAN.md — Human-verify drag/rotate/ControlPanel-edit/Reset behavioral parity on the plain `/` route (depends on 16-01)
 
 ### Phase 17: Gallery → Sandbox Bridge
 **Goal**: Users can load any curated gallery scenario directly into the homepage Sandbox's live state and are scrolled to it — no page navigation, no lost interactivity.
