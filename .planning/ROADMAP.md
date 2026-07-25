@@ -56,7 +56,7 @@ See `.planning/milestones/v1.3-ROADMAP.md` for full phase details (goals, succes
 **Milestone Goal:** Re-sync the front end against the updated Claude Design file — restructure the Sandbox around merged header/footer command strips and on-chart vessel overlays, add the net-new Guided Tour, replace the Gallery card's navigate-to-page click with an in-place "Try on Sandbox" load, and sync the Hero preview card's visual details. Presentation-layer only — zero change to `classifyEncounter()` or any domain/`src/server/` logic.
 
 - [x] **Phase 16: Sandbox Mutation-Path Generalization** - Generalize `handleChipSelect` into a reusable `loadScenario()` entry point and remove the 6-chip preset row entirely (completed 2026-07-25)
-- [ ] **Phase 17: Gallery → Sandbox Bridge** - Gallery's "Try on Sandbox" loads a scenario directly into the homepage Sandbox with no page navigation
+- [x] **Phase 17: Gallery → Sandbox Bridge** - Gallery's "Try on Sandbox" loads a scenario directly into the homepage Sandbox with no page navigation (completed 2026-07-25)
 - [ ] **Phase 18: On-Chart Vessel Control Overlay** - Replace the side ControlPanel with click-to-open floating vessel overlays and merge the chart header/footer strips
 - [ ] **Phase 19: Guided Tour** - A 6-step "How to read this" modal walkthrough with full keyboard/focus handling
 - [ ] **Phase 20: Reasoning-Trail & Hero Visual Sync** - Horizontal "NAV DECISION CHAIN" trail layout and Hero preview card visual sync
@@ -109,7 +109,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 17-04-PLAN.md — Human-verify all 4 Roadmap success criteria end-to-end in a real browser, depends on 17-02
+- [x] 17-04-PLAN.md — Human-verify all 4 Roadmap success criteria end-to-end in a real browser, depends on 17-02
 
 ### Phase 18: On-Chart Vessel Control Overlay
 
@@ -188,7 +188,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16 �
 | 14. Pipeline & Hooks | v1.3 | 4/4 | Complete | 2026-07-20 |
 | 15. Deploy & Verify | v1.3 | 5/5 | Complete | 2026-07-22 |
 | 16. Sandbox Mutation-Path Generalization | v1.4 | 2/2 | Complete    | 2026-07-25 |
-| 17. Gallery → Sandbox Bridge | v1.4 | 3/4 | In Progress|  |
+| 17. Gallery → Sandbox Bridge | v1.4 | 4/4 | Complete   | 2026-07-25 |
 | 18. On-Chart Vessel Control Overlay | v1.4 | 0/TBD | Not started | - |
 | 19. Guided Tour | v1.4 | 0/TBD | Not started | - |
 | 20. Reasoning-Trail & Hero Visual Sync | v1.4 | 0/TBD | Not started | - |
