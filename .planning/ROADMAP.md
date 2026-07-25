@@ -87,11 +87,14 @@ Plans:
   2. After clicking, the page smooth-scrolls to the Sandbox section automatically, sequenced after the scenario state has actually updated.
   3. The "Try on Sandbox" CTA is discoverable and operable via mouse hover, keyboard Tab focus, and touch/coarse-pointer — human-verified across all three input modes, not hover-only.
   4. Human-verified: loading a second gallery card after a first correctly replaces the previously loaded scenario (state genuinely updates, not stale from the first load).
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
 
 Plans:
-- [ ] 17-01: TBD
+- [ ] 17-01-PLAN.md — SandboxBridgeProvider (React Context bridge) + wiring into app/page.tsx, app/s/[shareId]/page.tsx, and SandboxContainer's loadScenario consumption
+- [ ] 17-02-PLAN.md — TryOnSandboxButton + GalleryCard wiring (drop whole-card Link, hover/focus/touch-reveal CTA per D-01–D-08), depends on 17-01
+- [ ] 17-03-PLAN.md — Folded-todo hardening fixes: useSandboxState.ts unsafe Result cast (D-10), bearing() coincident-distance threshold widening (D-11) — independent, parallel with 17-01
+- [ ] 17-04-PLAN.md — Human-verify all 4 Roadmap success criteria end-to-end in a real browser, depends on 17-02
 
 ### Phase 18: On-Chart Vessel Control Overlay
 **Goal**: Users read the verdict and instrument readouts directly on the chart via merged header/footer strips, and control each vessel via a floating on-chart overlay opened by clicking it — with zero regression to this codebase's twice-fixed drag/rotate hit-testing.
@@ -158,7 +161,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16 �
 | 14. Pipeline & Hooks | v1.3 | 4/4 | Complete | 2026-07-20 |
 | 15. Deploy & Verify | v1.3 | 5/5 | Complete | 2026-07-22 |
 | 16. Sandbox Mutation-Path Generalization | v1.4 | 2/2 | Complete    | 2026-07-25 |
-| 17. Gallery → Sandbox Bridge | v1.4 | 0/TBD | Not started | - |
+| 17. Gallery → Sandbox Bridge | v1.4 | 0/4 | Not started | - |
 | 18. On-Chart Vessel Control Overlay | v1.4 | 0/TBD | Not started | - |
 | 19. Guided Tour | v1.4 | 0/TBD | Not started | - |
 | 20. Reasoning-Trail & Hero Visual Sync | v1.4 | 0/TBD | Not started | - |
