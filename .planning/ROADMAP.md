@@ -75,7 +75,7 @@ See `.planning/milestones/v1.3-ROADMAP.md` for full phase details (goals, succes
 **Plans**: 2 plans
 
 Plans:
-- [ ] 16-01-PLAN.md — Generalize useSandboxState() into loadScenario(), delete chip-scenarios.ts/.test.ts, remove chip row from SandboxContainer.tsx, replace chip-dependent tests
+- [x] 16-01-PLAN.md — Generalize useSandboxState() into loadScenario(), delete chip-scenarios.ts/.test.ts, remove chip row from SandboxContainer.tsx, replace chip-dependent tests
 - [ ] 16-02-PLAN.md — Human-verify drag/rotate/ControlPanel-edit/Reset behavioral parity on the plain `/` route (depends on 16-01)
 
 ### Phase 17: Gallery → Sandbox Bridge
@@ -157,7 +157,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16 �
 | 13. Comment Cleanup | v1.2 | 8/8 | Complete | 2026-07-20 |
 | 14. Pipeline & Hooks | v1.3 | 4/4 | Complete | 2026-07-20 |
 | 15. Deploy & Verify | v1.3 | 5/5 | Complete | 2026-07-22 |
-| 16. Sandbox Mutation-Path Generalization | v1.4 | 0/TBD | Not started | - |
+| 16. Sandbox Mutation-Path Generalization | v1.4 | 1/2 | In Progress|  |
 | 17. Gallery → Sandbox Bridge | v1.4 | 0/TBD | Not started | - |
 | 18. On-Chart Vessel Control Overlay | v1.4 | 0/TBD | Not started | - |
 | 19. Guided Tour | v1.4 | 0/TBD | Not started | - |
