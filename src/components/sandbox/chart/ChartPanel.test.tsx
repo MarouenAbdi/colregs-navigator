@@ -11,8 +11,8 @@
  * minimal test-only polyfills for both so the component can render and be
  * drag-tested under jsdom without weakening the production implementation.
  */
-import { render, screen, within } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { act, cleanup, render, screen, within } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChartPanel } from "./ChartPanel.js";
 import { classifyEncounter } from "../../../domain/colregs/classify-encounter.js";
 import {
@@ -57,6 +57,16 @@ beforeEach(() => {
   if (!Element.prototype.releasePointerCapture) {
     Element.prototype.releasePointerCapture = () => {};
   }
+});
+
+// Rule 3 (blocking, see ControlPanel.test.tsx/SandboxContainer.test.tsx):
+// vitest.config.ts sets `globals: false`, so RTL's automatic
+// afterEach-cleanup never registers -- without this, renders from earlier
+// tests stay mounted, and this file's new document-scoped queries
+// (screen.getByRole/getByLabelText, needed to assert the overlay's open/
+// closed state) would ambiguously match stray elements from prior tests.
+afterEach(() => {
+  cleanup();
 });
 
 function renderChartPanel(overrides: Partial<ChartPanelProps> = {}) {
@@ -153,5 +163,98 @@ describe("ChartPanel", () => {
     expect(cones).toHaveLength(2);
     const amberCones = Array.from(cones).filter((cone) => cone.getAttribute("stroke") === "#F59E0B");
     expect(amberCones).toHaveLength(1);
+  });
+
+  // D-01/D-04/Pitfall 1 regression coverage: crossingResidualBasicCase's
+  // vesselA (0,0) and vesselB (5,0) sit close enough on the 20nm-wide chart
+  // (CHART_VIEW_BOX) for vesselA's overlay card to plausibly visually
+  // overlap vesselB's hull -- a genuine risk, not a contrived one.
+  const pointerDownInit = { pointerId: 1, bubbles: true };
+
+  it("opens vesselA's overlay on hull pointerdown", () => {
+    const { container } = renderChartPanel();
+    const hullA = container.querySelector('[data-testid="hull-hit-vesselA"]');
+    act(() => {
+      hullA?.dispatchEvent(new PointerEvent("pointerdown", pointerDownInit));
+    });
+
+    expect(screen.getByRole("slider")).toBeInTheDocument();
+  });
+
+  it("closes vesselA's overlay when its own hull is pressed again (D-01 toggle)", () => {
+    const { container } = renderChartPanel();
+    const hullA = container.querySelector('[data-testid="hull-hit-vesselA"]');
+    act(() => {
+      hullA?.dispatchEvent(new PointerEvent("pointerdown", pointerDownInit));
+    });
+    expect(screen.getByRole("slider")).toBeInTheDocument();
+
+    act(() => {
+      hullA?.dispatchEvent(new PointerEvent("pointerdown", pointerDownInit));
+    });
+    expect(screen.queryByRole("slider")).toBeNull();
+  });
+
+  it("switches the overlay to vesselB when vesselB's hull is pressed while vesselA's overlay is open, not closing it", () => {
+    const { container } = renderChartPanel();
+    const hullA = container.querySelector('[data-testid="hull-hit-vesselA"]');
+    const hullB = container.querySelector('[data-testid="hull-hit-vesselB"]');
+
+    act(() => {
+      hullA?.dispatchEvent(new PointerEvent("pointerdown", pointerDownInit));
+    });
+    act(() => {
+      hullB?.dispatchEvent(new PointerEvent("pointerdown", pointerDownInit));
+    });
+
+    // Proves useHullDrag.ts's stopPropagation()-guarded svg bubbling fix:
+    // vesselA's own hull pointerdown must not let the empty-chart-space
+    // close handler run AFTER vesselB's onSelect() already switched the
+    // selection, which would otherwise clobber it back to null.
+    expect(screen.getByLabelText(/Close Vessel B control card/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Close Vessel A control card/i)).toBeNull();
+  });
+
+  it("closes an open overlay when the bare svg background is pressed", () => {
+    const { container } = renderChartPanel();
+    const hullA = container.querySelector('[data-testid="hull-hit-vesselA"]');
+    act(() => {
+      hullA?.dispatchEvent(new PointerEvent("pointerdown", pointerDownInit));
+    });
+    expect(screen.getByRole("slider")).toBeInTheDocument();
+
+    const svg = container.querySelector("svg");
+    act(() => {
+      svg?.dispatchEvent(new PointerEvent("pointerdown", pointerDownInit));
+    });
+
+    expect(screen.queryByRole("slider")).toBeNull();
+  });
+
+  it("still fires onVesselPositionChange for a drag on vesselB while vesselA's overlay is open and visually near it", () => {
+    // Pitfall 1 regression: the new floating overlay card must not
+    // silently swallow the pointer events meant for the other vessel's
+    // drag, even though this fixture's 5nm vessel separation puts them
+    // close enough on-chart for this to be a real risk.
+    const onVesselPositionChange = vi.fn();
+    const { container } = renderChartPanel({ onVesselPositionChange });
+
+    const hullA = container.querySelector('[data-testid="hull-hit-vesselA"]');
+    act(() => {
+      hullA?.dispatchEvent(new PointerEvent("pointerdown", pointerDownInit));
+    });
+    expect(screen.getByRole("slider")).toBeInTheDocument();
+
+    const hullB = container.querySelector('[data-testid="hull-hit-vesselB"]');
+    const dragEventInit = { pointerId: 2, clientX: 150, clientY: 200, bubbles: true };
+    act(() => {
+      hullB?.dispatchEvent(new PointerEvent("pointerdown", dragEventInit));
+      hullB?.dispatchEvent(new PointerEvent("pointermove", dragEventInit));
+    });
+
+    expect(onVesselPositionChange).toHaveBeenCalledWith(
+      "vesselB",
+      expect.objectContaining({ x: expect.any(Number), y: expect.any(Number) }),
+    );
   });
 });
