@@ -4,8 +4,8 @@ milestone: v1.4
 milestone_name: Design Sync (Sandbox & Gallery)
 status: executing
 stopped_at: Phase 17 UI-SPEC approved
-last_updated: "2026-07-25T13:38:12.859Z"
-last_activity: 2026-07-25 -- Phase 17 planning complete
+last_updated: "2026-07-25T13:44:44.265Z"
+last_activity: 2026-07-25 -- Phase 17 execution started
 progress:
   total_phases: 5
   completed_phases: 1
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-25)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 17 — gallery → sandbox bridge
+**Current focus:** Phase 17 — gallery-sandbox-bridge
 
 ## Current Position
 
-Phase: 17
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-07-25 -- Phase 17 planning complete
+Phase: 17 (gallery-sandbox-bridge) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 17
+Last activity: 2026-07-25 -- Phase 17 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
