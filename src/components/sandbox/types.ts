@@ -26,36 +26,6 @@ export interface ChartPanelProps {
   onVesselTypeChange: VesselUpdateHandlers["onVesselTypeChange"];
 }
 
-export interface ControlPanelProps {
-  vesselA: Vessel;
-  vesselB: Vessel;
-  // The vessel-control card's header row renders a give-way/stand-on/
-  // mutual role badge (getVesselRole() requires the full classification,
-  // not just the two vessels), per the Sandbox design contract.
-  classification: ClassificationResult;
-  onVesselSpeedChange: VesselUpdateHandlers["onVesselSpeedChange"];
-  onVesselTypeChange: VesselUpdateHandlers["onVesselTypeChange"];
-}
-
-// The verdict-banner card's props -- same shape the single ReasoningPanel
-// aside used to consume, now split out since that aside is retired in
-// favor of 3 separate cards (verdict banner / instrument readouts /
-// reasoning trail) matching the design 1:1.
-export interface VerdictBannerProps {
-  classification: ClassificationResult; // always the LAST-GOOD result
-  isDegenerate: boolean;
-}
-
-// Range/Bearing A->B/CPA/TCPA are derived at the UI layer from live vessel
-// state via deriveInstrumentReadouts() -- ClassificationResult itself
-// carries none of these (see instrument-readouts.ts for why scanning
-// classification.trail[].facts is not a reliable alternative source).
-export interface InstrumentReadoutsProps {
-  vesselA: Vessel;
-  vesselB: Vessel;
-  classification: ClassificationResult;
-}
-
 // The reasoning-trail card only ever renders classification.trail/doubt/
 // doubtBoundary -- no vessel state needed.
 export interface ReasoningTrailProps {
