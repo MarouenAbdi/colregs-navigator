@@ -5,14 +5,14 @@
  * InstrumentReadouts/ReasoningTrail) + the applyVesselUpdate choke point.
  * Exercises default-scenario mount (D-06), live update via ControlPanel
  * (CLAS-05), the degenerate coincident-position state (Pitfall 5), Rule
- * 13(d) hysteresis threading through previousEncounterTypeRef, the Reset
- * scenario CTA, and the 6-chip preset row (D-01/D-02).
+ * 13(d) hysteresis threading through previousEncounterTypeRef, and the
+ * Reset scenario CTA.
  *
  * jsdom does not implement `ResizeObserver` or the Pointer Capture methods
  * ChartPanel/useHullDrag call directly -- same test-only polyfills as
  * ChartPanel.test.tsx / useHullDrag.test.ts.
  */
-import { act, cleanup, render, screen, within } from "@testing-library/react";
+import { act, cleanup, render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SandboxContainer } from "./SandboxContainer.js";
@@ -151,6 +151,10 @@ describe("SandboxContainer", () => {
     expect(
       screen.getByText(/Vessel A gives way\. Give-way vessel takes early/),
     ).toBeInTheDocument();
+    // Closes out the "Chip-row removal... verify via a repo-wide usage
+    // check" pitfall-checklist item at the component-test level -- the
+    // chip row is fully removed this phase (D-01/D-02), no replacement UI.
+    expect(screen.queryByRole("button", { name: "Classic crossing" })).not.toBeInTheDocument();
   });
 
   it("re-derives the classification live when a ControlPanel speed slider changes, with no submit step", async () => {
@@ -244,6 +248,14 @@ describe("SandboxContainer", () => {
     expect(screen.queryByRole("heading", { name: "Crossing" })).not.toBeInTheDocument();
   });
 
+  // handleReset now delegates its apply step to loadScenario (D-03), so
+  // this test proves loadScenario's full-replace + hysteresis-reset
+  // contract (arbitrary vessel pair replace + previousEncounterTypeRef
+  // reset landing on the correct verdict) via its only current call site,
+  // not just "Reset works" in isolation -- no new render pass or assertion
+  // logic is needed since the drag-to-degenerate-then-reset sequence below
+  // already exercises this contract end-to-end through handleReset ->
+  // loadScenario.
   it("restores the passed-in initialScenario's own vessels (not the default) when Reset scenario is clicked", () => {
     const { container } = render(
       <SandboxContainer
@@ -272,33 +284,6 @@ describe("SandboxContainer", () => {
 
     expect(screen.getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
     expect(screen.queryByText("Unable to classify")).not.toBeInTheDocument();
-  });
-
-  it("does not show any chip as active when a saved/shared scenario is loaded, even though it defaults to Classic crossing on the plain seedless route", () => {
-    // Regression test: activeChipId used to default to "classic-crossing"
-    // unconditionally, so every /s/[shareId] page showed that chip as
-    // active/pressed regardless of the actually-loaded (arbitrary) vessel
-    // geometry -- directly contradicting this component's own documented
-    // "highlight never goes stale/misleading" contract.
-    render(<SandboxContainer />);
-    expect(screen.getByRole("button", { name: "Classic crossing" })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
-    cleanup();
-
-    render(
-      <SandboxContainer
-        initialScenario={{
-          vesselA: overtakingBothDirectionsCase.vesselA,
-          vesselB: overtakingBothDirectionsCase.vesselB,
-        }}
-      />,
-    );
-    for (const chip of screen.getAllByRole("button", { pressed: false })) {
-      expect(chip).toHaveAttribute("aria-pressed", "false");
-    }
-    expect(screen.queryByRole("button", { pressed: true })).not.toBeInTheDocument();
   });
 
   it("renders the banner label (and rationale, when provided) communicating a saved/shared scenario is loaded (D-02)", () => {
@@ -353,23 +338,5 @@ describe("SandboxContainer", () => {
     expect(
       screen.getByRole("button", { name: "Save and share this scenario" }),
     ).toBeDisabled();
-  });
-
-  // D-01/D-02: chip row loads a canned scenario in place, full replace +
-  // hysteresis reset, mechanically identical to Reset scenario.
-  it("loads the Overtaking chip's fixture scenario when clicked, landing give-way on the fixture's documented vessel", async () => {
-    const user = userEvent.setup();
-    render(<SandboxContainer />);
-
-    await user.click(screen.getByRole("button", { name: "Overtaking" }));
-
-    const verdictHeading = screen.getByRole("heading", { name: "Overtaking" });
-    const verdictCard = verdictHeading.closest('[data-slot="verdict-banner"]') as HTMLElement;
-    expect(verdictCard).not.toBeNull();
-
-    // The "Overtaking" chip fixture documents vesselA as the give-way
-    // vessel (chip-scenarios.ts) -- its role badge must read "GIVE WAY".
-    const vesselABadgeContainer = within(verdictCard).getByText("Vessel A").parentElement;
-    expect(vesselABadgeContainer?.textContent).toContain("GIVE WAY");
   });
 });

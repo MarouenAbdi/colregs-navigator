@@ -7,9 +7,9 @@
  * vesselA/vesselB state, the Rule 13(d) hysteresis, and the
  * validate-then-classify choke point to useSandboxState() so state and
  * presentation stay separate concerns -- this file is now JSX composition
- * plus the chip-row/reset/save CTAs only, ensuring the live classification
- * update behaves identically regardless of which input (drag, form field,
- * or chip preset) triggered it.
+ * plus the reset/save CTAs only, ensuring the live classification update
+ * behaves identically regardless of which input (drag, form field, or
+ * scenario load) triggered it.
  */
 
 import { RotateCcw, Link2 } from "lucide-react";
@@ -18,7 +18,6 @@ import { ControlPanel } from "./control-panel/ControlPanel.js";
 import { VerdictBanner } from "./reasoning/VerdictBanner.js";
 import { InstrumentReadouts } from "./instruments/InstrumentReadouts.js";
 import { ReasoningTrail } from "./reasoning/ReasoningTrail.js";
-import { CHIP_ORDER } from "./chip-scenarios.js";
 import { useSandboxState } from "./hooks/useSandboxState.js";
 import { Button } from "@/components/ui/button";
 import type { SandboxContainerProps } from "./types.js";
@@ -78,34 +77,6 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
           </div>
         ) : null}
       </header>
-
-      {/* D-01/D-02: one-shot data-load chip row -- a plain button group, not
-          Tabs/ToggleGroup (Pattern 2). Clicking a chip performs a full
-          replace + hysteresis reset via handleChipSelect. */}
-      <div className="mb-8 flex flex-wrap gap-2">
-        {CHIP_ORDER.map(({ id, label }) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => sandboxState.handleChipSelect(id)}
-            aria-pressed={sandboxState.activeChipId === id}
-            className={`
-              flex h-[30px] items-center rounded-full border px-[13px] font-sans
-              text-[12.5px] font-medium transition-colors
-              ${
-              sandboxState.activeChipId === id
-                ? "border-rule-accent bg-rule-accent text-white"
-                : `
-                  border-border bg-card text-muted-foreground
-                  hover:text-foreground
-                `
-            }
-            `}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
 
       <VerdictBanner
         classification={sandboxState.lastGoodClassification}

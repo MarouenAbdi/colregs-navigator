@@ -2,7 +2,7 @@
  * useSandboxState -- SandboxContainer's "brain": owns `vesselA`/`vesselB`
  * state, the `previousEncounterTypeRef` Rule 13(d) hysteresis ref, and the
  * single `applyVesselUpdate` validate-then-classify choke point every
- * drag, form update, AND chip-preset load funnels through. Separated from
+ * drag, form update, and scenario load funnels through. Separated from
  * SandboxContainer's JSX so the state machine can be reasoned about and
  * tested independently of rendering. Preserves Rule 13(d) hysteresis
  * semantics and the Pitfall 5 degenerate-frame handling exactly as they
@@ -11,7 +11,6 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CHIP_SCENARIOS, type ChipId } from "../chip-scenarios.js";
 import { classifyEncounter } from "../../../domain/colregs/classify-encounter.js";
 import { crossingResidualBasicCase } from "../../../domain/colregs/classify-encounter.fixtures.js";
 import { trpc } from "../../../lib/trpc/client.js";
@@ -32,7 +31,6 @@ export function useSandboxState(initialScenario?: { vesselA: Vessel; vesselB: Ve
   vesselB: Vessel;
   lastGoodClassification: ClassificationResult;
   isDegenerate: boolean;
-  activeChipId: ChipId | null;
   saveError: string | null;
   isSaving: boolean;
   onVesselPositionChange: (vessel: VesselLabel, position: Position) => void;
@@ -40,7 +38,7 @@ export function useSandboxState(initialScenario?: { vesselA: Vessel; vesselB: Ve
   onVesselSpeedChange: (vessel: VesselLabel, speed: number) => void;
   onVesselTypeChange: (vessel: VesselLabel, type: VesselType) => void;
   handleReset: () => void;
-  handleChipSelect: (chipId: ChipId) => void;
+  loadScenario: (nextA: Vessel, nextB: Vessel) => void;
   handleSave: () => void;
 } {
   const router = useRouter();
@@ -84,18 +82,6 @@ export function useSandboxState(initialScenario?: { vesselA: Vessel; vesselB: Ve
   );
   const [isDegenerate, setIsDegenerate] = useState<boolean>(false);
 
-  // Tracks which chip (if any) is the source of the currently-loaded
-  // scenario -- purely a client-side visual highlight, cleared by
-  // any manual drag/heading/speed/type edit so it never goes stale. Only
-  // defaults to "classic-crossing" on the plain, seedless "/" route, where
-  // the default seed genuinely IS that chip's fixture (byte-identical,
-  // matching the design's default-active chip) -- a saved/shared scenario
-  // (`initialScenario` provided) has arbitrary geometry that has nothing to
-  // do with that fixture, so it must start with no chip highlighted.
-  const [activeChipId, setActiveChipId] = useState<ChipId | null>(
-    initialScenario ? null : "classic-crossing",
-  );
-
   // Seeded from the default scenario's own encounter type, so a drag
   // immediately after mount already has correct hysteresis context.
   const previousEncounterTypeRef = useRef<EncounterType | undefined>(
@@ -131,7 +117,6 @@ export function useSandboxState(initialScenario?: { vesselA: Vessel; vesselB: Ve
   }
 
   function onVesselPositionChange(vessel: VesselLabel, position: Position): void {
-    setActiveChipId(null);
     applyVesselUpdate(
       vessel === "vesselA" ? { ...vesselA, position } : vesselA,
       vessel === "vesselB" ? { ...vesselB, position } : vesselB,
@@ -139,7 +124,6 @@ export function useSandboxState(initialScenario?: { vesselA: Vessel; vesselB: Ve
   }
 
   function onVesselHeadingChange(vessel: VesselLabel, heading: number): void {
-    setActiveChipId(null);
     applyVesselUpdate(
       vessel === "vesselA" ? { ...vesselA, heading } : vesselA,
       vessel === "vesselB" ? { ...vesselB, heading } : vesselB,
@@ -147,7 +131,6 @@ export function useSandboxState(initialScenario?: { vesselA: Vessel; vesselB: Ve
   }
 
   function onVesselSpeedChange(vessel: VesselLabel, speed: number): void {
-    setActiveChipId(null);
     applyVesselUpdate(
       vessel === "vesselA" ? { ...vesselA, speed } : vesselA,
       vessel === "vesselB" ? { ...vesselB, speed } : vesselB,
@@ -155,32 +138,27 @@ export function useSandboxState(initialScenario?: { vesselA: Vessel; vesselB: Ve
   }
 
   function onVesselTypeChange(vessel: VesselLabel, type: VesselType): void {
-    setActiveChipId(null);
     applyVesselUpdate(
       vessel === "vesselA" ? { ...vesselA, type } : vesselA,
       vessel === "vesselB" ? { ...vesselB, type } : vesselB,
     );
   }
 
-  function handleReset(): void {
-    // Reset scenario is a deliberate FULL state reset, including
-    // hysteresis -- unlike every other applyVesselUpdate call site above
-    // (a normal drag/form update must never clear hysteresis on its
-    // own, see the degenerate branch in applyVesselUpdate). These are
-    // intentionally different code paths, not an inconsistency. The seed
-    // scenario is not necessarily one of the 6 chip fixtures, so this
-    // deliberately does NOT set activeChipId -- it stays whatever it was.
+  // Single generalized full-replace + hysteresis-reset entry point --
+  // every "load a whole new vessel pair" call site (Reset today; Phase 17's
+  // Gallery "Try on Sandbox" bridge next) funnels through this one function
+  // rather than each re-implementing the reset-then-apply body.
+  function loadScenario(nextA: Vessel, nextB: Vessel): void {
     previousEncounterTypeRef.current = undefined;
-    applyVesselUpdate(seedA, seedB);
+    applyVesselUpdate(nextA, nextB);
   }
 
-  function handleChipSelect(chipId: ChipId): void {
-    // Mirrors handleReset()'s exact shape (D-01/D-02: full replace + full
-    // hysteresis reset) -- routes through the same applyVesselUpdate choke
-    // point every other update site uses, never a parallel state path.
-    previousEncounterTypeRef.current = undefined;
-    applyVesselUpdate(CHIP_SCENARIOS[chipId].vesselA, CHIP_SCENARIOS[chipId].vesselB);
-    setActiveChipId(chipId);
+  function handleReset(): void {
+    // handleReset still owns computing seedA/seedB (this instance's seed --
+    // either initialScenario or the default fixture); it delegates the
+    // actual apply step to loadScenario (D-03) rather than duplicating
+    // loadScenario's body under a second name.
+    loadScenario(seedA, seedB);
   }
 
   function handleSave(): void {
@@ -193,7 +171,6 @@ export function useSandboxState(initialScenario?: { vesselA: Vessel; vesselB: Ve
     vesselB,
     lastGoodClassification,
     isDegenerate,
-    activeChipId,
     saveError,
     isSaving: createScenario.isPending,
     onVesselPositionChange,
@@ -201,7 +178,7 @@ export function useSandboxState(initialScenario?: { vesselA: Vessel; vesselB: Ve
     onVesselSpeedChange,
     onVesselTypeChange,
     handleReset,
-    handleChipSelect,
+    loadScenario,
     handleSave,
   };
 }
