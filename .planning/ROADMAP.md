@@ -128,10 +128,24 @@ Plans:
 
 Plans:
 
+**Wave 1**
+
 - [ ] 18-01-PLAN.md — Interface contracts (ChartHeaderStripProps/ChartFooterStripProps/VesselOverlayCardProps) + pure derivation utilities (chart-header-risk.ts D-02, footer-action-copy.ts D-03, vessel-overlay-position.ts)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 18-02-PLAN.md — New components: ChartHeaderStrip, ChartFooterStrip, VesselOverlayCard (depends on 18-01)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 18-03-PLAN.md — Hook onSelect wiring (D-04) + ChartPanel.tsx selection-state/composition wiring + regression tests for D-01's close-paths and Pitfall 1's overlap case (depends on 18-02)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 18-04-PLAN.md — SandboxContainer cleanup + deletion of VerdictBanner/InstrumentReadouts/ControlPanel/status-pill.ts (depends on 18-03)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
 - [ ] 18-05-PLAN.md — Human-verify all 4 Roadmap success criteria, including the critical hit-testing regression re-check (depends on 18-04)
 
 ### Phase 19: Guided Tour
