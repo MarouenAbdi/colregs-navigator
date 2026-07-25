@@ -53,22 +53,22 @@ Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SBOX-06 | TBD | Pending |
-| SBOX-07 | TBD | Pending |
-| SBOX-08 | TBD | Pending |
-| SBOX-09 | TBD | Pending |
-| SBOX-10 | TBD | Pending |
-| TOUR-01 | TBD | Pending |
-| TOUR-02 | TBD | Pending |
-| GAL-05 | TBD | Pending |
-| GAL-06 | TBD | Pending |
-| HERO-05 | TBD | Pending |
+| SBOX-06 | Phase 18 | Pending |
+| SBOX-07 | Phase 18 | Pending |
+| SBOX-08 | Phase 18 | Pending |
+| SBOX-09 | Phase 20 | Pending |
+| SBOX-10 | Phase 16 | Pending |
+| TOUR-01 | Phase 19 | Pending |
+| TOUR-02 | Phase 19 | Pending |
+| GAL-05 | Phase 17 | Pending |
+| GAL-06 | Phase 17 | Pending |
+| HERO-05 | Phase 20 | Pending |
 
 **Coverage:**
 - v1 requirements: 10 total
-- Mapped to phases: 0 (pending roadmap creation)
-- Unmapped: 10 ⚠️
+- Mapped to phases: 10 (Phase 16: SBOX-10; Phase 17: GAL-05, GAL-06; Phase 18: SBOX-06, SBOX-07, SBOX-08; Phase 19: TOUR-01, TOUR-02; Phase 20: SBOX-09, HERO-05)
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-07-25*
-*Last updated: 2026-07-25 after initial definition*
+*Last updated: 2026-07-25 after ROADMAP.md creation — 10/10 requirements mapped to Phases 16-20*

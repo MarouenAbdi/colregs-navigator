@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Design Sync (Sandbox & Gallery)
 status: planning
-last_updated: "2026-07-25T10:28:26.285Z"
+last_updated: "2026-07-25T11:50:00.000Z"
 last_activity: 2026-07-25
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,17 +17,19 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-22)
+See: .planning/PROJECT.md (updated 2026-07-25)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** v1.3 milestone archived -- ready for next milestone planning
+**Current focus:** v1.4 Design Sync — roadmap created, ready to plan Phase 16
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-07-25 — Milestone v1.4 started
+Phase: 16 of 20 (Sandbox Mutation-Path Generalization)
+Plan: — (not yet planned)
+Status: Ready to plan
+Last activity: 2026-07-25 — ROADMAP.md created for v1.4 (Phases 16-20), 10/10 requirements mapped
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -47,7 +49,7 @@ Last activity: 2026-07-25 — Milestone v1.4 started
 **Recent Trend:**
 
 - Last 5 plans: 15-01 → 15-02 → 15-03 → 15-04 → 15-05, all v1.3 Phase 15 (Deploy & Verify)
-- Trend: v1.3 milestone complete, both phases shipped
+- Trend: v1.3 milestone complete, both phases shipped; v1.4 roadmap just created, no plans executed yet
 
 *Updated after each plan completion*
 
@@ -58,13 +60,11 @@ Last activity: 2026-07-25 — Milestone v1.4 started
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- v1.3 is compressed to exactly 2 phases (user-requested, down from research's suggested 4): Phase 14 "Pipeline & Hooks" covers all repo-local tooling with no external hosting/DB dependency (CI-01..06, CD-01/CD-02 wiring only, HOOKS-01, DOCS-CONTRIB-01); Phase 15 "Deploy & Verify" covers everything requiring real Vercel/Neon provisioning (DEPLOY-01..03, HEALTH-01..04).
-- CD-01/CD-02 are scoped across both phases: the deploy script/workflow mechanics are authored and environment-gated in Phase 14 ("wired and ready"), but only actually exercised against a live host in Phase 15 ("live verification").
-- Research recommends Vercel (hosting) + Neon (Postgres) — native Git integration for CD, Neon's scale-to-zero compute fits sporadic portfolio traffic, `@prisma/adapter-pg` needs no driver change. GitHub Actions owns CI only; the host's native Git integration owns CD — no redundant hand-rolled Actions deploy step (named anti-pattern).
-- Known first-deploy risks flagged by research to verify explicitly, not assume: `generated/prisma` has never been regenerated on a clean checkout (no `postinstall` script yet), `next build --webpack` has never been verified against a host's auto-detected build command (direct precedent: Turbopack's silent `resolve.extensionAlias` incompatibility went undetected for 4 phases), and free-tier DB auto-suspend could stack with serverless cold starts on the exact demo request that matters most.
-- v1.2 Tech Debt & Stabilization shipped 2026-07-20, 22/22 requirements validated across Phases 10-13 — see `.planning/milestones/v1.2-ROADMAP.md`.
-- Plan 14-02: repo `MarouenAbdi/colregs-navigator` made public (user decision, resolving CI-05's blocked-on-billing checkpoint) — branch protection on `main` is now configured and GET-verified (`required_status_checks.contexts: [lint, typecheck, test, build]`, `strict: true`, `enforce_admins: true`). CI-01 and CI-05 both fully satisfied, not deferred.
-- Plan 14-02 found and fixed three real CI bugs only surfaced by exercising the pipeline against a live PR: package-lock.json peer-dep drift under strict resolution, missing `prisma db seed` step in `test`/`build` jobs, and a `typescript@7.0.2` (tsgo)/Next.js 16.2.10 build-time compatibility gap (fixed via `@typescript/native-preview` devDependency, Next's own official escape hatch for tsgo detection — does not change the pinned typescript version).
+- v1.4 roadmap derived from research's suggested 5-phase structure with no changes needed: Phase 16 (mutation-path generalization, prerequisite) → Phase 17 (Gallery↔Sandbox bridge) → Phase 18 (on-chart vessel overlay + header/footer strips, highest risk) → Phase 19 (Guided Tour, sequenced after 18 so content/z-index reference final UI) → Phase 20 (reasoning-trail + Hero visual sync, lowest risk/additive).
+- Phase 18 is this codebase's 3rd occurrence of the painted-element-swallows-pointer-event hit-testing regression class (Phase 4, Phase 8 precedent) — its success criteria explicitly require human-verified drag/rotate-with-overlay-open testing, not just green CI.
+- Every v1.4 phase's success criteria include an explicit human-browser-verification item per research's Pitfall 5 finding: this project has shipped "tests green, feature broken" before (Phase 5 dev-server bug, Phase 4/8 hit-testing) and jsdom cannot observe real pointer-capture routing, focus-trap escape, or CSS stacking order.
+- Research recommends React Context (not zustand) for the Gallery→Sandbox bridge — only 2 low-frequency consumers, below this project's pre-scoped zustand-adoption trigger (3+ frequent consumers).
+- No new npm dependencies needed: shadcn `Dialog`/`Popover` registry components layer on the already-installed `radix-ui` package.
 
 ### Pending Todos
 
@@ -85,6 +85,7 @@ Items acknowledged and carried forward from previous milestone close:
 | Tooling | FMT-01 (repo-wide Prettier pass), RFCT-V2-01 (ChipRow extraction) | Deferred to v2 | v1.2 requirements scoping |
 | Tech debt | `/api/health` has zero automated CI regression coverage (route lives outside `src/**`, invisible to `vitest.config.ts`'s glob) | Carried forward, not yet scheduled | v1.3 milestone close |
 | Tech debt | Spurious empty Vercel project `agent-a5473b04789dea3ed` (from a `vercel link` mis-detection bug) awaits manual deletion via the Vercel dashboard | Carried forward, user action required | v1.3 milestone close |
+| Guided Tour | TOUR-03 (auto-launch on first visit) | Deferred to v2 | v1.4 requirements scoping |
 
 ## Quick Tasks Completed
 
@@ -92,15 +93,16 @@ Items acknowledged and carried forward from previous milestone close:
 |----------|------|------|
 | 260718-qgs | Header design-fidelity + Phase 7 convention fixes, corrected against the raw Claude Design source | 2026-07-18 |
 | 260719-t8r | Generate `docs/reasoning-trails.json` design reference (catalog of all COLREGS reasoning-trail shapes) | 2026-07-19 |
-| 260720-jko | Reorganize sandbox/, domain/colregs/, domain/geometry/, gallery/ into topic/feature subfolders — zero logic change, 216/216 tests pass | 2026-07-20 |
+| 260720-jko | Reorganize sandbox/, domain/colregs/, domain/gallery/ into topic/feature subfolders — zero logic change, 216/216 tests pass | 2026-07-20 |
 | 260720-kg5 | Remove local/no-stale-id-comments ESLint rule (deregistered, deleted rule file, pruned suppressions) — 0 lint errors after | 2026-07-20 |
 
 ## Session Continuity
 
-Last session: 2026-07-22T08:12:00.000Z
-Stopped at: Plan 15-05 complete -- v1.3 milestone fully done, all 15 phases/9 plans complete
-Resume file: none -- no plans remain in v1.3
+Last session: 2026-07-25T11:50:00.000Z
+Stopped at: ROADMAP.md created for v1.4 (Phases 16-20), REQUIREMENTS.md traceability updated, 10/10 requirements mapped
+Resume file: none
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Run `/gsd:plan-phase 16` to begin planning Sandbox Mutation-Path Generalization
+</content>
