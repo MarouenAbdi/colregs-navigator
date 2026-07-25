@@ -19,6 +19,8 @@
 
 **Locked decisions:** Match the design exactly on all three scope questions raised during milestone scoping — Guided Tour is in scope (not deferred), the chip row is removed (not kept alongside Gallery), and Gallery fully switches to load-in-place (not both Link + button). Zero change to `classifyEncounter()`/domain logic — presentation layer only, same pattern as v1.1.
 
+**Progress:** Phase 16 (Sandbox Mutation-Path Generalization) complete 2026-07-25 — SBOX-10 validated. `useSandboxState()` now exposes a single generalized `loadScenario(vesselA, vesselB)` entry point (replacing `handleChipSelect`); every mutation source (drag, rotate, ControlPanel edit, Reset) funnels through it; the inline 6-chip preset row and its backing `chip-scenarios.ts` module are fully removed. Human-verified behavioral parity in a real browser. Two pre-existing, out-of-scope issues surfaced and logged as backlog todos rather than blocking this phase: a floating-point precision gap in the exact-coincident-position degenerate check, and an unsafe `Result` cast in `useSandboxState`'s lazy initializer (both predate this phase). This is the prerequisite Phase 17 (Gallery → Sandbox bridge) depends on.
+
 <details>
 <summary>v1.3 milestone details (shipped 2026-07-22)</summary>
 
