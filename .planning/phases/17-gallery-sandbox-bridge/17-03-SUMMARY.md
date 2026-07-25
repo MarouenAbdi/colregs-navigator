@@ -114,3 +114,7 @@ None - no external service configuration required.
 ---
 *Phase: 17-gallery-sandbox-bridge*
 *Completed: 2026-07-25*
+
+## Self-Check: PASSED
+
+All created/modified files verified present on disk; all task commits (`917f45b`, `4c88048`) and the metadata commit (`7554b6b`) verified present in `git log --oneline --all`.
