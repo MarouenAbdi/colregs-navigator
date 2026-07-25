@@ -22,8 +22,8 @@ Requirements for this milestone. Each maps to roadmap phases. Zero change to `cl
 
 ### Gallery
 
-- [ ] **GAL-05**: User can click "Try on Sandbox" on a gallery card to load that scenario directly into the homepage Sandbox's live state and be smooth-scrolled to it, with no page navigation (replaces the whole-card `Link` to `/s/{id}`)
-- [ ] **GAL-06**: The "Try on Sandbox" CTA is reachable via mouse hover, keyboard focus, and touch — not hover-only
+- [x] **GAL-05**: User can click "Try on Sandbox" on a gallery card to load that scenario directly into the homepage Sandbox's live state and be smooth-scrolled to it, with no page navigation (replaces the whole-card `Link` to `/s/{id}`)
+- [x] **GAL-06**: The "Try on Sandbox" CTA is reachable via mouse hover, keyboard focus, and touch — not hover-only
 
 ### Hero
 
@@ -60,8 +60,8 @@ Populated during roadmap creation.
 | SBOX-10 | Phase 16 | Complete |
 | TOUR-01 | Phase 19 | Pending |
 | TOUR-02 | Phase 19 | Pending |
-| GAL-05 | Phase 17 | Pending |
-| GAL-06 | Phase 17 | Pending |
+| GAL-05 | Phase 17 | Complete |
+| GAL-06 | Phase 17 | Complete |
 | HERO-05 | Phase 20 | Pending |
 
 **Coverage:**

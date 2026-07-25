@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Design Sync (Sandbox & Gallery)
-status: executing
-stopped_at: Phase 17 UI-SPEC approved
-last_updated: "2026-07-25T13:44:44.265Z"
+status: ready_to_plan
+stopped_at: Phase 17 complete (4/4) — ready to discuss Phase 18
+last_updated: 2026-07-25T14:50:21.840Z
 last_activity: 2026-07-25 -- Phase 17 execution started
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 6
-  completed_plans: 2
+  completed_plans: 6
   percent: 20
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-25)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 17 — gallery-sandbox-bridge
+**Current focus:** Phase 18 — on chart vessel control overlay
 
 ## Current Position
 
-Phase: 17 (gallery-sandbox-bridge) — EXECUTING
-Plan: 1 of 4
-Status: Executing Phase 17
-Last activity: 2026-07-25 -- Phase 17 execution started
+Phase: 18
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-07-25
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -36,7 +36,7 @@ Progress: [░░░░░░░░░░] 0%
 
 **Velocity:**
 
-- Total plans completed: 52 (19 v1.0 + 14 v1.1 + 18 v1.2 + 9 v1.3 [incl. 15-02, no separate SUMMARY.md — manual provisioning verified downstream], some plans span multiple waves — see milestone ROADMAPs for exact per-phase counts)
+- Total plans completed: 56 (19 v1.0 + 14 v1.1 + 18 v1.2 + 9 v1.3 [incl. 15-02, no separate SUMMARY.md — manual provisioning verified downstream], some plans span multiple waves — see milestone ROADMAPs for exact per-phase counts)
 - Average duration: - min
 - Total execution time: - hours
 
@@ -47,6 +47,7 @@ Progress: [░░░░░░░░░░] 0%
 | 14 (Pipeline & Hooks) | 4/4 | - | - |
 | 15 (Deploy & Verify) | 5/5 | - | - |
 | 16 | 2 | - | - |
+| 17 | 4 | - | - |
 
 **Recent Trend:**
 
