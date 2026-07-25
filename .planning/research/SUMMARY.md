@@ -1,164 +1,159 @@
 # Project Research Summary
 
-**Project:** COLREGS Navigator — v1.3 "CI/CD & Deployment" milestone
-**Domain:** CI/CD pipeline + first-ever live deployment for an existing Next.js 16 / React 19 / TypeScript 7 (tsgo) / tRPC 11 / Prisma 7 / PostgreSQL portfolio app
-**Researched:** 2026-07-20
-**Confidence:** HIGH-MEDIUM (toolchain mechanics and official docs are HIGH; hosting/DB free-tier pricing and final platform pick are MEDIUM — genuinely fast-moving and partly a user decision)
+**Project:** COLREGS Navigator — v1.4 "Design Sync (Sandbox & Gallery)" milestone
+**Domain:** Front-end redesign sync for an existing Next.js 16 / React 19 / tRPC app — modal wizard, on-chart floating overlays, and cross-subtree client state sharing, applied to an already-shipped interactive SVG chart + gallery product
+**Researched:** 2026-07-25
+**Confidence:** HIGH
 
 ## Executive Summary
 
-This milestone doesn't introduce a new product domain — it wires an already-built, already-tested Next.js/tRPC/Prisma app into its first CI pipeline and first real production deployment. All four research tracks converge on the same architecture: GitHub Actions owns CI only (lint, typecheck, test, build — as a merge gate), and the hosting platform's native Git integration owns CD (auto-deploy on merge to `main`), with **Vercel + Neon** as the recommended host/DB pair because they are the cleanest fit for this project's existing `@prisma/adapter-pg` driver-adapter pattern, are genuinely free and non-expiring at portfolio-traffic scale, and wire together natively (Neon's Vercel Marketplace integration auto-injects `DATABASE_URL`). Husky 9 + lint-staged handles pre-commit hygiene (staged-file ESLint only — full typecheck deliberately stays out of pre-commit and lives in CI, and optionally `pre-push`).
+This milestone is presentation-layer-only: zero changes to `classifyEncounter()` or any domain/`src/server/` code. It restructures three existing surfaces — replacing the side `ControlPanel` with on-chart floating vessel-control overlays, adding a 6-step Guided Tour modal, and switching the Gallery from `<Link>` navigation to an in-place "Try on Sandbox" load — using primitives already available in the locked stack. No new npm dependencies are required: `radix-ui@^1.6.2` is already installed, so shadcn's `Dialog` and `Popover` registry components (`npx shadcn add dialog`/`popover`) are pure source-file additions. The Gallery→Sandbox state bridge is solved with plain React Context (a thin Client Component provider wrapping the existing Server/Client composition in `app/page.tsx`), not zustand — the trigger condition this project pre-scoped for adopting zustand (3+ frequently-updating shared-state consumers) has not arrived; there are exactly two, low-frequency consumers here.
 
-The single biggest risk this research surfaces is that this is the **first time** several already-written, already-working pieces of this codebase run outside the original developer's warm local machine: the Prisma client has never been generated on a clean checkout (`generated/prisma` is gitignored, no `postinstall` script exists), the mandatory `next build --webpack` flag has never been verified against a host's auto-detected build command, and `tsc --noEmit` (tsgo) has never run as CI's authoritative type gate now that `next.config.ts` disables Next's own broken internal type-checker. Each of these is a "looks done but isn't" trap directly analogous to a precedent this project has already hit once (Turbopack's silent `resolve.extensionAlias` incompatibility, undiscovered for four phases). The mitigation pattern is consistent across all four research files: don't trust "build passes locally" or "CI job is green" as proof — explicitly verify a truly clean checkout, a real hosted build, and a real post-idle-period request before calling any part of this milestone done.
+The recommended approach generalizes code that already exists rather than adding parallel paths: `handleChipSelect()` becomes `loadScenario(vesselA, vesselB)`, and every vessel-mutation source (drag, form field, reset, Gallery load) continues to funnel through the single `applyVesselUpdate()` choke point. Positioning of the new on-chart overlay must go through the existing DOM-API-free `chartToScreen()` function, never `getBoundingClientRect()`/`getScreenCTM()` on the SVG — this project has already engineered around that exact jsdom gap once and the convention must hold for the new overlay and for any reasoning-trail connector-line work.
 
-The recommended approach is deliberately proportional to a solo-authored portfolio project reviewed by a technical interviewer: real CI, real CD, real production DB, real health check and rollback story — but explicitly *no* staging environment, Kubernetes, blue-green deploys, secrets manager, or observability stack. FEATURES.md is explicit that over-scoping here is exactly as visible a judgment failure to a reviewer as under-scoping (no CI at all) — this milestone is itself a demonstration of proportional engineering judgment, not a tool checklist.
+The dominant risk is not technology selection but regression of a bug class this codebase has already paid for twice: painted elements silently swallowing pointer events meant for vessel hulls/rotate-handles (Phase 4 and Phase 8 incidents). The new on-chart overlay card is a strictly larger, more animated version of that same shape and is the highest-risk single item in the milestone. A second, systemic risk is that automated CI (lint/typecheck/test/build) cannot observe real pointer-capture routing, real focus-trap escape, or real CSS stacking order — this project has already shipped "green but broken" once (the Phase 5 dev-server bug invisible to tsc/Vitest). Every phase in this milestone needs an explicit, scripted human-verification pass in a real browser, not just passing CI, as its actual completion bar.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The stack additions are almost entirely configuration, not new runtime dependencies: `actions/checkout@v7`, `actions/setup-node@v7` (with `cache: npm` and `node-version-file: '.nvmrc'`), Husky 9.1.7 + lint-staged 17.0.8 (dev-only), and two external platform choices — **Vercel** (hosting) and **Neon** (managed Postgres). No production npm package is added. Existing tooling (Prisma 7.8.0's `migrate deploy`, the already-scripted `npm run lint/typecheck/test/build`) is reused as-is.
+No core-stack changes. The only additions are two shadcn/ui registry components (`Dialog`, `Popover`) layered on the already-installed `radix-ui` package — confirmed via direct `package.json`/`src/components/ui/` inspection that only `badge`/`button`/`card`/`label`/`select`/`slider` exist today, and that `dialog`/`popover` resolve against the existing dependency with zero new `package.json` lines. React's built-in `createContext`/`useContext` — not zustand — is the recommended mechanism for the Gallery→Sandbox bridge.
 
 **Core technologies:**
-- Vercel (hosting): first-party Next.js maintainer, zero-Dockerfile, non-expiring free Hobby tier at this project's traffic scale, native Neon Marketplace wiring
-- Neon (Postgres): scale-to-zero compute fits sporadic portfolio-review traffic far better than Supabase's always-on-compute-with-7-day-pause model; pooled/unpooled URL pair maps directly onto the existing `@prisma/adapter-pg` pattern
-- Husky 9.1.7 + lint-staged 17.0.8: standard, current, `prepare`-script-based git hook pattern — staged-file ESLint only, no new lint rules
-- `actions/checkout@v7` / `actions/setup-node@v7`: latest verified tags via live GitHub API, not training data
-
-Note: `.nvmrc` does not currently exist in the repo and should be added — every research track (STACK, ARCHITECTURE, PITFALLS) independently flags Node-version pinning as a prerequisite so local/CI/host never silently drift.
+- shadcn `Dialog` (Radix `Dialog` under the hood) — Guided Tour modal shell — controlled `open`/`currentStep` state, `Presence`-gated content mounting means step swaps don't remount the dialog; no dedicated stepper package needed (none exists in the shadcn registry)
+- shadcn `Popover` (virtual-anchor pattern) — dismiss/focus shell for the on-chart vessel-control overlay — provides outside-click dismissal, Escape-to-close, and focus return for free; anchored via a portaled invisible div fed the existing `chartToScreen()`-computed coordinate, never a `ref` on the SVG node
+- React Context (`SandboxBridgeProvider`) — Gallery→Sandbox cross-tree signal — a Client Component provider wrapping Server Component children per Next.js's own documented pattern; zustand deliberately deferred until a 3rd shared-state consumer actually appears
 
 ### Expected Features
 
+Three UI patterns, matched against locked v1.4 scope. No domain/feature research applies (classification logic is unchanged this milestone).
+
 **Must have (table stakes):**
-- GitHub Actions CI: lint + typecheck + test + build, triggered on `pull_request` and `push:main`, with branch protection making all four required status checks (a red CI run that doesn't block merge is "theater," per FEATURES.md)
-- README CI status badge
-- CD: real auto-deploy on merge to `main` (via host-native Git integration, not a hand-rolled Actions deploy step run alongside it — the dual-deploy pattern is a named anti-pattern)
-- `prisma migrate deploy` (never `migrate dev`/`db push`) wired into the deploy path against production Postgres
-- A minimal `/api/health` endpoint doing a real DB connectivity check
-- Husky + lint-staged pre-commit hook (ESLint on staged files only)
-- `CONTRIBUTING.md` (carries forward locked requirement `DOCS-CONTRIB-01`): setup, running checks locally, pre-commit hook behavior, branch/commit conventions, PR expectations, rollback note
+- Guided Tour: Back/Next/Skip (first step no Back, last step "Done"), step-dot progress, Escape/outside-click dismiss, focus trap + focus-return to trigger, `localStorage` "seen" flag (no auto-launch — manual "How to read this" button only)
+- On-chart overlay: dismiss on outside-click/Escape, single `selectedVesselId: 'A' | 'B' | null` state (not two independent booleans) so re-selecting toggles closed and selecting the other vessel moves the overlay, positioned near the live (draggable) vessel position
+- Gallery card: discoverable CTA revealed on hover **and** `:focus-within` **and** touch/coarse-pointer fallback — hover-only silently locks out touch and keyboard users, a regression from today's fully-accessible whole-card `<Link>`
+- Gallery→Sandbox: direct state-setter call (no routing/navigation), `scrollIntoView({behavior:'smooth'})` sequenced after the state update commits, some visible acknowledgment that data changed
 
-**Should have (differentiators):**
-- A short documented rationale for *not* running a redundant Actions deploy step (shows judgment, not just tool usage)
-- PR preview deployments (free if the host is Vercel/Netlify — do not hand-roll)
-- Dependabot config (one file, zero custom code)
-- `npm audit --audit-level=high` as a non-blocking, report-only CI step
-- A CD-decision ADR entry (host choice, DB choice, deploy-trigger mechanism) — reuses the project's existing ADR practice
+**Should have (competitive):**
+- Tour illustrations depict this app's actual chart UI (bearing lines, give-way color, decision chain) rather than generic icon art — teaches the reasoning that is the app's actual differentiator
+- On-chart overlay scoped exactly to editable fields (position/heading/speed/type), resisting scope creep into a full "properties panel" port
+- Load-in-place preserves scroll/URL state cleanly — no history entry added, back-button behavior unaffected
 
-**Defer (explicitly out of scope this milestone):**
-- Staging environment / multi-env promotion pipeline
-- Kubernetes / Docker orchestration
-- Blue-green/canary/traffic-shifting deploys
-- Dedicated secrets-management system (Vault, etc.)
-- Custom observability stack (Grafana/Prometheus)
-- Matrix CI build strategy across Node versions/OSes
+**Defer (v2+):**
+- Auto-launch Tour on first visit (needs its own first-visit-detection design — explicitly deferred, not bundled)
+- Post-load highlight/flash animation on Sandbox beyond the scroll itself
+- DOM-anchored "spotlight" tour pointing at live elements (would justify a real tour library — not this milestone's self-contained modal shape)
+- Overlay editing extended beyond 2 vessels (out of scope per existing "multi-vessel is v2" boundary)
 
 ### Architecture Approach
 
-CI (GitHub Actions) and CD (the hosting platform's native Git integration) are treated as two separate, decoupled systems — Actions never deploys anything; it is purely a pre-merge and post-merge correctness gate. The host's own build script (`vercel-build`, auto-preferred over `build` when present) is the single place where Prisma-client generation, an environment-gated `prisma migrate deploy` (only on real production builds, never PR previews), and the mandatory `next build --webpack` flag all run together. `docker-compose.yml` (already in the repo) is reused verbatim as CI's ephemeral test database rather than re-declared as a separate GitHub Actions `services:` block, keeping local dev and CI on one definition.
+The current architecture is a single client tree (`SandboxContainer`) with one state choke point (`useSandboxState()`) plus a fully separate Server Component tree (`GalleryContainer`) that only ever wrote via `<Link>` navigation. The target architecture keeps that choke point intact and adds one new entry point (`loadScenario()`, generalized from `handleChipSelect()`) plus a thin `SandboxBridgeProvider` Client Component wrapping the whole page composition, whose Server Component children (`Hero`, `GalleryContainer`) remain unaffected — only the Provider itself and the new interactive leaves (`TryOnSandboxButton`, `VesselControlOverlay`) cross the Server/Client boundary.
 
 **Major components:**
-1. `.github/workflows/ci.yml` — single job (no matrix needed at this scale): lint, typecheck, test (needs Docker Postgres), build
-2. Host's native Git integration (Vercel recommended) — the actual CD mechanism, triggered independently by a push to `main`
-3. `vercel-build` script (or host-equivalent) — `prisma generate` → environment-gated `prisma migrate deploy` → `next build --webpack`, the one place production migrations and the mandatory webpack flag are guaranteed to run together
-4. Husky (`.husky/pre-commit` → lint-staged; optionally `.husky/pre-push` → full `npm run typecheck`) — local-only, fast-first enforcement layer
-5. Production Postgres (Neon) — standard `postgresql://` wire protocol, no driver/adapter change needed from the existing `@prisma/adapter-pg` + `pg` setup
+1. `useSandboxState()` — gains `loadScenario(vesselA, vesselB)` (replaces `handleChipSelect`), remains the sole choke point every mutation source (drag, form field, Reset, Gallery load) funnels through
+2. `SandboxBridgeProvider` / `useSandboxBridge()` — new page-scoped React Context; pure signaling channel (`pendingScenario`, `requestLoad()`), zero business logic
+3. `ChartPanel` + `VesselControlOverlay` — `ChartPanel` gains local `selectedVessel` state (not lifted into `useSandboxState()`) and renders the new floating overlay, which absorbs `ControlPanel`'s form fields and positions via the existing `chartToScreen()`-derived screen coordinates
+4. `ChartHeaderStrip` / `ChartFooterStrip` — replace `VerdictBanner`/`InstrumentReadouts` by recomposing the same existing pure derivation modules (`bannerRuleBadge`, `statusPillCopy`, `deriveInstrumentReadouts`) into a new layout, no new business logic
+5. `GuidedTourModal` + `guided-tour-steps.ts` (pure data) + `TourStepIllustration` — new, fully independent feature folder (`src/components/tour/`), zero shared files with the Sandbox/Gallery wiring
 
-Two secret stores are kept fully separate and non-overlapping: CI's test DB uses the already-public dev credentials from `.env.example`/`docker-compose.yml` (not a GitHub secret at all), while the real production `DATABASE_URL` lives only in the hosting platform's own environment-variable store — GitHub Actions never needs to hold a production credential under this architecture.
+Suggested build order (from ARCHITECTURE.md): [1] generalize `handleChipSelect`→`loadScenario` + remove chip row first (both [2] and [3] depend on it) → [2] Gallery↔Sandbox bridge and [3] chart restructure (overlay + strips) can run in parallel/either order → [4] Guided Tour and [5] Hero visual sync are fully independent and lowest-risk, safe to sequence last.
 
 ### Critical Pitfalls
 
-1. **`generated/prisma` client never regenerated on a clean checkout** — `output` is gitignored and there's no `postinstall` script; every CI job and the first host build will fail immediately on import resolution unless `prisma generate` (or a `"postinstall": "prisma generate"` script) runs explicitly. This blocks the entire CI phase, not just the build job — fix first.
-2. **Old `?connection_limit=` URL-param advice is dead on arrival for driver adapters** — Prisma 7 + `@prisma/adapter-pg` delegates pool sizing entirely to `pg.Pool` constructor options (`max`, `connectionTimeoutMillis`), not connection-string params; under serverless concurrency the default pool size (10) times several warm function instances can exhaust a free-tier connection cap. Cap `max` explicitly and prefer Neon's pooled endpoint.
-3. **Host build command silently diverging from `package.json`'s `next build --webpack`** — this project has direct precedent (Turbopack's silent `resolve.extensionAlias` incompatibility, undetected for four phases). Never trust a host's framework auto-detection; explicitly verify the build log shows webpack, not Turbopack, on the very first real deploy.
-4. **Unsafe or unconditional `prisma migrate deploy`** — must be environment-gated (e.g. `VERCEL_ENV === "production"`) so a PR preview build can never apply a migration to the live database; `migrate dev`/`db push` must never appear in any CI/CD script.
-5. **Free-tier DB auto-suspend stacking with serverless cold starts** — the exact failure mode that could hit a portfolio demo on the one occasion that matters most (an interviewer's first click after days of inactivity). Neon's fast, transparent resume is preferred over Supabase's full 7-day project pause; test the live deploy after a genuine overnight idle period before calling it demo-ready.
-
-(Six more pitfalls are documented in PITFALLS.md, including Husky hooks silently not registering on a fresh clone, forked-PR GitHub Actions secret unavailability, `.env` leak risk once a real production credential exists, and Node-version drift across local/CI/host — all mapped to specific phases below.)
+1. **On-chart overlay reopens the hit-testing regression class (3rd occurrence)** — a floating control card stacked over the chart can silently swallow `pointerdown` events meant for hull/rotate-handle drag, exactly like the Phase 4 and Phase 8 incidents, but at a much larger blast radius (150-250px card vs. ~45px² badge). Avoid: default the overlay's root to `pointer-events: none`, re-enable only on its real interactive children; treat overlay-open as a state machine that must account for heading-dependent hull-polygon overlap; add an automated geometric/overlap check mirroring the Phase 8 point-in-polygon precedent, not manual UAT alone.
+2. **Gallery (Server Component) has no existing seam to reach into Sandbox's client-only state** — naive implementations either do nothing, force a state-losing remount, or secretly fall back to `router.push('/s/{id}')`, which defeats the locked "load-in-place, no navigation" decision. Avoid: decide the state-ownership seam (Context provider, per STACK/ARCHITECTURE research) explicitly before writing the button's `onClick`; sequence `scrollIntoView` after the state update commits, not synchronously in the click handler.
+3. **Reasoning-trail connector-line work tempts `getBoundingClientRect()`/`getBBox()`, which this project has already banned once (jsdom gap)** — precise connector geometry between node-cards is the obvious but wrong reach. Avoid: default to CSS-only connectors (border/pseudo-element chevrons keyed off adjacent step types, not runtime pixel positions); if real measurement is unavoidable, isolate it in a hook explicitly excluded from unit-test coverage and verify only via browser walkthrough.
+4. **Guided Tour modal is the first Dialog primitive in this codebase and can collide with the new overlay's stacking/focus conventions** — Radix Dialog defaults to `modal={true}` (focus trap, auto-close-on-Escape, focus-return-to-trigger); undocumented z-index tiers between Tour and on-chart overlay risk a collision once both ship in the same milestone. Avoid: assign an explicit, documented z-index scale; empirically verify (not assume) that the Dialog backdrop makes background Sandbox interactions genuinely inert given this app's unusual SVG pointer-event wiring.
+5. **Green CI is not this project's actual acceptance bar** — Vitest/RTL under jsdom cannot observe real pointer-capture routing, real focus-trap Tab-escape, or real CSS stacking order; this project has already shipped "tests green, dev server broken" once (Phase 5) and needed two UAT rounds to fix hit-testing once before (Phase 4). Avoid: write an explicit, scripted human-verification checklist per phase up front (during planning, not closeout), derived directly from pitfalls 1-4, and report the actual browser-verification outcome as the phase-completion signal — not "lint/test/build all green."
 
 ## Implications for Roadmap
 
-Based on combined research, suggested phase structure:
+Based on research, suggested phase structure:
 
-### Phase 1: CI Foundation
-**Rationale:** Nothing else in this milestone can be verified without a working CI pipeline first, and this phase surfaces the "first time on a clean checkout" pitfalls (Prisma client generation, Node pinning, macOS-vs-Linux native binaries) before deployment adds a second, harder-to-debug environment on top.
-**Delivers:** `.github/workflows/ci.yml` (lint + typecheck + test + build, triggered on `pull_request` + `push:main`), `.nvmrc`, `"postinstall": "prisma generate"`, Docker-Postgres-backed test job reusing the existing `docker-compose.yml`, branch protection requiring all jobs, README CI badge.
-**Addresses:** GitHub Actions CI table-stake, dependency caching, required status checks, README badge (FEATURES.md P1 items).
-**Avoids:** Pitfalls 1 (Prisma client never regenerated), 5 (Node version drift), 6 (macOS/Linux native-binary mismatch), 8 (forked-PR secrets — resolved by using a service/Docker container, not a hosted-DB secret).
+### Phase 1: Sandbox mutation-path generalization (prerequisite refactor)
+**Rationale:** Both the Gallery bridge and the chip-row-removal target feature depend on the same small refactor; doing it once first avoids two independent re-derivations later.
+**Delivers:** `loadScenario(vesselA, vesselB)` replacing `handleChipSelect(chipId)` in `useSandboxState()`; chip row JSX, `activeChipId`, and (if no other consumer remains) `chip-scenarios.ts` removed from `SandboxContainer`.
+**Addresses:** "Remove 6-chip preset row" (locked, mutually exclusive with keeping Gallery as pure `Link`, per FEATURES.md dependency notes).
+**Avoids:** Technical-debt pitfall of orphaned `activeChipId`/`handleChipSelect`/`chip-scenarios.ts` left wired but unreachable after the chip row disappears from the UI.
 
-### Phase 2: Pre-commit Hooks & Contributor Docs
-**Rationale:** Independent of hosting/DB choice, so it can proceed in parallel with or immediately after Phase 1; sequenced before deployment because `CONTRIBUTING.md` should document real hook behavior, not an aspirational one (per FEATURES.md's explicit dependency note).
-**Delivers:** Husky 9 + lint-staged (staged-file `eslint --fix` only, full typecheck deliberately kept out of pre-commit), a `.env*` staged-file guard rule, `CONTRIBUTING.md` covering setup/checks/hook behavior/branch conventions/PR expectations/rollback note.
-**Addresses:** HOOKS-01 and DOCS-CONTRIB-01 locked requirements; the "full typecheck in pre-commit" anti-pattern is explicitly avoided.
-**Avoids:** Pitfall 7 (Husky hooks silently not firing on fresh clone — verify via an actual scratch clone + `npm ci`), Pitfall 9 (`.env` leak risk, addressed here as a cheap pre-commit guard before a real production credential exists).
+### Phase 2: Gallery → Sandbox load-in-place bridge
+**Rationale:** Flagged as the milestone's "hard dependency" — needs the generalized `loadScenario()` from Phase 1, and its state-ownership seam (Context vs. shared store) must be decided explicitly before any component code is written.
+**Delivers:** `SandboxBridgeProvider`/`useSandboxBridge()` Context wrapping `app/page.tsx`; `GalleryCard` drops its whole-card `<Link>` in favor of a `TryOnSandboxButton` leaf (hover + `:focus-within` + touch-visible reveal); `scrollIntoView` sequenced after the state commit.
+**Uses:** React Context per STACK.md's Question 3 verdict — not zustand.
+**Implements:** ARCHITECTURE.md's "Server Components as children of a page-level Client Provider" pattern; Anti-Pattern 3/4 guardrails (don't make `GalleryContainer`/`GalleryCard` Client Components; don't reach for zustand at 2 consumers).
 
-### Phase 3: Hosting & Database Provisioning
-**Rationale:** CD mechanism and the `prisma migrate deploy` step both depend on which host/DB is selected — this is explicitly a decide-then-build item per PROJECT.md, not pre-lockable before Phase 1/2. Comes after CI exists so the very first deploy can be validated against a pipeline that already proves lint/typecheck/test/build are healthy.
-**Delivers:** Vercel project linked to the GitHub repo (native Git integration for CD), Neon project provisioned and wired via the Vercel Marketplace integration (auto-injected `DATABASE_URL`/`DATABASE_URL_UNPOOLED`), `vercel-build` script (Prisma generate → environment-gated `migrate deploy` → `next build --webpack`), all `.env.example` variables configured in Vercel's Production environment.
-**Uses:** Vercel + Neon (STACK.md), `@prisma/adapter-pg` pool configuration (`max` capped explicitly).
-**Implements:** The CI/CD-decoupled architecture pattern (ARCHITECTURE.md Pattern 1) and the environment-gated migration script (Pattern 2).
+### Phase 3: On-chart vessel control overlay
+**Rationale:** Independent of Phase 2 (different files almost entirely, per ARCHITECTURE.md's build-order graph), but shares the Phase 1 prerequisite and is the highest-risk item in the milestone — schedule with dedicated attention to the pointer-events regression class.
+**Delivers:** `VesselControlOverlay` (absorbs `ControlPanel`'s form fields), `selectedVessel` state local to `ChartPanel`, click-vs-drag movement-threshold guard in the hull pointer handlers, `ChartHeaderStrip`/`ChartFooterStrip` replacing `VerdictBanner`/`InstrumentReadouts`.
+**Addresses:** "On-chart vessel control overlay (replaces side panel)" — HIGH user value, MEDIUM cost per FEATURES.md's prioritization matrix.
+**Avoids:** Pitfall 1 (hit-testing regression, 3rd occurrence) — requires explicit `pointer-events: none` default + selective re-enable, and a manual (ideally automated geometric) drag-with-overlay-open verification pass before closing the phase.
 
-### Phase 4: Go-Live Verification & Operational Signal
-**Rationale:** "Green CI" and "green build" are not the same claim as "actually works when deployed" — this project has direct precedent for that gap (Turbopack). This phase is the explicit verification gate the pitfalls research insists on, not an assumed byproduct of Phase 3.
-**Delivers:** `/api/health` endpoint (real DB connectivity check), a verified real end-to-end request against the live deploy (not just a green build log), a post-idle-period (overnight) load test to catch DB-suspend/cold-start stacking, a documented rollback story (host's one-click "promote a previous deployment"), optional Dependabot config and non-blocking `npm audit` step, a short ADR entry for the CD mechanism decision.
-**Delivers (verification checklist, not code):** confirms host build command literally matches `package.json`'s `build` script; confirms pool sizing is adapter-level, not a URL param; confirms every `.env.example` variable exists in the host's Production scope.
-**Avoids:** Pitfalls 3 (build-command mismatch), 10 (env-var misconfiguration on first deploy), 11 (free-tier auto-suspend + cold-start compounding).
+### Phase 4: Guided Tour modal
+**Rationale:** Fully independent of Phases 2/3 (zero shared files), and best sequenced *after* the overlay/chart-strip restructure lands so Tour copy references the final UI and z-index tiers can be assigned without guessing at a not-yet-built layout.
+**Delivers:** `GuidedTourModal` (shadcn `Dialog`), `guided-tour-steps.ts` (pure data), `TourStepIllustration`, `localStorage` "seen" gate, "How to read this" trigger button.
+**Addresses:** MEDIUM user value / LOW cost per FEATURES.md; should explicitly teach "click a vessel to adjust its speed/type" given the overlay replaces an always-visible panel.
+**Avoids:** Pitfall 4 (Dialog focus/z-index collision with the new overlay) — requires an explicit documented z-index scale and empirical (not assumed) verification that the modal backdrop makes background Sandbox interactions genuinely inert.
+
+### Phase 5: Reasoning-trail visual sync + Hero preview sync (lowest risk, additive/cosmetic)
+**Rationale:** Fully independent, static/fixture-driven changes; safest to do last or in parallel on separate branches.
+**Delivers:** Horizontal "NAV DECISION CHAIN" connector treatment (CSS-only, position-independent) for `ReasoningTrail`; visual-only sync of the Hero preview to match the redesign.
+**Avoids:** Pitfall 3 (DOM-measurement-driven connectors that break under jsdom) — default to CSS-only connectors; isolate any real measurement into a hook explicitly excluded from unit-test coverage.
 
 ### Phase Ordering Rationale
 
-- CI must exist before deployment is attempted, because CI is what proves the app builds/tests/typechecks correctly on a clean, non-macOS-warm checkout — deploying without this first would conflate "new hosting environment" bugs with "never actually verified outside my machine" bugs.
-- Pre-commit hooks are independent of hosting and can run in parallel with or right after CI, but must precede (or land alongside) `CONTRIBUTING.md`'s hook-behavior section so documentation doesn't describe aspirational behavior.
-- Hosting/DB selection is deliberately its own phase, not folded into CI, because PROJECT.md leaves it as a locked "research-then-decide" item and because the CD mechanism and migration step both depend on which host is picked (Vercel vs. an Actions-driven deploy is a real either/or, not "always add both").
-- Go-live verification is split into its own final phase specifically because "build passes" and "actually deployed and works" are different claims — every research track flags this as the single most likely source of a "looks done but isn't" failure in this milestone, directly citing this project's own Turbopack precedent.
+- Phase 1 unblocks both Phase 2 and Phase 3's "remove chip row" requirement — a single mechanical refactor, not duplicated logic.
+- Phases 2 and 3 touch almost entirely disjoint files (bridge/Gallery vs. chart/overlay) and can run in parallel; if serialized, Phase 2 first is slightly preferable since it's more mechanically constrained.
+- Phase 4 (Tour) is scheduled after Phase 3 specifically so its content and z-index tier reference the final, already-built chart/overlay layout rather than a moving target.
+- Phase 5 is deliberately last/lowest-priority since it is purely additive/cosmetic and shares no files with the state-bridging or hit-testing-sensitive work.
+- Every phase carries an explicit human-verification checklist item (Pitfall 5) — this is a cross-cutting closeout requirement, not a separate phase.
 
 ### Research Flags
 
-Phases likely needing deeper research during planning:
-- **Phase 3 (Hosting & Database Provisioning):** hosting/DB provider free-tier limits and exact Vercel Marketplace/Neon wiring steps are dashboard-driven and pricing pages shift; verify current limits and exact click-path at implementation time rather than trusting this research's snapshot.
-- **Phase 4 (Go-Live Verification):** whether `next build` performs any server-side data fetch against the database at build time (e.g., a statically-pre-rendered gallery of curated `Scenario` rows) is an explicitly flagged open gap in STACK.md — needs empirical verification (a real `npm run build` against a freshly-migrated, unseeded DB) before assuming the build step doesn't also need seed data.
+Needs deeper research during planning:
+- **Phase 3 (on-chart overlay):** the pointer-events/hit-testing interaction is this milestone's highest-risk item with a documented 2-incident history in this exact codebase — plan-phase should consider scoping an automated geometric/overlap check (mirroring the Phase 8 point-in-polygon precedent), not rely on manual verification alone.
+- **Phase 2 (Gallery bridge):** the state-ownership seam decision (Context, per this research) should be written down explicitly in the phase plan before implementation begins, since STACK/ARCHITECTURE and PITFALLS research frame this as a "decide before writing the click handler" risk.
 
-Phases with standard patterns (skip research-phase):
-- **Phase 1 (CI Foundation):** GitHub Actions lint/typecheck/test/build shape is extremely well-documented and directly mirrors this project's own already-working local scripts — low novelty.
-- **Phase 2 (Pre-commit Hooks & Docs):** Husky v9 + lint-staged is a mature, unchanged-for-2-years pattern with strong multi-source corroboration.
+Phases with standard/well-documented patterns (research-phase likely unnecessary):
+- **Phase 1 (mutation-path generalization):** a rename + signature generalization of already-tested, already-existing code.
+- **Phase 4 (Guided Tour):** shadcn `Dialog` + local `currentStep` state is a fully documented, verified pattern (Context7-confirmed Radix behavior); the main residual risk (z-index/focus interplay with Phase 3's overlay) is a verification-checklist item, not an open research question.
+- **Phase 5 (reasoning-trail/Hero sync):** CSS-only connector treatment is a standard, already-precedented pattern in this codebase.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH for Actions/Husky/lint-staged versions (live GitHub API + Context7 verified); MEDIUM for Vercel/Neon free-tier pricing specifics (cross-checked 2026 sources, but pricing pages change) |
-| Features | HIGH for CI/CD structure, badges, Husky/lint-staged division (multi-source corroborated); MEDIUM for health-check conventions and Vercel-vs-Actions redundancy specifics (fewer authoritative primary sources) |
-| Architecture | MEDIUM-HIGH — HIGH on toolchain-specific gotchas (tsgo, Prisma 7 config behavior, Vercel build-command override, all verified against official docs/GitHub issues); MEDIUM on final hosting-platform pick, which this research deliberately defers to the user |
-| Pitfalls | HIGH for Prisma 7 driver-adapter/pooling behavior and Husky `prepare`-script mechanics (official docs + multiple community sources); MEDIUM for hosting-provider free-tier specifics and GitHub Actions caching/forked-PR-secrets mechanics (official docs language + community confirmation, fast-moving pricing) |
+| Stack | HIGH | Verified against Context7 `/shadcn-ui/ui`, `/radix-ui/primitives`, and `/vercel/next.js/v16.2.9` official sources, plus direct `package.json`/`src/components/ui/` inspection confirming exact current dependency state |
+| Features | MEDIUM-HIGH | Radix/shadcn primitive behavior HIGH (Context7-verified); general UX-pattern conventions (tour modals, hover-reveal CTAs) MEDIUM, cross-referenced across 3+ independent sources; no single canonical spec exists for "load example into workspace" so that section is pattern-synthesis |
+| Architecture | HIGH | Grounded in direct inspection of the actual current implementation (`useSandboxState.ts`, `ChartPanel.tsx`, `VesselGroup.tsx`, `GalleryContainer.tsx`, etc.), not inferred from training data; Server/Client composition pattern is stable, documented Next.js capability |
+| Pitfalls | HIGH | Grounded directly in this codebase's own documented incident history (Phase 4, Phase 8, Phase 5 regressions in PROJECT.md's Key Decisions) plus direct source reading; one external claim (Radix Dialog modal defaults) independently verified via Context7 |
 
-**Overall confidence:** HIGH on mechanism/architecture/pitfall-avoidance; MEDIUM on the specific hosting/DB vendor pricing details that could shift before implementation.
+**Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Does `next build` touch the database at build time?** (e.g., statically pre-rendered curated Scenario gallery). Flagged as an open, unresolved question in STACK.md — resolve empirically during Phase 4 by running `npm run build` locally against a freshly-migrated, unseeded database before assuming either outcome.
-- **Exact current Vercel/Neon free-tier numeric limits** — MEDIUM confidence, pricing-page-dependent; re-verify at the time Phase 3 is actually implemented rather than trusting this document's snapshot.
-- **`@testing-library/user-event` version** — noted in STACK.md as MEDIUM confidence (registry lookup was interrupted); not load-bearing for this milestone specifically (it matters for vessel-drag UI tests from earlier milestones) but worth a quick verification pass if touched.
-- **Whether the host ultimately chosen is Vercel** — all architecture and pitfalls guidance is written host-agnostic where possible but is most concretely verified for Vercel specifically; if Netlify or another host is chosen instead during Phase 3, the `vercel-build`-script-specific mechanics (Pattern 2) need a host-equivalent translation (e.g., Netlify's build plugins/environment context).
+- **Exact `@testing-library/user-event` version for simulating pointer-drag sequences in the new overlay's interaction tests** — STACK.md flags this as MEDIUM confidence (registry lookup was interrupted mid-research); verify the installed major version (v14+) at implementation time rather than assuming.
+- **Whether the design file specifies a mobile/narrow-viewport Dialog↔Drawer swap for the Guided Tour** — STACK.md's recommendation (plain `Dialog`, no responsive swap) is conditional on the design not showing a bottom-sheet variant; confirm against the actual design file before Phase 4 implementation.
+- **Whether any invisible connector/gap element is part of the on-chart overlay's final visual design** — if the design introduces a decorative connector between the vessel anchor point and the floating card, it needs an explicit `pointer-events: none`, per the existing Phase 8 precedent; not yet confirmed since the design's exact overlay-card visual shape wasn't available to this research pass.
+- **Automated overlap-check feasibility for Phase 3** — PITFALLS.md recommends an automated geometric/point-in-polygon check mirroring the Phase 8 precedent, but doesn't specify implementation detail; plan-phase should scope whether this is a unit test against `resolveOverlayAnchor()` output or a different mechanism.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- GitHub API live lookups (`actions/checkout`, `actions/setup-node` latest release tags)
-- Context7 `/llmstxt/prisma_io_llms_txt`, `/typicode/husky` — official Prisma Migrate/Vercel deployment patterns, Husky v9 `prepare`-script mechanics
-- Official docs: Prisma (Migrate Deploy, Deploy to Vercel, database connections), Vercel (Configuring a Build, Hobby plan), Neon (connection pooling, Prisma guide, Vercel Marketplace integration), GitHub Docs (status badges), Render (free Postgres 30-day expiry changelog), Next.js (Turbopack default bundler blog post, SWC binary failure docs)
-- GitHub issues on official repos: `prisma/prisma#28869`/`#28590`/`#28708` (env-var config fix in Prisma 7.2.0+), `microsoft/typescript-go#1507` (tsgo CI-performance data)
-- Direct repository inspection: `package.json`, `next.config.ts`, `eslint.config.mjs`, `prisma/schema.prisma`, `prisma.config.ts`, `src/server/db/client.ts`, `docker-compose.yml`, `.env.example`, `.gitignore`, `README.md`, `.planning/PROJECT.md`
+- Context7 `/shadcn-ui/ui` — `Dialog` controlled-state example, `Popover` registry source, `context-menu.tsx` virtual-anchor pattern, "Component Selection" skill doc (confirms no stepper component exists)
+- Context7 `/radix-ui/primitives` — `Dialog`/`Popover` `Presence`, `FocusScope`, `DismissableLayer` behavior; controlled `open`/`onOpenChange` shape; modal defaults and `onCloseAutoFocus`/`onPointerDownOutside` callback surface
+- Context7 `/vercel/next.js/v16.2.9` — "Interleaving Server and Client Components," "Context providers" pattern (matches this project's locked Next.js 16.2.10)
+- Direct repository inspection — `package.json`, `src/components/ui/`, `useSandboxState.ts`, `SandboxContainer.tsx`, `ChartPanel.tsx`, `VesselGroup.tsx`, `ControlPanel.tsx`, `VerdictBanner.tsx`, `InstrumentReadouts.tsx`, `GalleryContainer.tsx`, `GalleryCard.tsx`, `app/page.tsx`, `chip-scenarios.ts` — ground truth for current architecture, confirming Gallery is Server-only with no bridge to Sandbox today and no Dialog primitive exists yet
+- `.planning/PROJECT.md` Key Decisions table — this project's own documented Phase 4/Phase 8/Phase 5 incident history, locked v1.4 scope decisions
 
 ### Secondary (MEDIUM confidence)
-- [Vercel Knowledge Base: GitHub Actions with Vercel](https://vercel.com/kb/guide/how-can-i-use-github-actions-with-vercel) — redundant-deploy anti-pattern
-- [Netlify: Next.js 16 deploy support changelog](https://www.netlify.com/changelog/next-js-16-deploy-on-netlify/)
-- [Railway pricing docs](https://docs.railway.com/pricing/plans), [Supabase pricing breakdown](https://designrevision.com/blog/supabase-pricing) — free-tier comparison data
-- [Better Stack: Husky and lint-staged guide](https://betterstack.com/community/guides/scaling-nodejs/husky-and-lint-staged/)
-- [GitHub community discussion #196886](https://github.com/orgs/community/discussions/196886) — forked-PR secret behavior
-- Multiple independent 2026 Neon-vs-Supabase comparison articles (designrevision.com, dev.to, closefuture.io, kunalganglani.com) — cross-checked, converging on same free-tier suspend/pause claims
+- Appcues onboarding/product-tour UX pattern guides, Kompassify product tour modal examples, Whatfix product tours 2025 — cross-referenced tour-modal conventions (Back/Next/Skip, dot progress)
+- Deque WAI-ARIA modal dialog pattern, UXPin accessible modal focus traps — accessibility conventions for focus-trapped modals
+- LogRocket product tour library landscape, Canva "Use this template" flow description — informs anti-feature reasoning (why not a tour library; load-in-place pattern precedent)
+- Konva canvas-vs-SVG guide, vitest-dev/vitest #395 canvas testing flakiness — carried forward from original stack research, informs the continued SVG-not-canvas rationale
 
 ### Tertiary (LOW confidence)
-- None flagged as standalone LOW-confidence claims in this milestone's research; all findings above are at least MEDIUM (cross-checked or official) with specific gaps called out above rather than left implicit.
+- None flagged — all findings in this milestone's research trace to either direct repository inspection, official Context7-verified library docs, or cross-referenced (3+ source) UX convention research.
 
 ---
-*Research completed: 2026-07-20*
+*Research completed: 2026-07-25*
 *Ready for roadmap: yes*
