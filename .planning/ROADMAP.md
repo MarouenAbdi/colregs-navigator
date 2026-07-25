@@ -55,7 +55,7 @@ See `.planning/milestones/v1.3-ROADMAP.md` for full phase details (goals, succes
 
 **Milestone Goal:** Re-sync the front end against the updated Claude Design file — restructure the Sandbox around merged header/footer command strips and on-chart vessel overlays, add the net-new Guided Tour, replace the Gallery card's navigate-to-page click with an in-place "Try on Sandbox" load, and sync the Hero preview card's visual details. Presentation-layer only — zero change to `classifyEncounter()` or any domain/`src/server/` logic.
 
-- [ ] **Phase 16: Sandbox Mutation-Path Generalization** - Generalize `handleChipSelect` into a reusable `loadScenario()` entry point and remove the 6-chip preset row entirely
+- [x] **Phase 16: Sandbox Mutation-Path Generalization** - Generalize `handleChipSelect` into a reusable `loadScenario()` entry point and remove the 6-chip preset row entirely (completed 2026-07-25)
 - [ ] **Phase 17: Gallery → Sandbox Bridge** - Gallery's "Try on Sandbox" loads a scenario directly into the homepage Sandbox with no page navigation
 - [ ] **Phase 18: On-Chart Vessel Control Overlay** - Replace the side ControlPanel with click-to-open floating vessel overlays and merge the chart header/footer strips
 - [ ] **Phase 19: Guided Tour** - A 6-step "How to read this" modal walkthrough with full keyboard/focus handling
@@ -76,7 +76,7 @@ See `.planning/milestones/v1.3-ROADMAP.md` for full phase details (goals, succes
 
 Plans:
 - [x] 16-01-PLAN.md — Generalize useSandboxState() into loadScenario(), delete chip-scenarios.ts/.test.ts, remove chip row from SandboxContainer.tsx, replace chip-dependent tests
-- [ ] 16-02-PLAN.md — Human-verify drag/rotate/ControlPanel-edit/Reset behavioral parity on the plain `/` route (depends on 16-01)
+- [x] 16-02-PLAN.md — Human-verify drag/rotate/ControlPanel-edit/Reset behavioral parity on the plain `/` route (depends on 16-01)
 
 ### Phase 17: Gallery → Sandbox Bridge
 **Goal**: Users can load any curated gallery scenario directly into the homepage Sandbox's live state and are scrolled to it — no page navigation, no lost interactivity.
@@ -157,7 +157,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16 �
 | 13. Comment Cleanup | v1.2 | 8/8 | Complete | 2026-07-20 |
 | 14. Pipeline & Hooks | v1.3 | 4/4 | Complete | 2026-07-20 |
 | 15. Deploy & Verify | v1.3 | 5/5 | Complete | 2026-07-22 |
-| 16. Sandbox Mutation-Path Generalization | v1.4 | 1/2 | In Progress|  |
+| 16. Sandbox Mutation-Path Generalization | v1.4 | 2/2 | Complete   | 2026-07-25 |
 | 17. Gallery → Sandbox Bridge | v1.4 | 0/TBD | Not started | - |
 | 18. On-Chart Vessel Control Overlay | v1.4 | 0/TBD | Not started | - |
 | 19. Guided Tour | v1.4 | 0/TBD | Not started | - |
