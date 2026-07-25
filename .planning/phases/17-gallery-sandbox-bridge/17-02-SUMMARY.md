@@ -115,3 +115,7 @@ None - no external service configuration required.
 ---
 *Phase: 17-gallery-sandbox-bridge*
 *Completed: 2026-07-25*
+
+## Self-Check: PASSED
+
+All 5 created/modified source files and the SUMMARY.md itself confirmed present on disk; both task commits (`92349a6`, `4605fea`) and the summary commit (`6847c6f`) confirmed present in `git log`.
