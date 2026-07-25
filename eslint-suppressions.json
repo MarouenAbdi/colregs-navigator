@@ -9,11 +9,6 @@
       "count": 6
     }
   },
-  "src/components/sandbox/chip-scenarios.test.ts": {
-    "vitest/no-conditional-expect": {
-      "count": 1
-    }
-  },
   "src/components/sandbox/instruments/instrument-readouts.test.ts": {
     "vitest/no-conditional-expect": {
       "count": 2
@@ -37,11 +32,6 @@
   "src/domain/colregs/risk-of-collision/risk-of-collision.test.ts": {
     "vitest/no-conditional-expect": {
       "count": 4
-    }
-  },
-  "src/domain/geometry/bearing/bearing.test.ts": {
-    "vitest/no-conditional-expect": {
-      "count": 10
     }
   },
   "src/domain/geometry/cpa/cpa.test.ts": {

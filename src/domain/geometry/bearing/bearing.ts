@@ -13,6 +13,17 @@
 import type { Position } from "../../vessel/vessel.js";
 import { err, ok, type Result } from "../../shared/result.js";
 
+// D-11: widened from exact dx===0 && dy===0 equality to a small distance
+// threshold -- a drag gesture can land the two vessels a sub-pixel
+// fraction apart in chart-space units without ever producing exact
+// floating-point equality, which let genuinely-coincident-looking drags
+// slip past this guard and reach atan2 with a near-zero (but nonzero)
+// argument, producing a wildly unstable bearing rather than the intended
+// "unable to classify" degenerate signal. 1e-6 chart-space units is far
+// below any real, humanly-perceptible vessel separation on this chart's
+// viewBox scale, so it only catches true coincident/near-coincident drags.
+const COINCIDENT_DISTANCE_THRESHOLD = 1e-6;
+
 export function bearing(a: Position, b: Position): Result<number> {
   if (
     !Number.isFinite(a.x) ||
@@ -28,7 +39,7 @@ export function bearing(a: Position, b: Position): Result<number> {
   const dx = b.x - a.x;
   const dy = b.y - a.y;
 
-  if (dx === 0 && dy === 0) {
+  if (Math.hypot(dx, dy) < COINCIDENT_DISTANCE_THRESHOLD) {
     return err("coincident-position", { a, b });
   }
 
