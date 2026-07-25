@@ -123,12 +123,16 @@ Plans:
   3. User can click a vessel on the chart to open a floating control card (type, speed, heading) for that vessel; clicking the other vessel moves the overlay to it, and re-clicking the same vessel closes it. The side `ControlPanel` is fully removed.
   4. Human-verified: with the vessel-control overlay open, dragging and rotating either vessel still works correctly with no dead zones — this is the codebase's 3rd occurrence of the painted-element-swallows-pointer-event regression class (Phase 4, Phase 8 precedent), and must be explicitly re-verified, not assumed.
 
-**Plans**: TBD
+**Plans**: 5 plans
 **UI hint**: yes
 
 Plans:
 
-- [ ] 18-01: TBD
+- [ ] 18-01-PLAN.md — Interface contracts (ChartHeaderStripProps/ChartFooterStripProps/VesselOverlayCardProps) + pure derivation utilities (chart-header-risk.ts D-02, footer-action-copy.ts D-03, vessel-overlay-position.ts)
+- [ ] 18-02-PLAN.md — New components: ChartHeaderStrip, ChartFooterStrip, VesselOverlayCard (depends on 18-01)
+- [ ] 18-03-PLAN.md — Hook onSelect wiring (D-04) + ChartPanel.tsx selection-state/composition wiring + regression tests for D-01's close-paths and Pitfall 1's overlap case (depends on 18-02)
+- [ ] 18-04-PLAN.md — SandboxContainer cleanup + deletion of VerdictBanner/InstrumentReadouts/ControlPanel/status-pill.ts (depends on 18-03)
+- [ ] 18-05-PLAN.md — Human-verify all 4 Roadmap success criteria, including the critical hit-testing regression re-check (depends on 18-04)
 
 ### Phase 19: Guided Tour
 
