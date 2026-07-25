@@ -64,20 +64,25 @@ export function useSandboxState(initialScenario?: { vesselA: Vessel; vesselB: Ve
   const [vesselA, setVesselA] = useState<Vessel>(seedA);
   const [vesselB, setVesselB] = useState<Vessel>(seedB);
 
-  // Lazy initializer: the ONE place in this file that unwraps a
-  // classifyEncounter() Result's `.value` without a preceding `.ok`
-  // check. Safe specifically because the seed vessels come from either
-  // the known-good, already-tested, doubt-free default fixture, or a
+  // Lazy initializer: a documented two-level fallback chain instead of an
+  // unchecked cast (D-10). The seed vessels come from either the
+  // known-good, already-tested, doubt-free default fixture, or a
   // previously-persisted (already-validated on create) saved scenario --
-  // not user-editable at mount time -- so its classification can never
-  // fail.
+  // not user-editable at mount time -- so classification is expected to
+  // always succeed. If that invariant is ever violated anyway, fall back
+  // to classifying the app's own known-good default fixture
+  // (crossingResidualBasicCase) rather than silently producing a wrong or
+  // degenerate value; if even that fails, throw loudly -- something is
+  // fundamentally broken, and failing loudly beats an unchecked cast that
+  // would otherwise crash the next line's `lastGoodClassification.encounterType`
+  // access with a much less legible TypeError.
   const [lastGoodClassification, setLastGoodClassification] = useState<ClassificationResult>(
     () => {
-      const initialResult = classifyEncounter(seedA, seedB) as {
-        ok: true;
-        value: ClassificationResult;
-      };
-      return initialResult.value;
+      const initialResult = classifyEncounter(seedA, seedB);
+      if (initialResult.ok) return initialResult.value;
+      const fallback = classifyEncounter(crossingResidualBasicCase.vesselA, crossingResidualBasicCase.vesselB);
+      if (fallback.ok) return fallback.value;
+      throw new Error("crossingResidualBasicCase fixture failed to classify — invariant broken");
     },
   );
   const [isDegenerate, setIsDegenerate] = useState<boolean>(false);

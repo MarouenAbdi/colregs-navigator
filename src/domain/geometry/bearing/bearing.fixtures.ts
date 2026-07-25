@@ -57,6 +57,14 @@ export const coincidentPositionCase: ErrCase = {
   b: { x: 2, y: 3 },
 };
 
+// Separation of 1e-7 chart-space units -- sub-threshold (below
+// COINCIDENT_DISTANCE_THRESHOLD of 1e-6) but nonzero, so exact dx===0/dy===0
+// equality would miss it. Must still classify as coincident (D-11).
+export const nearCoincidentPositionCase: ErrCase = {
+  a: { x: 2, y: 3 },
+  b: { x: 2 + 1e-7, y: 3 },
+};
+
 // Non-finite coordinate (NaN) must be rejected before any atan2/normalize
 // arithmetic runs.
 export const nonFiniteInputCase: ErrCase = {
