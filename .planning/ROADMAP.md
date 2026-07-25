@@ -64,82 +64,109 @@ See `.planning/milestones/v1.3-ROADMAP.md` for full phase details (goals, succes
 ## Phase Details
 
 ### Phase 16: Sandbox Mutation-Path Generalization
+
 **Goal**: Every Sandbox vessel-mutation source funnels through one generalized, reusable scenario-loading entry point, and the inline preset-chip UI is fully removed — the prerequisite both Phase 17 (Gallery load) and the rest of this milestone depend on.
 **Depends on**: Nothing (first phase of v1.4; builds on v1.0-v1.3's existing `useSandboxState()`)
 **Requirements**: SBOX-10
 **Success Criteria** (what must be TRUE):
+
   1. The Sandbox UI no longer displays the 6-chip preset row anywhere on the page.
   2. `useSandboxState()` exposes a single `loadScenario(vesselA, vesselB)` entry point (replacing `handleChipSelect`) that every mutation source (drag, ControlPanel field edit, Reset) can call.
   3. Existing Sandbox interactions (drag/rotate a vessel, edit via ControlPanel, Reset) behave identically to before the refactor — human-verified in a real browser, not just green tests.
   4. No orphaned chip-row code remains (`activeChipId`, old `handleChipSelect`, `chip-scenarios.ts`) — removed, not merely hidden from the UI.
+
 **Plans**: 2 plans
 
 Plans:
+
 - [x] 16-01-PLAN.md — Generalize useSandboxState() into loadScenario(), delete chip-scenarios.ts/.test.ts, remove chip row from SandboxContainer.tsx, replace chip-dependent tests
 - [x] 16-02-PLAN.md — Human-verify drag/rotate/ControlPanel-edit/Reset behavioral parity on the plain `/` route (depends on 16-01)
 
 ### Phase 17: Gallery → Sandbox Bridge
+
 **Goal**: Users can load any curated gallery scenario directly into the homepage Sandbox's live state and are scrolled to it — no page navigation, no lost interactivity.
 **Depends on**: Phase 16 (needs `loadScenario()`)
 **Requirements**: GAL-05, GAL-06
 **Success Criteria** (what must be TRUE):
+
   1. User can click "Try on Sandbox" on any gallery card and see the Sandbox chart/readouts immediately update to that scenario's two vessels, with no URL change and no full page navigation.
   2. After clicking, the page smooth-scrolls to the Sandbox section automatically, sequenced after the scenario state has actually updated.
   3. The "Try on Sandbox" CTA is discoverable and operable via mouse hover, keyboard Tab focus, and touch/coarse-pointer — human-verified across all three input modes, not hover-only.
   4. Human-verified: loading a second gallery card after a first correctly replaces the previously loaded scenario (state genuinely updates, not stale from the first load).
+
 **Plans**: 4 plans
 **UI hint**: yes
 
 Plans:
+**Wave 1**
+
 - [ ] 17-01-PLAN.md — SandboxBridgeProvider (React Context bridge) + wiring into app/page.tsx, app/s/[shareId]/page.tsx, and SandboxContainer's loadScenario consumption
-- [ ] 17-02-PLAN.md — TryOnSandboxButton + GalleryCard wiring (drop whole-card Link, hover/focus/touch-reveal CTA per D-01–D-08), depends on 17-01
 - [ ] 17-03-PLAN.md — Folded-todo hardening fixes: useSandboxState.ts unsafe Result cast (D-10), bearing() coincident-distance threshold widening (D-11) — independent, parallel with 17-01
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 17-02-PLAN.md — TryOnSandboxButton + GalleryCard wiring (drop whole-card Link, hover/focus/touch-reveal CTA per D-01–D-08), depends on 17-01
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 17-04-PLAN.md — Human-verify all 4 Roadmap success criteria end-to-end in a real browser, depends on 17-02
 
 ### Phase 18: On-Chart Vessel Control Overlay
+
 **Goal**: Users read the verdict and instrument readouts directly on the chart via merged header/footer strips, and control each vessel via a floating on-chart overlay opened by clicking it — with zero regression to this codebase's twice-fixed drag/rotate hit-testing.
 **Depends on**: Phase 16 (needs the generalized mutation path; independent of Phase 17's Gallery-bridge files)
 **Requirements**: SBOX-06, SBOX-07, SBOX-08
 **Success Criteria** (what must be TRUE):
+
   1. A single merged header strip (rule badge + encounter title + risk badge) sits atop the chart — the separate `VerdictBanner` card is gone.
   2. A single merged footer strip (LIVE/RANGE/BEARING/CPA/TCPA + each vessel's required-action text) sits below the chart — the separate `InstrumentReadouts` card is gone.
   3. User can click a vessel on the chart to open a floating control card (type, speed, heading) for that vessel; clicking the other vessel moves the overlay to it, and re-clicking the same vessel closes it. The side `ControlPanel` is fully removed.
   4. Human-verified: with the vessel-control overlay open, dragging and rotating either vessel still works correctly with no dead zones — this is the codebase's 3rd occurrence of the painted-element-swallows-pointer-event regression class (Phase 4, Phase 8 precedent), and must be explicitly re-verified, not assumed.
+
 **Plans**: TBD
 **UI hint**: yes
 
 Plans:
+
 - [ ] 18-01: TBD
 
 ### Phase 19: Guided Tour
+
 **Goal**: A first-time or confused user can open a self-contained modal walkthrough that explains how to read the Sandbox, fully operable by mouse, keyboard, and screen-reader-relevant focus handling.
 **Depends on**: Phase 18 (tour content/illustrations and z-index tier reference the final chart/overlay layout, not a moving target)
 **Requirements**: TOUR-01, TOUR-02
 **Success Criteria** (what must be TRUE):
+
   1. User can click a new "How to read this" button to open a 6-step tour modal, each step showing a per-step illustration and step-dot progress indicator.
   2. User can navigate the tour with Back/Next controls (no Back on step 1; "Done" replaces "Next" on the final step).
   3. User can dismiss the tour via Escape, clicking outside the modal, or Skip/Done — every path closes the tour.
   4. After the tour closes by any dismissal path, keyboard focus visibly returns to the "How to read this" trigger button — human-verified via real Tab-key navigation, not just an automated focus assertion.
   5. Human-verified: the tour modal's stacking order does not visually collide with the Phase 18 on-chart vessel overlay (explicit z-index tiers checked in a session where both could plausibly be open).
+
 **Plans**: TBD
 **UI hint**: yes
 
 Plans:
+
 - [ ] 19-01: TBD
 
 ### Phase 20: Reasoning-Trail & Hero Visual Sync
+
 **Goal**: The reasoning trail and Hero preview card visually match the updated design file, purely additive/cosmetic changes with zero classification-output change.
 **Depends on**: Nothing new (independent of Phases 17-19; only shares Phase 16's stable foundation)
 **Requirements**: SBOX-09, HERO-05
 **Success Criteria** (what must be TRUE):
+
   1. The reasoning trail renders as a horizontal sequence of connected step cards ("NAV DECISION CHAIN") instead of a vertical list, correctly for encounters with varying trail lengths.
   2. The connector treatment between trail cards is CSS-only (no `getBoundingClientRect()`/`getBBox()` runtime measurement) and renders correctly across different step counts — human-verified in a real browser, matching this project's existing jsdom-measurement-ban precedent.
   3. The Hero preview card's bezel accents, radar sweep overlay, and readout styling visually match the updated design file, while the card remains fully static/fixture-driven with unchanged classification values.
   4. Human-verified: no regression to Hero's fixture-driven classification values or to any other Sandbox content during this pass.
+
 **Plans**: TBD
 **UI hint**: yes
 
 Plans:
+
 - [ ] 20-01: TBD
 
 ## Progress
