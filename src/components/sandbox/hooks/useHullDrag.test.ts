@@ -67,8 +67,11 @@ describe("useHullDrag (via ChartPanel's hull hit-rect)", () => {
         vesselA,
         vesselB,
         classification: result.value,
+        isDegenerate: false,
         onVesselPositionChange,
         onVesselHeadingChange,
+        onVesselSpeedChange: vi.fn(),
+        onVesselTypeChange: vi.fn(),
       }),
     );
 

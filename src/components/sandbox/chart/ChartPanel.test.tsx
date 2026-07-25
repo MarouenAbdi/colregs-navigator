@@ -68,8 +68,11 @@ function renderChartPanel(overrides: Partial<ChartPanelProps> = {}) {
     vesselA,
     vesselB,
     classification: result.value,
+    isDegenerate: false,
     onVesselPositionChange: vi.fn(),
     onVesselHeadingChange: vi.fn(),
+    onVesselSpeedChange: vi.fn(),
+    onVesselTypeChange: vi.fn(),
     ...overrides,
   };
   return render(<ChartPanel {...props} />);
@@ -77,9 +80,14 @@ function renderChartPanel(overrides: Partial<ChartPanelProps> = {}) {
 
 describe("ChartPanel", () => {
   it("renders a GW badge and an SO badge for a give-way/stand-on crossing encounter", () => {
-    renderChartPanel();
-    expect(screen.getByText("GW")).toBeInTheDocument();
-    expect(screen.getByText("SO")).toBeInTheDocument();
+    // Scoped to the <svg> element -- ChartFooterStrip's per-vessel role
+    // badge (Plan 18-02/18-03) also renders "GW"/"SO" text now that
+    // ChartPanel composes the merged header/footer strips, so an
+    // unscoped screen.getByText() would ambiguously match both.
+    const { container } = renderChartPanel();
+    const svg = within(container.querySelector("svg") as unknown as HTMLElement);
+    expect(svg.getByText("GW")).toBeInTheDocument();
+    expect(svg.getByText("SO")).toBeInTheDocument();
   });
 
   it("gives the decorative letter/role-badge overlay pointer-events:none so it never shadows the hull's own drag hit-target underneath it", () => {
@@ -91,7 +99,9 @@ describe("ChartPanel", () => {
     // pointer-events:visiblePainted, silently blocking the hull drag that
     // should have started there.
     const { container } = renderChartPanel();
-    const badgeText = within(container).getByText("GW");
+    // Scoped to the <svg> -- see note above re: ChartFooterStrip's own
+    // "GW" text.
+    const badgeText = within(container.querySelector("svg") as unknown as HTMLElement).getByText("GW");
     const overlayGroup = badgeText.closest("g[pointer-events]");
     expect(overlayGroup).not.toBeNull();
     expect(overlayGroup?.getAttribute("pointer-events")).toBe("none");
@@ -105,7 +115,9 @@ describe("ChartPanel", () => {
     // stays its later sibling -- the exact source order the hit-testing
     // regression fix above depends on.
     const { container } = renderChartPanel();
-    const badgeText = within(container).getByText("GW");
+    // Scoped to the <svg> -- see note above re: ChartFooterStrip's own
+    // "GW" text.
+    const badgeText = within(container.querySelector("svg") as unknown as HTMLElement).getByText("GW");
     const overlayGroup = badgeText.closest("g[pointer-events]");
     const rotatingGroup = container.querySelector('g[transform^="rotate("]');
     expect(overlayGroup).not.toBeNull();
