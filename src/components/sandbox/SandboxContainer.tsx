@@ -12,6 +12,7 @@
  * scenario load) triggered it.
  */
 
+import { useEffect } from "react";
 import { RotateCcw, Link2 } from "lucide-react";
 import { ChartPanel } from "./chart/ChartPanel.js";
 import { ControlPanel } from "./control-panel/ControlPanel.js";
@@ -19,11 +20,22 @@ import { VerdictBanner } from "./reasoning/VerdictBanner.js";
 import { InstrumentReadouts } from "./instruments/InstrumentReadouts.js";
 import { ReasoningTrail } from "./reasoning/ReasoningTrail.js";
 import { useSandboxState } from "./hooks/useSandboxState.js";
+import { useSandboxBridge } from "./bridge/SandboxBridgeProvider.js";
 import { Button } from "@/components/ui/button";
 import type { SandboxContainerProps } from "./types.js";
 
 export function SandboxContainer({ initialScenario, banner }: SandboxContainerProps = {}) {
   const sandboxState = useSandboxState(initialScenario);
+  const { pendingScenario } = useSandboxBridge();
+
+  // Keyed on requestId (a monotonically-changing number), not vesselA/
+  // vesselB object identity, so re-selecting the same Gallery scenario
+  // twice in a row still re-triggers the load (Roadmap Phase 17 success
+  // criterion 4).
+  useEffect(() => {
+    if (!pendingScenario) return;
+    sandboxState.loadScenario(pendingScenario.vesselA, pendingScenario.vesselB);
+  }, [pendingScenario?.requestId]);
 
   return (
     <div className="
