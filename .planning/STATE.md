@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.3
-milestone_name: CI/CD & Deployment
-status: Awaiting next milestone
-stopped_at: Plan 15-05 complete -- v1.3 milestone fully done, both phases (14-15) and all 9 plans complete
-last_updated: "2026-07-22T08:41:54.375Z"
-last_activity: 2026-07-22 — Milestone v1.3 completed and archived
+milestone: v1.4
+milestone_name: Design Sync (Sandbox & Gallery)
+status: planning
+last_updated: "2026-07-25T10:28:26.285Z"
+last_activity: 2026-07-25
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 9
-  completed_plans: 9
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -25,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-07-22)
 
 ## Current Position
 
-Phase: Milestone v1.3 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-07-22 — Milestone v1.3 completed and archived
+Status: Defining requirements
+Last activity: 2026-07-25 — Milestone v1.4 started
 
 ## Performance Metrics
 

@@ -1,271 +1,361 @@
 # Architecture Research
 
-**Domain:** CI/CD & deployment integration for an existing Next.js 16 / tRPC / Prisma 7 (tsgo) modular monolith
-**Researched:** 2026-07-20
-**Confidence:** MEDIUM-HIGH overall — HIGH on the toolchain-specific gotchas (tsgo, Prisma 7 config, Vercel build-command override), MEDIUM on final hosting-platform pick (locked decision defers that to the user)
+**Domain:** v1.4 Design Sync integration — restructuring an existing Next.js 16 App Router / React 19 / tRPC front end (COLREGS Navigator Sandbox + Gallery), presentation-layer only, zero domain/`src/server/` changes
+**Researched:** 2026-07-25
+**Confidence:** HIGH — based on direct inspection of the actual current implementation (`useSandboxState.ts`, `SandboxContainer.tsx`, `ChartPanel.tsx`, `VesselGroup.tsx`, `ControlPanel.tsx`, `VerdictBanner.tsx`, `InstrumentReadouts.tsx`, `GalleryContainer.tsx`, `GalleryCard.tsx`, `app/page.tsx`, `chip-scenarios.ts`), not inferred from training data. The Next.js Server/Client Component composition pattern used below (Server Components as `children` of a Client Component) is a documented, stable React Server Components capability, not new/uncertain API surface.
 
 ## Standard Architecture
 
-### System Overview
+### System Overview — current (pre-v1.4)
 
 ```
-┌───────────────────────────── Pull Request ──────────────────────────────────┐
-│  .github/workflows/ci.yml  (CI — gate, runs on every PR + push to main)      │
-│  ┌────────┐  ┌───────────┐  ┌──────────────────┐  ┌─────────────────────┐   │
-│  │  lint  │  │ typecheck │  │  test (needs DB)  │  │  build (needs DB    │   │
-│  │ eslint │  │ tsc/tsgo  │  │  docker compose   │  │  url placeholder,   │   │
-│  │        │  │ --noEmit  │  │  up -d --wait +   │  │  next build         │   │
-│  │        │  │           │  │  migrate deploy   │  │  --webpack)         │   │
-│  └────────┘  └───────────┘  └──────────────────┘  └─────────────────────┘   │
-└───────────────────────────────────────────────────────────────────────────────┘
-                                      │  merge to main (required checks green)
-                                      ▼
-┌───────────────────────── Host's native Git integration (CD) ────────────────┐
-│  Vercel (recommended) / Railway / Render — auto-triggered by GitHub push     │
-│  vercel-build script:                                                       │
-│    prisma generate                                                          │
-│    → if VERCEL_ENV === "production": prisma migrate deploy                  │
-│    → next build --webpack                                                   │
-│  DATABASE_URL sourced from the HOST's own env-var store (not a GH secret)   │
-└───────────────────────────────────────────────────────────────────────────────┘
-                                      │
-                                      ▼
-                     Live app  ←→  Production Postgres (Neon/Railway/Supabase)
-
-┌────────────────── Local machine (separate from the above) ──────────────────┐
-│  Husky pre-commit → lint-staged (staged-file eslint --fix only, fast)       │
-│  Husky pre-push  → npm run typecheck (full-repo tsc/tsgo, slower, optional) │
-└───────────────────────────────────────────────────────────────────────────────┘
+app/page.tsx (Server Component)
+├── <Hero/>                                     (mostly static, illustrative-only)
+├── <section id="sandbox">
+│     └── <SandboxContainer/>  "use client"      ← single React tree, client-only
+│           ├── useSandboxState()                ← THE state choke point
+│           │     vesselA/vesselB, lastGoodClassification,
+│           │     isDegenerate, activeChipId, saveError, isSaving
+│           │     applyVesselUpdate() (private) ← every mutation funnels here
+│           │     handleChipSelect(chipId) ← full-replace + hysteresis reset
+│           │     handleReset(), handleSave()
+│           ├── chip row (6 preset buttons)      ← REMOVED this milestone
+│           ├── <VerdictBanner/>                 ← full-width, own row
+│           ├── grid: <ChartPanel/> | <InstrumentReadouts/> + <ControlPanel/>
+│           └── <ReasoningTrail/>                ← horizontal card row already
+└── <section id="gallery">
+      └── <GalleryContainer/> (async Server Component, tRPC gallery.list)
+            └── <GalleryCard/> × N  (whole card = <Link href="/s/{id}">)
 ```
+
+### System Overview — target (v1.4)
+
+```
+app/page.tsx (Server Component, unchanged Server/async boundary for Gallery)
+└── <SandboxBridgeProvider>  "use client"        ← NEW, thin, page-level
+      (children below are still composed IN page.tsx — Server Components
+       passed as `children` into a Client Component do not themselves
+       become Client Components; only the Provider itself needs "use client")
+      ├── <Hero/>                                 (untouched, visual sync only)
+      ├── <section id="sandbox">
+      │     └── <SandboxContainer/>  "use client"
+      │           ├── useSandboxState()           ← loadScenario() replaces
+      │           │                                  handleChipSelect(); chip
+      │           │                                  row + activeChipId REMOVED
+      │           ├── useSandboxBridge() effect   ← NEW: consumes pending
+      │           │                                  scenario from context
+      │           ├── top header (title/desc + Save/Reset + NEW "How to
+      │           │     read this" button opening <GuidedTourModal/>)
+      │           ├── <ChartHeaderStrip/>          ← NEW, replaces VerdictBanner
+      │           │     (verdict + rule badge + role badges + risk pill,
+      │           │      merged from VerdictBanner + InstrumentReadouts' pill)
+      │           ├── <ChartPanel/>                ← MODIFIED: now also owns
+      │           │     vessel-selection state + renders
+      │           │     <VesselControlOverlay/> on click
+      │           ├── <ChartFooterStrip/>          ← NEW, replaces
+      │           │     InstrumentReadouts (tiles minus pill) + adds
+      │           │     per-vessel required-action text
+      │           └── <ReasoningTrail/>            ← same file, connector-line
+      │                 visual treatment only, no boundary change
+      └── <section id="gallery">
+            └── <GalleryContainer/> (async Server Component, UNCHANGED fetch)
+                  └── <GalleryCard/> × N  (Server Component, no "use client")
+                        └── <TryOnSandboxButton/>  "use client" ← NEW, only
+                              the interactive leaf; calls useSandboxBridge()
+                              .requestLoad(vesselA, vesselB) + scrollIntoView
+```
+
+**Deleted:** `src/components/sandbox/control-panel/ControlPanel.tsx` (and its
+test), the inline chip row JSX in `SandboxContainer.tsx`, `activeChipId`/
+`handleChipSelect` from `useSandboxState.ts`, `GalleryCard.tsx`'s whole-card
+`<Link>`. `CopyLinkButton.tsx` (used only by `/s/[shareId]/page.tsx`, unrelated
+to vessel controls) survives — relocate it out of `control-panel/` once that
+folder is otherwise empty.
 
 ### Component Responsibilities
 
-| Component | Responsibility | Typical Implementation |
-|-----------|----------------|------------------------|
-| `.github/workflows/ci.yml` | PR/main gate: lint, typecheck, test, build must all pass before merge is allowed | One workflow, 4 jobs (can run in parallel matrix or sequentially); required status checks configured in branch protection |
-| Host's Git integration (Vercel/Railway/Render) | Actual CD — auto-build + auto-deploy to production on every push to `main` | Native GitHub App connection; **no custom GH Actions "deploy" job needed** if this is used |
-| `vercel-build` (or host-equivalent) script | Single source of truth for what actually happens during a production build: generate Prisma client → conditionally migrate → build | A `package.json` script Vercel auto-prefers over `build` when present |
-| Husky | Registers local git hooks (`.husky/pre-commit`, `.husky/pre-push`) | v9+ shape: a plain shell script per hook, no `husky.sh` sourcing boilerplate needed |
-| lint-staged | Runs fast, staged-file-only checks (ESLint `--fix`) at commit time | `lint-staged.config.js` or a `"lint-staged"` key in `package.json` |
-| `docker-compose.yml` (already exists) | Local Postgres 17 for dev — **reused verbatim** as the CI test job's ephemeral DB | `docker compose up -d --wait` inside the GH Actions runner (Docker is preinstalled on `ubuntu-latest`) |
-| Production Postgres provider | Durable, publicly-reachable Postgres instance backing the live app | Neon / Railway / Supabase — all expose a standard `postgresql://` connection string compatible with the project's existing `@prisma/adapter-pg` + `pg` driver, no adapter swap needed |
+| Component | Responsibility | New / Modified / Deleted |
+|-----------|----------------|---------------------------|
+| `useSandboxState()` | Still the single state choke point for `vesselA`/`vesselB`, classification, hysteresis. Gains a generalized `loadScenario(vesselA, vesselB)` (same body as today's `handleChipSelect`, minus the chip-ID lookup). Loses `activeChipId`/`handleChipSelect`. | Modified |
+| `SandboxBridgeProvider` + `useSandboxBridge()` | Page-scoped React Context carrying one thing: "a scenario is pending load" (`{vesselA, vesselB, requestId}` or `null`) plus a `requestLoad()` setter. Zero business logic — a pure signaling channel between two sibling client trees separated by a Server Component in between. | New |
+| `TryOnSandboxButton` | The only interactive element left in a Gallery card. Calls `requestLoad()` then does `document.getElementById("sandbox")?.scrollIntoView(...)` directly — scrolling does not need to wait on Sandbox's own re-render, so it is not routed through the bridge. | New |
+| `ChartHeaderStrip` | Merges `VerdictBanner`'s rule badge / title / description / role badges with the risk status pill currently rendered inside `InstrumentReadouts`. Reuses `bannerAccentClassName`/`bannerRuleBadge`/`verdictBannerDescription` (from `VerdictBanner.tsx`) and `statusPillCopy` (from `instrument-readouts`/`status-pill.ts`) as pure derivation imports — no duplicated logic. | New (replaces `VerdictBanner.tsx`) |
+| `ChartFooterStrip` | Renders the Range/Bearing/CPA/TCPA tile grid (from `InstrumentReadouts`, minus the pill) plus new per-vessel required-action sentences, derived from `getVesselRole()` via a new small pure module. | New (replaces `InstrumentReadouts.tsx`) |
+| `ChartPanel` | Unchanged SVG surface + drag/rotate. Gains ephemeral `selectedVessel: VesselLabel \| null` local state (NOT lifted into `useSandboxState()` — it has zero effect on classification) and renders `VesselControlOverlay` for whichever vessel is selected. | Modified |
+| `VesselControlOverlay` | Floating HTML card (shadcn `Select`/`Slider`, same fields as the old `ControlPanel`'s `VesselFormSection`) absolutely positioned over the chart using the already-computed `screenA`/`screenB` pixel coordinates from `chart-panel-derivation.ts`. Opens on hull click, closes on outside-click/Escape/selecting the other vessel. | New (absorbs `ControlPanel.tsx`'s form-field JSX) |
+| `GuidedTourModal` | 6-step modal, shadcn `Dialog` (not yet added to `src/components/ui/` — needs `npx shadcn add dialog`, backed by the already-installed `radix-ui` package). Reads step content from a pure data module. | New |
+| `guided-tour-steps.ts` | Pure data: `{id, title, body, bullets}[]`, no JSX, no domain imports — same shape convention as `chip-scenarios.ts`. | New |
+| `TourStepIllustration` | Per-step decorative inline SVG, switched by step id — kept OUT of the data module per this repo's "split computation/data from presentation" convention. | New |
+| `GalleryCard` | Drops the whole-card `<Link>`; becomes a plain (non-"use client") `Card` with a hover-revealed `TryOnSandboxButton` child. | Modified |
 
 ## Recommended Project Structure
 
 ```
-.github/
-└── workflows/
-    └── ci.yml              # lint + typecheck + test + build, on pull_request + push:main
-                             # (no separate deploy.yml — see Pattern 1 below)
-.husky/
-├── pre-commit              # runs `npx lint-staged`
-└── pre-push                # runs `npm run typecheck` (full project — see Pattern 4)
-lint-staged.config.js        # (or inline "lint-staged" key in package.json)
-CONTRIBUTING.md              # new — carries forward DOCS-CONTRIB-01
-README.md                    # modified — CI badge, "Live Deployment" section replacing the
-                             # current "no hosted/live deployment for this milestone" note
-package.json                 # modified — new devDeps (husky, lint-staged), new
-                             # "vercel-build" / "prepare" scripts (see Pattern 2)
-app/api/health/route.ts      # optional — trivial `{ status: "ok" }` GET route; useful as a
-                             # post-deploy smoke-test target and for future uptime pings
-                             # (not strictly required to satisfy the milestone's target
-                             # features, but cheap and standard — flag as a nice-to-have,
-                             # not a hard requirement)
-vercel.json                  # optional — only needed if NOT using the `vercel-build` script
-                             # convention; the script convention is preferred (see Pattern 2)
+src/components/
+├── sandbox/
+│   ├── SandboxContainer.tsx          # MODIFIED: no chip row, composes strips
+│   ├── hooks/
+│   │   └── useSandboxState.ts        # MODIFIED: loadScenario() replaces
+│   │                                  #   handleChipSelect(); activeChipId gone
+│   ├── chip-scenarios.ts             # DELETE if no other consumer remains
+│   │                                  #   after the chip row is removed
+│   ├── bridge/
+│   │   └── SandboxBridgeProvider.tsx # NEW: context + useSandboxBridge()
+│   ├── chart/
+│   │   ├── ChartPanel.tsx            # MODIFIED: + selectedVessel state
+│   │   ├── ChartHeaderStrip.tsx      # NEW (replaces reasoning/VerdictBanner.tsx)
+│   │   ├── ChartFooterStrip.tsx      # NEW (replaces instruments/InstrumentReadouts.tsx)
+│   │   ├── chart-footer-action-text.ts # NEW: pure VesselRole -> action sentence
+│   │   ├── VesselControlOverlay.tsx  # NEW (absorbs control-panel/ControlPanel.tsx)
+│   │   ├── VesselGroup.tsx           # UNCHANGED shape, but see Pitfall note below
+│   │   │                              #   re: adding a click handler here
+│   │   ├── chart-panel-derivation.ts # UNCHANGED — already exposes screenA/screenB
+│   │   └── chart-panel-geometry.ts   # UNCHANGED
+│   ├── reasoning/
+│   │   └── ReasoningTrail.tsx        # MODIFIED (visual connector treatment only)
+│   └── control-panel/
+│       └── CopyLinkButton.tsx        # MOVED here from a deleted ControlPanel.tsx
+│                                      #   sibling — relocate to sandbox/ root once
+│                                      #   control-panel/ has only this one file left
+├── gallery/
+│   └── card/
+│       ├── GalleryCard.tsx           # MODIFIED: no <Link>, renders TryOnSandboxButton
+│       └── TryOnSandboxButton.tsx    # NEW, "use client"
+└── tour/
+    ├── GuidedTourModal.tsx           # NEW
+    ├── guided-tour-steps.ts          # NEW, pure data
+    └── TourStepIllustration.tsx      # NEW
 ```
 
 ### Structure Rationale
 
-- **One `ci.yml`, no `deploy.yml`:** given the realistic hosting candidates (Vercel, Railway, Render) all offer native GitHub-push-triggered deploys, a hand-rolled GitHub Actions deploy job would duplicate what the host already does for free, and would need its own copy of the production `DATABASE_URL` as a GH secret — a second copy of a production credential this architecture doesn't need to create. Keep GH Actions scoped to CI only.
-- **`docker-compose.yml` reused, not reimplemented as a GH Actions `services:` block:** the file already exists, already matches `.env.example`'s credentials, and already pins `postgres:17`. A GH Actions `services:` block would be a second, independently-maintained definition of the same thing — a config-drift risk with zero benefit here.
-- **`vercel-build` script over `vercel.json` `buildCommand`:** see Pattern 2 — this is the more idiomatic, single-file way to guarantee the project's mandatory `--webpack` flag and the migration-gating logic both survive Vercel's own build invocation.
+- **`sandbox/bridge/`, not `shared/`:** the bridge has exactly two real consumers (`SandboxContainer` and `GalleryCard`'s button), both of which exist today, so per this repo's own "extract to `shared/` only on a real second consumer" convention it does *not* belong in `src/components/shared/` — it's a Sandbox-owned concern that Gallery imports, not a generic cross-feature primitive. If a third consumer appears later (e.g. Hero's CTA also loading a scenario), promote it then, not now.
+- **`tour/` as its own top-level feature folder, not nested under `sandbox/`:** the Guided Tour is triggered from Sandbox's header, but its content (6-step maritime-encounter explainer) has no dependency on Sandbox's state or types — keeping it a standalone folder avoids coupling a self-contained, static-content feature to Sandbox's file tree the way `chip-scenarios.ts` (Vessel literals, Sandbox-specific) legitimately is coupled to it.
+- **`ChartHeaderStrip`/`ChartFooterStrip` inside `sandbox/chart/`, not `sandbox/reasoning/`/`sandbox/instruments/`:** both strips are now visually and functionally part of the chart panel's own card (header/footer of the *chart*, not a separate reasoning aside), so relocating them next to `ChartPanel.tsx` reflects the real new composition, not the old one.
+- **`chart-footer-action-text.ts` as a new pure module, not inline in the strip component:** matches this repo's established split (`instrument-readouts.ts`, `status-pill.ts`, `vessel-role.ts` are all pure, framework-free derivation modules imported by presentation components) — the required-action sentence is a pure `VesselRole -> string` mapping with zero JSX, independently unit-testable the same way `status-pill.test.ts` already tests `statusPillCopy()`.
 
 ## Architectural Patterns
 
-### Pattern 1: CI (Actions) and CD (host Git integration) are separate, decoupled systems
+### Pattern 1: Generalize the existing "full replace + hysteresis reset" choke point instead of adding a parallel one
 
-**What:** GitHub Actions' job is exclusively "should this PR/commit be allowed to merge" — lint, typecheck, test, build-as-a-correctness-check. The actual production deployment is triggered independently by the hosting platform's own GitHub App watching `main`.
+**What:** `handleChipSelect(chipId)` in `useSandboxState.ts` already does exactly what "Try on Sandbox" needs — reset `previousEncounterTypeRef`, then call `applyVesselUpdate(nextA, nextB)`. Rename/generalize it to `loadScenario(vesselA: Vessel, vesselB: Vessel)`, drop the `ChipId` lookup, and have both the (now-removed) chip row's old call sites and the new bridge-driven load path call the same function.
 
-**When to use:** Whenever the chosen host has native git-push-to-deploy (true for Vercel, Railway, Render — all realistic candidates for this milestone's "free/hobby-tier" constraint). Only build a custom GH Actions deploy job if the eventual host lacks this (e.g., a raw VPS or Docker-only target).
+**When to use:** Now — it is a small, mechanical refactor that both unblocks the Gallery→Sandbox wiring and satisfies the "remove chip row" target feature in one pass, and it means the codebase never has two independently-written "replace both vessels and reset hysteresis" code paths.
 
-**Trade-offs:** Simpler, fewer secrets, no duplicated build logic — but it does mean GH Actions' own "build" job and the host's production build are two separate builds of the same commit. That's acceptable here (cheap, and it's the standard industry pattern) — it is *not* redundant in the sense that matters: CI's build job is a merge gate that runs before human review completes, the host's build is what actually ships.
-
-### Pattern 2: Environment-gated migration inside the host's own build script
-
-**What:** Add a `vercel-build` script (Vercel auto-prefers this script name over `build` when present — this is Vercel's own documented mechanism for framework-integrated projects that need extra build steps) that runs Prisma generate unconditionally, but gates `prisma migrate deploy` behind the host's own "is this the real production deploy" signal (Vercel sets `VERCEL_ENV` to `production`/`preview`/`development` automatically; Railway/Render have equivalent variables).
-
-**When to use:** Always, for this project — it is the only way to run migrations exactly once per real production deploy without ever risking a PR preview build silently applying a migration to the live database.
+**Trade-offs:** None significant. This is strictly a rename + signature generalization of code that already exists and is already tested via `SandboxContainer.test.tsx`.
 
 **Example:**
-```json
-{
-  "scripts": {
-    "build": "next build --webpack",
-    "vercel-build": "prisma generate && node scripts/migrate-if-production.mjs && next build --webpack"
-  }
-}
-```
-```js
-// scripts/migrate-if-production.mjs
-import { execSync } from "node:child_process";
-
-// Only the real production deploy (a push to `main`) should ever mutate the
-// live schema -- Vercel's Preview Deployments (every PR/branch push) build
-// with the same script but VERCEL_ENV="preview", so this guard is what
-// stops a work-in-progress branch from running `migrate deploy` against
-// production Postgres.
-if (process.env.VERCEL_ENV === "production") {
-  execSync("npx prisma migrate deploy", { stdio: "inherit" });
+```typescript
+// useSandboxState.ts
+function loadScenario(nextA: Vessel, nextB: Vessel): void {
+  previousEncounterTypeRef.current = undefined;
+  applyVesselUpdate(nextA, nextB);
 }
 ```
 
-**Trade-off:** Ties the migration step to whichever host is chosen (the env-var name changes per platform) — acceptable since the migration step already has to live *somewhere* host-aware, and this keeps it in one file next to the rest of the deploy config rather than split across a GH Actions secret + workflow step.
+### Pattern 2: Server Components as `children` of a page-level Client Provider
 
-### Pattern 3: Reuse the existing `docker-compose.yml` for CI's database-backed jobs
+**What:** `SandboxBridgeProvider` is a `"use client"` component whose only job is to hold `pendingScenario` state and expose `requestLoad()`. It wraps `{children}` — but those children (`<Hero/>`, `<SandboxContainer/>`, `<GalleryContainer/>`) are still *composed inside `app/page.tsx`*, which remains an ordinary Server Component. React Server Components support passing Server Component output through a Client Component's `children` slot without forcing those children to become Client Components themselves — only the Provider crosses the boundary, `GalleryContainer`'s async tRPC fetch is completely unaffected.
 
-**What:** The `test` job (and, if migrations are also verified in CI, a dedicated `migrate-check` step) starts the *exact* file already used for local dev, rather than re-declaring Postgres via GH Actions' `services:` YAML key.
+**When to use:** Exactly this shape — a small, well-known set of sibling consumers (here: 2) on the same page that sit on opposite sides of a Server/Client boundary and need to signal one direction (Gallery → Sandbox). This is the standard, documented Next.js App Router answer to "a Server-rendered button needs to affect client state elsewhere on the page" — it does not require lifting Gallery's data-fetching into a client component, and does not require a new dependency (Zustand, event bus, etc.).
 
-**When to use:** Whenever local dev already has a docker-compose Postgres definition (true here) — one definition, two consumers (dev machine, CI runner).
+**Trade-offs:** A plain `createContext`/`useState` round-trip means Sandbox's `useEffect` fires one render *after* the button click, not synchronously — acceptable here since nothing in the UI needs the load to be perceptibly instantaneous, and it's the same one-tick lag `router.push()`-driven navigation already has elsewhere in this app. Rejected alternative: a `window.dispatchEvent(new CustomEvent(...))` / `window.addEventListener` pair. It would also work and needs no Provider wrapper at all, but it is strictly *less* traceable/typed than Context (a reviewer has to grep for a string event name rather than a typed hook), which cuts against this codebase's explicit "explicit dependencies" constraint — Context is the more idiomatic, equally-lightweight choice here.
 
-**Example (CI test job):**
-```yaml
-- name: Start Postgres
-  run: docker compose up -d --wait
-- name: Apply migrations
-  run: npx prisma migrate deploy
-  env:
-    DATABASE_URL: postgresql://colregs:colregs@localhost:5432/colregs_navigator?schema=public
-- name: Run tests
-  run: npm test
-  env:
-    DATABASE_URL: postgresql://colregs:colregs@localhost:5432/colregs_navigator?schema=public
+**Example:**
+```typescript
+// src/components/sandbox/bridge/SandboxBridgeProvider.tsx
+"use client";
+type PendingScenario = { vesselA: Vessel; vesselB: Vessel; requestId: number };
+const SandboxBridgeContext = createContext<{
+  pendingScenario: PendingScenario | null;
+  requestLoad: (vesselA: Vessel, vesselB: Vessel) => void;
+} | null>(null);
+
+export function SandboxBridgeProvider({ children }: { children: ReactNode }) {
+  const [pendingScenario, setPendingScenario] = useState<PendingScenario | null>(null);
+  const requestLoad = useCallback((vesselA: Vessel, vesselB: Vessel) => {
+    // requestId (not vessel identity) is the effect dependency below, so
+    // re-selecting the SAME gallery scenario twice in a row still reloads it.
+    setPendingScenario({ vesselA, vesselB, requestId: Date.now() });
+  }, []);
+  return (
+    <SandboxBridgeContext.Provider value={{ pendingScenario, requestLoad }}>
+      {children}
+    </SandboxBridgeContext.Provider>
+  );
+}
+
+export function useSandboxBridge() {
+  const ctx = useContext(SandboxBridgeContext);
+  if (!ctx) throw new Error("useSandboxBridge must be used within SandboxBridgeProvider");
+  return ctx;
+}
 ```
-Note: these credentials are the same non-secret dev defaults already committed in `.env.example` and `docker-compose.yml` — nothing here needs a GitHub Actions secret, since this Postgres instance only ever exists for the lifetime of one CI run.
-
-**Trade-off:** None significant — `docker compose up -d --wait` (the `--wait` flag respects the existing `healthcheck: pg_isready` block already defined) adds a few seconds of startup latency versus a bare `services:` container, which is negligible.
-
-### Pattern 4: Full typecheck deferred out of pre-commit; lint-staged handles only staged-file lint
-
-**What:** `lint-staged` runs ESLint (`--fix`) against staged files only, at `pre-commit`. `tsc --noEmit` (or `tsgo`/`npm run typecheck`) is **not** added to lint-staged at all — TypeScript's type-checker inherently needs the whole project graph, so scoping it to staged files produces misleading pass/fail results (a changed file's type errors can originate from an *unstaged* file it references). Run the full typecheck at `pre-push` instead (still local, still before code reaches GitHub, but off the hot path of every single commit), with CI's own `typecheck` job as the authoritative, un-skippable gate.
-
-**When to use:** Always for this project, doubly so given the verified finding that `tsgo` in CI-class environments does **not** reliably deliver its marketed 10x speedup over classic `tsc` — a real-world GitHub Actions report measured only ~28% faster (57s vs 79s) on a 2-vCPU `ubuntu-latest` runner, because Go's goroutine-based parallelism has little headroom on shared 2-vCPU runners ([microsoft/typescript-go#1507](https://github.com/microsoft/typescript-go/issues/1507)). This project's codebase is much smaller than that report's 322K-line benchmark, so absolute time will be short regardless — but it confirms typecheck is not free, and should not gate every commit.
-
-**Example (`lint-staged.config.js`):**
-```js
-export default {
-  "*.{ts,tsx,js,jsx,mjs,cjs}": ["eslint --fix"],
-};
+```typescript
+// inside SandboxContainer.tsx (or a small effect in useSandboxState.ts)
+const { pendingScenario } = useSandboxBridge();
+useEffect(() => {
+  if (!pendingScenario) return;
+  sandboxState.loadScenario(pendingScenario.vesselA, pendingScenario.vesselB);
+  // deliberately keyed on requestId, not on vesselA/vesselB object identity
+}, [pendingScenario?.requestId]);
 ```
-```bash
-# .husky/pre-commit
-npx lint-staged
-
-# .husky/pre-push
-npm run typecheck
+```tsx
+// TryOnSandboxButton.tsx
+"use client";
+export function TryOnSandboxButton({ vesselA, vesselB }: { vesselA: Vessel; vesselB: Vessel }) {
+  const { requestLoad } = useSandboxBridge();
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        requestLoad(vesselA, vesselB);
+        document.getElementById("sandbox")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }}
+    >
+      Try on Sandbox
+    </button>
+  );
+}
 ```
 
-**Trade-off:** A contributor can still push code with a type error if they skip/force past `pre-push` — CI's `typecheck` job is what actually can't be bypassed (assuming branch protection requires it as a status check), so pre-push is a convenience, not the safety boundary.
+### Pattern 3: Ephemeral UI-selection state stays local to the component that owns the interaction, not in `useSandboxState()`
+
+**What:** `selectedVessel` (which vessel's on-chart overlay, if any, is open) and the Guided Tour's open/closed flag are pure view state with zero effect on classification. They belong as local `useState` in `ChartPanel`/`SandboxContainer` respectively — not lifted into `useSandboxState()`, which this codebase has deliberately scoped to "vessel data + derived classification" only (see its own file header comment).
+
+**When to use:** Always, for this kind of state — it is the same boundary this codebase already draws between `useSandboxState()` (domain-adjacent) and `useContainerSize()`/`useHullDrag()`/`useRotateHandleDrag()` (chart-interaction-local hooks that ChartPanel owns directly).
+
+**Trade-offs:** None — this is a continuation of an already-established, working pattern, not a new decision.
 
 ## Data Flow
 
-### Request Flow (CI → CD)
+### Vessel-state mutation flow (unchanged shape, one new entry point)
 
 ```
-PR opened/updated
-    ↓
-GH Actions ci.yml (pull_request trigger)
-    → lint job            (npx prisma generate [dummy DATABASE_URL] → eslint .)
-    → typecheck job        (npx prisma generate [dummy DATABASE_URL] → tsc --noEmit)
-    → test job             (docker compose up -d --wait → prisma migrate deploy → vitest run)
-    → build job            (npx prisma generate [dummy DATABASE_URL] → next build --webpack)
-    ↓ (all 4 required, branch-protection-gated)
-Merge to main
-    ↓
-GH Actions ci.yml re-runs on push:main (same 4 jobs, re-validates post-merge state)
-    ↓ (independently, in parallel)
-Vercel GitHub App detects push to main
-    → vercel-build script: prisma generate → [VERCEL_ENV=production ⇒ prisma migrate deploy] → next build --webpack
-    → deploy → live app updated
+Drag/rotate gesture (ChartPanel) ──┐
+Form field (VesselControlOverlay) ─┼─→ useSandboxState()'s applyVesselUpdate()
+Reset button ───────────────────────┤     (validate via VesselSchema, then
+loadScenario() [Gallery bridge] ────┘      classifyEncounter(), Rule 13(d)
+                                            hysteresis via previousEncounterTypeRef)
+                                                    │
+                                                    ▼
+                              { vesselA, vesselB, lastGoodClassification,
+                                isDegenerate } ── re-render ──▶
+                              ChartHeaderStrip / ChartPanel / ChartFooterStrip /
+                              VesselControlOverlay / ReasoningTrail
+```
+
+### Gallery → Sandbox cross-tree flow (new)
+
+```
+User hovers GalleryCard → TryOnSandboxButton revealed (pure CSS, Server-rendered)
+User clicks button (client leaf)
+    → SandboxBridgeProvider.requestLoad(vesselA, vesselB)   [Context setState]
+    → document.getElementById("sandbox").scrollIntoView(...)  [immediate, no wait]
+        (independent of the Context round-trip — the anchor exists regardless
+         of whether Sandbox has re-rendered with the new scenario yet)
+                              ↓ (next render tick)
+SandboxContainer's effect sees pendingScenario.requestId change
+    → sandboxState.loadScenario(vesselA, vesselB)
+    → same applyVesselUpdate() path as every other mutation source above
 ```
 
 ### Key Data Flows
 
-1. **Migration flow:** a single set of committed files (`prisma/migrations/*/migration.sql`) flows through three environments with zero divergence: local dev (`prisma migrate dev`, already established), CI's ephemeral test Postgres (`prisma migrate deploy` against the docker-compose container), and production (`prisma migrate deploy`, gated to real production builds only via Pattern 2). No environment ever runs a different migration path (e.g. `db push` or `migrate reset`) — that's what makes `migrate deploy` safe for a live DB: it only ever applies pending, already-reviewed migration files in order, never destructively resets.
-2. **Secret flow:** two entirely separate `DATABASE_URL` values live in two separate stores that never need to overlap. (a) The CI test job's DB credentials are the already-public dev defaults from `.env.example`/`docker-compose.yml` — not a secret, needs no GitHub Secret at all. (b) The production `DATABASE_URL` lives only in the hosting platform's own environment-variable store (Vercel Project Settings → Environment Variables, scoped to "Production"), because migration + runtime both happen inside the host's own build/runtime, not from a GitHub Actions runner reaching out to the internet. This means, in the recommended architecture, **GitHub Actions never needs to hold a production database credential at all** — a smaller secret-exposure surface than a design where an Actions job calls out to prod directly.
-
-## Scaling Considerations
-
-| Concern | At portfolio-demo scale (few users) | If traffic grows meaningfully |
-|---------|--------------------------------------|-------------------------------|
-| DB connections | Fine as-is — Vercel serverless functions + a single Prisma Client instance per invocation, low concurrency | First real bottleneck: serverless functions can each open their own Postgres connection, quickly exhausting a free-tier connection cap (Neon/Railway free tiers cap concurrent connections). Fix is a pooled connection string (Neon's built-in pooler endpoint, or PgBouncer) — the project's existing `@prisma/adapter-pg` + `pg` driver works unchanged against a pooled connection string, no code change needed, just swap which connection string `DATABASE_URL` points at |
-| CI runtime | Negligible (small codebase, ~seconds per job) | If it grows, split lint/typecheck/test/build into a matrix that runs in parallel (already the recommended shape) rather than one long sequential job |
-| Migration risk | Low — single-developer workflow, migrations reviewed in PRs before merge | Add a "migration diff / destructive-change" check (e.g. a CI step that fails if a migration contains `DROP COLUMN`/`DROP TABLE` without an explicit override) before this becomes a multi-contributor project |
+1. **Single choke point preserved:** every one of drag, rotate, on-chart overlay form field, Reset, and now Gallery-driven load funnels through the same `applyVesselUpdate()` — the v1.4 restructure adds call sites, it does not add a second mutation path. This is the most important invariant to preserve: a bug class this project has already paid for twice (`VesselGroup.tsx`'s hit-testing regressions) came from two logically-identical things drifting into two separately-maintained implementations.
+2. **UI-selection state flows one level, not through the state hook:** `ChartPanel` owns `selectedVessel`, passes the selected vessel's data + the two `onVesselSpeedChange`/`onVesselTypeChange` handlers (already available in `useSandboxState()`'s return value, just not previously threaded into `ChartPanel`) down into `VesselControlOverlay`. `ChartPanelProps` must be extended to accept these two handlers, which today only reach `ControlPanel` directly from `SandboxContainer`.
+3. **Gallery's data fetch is untouched:** `GalleryContainer`'s `await getCaller().gallery.list()` and `rowToVessels()` still run exactly as today, server-side, at request time — nothing about the bridge changes how or when that data is fetched, only what happens when a user acts on it.
 
 ## Anti-Patterns
 
-### Anti-Pattern 1: Running the full-project `tsc`/`tsgo` typecheck in `pre-commit`
+### Anti-Pattern 1: Wiring the hull's click-to-select overlay through the same pointer handlers as drag, with no movement threshold
 
-**What people do:** Add `tsc --noEmit` (or `npm run typecheck`) directly into `lint-staged`'s file-glob config, hoping it scopes to changed files.
-**Why it's wrong:** TypeScript's checker needs the whole project's type graph — scoping to staged files produces false negatives (misses errors from cross-file references) and is also slow on every commit, and per the verified `tsgo`-in-CI finding above, this compiler's parallelism gains are constrained on shared/limited-core machines, so it's not free even with the new compiler.
-**Instead:** lint-staged does ESLint only; full typecheck runs at `pre-push` (optional local safety net) and unconditionally in CI (the real gate).
+**What people do:** Add a plain `onClick` to the hull `<polygon>` alongside its existing `onPointerDown`/`onPointerMove`/`onPointerUp` drag handlers, assuming "click" only fires on a true stationary click.
 
-### Anti-Pattern 2: Assuming `next build`'s own type-checking covers CI's typecheck requirement
+**Why it's wrong:** This is the exact bug class this project has already hit twice (documented in `PROJECT.md`'s Key Decisions: the Phase 4 and Phase 8 hit-testing regressions), from a different angle — a `click` event fires after `pointerdown`→`pointerup` on the same element in most browsers *regardless of how far the pointer moved in between* (no built-in drag-distance threshold). Without an explicit guard, ending a hull-drag gesture would also toggle the vessel-control overlay open/closed on every single drag, which reads as broken, flickering UI.
 
-**What people do:** Rely on `next build` to fail the pipeline if there's a type error, skipping a dedicated `tsc --noEmit` CI step.
-**Why it's wrong:** This project's `next.config.ts` already sets `typescript.ignoreBuildErrors: true`, *specifically* because Next 16.2.10's built-in type-checker hardcodes a TypeScript Program-API entry point that the tsgo-based `typescript@7.0.2` package no longer ships — `next build` cannot type-check this project at all right now (documented, verified, in the existing config's own comment). Skipping a separate typecheck step would mean **no type-checking whatsoever** runs in CI.
-**Instead:** `npm run typecheck` (`tsc --noEmit`) must be its own explicit CI job — it already is the project's authoritative type gate locally; CI must mirror that.
+**Instead:** Track the `clientX`/`clientY` at `onPointerDown` in a ref, and in `onPointerUp` compare against the up-position; only treat it as a "select" if the total movement is under a small pixel threshold (e.g. 4-5px). This logic belongs in a small addition to `useHullDrag.ts` (or a sibling hook) — not duplicated per-vessel, and not left as a bare `onClick`.
 
-### Anti-Pattern 3: Leaving Vercel's "Build Command" on pure framework auto-detect for this project
+### Anti-Pattern 2: Lifting `selectedVessel`/Guided-Tour-open state into `useSandboxState()`
 
-**What people do:** Deploy a Next.js repo to Vercel and leave the Build Command field unset, trusting the "Next.js" framework preset to do the right thing (Vercel's own docs recommend exactly this for standard projects).
-**Why it's wrong:** Next.js 16 made Turbopack the default bundler for **both** `next dev` and `next build` — webpack is "no longer the default," and opting out requires the explicit `--webpack` CLI flag (a `webpack:` function in `next.config.ts` alone is not sufficient to opt out). This project depends on that flag: without it, Turbopack is used, which does not support `resolve.extensionAlias`, and the build fails on the very first `.js`-suffixed relative import (~98 imports across 37 files, per this project's own Key Decisions log — this already happened once, in Phase 5). Vercel's own build-configuration docs are explicit that custom build flags need an explicit override (`vercel.json`'s `buildCommand`, or the dashboard's Override field) rather than being inferred from `package.json`'s `build` script content for framework-detected projects.
-**Instead:** Do not rely on Vercel's zero-config default. Either (a) add the `vercel-build` script shown in Pattern 2, which Vercel auto-prefers and which explicitly ends in `next build --webpack`, or (b) explicitly set `buildCommand` in `vercel.json`/Project Settings. Verify this concretely on the very first deploy (check the build log for "Turbopack" vs. the expected webpack output) before treating CD as working — this is exactly the kind of toolchain assumption that has bitten this project before (Turbopack/webpack, tsc/tsgo Program API).
+**What people do:** Add `selectedVessel`/`isTourOpen` fields and setters to the same hook that owns `vesselA`/`vesselB`/classification, on the reasoning that "it's all Sandbox state."
 
-### Anti-Pattern 4: Unconditional `prisma migrate deploy` in the build command
+**Why it's wrong:** `useSandboxState()`'s own file header explicitly scopes it to vessel data + the validate-then-classify choke point; mixing in view-only UI state that never touches `classifyEncounter()` blurs that boundary for no benefit, and makes the hook's return type grow with every future UI-only interaction this Sandbox ever gains.
 
-**What people do:** Add `prisma migrate deploy && next build` as the literal build command with no environment gate.
-**Why it's wrong:** Every PR/branch preview build on Vercel would also run this build command, meaning a branch that isn't merged yet could apply a migration to the live production database the moment its preview deployment builds — the actual live data at risk, not a sandboxed copy.
-**Instead:** Gate the migration step behind the host's own production-vs-preview signal (Pattern 2).
+**Instead:** Keep it local (Pattern 3 above) — exactly where `useContainerSize()`/drag hooks already live relative to `ChartPanel`.
 
-### Anti-Pattern 5: Duplicating the production `DATABASE_URL` into GitHub Actions Secrets "just in case"
+### Anti-Pattern 3: Making `GalleryContainer` or `GalleryCard` a Client Component to support the new button
 
-**What people do:** Add the real production connection string as a GitHub Actions secret even though no Actions job actually touches production.
-**Why it's wrong:** Every secret copy is an additional exposure surface (visible to anyone with write access to workflow files, any Actions runner, any third-party Action used in the workflow) with no corresponding benefit if the recommended architecture (Pattern 1/2) is followed.
-**Instead:** Production `DATABASE_URL` lives only in the hosting platform's own environment-variable store, scoped to "Production." GitHub Actions only ever needs the disposable, already-public dev credentials for its own ephemeral test Postgres.
+**What people do:** Add `"use client"` to the top of `GalleryCard.tsx` (or worse, `GalleryContainer.tsx`) because "the button needs interactivity."
+
+**Why it's wrong:** `GalleryContainer` is an `async` Server Component performing the real tRPC data fetch (`gallery.list()`) at render time — making it (or its child `GalleryCard`) a Client Component would force that fetch to move client-side (a new tRPC client call, a loading state, a waterfall) for zero benefit, since only the button's `onClick` needs a client boundary.
+
+**Instead:** Push `"use client"` down to the smallest possible leaf — `TryOnSandboxButton` only. `GalleryCard` stays a plain Server Component that simply renders that client child, which is a fully supported, ordinary composition (Server Components may freely import and render Client Components; only the reverse is restricted).
+
+### Anti-Pattern 4: Reaching for Zustand (or any new state-management dependency) for the Gallery↔Sandbox bridge
+
+**What people do:** Since two independent trees need to share a signal, treat it as validation that "we finally need global state" and add a store library.
+
+**Why it's wrong:** This project's own `STACK.md`/CLAUDE.md conventions gate `zustand` behind "3+ sibling panels genuinely needing shared state" — there are exactly 2 consumers here (one Gallery button type, one Sandbox), and React's built-in Context is sufficient and already idiomatic for the App Router Server/Client boundary this problem actually is.
+
+**Instead:** Plain `createContext`/`useState` (Pattern 2). Revisit only if a third independent consumer of "load a scenario into the sandbox" appears (e.g., a future shareable-deeplink-triggered load, though that already has its own mechanism via `/s/[shareId]`'s `initialScenario` prop).
 
 ## Integration Points
-
-### External Services
-
-| Service | Integration Pattern | Notes |
-|---------|---------------------|-------|
-| GitHub Actions | `.github/workflows/ci.yml`, triggered on `pull_request` and `push: main`; 4 jobs (lint, typecheck, test, build); branch protection marks all 4 as required status checks | `actions/checkout@v4`, `actions/setup-node@v4` pinned to **Node 22** (matches README's documented local prerequisite, "Node.js 22+"), `cache: npm` |
-| Hosting platform (Vercel recommended; Railway/Render viable alternates) | Native GitHub App — auto-deploys `main` on every merge; no GH Actions involvement | Must explicitly set the build command/script per Anti-Pattern 3 — do not trust zero-config defaults given the mandatory `--webpack` flag |
-| Production Postgres (Neon/Railway/Supabase — pick one) | Standard `postgresql://` connection string, compatible as-is with the existing `@prisma/adapter-pg` + `pg` driver | No driver/adapter change needed regardless of provider — this project does **not** use `@prisma/adapter-neon`'s HTTP driver, so any standard-Postgres-wire-protocol host works without touching `src/server/db/client.ts` |
-| Husky + lint-staged (local, not a "service" but the local-tooling integration point) | `.husky/pre-commit` → `npx lint-staged`; `.husky/pre-push` → `npm run typecheck` | Husky v9+ shape: no `#!/usr/bin/env sh\n. "$(dirname "$0")/_/husky.sh"` boilerplate needed — hook files are plain executable scripts; `"prepare": "husky"` in `package.json` installs the git hooks on `npm install` |
 
 ### Internal Boundaries
 
 | Boundary | Communication | Notes |
 |----------|---------------|-------|
-| `package.json` scripts ↔ `.github/workflows/ci.yml` | CI calls `npm run lint` / `npm run typecheck` / `npm test` / `npm run build` directly — the workflow is a thin wrapper, never re-implements these commands inline | Keeps a single source of truth for "what does lint/typecheck/test/build mean" — local dev and CI never drift |
-| `prisma.config.ts` ↔ every CI job that shells out to `prisma` (including `prisma generate` in lint/typecheck/build jobs) | `prisma.config.ts` calls `env("DATABASE_URL")`, which is a documented Prisma 7 behavior that historically threw a hard `PrismaConfigEnvError` if `DATABASE_URL` was unset at config-load time — **even for commands like `generate` that never open a connection** ([prisma/prisma#28869](https://github.com/prisma/prisma/issues/28869), [#28590](https://github.com/prisma/prisma/issues/28590)). This was fixed upstream in **Prisma 7.2.0**; this project is locked to `^7.8.0`, comfortably past that fix, so `prisma generate` should succeed with no `DATABASE_URL` set at all. **Recommendation (defense-in-depth, not strictly required):** set a placeholder `DATABASE_URL` (e.g. `postgresql://placeholder:placeholder@localhost:5432/placeholder`) as a non-secret repo/workflow-level env var for the `lint`, `typecheck`, and `build` jobs anyway — it's zero-cost insurance against any future Prisma patch regressing this, and removes any ambiguity about whether the fix applies to every subcommand this project's scripts invoke. |
-| `next.config.ts`'s `typescript.ignoreBuildErrors: true` ↔ CI's dedicated `typecheck` job | The config comment already documents *why* this flag exists (tsgo/Next 16 Program-API mismatch) — CI's `typecheck` job is the component that makes this flag safe to have set at all; if that job is ever removed from the required-checks list, type safety silently stops being enforced anywhere | Treat the `typecheck` CI job as load-bearing infrastructure, not a "nice to have" alongside lint |
-| `docker-compose.yml` ↔ CI `test` job | CI starts the *same* file, not a re-declared equivalent | See Pattern 3 |
+| `GalleryCard` (Server) ↔ `TryOnSandboxButton` (Client) | Plain props (`vesselA`, `vesselB`, `title` for the `aria-label`) — a Server Component rendering a Client Component and passing serializable props is standard RSC composition, no special handling needed | `vesselA`/`vesselB` are plain data objects (Zod-inferred `Vessel`), already serializable |
+| `TryOnSandboxButton`/`SandboxContainer` ↔ `SandboxBridgeProvider` | React Context, one direction of intent (`requestLoad`) + one piece of state (`pendingScenario`) | No business logic in the Provider — it is purely a signaling channel; all validation/classification still happens inside `useSandboxState()`'s `applyVesselUpdate()` |
+| `ChartPanel` ↔ `VesselControlOverlay` | Props: selected vessel's data, its role, and the two handlers already present in `useSandboxState()`'s return value | Requires extending `ChartPanelProps` (`types.ts`) to add `onVesselSpeedChange`/`onVesselTypeChange`, mirroring the shape `ControlPanelProps` already has today |
+| `ChartHeaderStrip`/`ChartFooterStrip` ↔ pure derivation modules | Direct function imports (`bannerRuleBadge`, `verdictBannerDescription`, `statusPillCopy`, `deriveInstrumentReadouts`, new `chart-footer-action-text.ts`) | No new coupling shape — these strips consume the same pure functions the components they replace already consumed; only the JSX composition/layout changes |
+| `SandboxContainer`'s "How to read this" button ↔ `GuidedTourModal` | Local `useState<boolean>` (open/closed), same file or a thin wrapper — no Context needed since it's a single producer/single consumer within one tree | Add shadcn's `Dialog` primitive (`npx shadcn add dialog`) — `radix-ui@^1.6.2` is already an installed dependency, so this is a zero-new-dependency addition, just an unadded `src/components/ui/dialog.tsx` file |
+
+## Suggested Build Order
+
+Given the milestone context's explicit callout — "Gallery→Sandbox wiring is a hard dependency for the 'Try on Sandbox' button but independent of the Guided Tour and the header/footer-strip restructure" — the dependency graph is:
+
+```
+[1] Prerequisite refactor
+    useSandboxState: handleChipSelect(chipId) → loadScenario(vesselA, vesselB)
+    SandboxContainer: remove chip row JSX + activeChipId usage
+    (delete chip-scenarios.ts if it has no other consumer after this)
+        │
+        ├──▶ [2] Gallery → Sandbox wiring            ──┐
+        │      SandboxBridgeProvider + useSandboxBridge   │  independent of
+        │      GalleryCard: drop <Link>, add                │  each other —
+        │      TryOnSandboxButton (hover-reveal)             │  can build in
+        │      wrap app/page.tsx in the Provider              │  parallel /
+        │                                                       │  either order
+        └──▶ [3] Sandbox chart restructure             ──┘
+               ChartHeaderStrip (replaces VerdictBanner)
+               ChartFooterStrip (replaces InstrumentReadouts)
+               VesselControlOverlay (replaces ControlPanel)
+               ChartPanel: selectedVessel + click-vs-drag guard (Anti-Pattern 1)
+
+[4] Guided Tour — fully independent, zero shared files with [2]/[3]
+       guided-tour-steps.ts, TourStepIllustration.tsx, GuidedTourModal.tsx,
+       "How to read this" trigger button in SandboxContainer's existing
+       top header row (unaffected by [3]'s chart-card restructure)
+
+[5] Hero preview visual sync — fully independent, static/fixture-driven,
+       touches only hero-preview-geometry.ts/HeroPreviewCard.tsx; safe to
+       do anytime, lowest risk in the milestone
+```
+
+**Rationale for [1] first:** both [2] (needs a generic load function, not a chip-ID lookup) and [3]'s "remove chip row" target feature depend on this same small refactor — doing it once, first, avoids either later step re-deriving it independently.
+
+**[2] and [3] in parallel or either order after [1]:** they touch different files almost entirely (`SandboxBridgeProvider`/`GalleryCard` vs. `ChartHeaderStrip`/`ChartFooterStrip`/`VesselControlOverlay`/`ChartPanel`) — the one shared file is `SandboxContainer.tsx`'s composition JSX, which is a small, low-conflict edit either way. If serialized on one branch, doing [2] before [3] is slightly preferable since [2]'s wiring is more mechanically constrained (the milestone context flags it as the "hard dependency" one) and dislodges the chip-row/`ControlPanel` removal question cleanly before the bigger visual restructure lands.
+
+**[4] and [5] can run anytime, including fully in parallel with [2]/[3]** on separate branches — neither shares a file with the Sandbox/Gallery wiring work. If sequencing on a single branch/PR-per-phase basis (this project's established git workflow, per `CLAUDE.md`), doing them last is lowest-risk since they are additive/cosmetic rather than restructuring existing wiring.
 
 ## Sources
 
-- [Configuring a Build — Vercel Docs](https://vercel.com/docs/builds/configure-a-build) — MEDIUM-HIGH confidence, official docs; confirms custom build flags for framework-detected projects need explicit `buildCommand` override, and that `vercel-build` / framework auto-detect is the standard split
-- [Next.js 16 — Turbopack default bundler](https://nextjs.org/blog/next-16) and multiple corroborating secondary sources (akoskm.com, ishu.dev, progosling.com) — MEDIUM-HIGH confidence (official Next.js blog + consistent secondary coverage); confirms webpack opt-out requires the explicit `--webpack` flag, not just a webpack config block, as of Next.js 16
-- [microsoft/typescript-go#1507](https://github.com/microsoft/typescript-go/issues/1507) — MEDIUM confidence (single GitHub issue, closed as "needs more info," but concrete measured numbers on `ubuntu-latest`); used to temper the "10x faster" marketing claim for tsgo specifically in shared/constrained CI runners
-- [`@typescript/native-preview` npm package](https://www.npmjs.com/package/@typescript/native-preview) and [`@typescript/native-preview-linux-x64`](https://www.npmjs.com/package/@typescript/native-preview-linux-x64?activeTab=dependencies) — HIGH confidence, official npm registry metadata; confirms the platform-specific-binary-via-`optionalDependencies` mechanism (same pattern as esbuild/swc) that makes `npm ci` on a Linux GitHub Actions runner correctly resolve the Linux-x64 native tsgo binary with no special CI configuration
-- [prisma/prisma#28869](https://github.com/prisma/prisma/issues/28869), [#28590](https://github.com/prisma/prisma/issues/28590), [#28708](https://github.com/prisma/prisma/issues/28708) — HIGH confidence, official GitHub issues on the `prisma` repo; confirms the `env()`-throws-even-for-`generate` behavior and that it was fixed in 7.2.0+ (this project is locked to `^7.8.0`, past the fix)
-- [Deploying database changes with Prisma Migrate — Prisma Docs](https://www.prisma.io/docs/orm/prisma-client/deployment/deploy-database-changes-with-prisma-migrate) and [Deploy to Vercel — Prisma Docs](https://www.prisma.io/docs/orm/prisma-client/deployment/serverless/deploy-to-vercel) — HIGH confidence, official Prisma documentation; source of the `migrate deploy`-as-a-deploy-step pattern and the `postinstall`/build-script Prisma Client generation pattern for custom `output` paths
-- [prisma/prisma discussion #11131](https://github.com/prisma/prisma/discussions/11131) and [#26422](https://github.com/prisma/prisma/discussions/26422) — MEDIUM confidence, community discussion on the official repo; corroborates "decouple migration from build where possible, gate by environment"
-- Husky/lint-staged 2026 sourcing (PkgPulse guide, Better Stack, dev.to threads) — MEDIUM confidence, multiple consistent secondary sources; used for the "typecheck at pre-push not pre-commit, lint-staged for staged-file linting only" pattern, which is also independently justified by this project's own verified tsgo-CI-performance finding above
-- Direct repository inspection (`package.json`, `next.config.ts`, `tsconfig.json`, `prisma/schema.prisma`, `prisma.config.ts`, `vitest.config.ts`, `docker-compose.yml`, `.env.example`, `README.md`) — HIGH confidence, ground truth for every project-specific claim in this document (Node 22+ requirement, `--webpack` flag, custom Prisma `output` path, live-DB-backed test suite, existing docker-compose credentials, no existing `.github/`/`.husky`/`CONTRIBUTING.md`)
+- Direct repository inspection (`src/components/sandbox/**`, `src/components/gallery/**`, `src/components/hero/**`, `app/page.tsx`, `app/s/[shareId]/page.tsx`, `components.json`, `package.json`) — HIGH confidence, ground truth for every current-state claim in this document (existing `useSandboxState()` choke point, existing chip-row/`ControlPanel` shape, existing Server/Client boundary at `GalleryContainer`, `radix-ui@^1.6.2` already installed, no `dialog.tsx` yet in `src/components/ui/`)
+- `.planning/PROJECT.md` — HIGH confidence, source of the v1.4 target-feature list, locked decisions (Guided Tour in scope, chip row removed, Gallery fully switches to load-in-place), and the project's own documented hit-testing-regression precedent (Phase 4/Phase 8) that directly informs the click-vs-drag Anti-Pattern above
+- React Server Components composition pattern ("Server Components as children of Client Components") — this is long-standing, stable Next.js App Router guidance (not a recent/uncertain API), consistent with how this codebase already composes `app/page.tsx` (a Server Component) around `<SandboxContainer/>`/`<GalleryContainer/>` today
 
 ---
-*Architecture research for: CI/CD & Deployment integration, COLREGS Navigator v1.3*
-*Researched: 2026-07-20*
+*Architecture research for: v1.4 Design Sync (Sandbox & Gallery) — COLREGS Navigator*
+*Researched: 2026-07-25*
