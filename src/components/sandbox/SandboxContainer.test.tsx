@@ -21,7 +21,7 @@ import {
   crossingResidualBasicCase,
   overtakingBothDirectionsCase,
 } from "../../domain/colregs/classify-encounter.fixtures.js";
-import type { Position } from "../../domain/vessel/vessel.js";
+import type { Position, Vessel } from "../../domain/vessel/vessel.js";
 import type { VesselLabel } from "../../domain/colregs/types.js";
 
 // Mock next/navigation's useRouter and the trpc client's
@@ -31,6 +31,15 @@ import type { VesselLabel } from "../../domain/colregs/types.js";
 const mockPush = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
+}));
+
+// Mocks the Gallery<->Sandbox bridge (SandboxBridgeProvider.tsx) the same
+// mutable-closure-variable way this file already mocks next/navigation and
+// the trpc client -- lets each test drive pendingScenario directly without
+// a real Provider ancestor or a TryOnSandboxButton click.
+let mockPendingScenario: { vesselA: Vessel; vesselB: Vessel; requestId: number } | null = null;
+vi.mock("./bridge/SandboxBridgeProvider.js", () => ({
+  useSandboxBridge: () => ({ pendingScenario: mockPendingScenario, requestLoad: vi.fn() }),
 }));
 
 const mockMutate = vi.fn();
@@ -92,6 +101,7 @@ beforeEach(() => {
   mockMutate.mockClear();
   mockIsPending = false;
   capturedOnSuccess = undefined;
+  mockPendingScenario = null;
 });
 
 // Rule 3 (blocking, see ControlPanel.test.tsx): vitest.config.ts sets
@@ -338,5 +348,48 @@ describe("SandboxContainer", () => {
     expect(
       screen.getByRole("button", { name: "Save and share this scenario" }),
     ).toBeDisabled();
+  });
+
+  // Gallery -> Sandbox bridge consumption (Phase 17, ROADMAP success
+  // criterion 1): SandboxContainer applies a pending scenario via
+  // loadScenario() as soon as useSandboxBridge()'s requestId changes, with
+  // no navigation and no submit step.
+  it("loads a bridged scenario via loadScenario when pendingScenario.requestId changes", () => {
+    const { rerender } = render(<SandboxContainer />);
+    expect(screen.getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
+
+    mockPendingScenario = {
+      vesselA: overtakingBothDirectionsCase.vesselA,
+      vesselB: overtakingBothDirectionsCase.vesselB,
+      requestId: 1,
+    };
+    rerender(<SandboxContainer />);
+
+    expect(screen.getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
+  });
+
+  // ROADMAP success criterion 4: a second bridged load replaces the first,
+  // not stale -- a component-level analog of the human-verified "second
+  // gallery card replaces the first" check Plan 17-04 confirms end-to-end.
+  it("replaces a bridged scenario with a second one when a new requestId arrives", () => {
+    const { rerender } = render(<SandboxContainer />);
+
+    mockPendingScenario = {
+      vesselA: overtakingBothDirectionsCase.vesselA,
+      vesselB: overtakingBothDirectionsCase.vesselB,
+      requestId: 1,
+    };
+    rerender(<SandboxContainer />);
+    expect(screen.getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
+
+    mockPendingScenario = {
+      vesselA: crossingResidualBasicCase.vesselA,
+      vesselB: crossingResidualBasicCase.vesselB,
+      requestId: 2,
+    };
+    rerender(<SandboxContainer />);
+
+    expect(screen.getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Overtaking" })).not.toBeInTheDocument();
   });
 });

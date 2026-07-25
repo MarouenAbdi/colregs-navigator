@@ -1,12 +1,20 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { GalleryCard } from "./GalleryCard.js";
 import {
   crossingResidualBasicCase,
   headOnGenuineCase,
 } from "../../../domain/colregs/classify-encounter.fixtures.js";
 import { classifyEncounter } from "../../../domain/colregs/classify-encounter.js";
+
+// GalleryCard now transitively renders TryOnSandboxButton, which calls the
+// real useSandboxBridge() hook -- mock it the same mutable-closure-variable
+// way SandboxContainer.test.tsx does, or every render below throws the
+// "must be used within SandboxBridgeProvider" guard error.
+vi.mock("../../sandbox/bridge/SandboxBridgeProvider.js", () => ({
+  useSandboxBridge: () => ({ pendingScenario: null, requestLoad: vi.fn() }),
+}));
 
 // Rule 3 (blocking): `vitest.config.ts` sets `globals: false` project-wide
 // (CLAUDE.md's "no magic" persona) -- matches every other `.test.tsx` file
@@ -63,7 +71,7 @@ describe("GalleryCard", () => {
     expect(screen.queryByText("B GIVES WAY")).not.toBeInTheDocument();
   });
 
-  it("wraps the whole card in a single Link to /s/{id} with the exact aria-label", () => {
+  it("has no Link/anchor anywhere on the card, with a reachable 'Try on Sandbox' button as its sole interactive affordance (D-04)", () => {
     const classification = classify(crossingResidualBasicCase.vesselA, crossingResidualBasicCase.vesselB);
     render(
       <GalleryCard
@@ -77,9 +85,9 @@ describe("GalleryCard", () => {
       />,
     );
 
-    const links = screen.getAllByRole("link");
-    expect(links.length).toBe(1);
-    expect(links[0]).toHaveAttribute("href", "/s/abc123");
-    expect(links[0]).toHaveAttribute("aria-label", "Load Classic crossing scenario into the sandbox");
+    expect(screen.queryAllByRole("link").length).toBe(0);
+    const button = screen.getByRole("button", { name: "Try Classic crossing on Sandbox" });
+    expect(button).toBeInTheDocument();
+    expect(button).not.toBeDisabled();
   });
 });

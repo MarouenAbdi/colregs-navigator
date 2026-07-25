@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Design Sync (Sandbox & Gallery)
-status: "Phase 16 shipped — PR #25"
-stopped_at: Phase 16 planned
-last_updated: "2026-07-25T12:23:35.871Z"
+status: "Phase 17 shipped — PR #26"
+stopped_at: Phase 17 UI-SPEC approved
+last_updated: "2026-07-25T14:53:24.211Z"
 last_activity: 2026-07-25
 progress:
   total_phases: 5
-  completed_phases: 0
-  total_plans: 2
-  completed_plans: 2
-  percent: 0
+  completed_phases: 1
+  total_plans: 6
+  completed_plans: 6
+  percent: 20
 ---
 
 # Project State
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-25)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 17 — gallery → sandbox bridge
+**Current focus:** Phase 18 — on chart vessel control overlay
 
 ## Current Position
 
-Phase: 17
+Phase: 18
 Plan: Not started
-Status: Phase 16 shipped — PR #25
+Status: Phase 17 shipped — PR #26
 Last activity: 2026-07-25
 
 Progress: [░░░░░░░░░░] 0%
@@ -36,7 +36,7 @@ Progress: [░░░░░░░░░░] 0%
 
 **Velocity:**
 
-- Total plans completed: 52 (19 v1.0 + 14 v1.1 + 18 v1.2 + 9 v1.3 [incl. 15-02, no separate SUMMARY.md — manual provisioning verified downstream], some plans span multiple waves — see milestone ROADMAPs for exact per-phase counts)
+- Total plans completed: 56 (19 v1.0 + 14 v1.1 + 18 v1.2 + 9 v1.3 [incl. 15-02, no separate SUMMARY.md — manual provisioning verified downstream], some plans span multiple waves — see milestone ROADMAPs for exact per-phase counts)
 - Average duration: - min
 - Total execution time: - hours
 
@@ -47,6 +47,7 @@ Progress: [░░░░░░░░░░] 0%
 | 14 (Pipeline & Hooks) | 4/4 | - | - |
 | 15 (Deploy & Verify) | 5/5 | - | - |
 | 16 | 2 | - | - |
+| 17 | 4 | - | - |
 
 **Recent Trend:**
 
@@ -100,9 +101,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-25T12:25:00.000Z
-Stopped at: Phase 16 planned
-Resume file: .planning/phases/16-sandbox-mutation-path-generalization/16-01-PLAN.md
+Last session: 2026-07-25T13:14:06.384Z
+Stopped at: Phase 17 UI-SPEC approved
+Resume file: .planning/phases/17-gallery-sandbox-bridge/17-UI-SPEC.md
 
 ## Operator Next Steps
 
