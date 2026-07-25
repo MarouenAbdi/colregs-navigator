@@ -157,7 +157,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16 �
 | 13. Comment Cleanup | v1.2 | 8/8 | Complete | 2026-07-20 |
 | 14. Pipeline & Hooks | v1.3 | 4/4 | Complete | 2026-07-20 |
 | 15. Deploy & Verify | v1.3 | 5/5 | Complete | 2026-07-22 |
-| 16. Sandbox Mutation-Path Generalization | v1.4 | 2/2 | Complete   | 2026-07-25 |
+| 16. Sandbox Mutation-Path Generalization | v1.4 | 2/2 | Complete    | 2026-07-25 |
 | 17. Gallery → Sandbox Bridge | v1.4 | 0/TBD | Not started | - |
 | 18. On-Chart Vessel Control Overlay | v1.4 | 0/TBD | Not started | - |
 | 19. Guided Tour | v1.4 | 0/TBD | Not started | - |
