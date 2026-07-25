@@ -1,18 +1,18 @@
 // @vitest-environment jsdom
 /**
  * SandboxContainer integration tests -- end-to-end wiring proof for
- * ChartPanel + ControlPanel + the 3 split reasoning cards (VerdictBanner/
- * InstrumentReadouts/ReasoningTrail) + the applyVesselUpdate choke point.
- * Exercises default-scenario mount (D-06), live update via ControlPanel
- * (CLAS-05), the degenerate coincident-position state (Pitfall 5), Rule
- * 13(d) hysteresis threading through previousEncounterTypeRef, and the
- * Reset scenario CTA.
+ * ChartPanel (header strip, chart surface, footer strip, and the
+ * click-to-open vessel overlay) + ReasoningTrail + the applyVesselUpdate
+ * choke point. Exercises default-scenario mount (D-06), live update via
+ * the on-chart vessel overlay's speed slider (CLAS-05), the degenerate
+ * coincident-position state (Pitfall 5), Rule 13(d) hysteresis threading
+ * through previousEncounterTypeRef, and the Reset scenario CTA.
  *
  * jsdom does not implement `ResizeObserver` or the Pointer Capture methods
  * ChartPanel/useHullDrag call directly -- same test-only polyfills as
  * ChartPanel.test.tsx / useHullDrag.test.ts.
  */
-import { act, cleanup, render, screen, within } from "@testing-library/react";
+import { act, cleanup, render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SandboxContainer } from "./SandboxContainer.js";
@@ -137,6 +137,20 @@ function dragHullTo(container: HTMLElement, vessel: VesselLabel, targetPosition:
   });
 }
 
+/**
+ * Opens a vessel's floating overlay via a single hull pointerdown -- D-04
+ * fires onSelect() in the same breath as setPointerCapture, so opening the
+ * overlay needs only the pointerdown, not a pointermove (unlike dragHullTo,
+ * which simulates an actual reposition).
+ */
+function openOverlay(container: HTMLElement, vessel: VesselLabel): void {
+  const hitRect = container.querySelector(`[data-testid="hull-hit-${vessel}"]`);
+  expect(hitRect).not.toBeNull();
+  act(() => {
+    hitRect?.dispatchEvent(new PointerEvent("pointerdown", { pointerId: 1, clientX: 0, clientY: 0, bubbles: true }));
+  });
+}
+
 /** Repeats `{ArrowRight}`/`{ArrowLeft}` on a focused Radix Slider thumb. */
 async function pressArrow(
   user: ReturnType<typeof userEvent.setup>,
@@ -154,23 +168,15 @@ function reasoningTrailCard(): HTMLElement {
   return card as HTMLElement;
 }
 
-// Plan 18-03 wires ChartPanel's own ChartHeaderStrip (encounter-title
-// heading + "Unable to classify"/rule-badge text) alongside the still-live
-// VerdictBanner card -- both render simultaneously until Plan 18-04 retires
-// VerdictBanner, so any query for this shared text/heading content must be
-// scoped to VerdictBanner's own DOM region or it ambiguously matches both.
-function verdictBanner(): HTMLElement {
-  const banner = document.querySelector('[data-slot="verdict-banner"]');
-  expect(banner).not.toBeNull();
-  return banner as HTMLElement;
-}
-
 describe("SandboxContainer", () => {
   it("loads with the default crossing scenario already classified, with no user interaction (D-06)", () => {
     render(<SandboxContainer />);
-    expect(within(verdictBanner()).getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
+    // Vessel A gives way in the default crossing scenario -- ChartFooterStrip
+    // renders its required-action text (D-03), replacing VerdictBanner's
+    // former combined one-line description.
     expect(
-      screen.getByText(/Vessel A gives way\. Give-way vessel takes early/),
+      screen.getByText("Alter course early & substantially — pass well clear astern."),
     ).toBeInTheDocument();
     // Closes out the "Chip-row removal... verify via a repo-wide usage
     // check" pitfall-checklist item at the component-test level -- the
@@ -178,22 +184,24 @@ describe("SandboxContainer", () => {
     expect(screen.queryByRole("button", { name: "Classic crossing" })).not.toBeInTheDocument();
   });
 
-  it("re-derives the classification live when a ControlPanel speed slider changes, with no submit step", async () => {
+  it("re-derives the classification live when the on-chart overlay's speed slider changes, with no submit step", async () => {
     const user = userEvent.setup();
-    render(<SandboxContainer />);
+    const { container } = render(<SandboxContainer />);
 
     const before = reasoningTrailCard().textContent;
 
+    openOverlay(container, "vesselA");
+
     // Default vesselA speed is 10kn -- 15 ArrowRight presses lands at 25kn,
     // matching the previous native-input test's "clear + type 25" target.
-    const vesselASlider = screen.getAllByRole("slider")[0] as HTMLElement;
+    const vesselASlider = screen.getByRole("slider") as HTMLElement;
     vesselASlider.focus();
     await pressArrow(user, "{ArrowRight}", 15);
 
     // Verdict stays "crossing"/"vesselA gives way" at this new speed, but
     // the Rule 7 TCPA/DCPA facts underneath change -- proving the trail
     // re-renders live from the new speed with no submit step.
-    expect(within(verdictBanner()).getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
     expect(reasoningTrailCard().textContent).not.toBe(before);
   });
 
@@ -205,7 +213,7 @@ describe("SandboxContainer", () => {
     // degenerate input.
     dragHullTo(container, "vesselA", { x: 5, y: 0 });
 
-    expect(within(verdictBanner()).getByText("Unable to classify")).toBeInTheDocument();
+    expect(screen.getByText("Unable to classify")).toBeInTheDocument();
     // The last-good trail entries (from the default scenario) stay
     // rendered underneath the degenerate note rather than going blank --
     // this "Rule 15" comes from ReasoningTrail's own entry.ruleId text, a
@@ -223,16 +231,20 @@ describe("SandboxContainer", () => {
     // encounter (bearing well abaft vesselA's beam) -- this sets
     // previousEncounterTypeRef.current to "overtaking" via a real
     // (non-sticky) Stage 3 classification.
-    const vesselASlider = screen.getAllByRole("slider")[0] as HTMLElement;
+    openOverlay(container, "vesselA");
+    const vesselASlider = screen.getByRole("slider") as HTMLElement;
     vesselASlider.focus();
     await pressArrow(user, "{ArrowLeft}", 10); // 10kn -> 0kn
 
-    const vesselBSlider = screen.getAllByRole("slider")[1] as HTMLElement;
+    // Pressing vesselB's hull while vesselA's overlay is open switches the
+    // overlay to vesselB (D-01), not closing it.
+    openOverlay(container, "vesselB");
+    const vesselBSlider = screen.getByRole("slider") as HTMLElement;
     vesselBSlider.focus();
     await pressArrow(user, "{ArrowRight}", 5); // 10kn -> 15kn
 
     dragHullTo(container, "vesselB", { x: 2, y: -8 });
-    expect(within(verdictBanner()).getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
 
     // Step 2: drag vesselB straight to (5,0) -- the exact position/heading/
     // speed combination of the already-proven overtakingHysteresisHoldsCase
@@ -242,7 +254,7 @@ describe("SandboxContainer", () => {
     // sticky Rule 13(d) path must keep the verdict "overtaking".
     dragHullTo(container, "vesselB", { x: 5, y: 0 });
 
-    expect(within(verdictBanner()).getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
   });
 
   it("restores the default scenario and clears degenerate state when Reset scenario is clicked", async () => {
@@ -250,12 +262,12 @@ describe("SandboxContainer", () => {
     const { container } = render(<SandboxContainer />);
 
     dragHullTo(container, "vesselA", { x: 5, y: 0 });
-    expect(within(verdictBanner()).getByText("Unable to classify")).toBeInTheDocument();
+    expect(screen.getByText("Unable to classify")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Reset scenario" }));
 
-    expect(within(verdictBanner()).getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
-    expect(within(verdictBanner()).queryByText("Unable to classify")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
+    expect(screen.queryByText("Unable to classify")).not.toBeInTheDocument();
   });
 
   // Seed-from-saved-scenario (SCEN-01, D-02, Assumption A3)
@@ -269,8 +281,8 @@ describe("SandboxContainer", () => {
       />,
     );
 
-    expect(within(verdictBanner()).getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
-    expect(within(verdictBanner()).queryByRole("heading", { name: "Crossing" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Crossing" })).not.toBeInTheDocument();
   });
 
   // handleReset now delegates its apply step to loadScenario (D-03), so
@@ -291,13 +303,13 @@ describe("SandboxContainer", () => {
       />,
     );
 
-    expect(within(verdictBanner()).getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
 
     // Drag vesselB onto vesselA's seeded position (0,0) -- a coincident-
     // position degenerate input -- to move off the overtaking verdict.
     dragHullTo(container, "vesselB", { x: 0, y: 0 });
-    expect(within(verdictBanner()).getByText("Unable to classify")).toBeInTheDocument();
-    expect(within(verdictBanner()).queryByRole("heading", { name: "Overtaking" })).not.toBeInTheDocument();
+    expect(screen.getByText("Unable to classify")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Overtaking" })).not.toBeInTheDocument();
 
     const resetButton = screen
       .getAllByRole("button")
@@ -307,8 +319,8 @@ describe("SandboxContainer", () => {
       resetButton?.click();
     });
 
-    expect(within(verdictBanner()).getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
-    expect(within(verdictBanner()).queryByText("Unable to classify")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
+    expect(screen.queryByText("Unable to classify")).not.toBeInTheDocument();
   });
 
   it("renders the banner label (and rationale, when provided) communicating a saved/shared scenario is loaded (D-02)", () => {
@@ -371,7 +383,7 @@ describe("SandboxContainer", () => {
   // no navigation and no submit step.
   it("loads a bridged scenario via loadScenario when pendingScenario.requestId changes", () => {
     const { rerender } = render(<SandboxContainer />);
-    expect(within(verdictBanner()).getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
 
     mockPendingScenario = {
       vesselA: overtakingBothDirectionsCase.vesselA,
@@ -380,7 +392,7 @@ describe("SandboxContainer", () => {
     };
     rerender(<SandboxContainer />);
 
-    expect(within(verdictBanner()).getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
   });
 
   // ROADMAP success criterion 4: a second bridged load replaces the first,
@@ -395,7 +407,7 @@ describe("SandboxContainer", () => {
       requestId: 1,
     };
     rerender(<SandboxContainer />);
-    expect(within(verdictBanner()).getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
 
     mockPendingScenario = {
       vesselA: crossingResidualBasicCase.vesselA,
@@ -404,7 +416,7 @@ describe("SandboxContainer", () => {
     };
     rerender(<SandboxContainer />);
 
-    expect(within(verdictBanner()).getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
-    expect(within(verdictBanner()).queryByRole("heading", { name: "Overtaking" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Overtaking" })).not.toBeInTheDocument();
   });
 });

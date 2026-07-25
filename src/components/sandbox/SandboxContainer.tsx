@@ -1,23 +1,20 @@
 "use client";
 
 /**
- * SandboxContainer -- the top-level state owner that wires ChartPanel,
- * ControlPanel, and the 3 split reasoning cards (VerdictBanner,
- * InstrumentReadouts, ReasoningTrail) together. Delegates all
- * vesselA/vesselB state, the Rule 13(d) hysteresis, and the
- * validate-then-classify choke point to useSandboxState() so state and
- * presentation stay separate concerns -- this file is now JSX composition
- * plus the reset/save CTAs only, ensuring the live classification update
- * behaves identically regardless of which input (drag, form field, or
- * scenario load) triggered it.
+ * SandboxContainer -- the top-level state owner that wires ChartPanel
+ * (header strip, chart surface, footer strip, and click-to-open vessel
+ * overlay) and ReasoningTrail together. Delegates all vesselA/vesselB
+ * state, the Rule 13(d) hysteresis, and the validate-then-classify choke
+ * point to useSandboxState() so state and presentation stay separate
+ * concerns -- this file is now JSX composition plus the reset/save CTAs
+ * only, ensuring the live classification update behaves identically
+ * regardless of which input (drag, overlay field, or scenario load)
+ * triggered it.
  */
 
 import { useEffect } from "react";
 import { RotateCcw, Link2 } from "lucide-react";
 import { ChartPanel } from "./chart/ChartPanel.js";
-import { ControlPanel } from "./control-panel/ControlPanel.js";
-import { VerdictBanner } from "./reasoning/VerdictBanner.js";
-import { InstrumentReadouts } from "./instruments/InstrumentReadouts.js";
 import { ReasoningTrail } from "./reasoning/ReasoningTrail.js";
 import { useSandboxState } from "./hooks/useSandboxState.js";
 import { useSandboxBridge } from "./bridge/SandboxBridgeProvider.js";
@@ -57,8 +54,8 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
             <p className="
               max-w-150 text-base font-semibold text-muted-foreground
             ">
-              Drag a hull to reposition it, grab the bow handle to change heading, and adjust
-              speed &amp; type below. Classification recomputes live.
+              Drag a hull to reposition it, grab the bow handle to change heading, and click a
+              vessel to adjust its speed &amp; type. Classification recomputes live.
             </p>
           </div>
           <div className="flex gap-2">
@@ -90,15 +87,7 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
         ) : null}
       </header>
 
-      <VerdictBanner
-        classification={sandboxState.lastGoodClassification}
-        isDegenerate={sandboxState.isDegenerate}
-      />
-
-      <div className="
-        mt-4 grid grid-cols-1 gap-4
-        min-[900px]:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]
-      ">
+      <div className="mt-4">
         <ChartPanel
           vesselA={sandboxState.vesselA}
           vesselB={sandboxState.vesselB}
@@ -109,20 +98,6 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
           onVesselSpeedChange={sandboxState.onVesselSpeedChange}
           onVesselTypeChange={sandboxState.onVesselTypeChange}
         />
-        <div className="flex flex-col gap-4">
-          <InstrumentReadouts
-            vesselA={sandboxState.vesselA}
-            vesselB={sandboxState.vesselB}
-            classification={sandboxState.lastGoodClassification}
-          />
-          <ControlPanel
-            vesselA={sandboxState.vesselA}
-            vesselB={sandboxState.vesselB}
-            classification={sandboxState.lastGoodClassification}
-            onVesselSpeedChange={sandboxState.onVesselSpeedChange}
-            onVesselTypeChange={sandboxState.onVesselTypeChange}
-          />
-        </div>
       </div>
 
       <div className="mt-4">
