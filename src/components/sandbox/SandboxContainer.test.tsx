@@ -12,7 +12,7 @@
  * ChartPanel/useHullDrag call directly -- same test-only polyfills as
  * ChartPanel.test.tsx / useHullDrag.test.ts.
  */
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SandboxContainer } from "./SandboxContainer.js";
@@ -154,10 +154,21 @@ function reasoningTrailCard(): HTMLElement {
   return card as HTMLElement;
 }
 
+// Plan 18-03 wires ChartPanel's own ChartHeaderStrip (encounter-title
+// heading + "Unable to classify"/rule-badge text) alongside the still-live
+// VerdictBanner card -- both render simultaneously until Plan 18-04 retires
+// VerdictBanner, so any query for this shared text/heading content must be
+// scoped to VerdictBanner's own DOM region or it ambiguously matches both.
+function verdictBanner(): HTMLElement {
+  const banner = document.querySelector('[data-slot="verdict-banner"]');
+  expect(banner).not.toBeNull();
+  return banner as HTMLElement;
+}
+
 describe("SandboxContainer", () => {
   it("loads with the default crossing scenario already classified, with no user interaction (D-06)", () => {
     render(<SandboxContainer />);
-    expect(screen.getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
+    expect(within(verdictBanner()).getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
     expect(
       screen.getByText(/Vessel A gives way\. Give-way vessel takes early/),
     ).toBeInTheDocument();
@@ -182,7 +193,7 @@ describe("SandboxContainer", () => {
     // Verdict stays "crossing"/"vesselA gives way" at this new speed, but
     // the Rule 7 TCPA/DCPA facts underneath change -- proving the trail
     // re-renders live from the new speed with no submit step.
-    expect(screen.getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
+    expect(within(verdictBanner()).getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
     expect(reasoningTrailCard().textContent).not.toBe(before);
   });
 
@@ -194,9 +205,13 @@ describe("SandboxContainer", () => {
     // degenerate input.
     dragHullTo(container, "vesselA", { x: 5, y: 0 });
 
-    expect(screen.getByText("Unable to classify")).toBeInTheDocument();
+    expect(within(verdictBanner()).getByText("Unable to classify")).toBeInTheDocument();
     // The last-good trail entries (from the default scenario) stay
-    // rendered underneath the degenerate note rather than going blank.
+    // rendered underneath the degenerate note rather than going blank --
+    // this "Rule 15" comes from ReasoningTrail's own entry.ruleId text, a
+    // distinct source from VerdictBanner's/ChartHeaderStrip's rule badge
+    // (both of which hide their own badge while isDegenerate), so this one
+    // assertion is correctly left unscoped.
     expect(screen.getByText("Rule 15")).toBeInTheDocument();
   });
 
@@ -217,7 +232,7 @@ describe("SandboxContainer", () => {
     await pressArrow(user, "{ArrowRight}", 5); // 10kn -> 15kn
 
     dragHullTo(container, "vesselB", { x: 2, y: -8 });
-    expect(screen.getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
+    expect(within(verdictBanner()).getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
 
     // Step 2: drag vesselB straight to (5,0) -- the exact position/heading/
     // speed combination of the already-proven overtakingHysteresisHoldsCase
@@ -227,7 +242,7 @@ describe("SandboxContainer", () => {
     // sticky Rule 13(d) path must keep the verdict "overtaking".
     dragHullTo(container, "vesselB", { x: 5, y: 0 });
 
-    expect(screen.getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
+    expect(within(verdictBanner()).getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
   });
 
   it("restores the default scenario and clears degenerate state when Reset scenario is clicked", async () => {
@@ -235,12 +250,12 @@ describe("SandboxContainer", () => {
     const { container } = render(<SandboxContainer />);
 
     dragHullTo(container, "vesselA", { x: 5, y: 0 });
-    expect(screen.getByText("Unable to classify")).toBeInTheDocument();
+    expect(within(verdictBanner()).getByText("Unable to classify")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Reset scenario" }));
 
-    expect(screen.getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
-    expect(screen.queryByText("Unable to classify")).not.toBeInTheDocument();
+    expect(within(verdictBanner()).getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
+    expect(within(verdictBanner()).queryByText("Unable to classify")).not.toBeInTheDocument();
   });
 
   // Seed-from-saved-scenario (SCEN-01, D-02, Assumption A3)
@@ -254,8 +269,8 @@ describe("SandboxContainer", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "Crossing" })).not.toBeInTheDocument();
+    expect(within(verdictBanner()).getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
+    expect(within(verdictBanner()).queryByRole("heading", { name: "Crossing" })).not.toBeInTheDocument();
   });
 
   // handleReset now delegates its apply step to loadScenario (D-03), so
@@ -276,13 +291,13 @@ describe("SandboxContainer", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
+    expect(within(verdictBanner()).getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
 
     // Drag vesselB onto vesselA's seeded position (0,0) -- a coincident-
     // position degenerate input -- to move off the overtaking verdict.
     dragHullTo(container, "vesselB", { x: 0, y: 0 });
-    expect(screen.getByText("Unable to classify")).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "Overtaking" })).not.toBeInTheDocument();
+    expect(within(verdictBanner()).getByText("Unable to classify")).toBeInTheDocument();
+    expect(within(verdictBanner()).queryByRole("heading", { name: "Overtaking" })).not.toBeInTheDocument();
 
     const resetButton = screen
       .getAllByRole("button")
@@ -292,8 +307,8 @@ describe("SandboxContainer", () => {
       resetButton?.click();
     });
 
-    expect(screen.getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
-    expect(screen.queryByText("Unable to classify")).not.toBeInTheDocument();
+    expect(within(verdictBanner()).getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
+    expect(within(verdictBanner()).queryByText("Unable to classify")).not.toBeInTheDocument();
   });
 
   it("renders the banner label (and rationale, when provided) communicating a saved/shared scenario is loaded (D-02)", () => {
@@ -356,7 +371,7 @@ describe("SandboxContainer", () => {
   // no navigation and no submit step.
   it("loads a bridged scenario via loadScenario when pendingScenario.requestId changes", () => {
     const { rerender } = render(<SandboxContainer />);
-    expect(screen.getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
+    expect(within(verdictBanner()).getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
 
     mockPendingScenario = {
       vesselA: overtakingBothDirectionsCase.vesselA,
@@ -365,7 +380,7 @@ describe("SandboxContainer", () => {
     };
     rerender(<SandboxContainer />);
 
-    expect(screen.getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
+    expect(within(verdictBanner()).getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
   });
 
   // ROADMAP success criterion 4: a second bridged load replaces the first,
@@ -380,7 +395,7 @@ describe("SandboxContainer", () => {
       requestId: 1,
     };
     rerender(<SandboxContainer />);
-    expect(screen.getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
+    expect(within(verdictBanner()).getByRole("heading", { name: "Overtaking" })).toBeInTheDocument();
 
     mockPendingScenario = {
       vesselA: crossingResidualBasicCase.vesselA,
@@ -389,7 +404,7 @@ describe("SandboxContainer", () => {
     };
     rerender(<SandboxContainer />);
 
-    expect(screen.getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "Overtaking" })).not.toBeInTheDocument();
+    expect(within(verdictBanner()).getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
+    expect(within(verdictBanner()).queryByRole("heading", { name: "Overtaking" })).not.toBeInTheDocument();
   });
 });

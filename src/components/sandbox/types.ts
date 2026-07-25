@@ -19,8 +19,11 @@ export interface ChartPanelProps {
   vesselA: Vessel;
   vesselB: Vessel;
   classification: ClassificationResult; // always the LAST-GOOD result, never the raw Result<T> wrapper
+  isDegenerate: boolean;
   onVesselPositionChange: VesselUpdateHandlers["onVesselPositionChange"];
   onVesselHeadingChange: VesselUpdateHandlers["onVesselHeadingChange"];
+  onVesselSpeedChange: VesselUpdateHandlers["onVesselSpeedChange"];
+  onVesselTypeChange: VesselUpdateHandlers["onVesselTypeChange"];
 }
 
 export interface ControlPanelProps {

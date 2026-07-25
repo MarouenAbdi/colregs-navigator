@@ -25,12 +25,18 @@ export function useRotateHandleDrag(
   onVesselHeadingChange: ChartPanelProps["onVesselHeadingChange"],
   containerSize: ContainerSize | null,
   viewBox: ChartViewBox,
+  onSelect: (vessel: VesselLabel) => void,
 ): DragHandlers {
   const onPointerDown = (event: PointerEvent<SVGElement>) => {
     // Pitfall 1: stop the gesture from also bubbling to the hull hit-rect's
-    // own onPointerDown -- the rotate handle sits near/over the hull.
+    // own onPointerDown -- the rotate handle sits near/over the hull. This
+    // also now covers the same svg-level "close on empty chart click"
+    // bubbling concern useHullDrag.ts's own stopPropagation() guards
+    // against, since onSelect() below must not be immediately clobbered by
+    // ChartPanel's empty-chart-space close handler in the same dispatch.
     event.stopPropagation();
     event.currentTarget.setPointerCapture(event.pointerId);
+    onSelect(vessel);
   };
 
   const onPointerMove = (event: PointerEvent<SVGElement>) => {
