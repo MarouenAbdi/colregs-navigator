@@ -9,9 +9,9 @@ Requirements for this milestone. Each maps to roadmap phases. Zero change to `cl
 
 ### Sandbox
 
-- [ ] **SBOX-06**: Chart header strip merges the rule badge, encounter title, and risk badge into one command strip atop the chart (replaces the separate `VerdictBanner` card)
-- [ ] **SBOX-07**: Chart footer strip merges the LIVE/RANGE/BEARING/CPA/TCPA readouts and each vessel's required-action text into one strip below the chart (replaces the separate `InstrumentReadouts` card)
-- [ ] **SBOX-08**: User can click a vessel on the chart to open an on-chart floating control card (type, speed, heading) for that vessel, replacing the always-visible side `ControlPanel`
+- [x] **SBOX-06**: Chart header strip merges the rule badge, encounter title, and risk badge into one command strip atop the chart (replaces the separate `VerdictBanner` card)
+- [x] **SBOX-07**: Chart footer strip merges the LIVE/RANGE/BEARING/CPA/TCPA readouts and each vessel's required-action text into one strip below the chart (replaces the separate `InstrumentReadouts` card)
+- [x] **SBOX-08**: User can click a vessel on the chart to open an on-chart floating control card (type, speed, heading) for that vessel, replacing the always-visible side `ControlPanel`
 - [ ] **SBOX-09**: Reasoning trail renders as a horizontal sequence of connected step cards ("NAV DECISION CHAIN"), replacing the vertical list
 - [x] **SBOX-10**: The inline 6-chip preset row is removed from the Sandbox; scenario loading happens only via the Gallery's "Try on Sandbox" action
 
@@ -53,9 +53,9 @@ Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SBOX-06 | Phase 18 | Pending |
-| SBOX-07 | Phase 18 | Pending |
-| SBOX-08 | Phase 18 | Pending |
+| SBOX-06 | Phase 18 | Complete |
+| SBOX-07 | Phase 18 | Complete |
+| SBOX-08 | Phase 18 | Complete |
 | SBOX-09 | Phase 20 | Pending |
 | SBOX-10 | Phase 16 | Complete |
 | TOUR-01 | Phase 19 | Pending |
