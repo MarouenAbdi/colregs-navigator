@@ -4,8 +4,8 @@ milestone: v1.4
 milestone_name: Design Sync (Sandbox & Gallery)
 status: executing
 stopped_at: Phase 18 context gathered
-last_updated: "2026-07-25T16:41:19.310Z"
-last_activity: 2026-07-25 -- Phase 18 planning complete
+last_updated: "2026-07-25T16:51:17.341Z"
+last_activity: 2026-07-25 -- Phase 18 execution started
 progress:
   total_phases: 5
   completed_phases: 2
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-25)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 18 — on chart vessel control overlay
+**Current focus:** Phase 18 — on-chart-vessel-control-overlay
 
 ## Current Position
 
-Phase: 18
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-07-25 -- Phase 18 planning complete
+Phase: 18 (on-chart-vessel-control-overlay) — EXECUTING
+Plan: 1 of 5
+Status: Executing Phase 18
+Last activity: 2026-07-25 -- Phase 18 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
