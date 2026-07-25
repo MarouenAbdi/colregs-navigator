@@ -5,6 +5,7 @@ import { rowToVessels } from "../../../src/server/application/scenario-service.j
 import { buildScenarioBanner } from "../../../src/lib/trpc/banner.js";
 import { SandboxContainer } from "../../../src/components/sandbox/SandboxContainer.js";
 import { CopyLinkButton } from "../../../src/components/sandbox/control-panel/CopyLinkButton.js";
+import { SandboxBridgeProvider } from "../../../src/components/sandbox/bridge/SandboxBridgeProvider.js";
 
 export default async function SharedScenarioPage({
   params,
@@ -27,7 +28,7 @@ export default async function SharedScenarioPage({
   const banner = buildScenarioBanner(scenario);
 
   return (
-    <>
+    <SandboxBridgeProvider>
       <SandboxContainer key={shareId} initialScenario={initialScenario} banner={banner} />
       <div className="
         mx-auto max-w-300 px-5 pb-8
@@ -35,6 +36,6 @@ export default async function SharedScenarioPage({
       ">
         <CopyLinkButton />
       </div>
-    </>
+    </SandboxBridgeProvider>
   );
 }
