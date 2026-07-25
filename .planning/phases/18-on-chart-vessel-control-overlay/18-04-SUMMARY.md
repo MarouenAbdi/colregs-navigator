@@ -151,3 +151,14 @@ None - no external service configuration required.
 ---
 *Phase: 18-on-chart-vessel-control-overlay*
 *Completed: 2026-07-25*
+
+## Self-Check: PASSED
+
+- FOUND: `.planning/phases/18-on-chart-vessel-control-overlay/18-04-SUMMARY.md`
+- MISSING (correct, deleted per Task 2): `src/components/sandbox/control-panel/ControlPanel.tsx`
+- MISSING (correct, deleted per Task 2): `src/components/sandbox/reasoning/VerdictBanner.tsx`
+- MISSING (correct, deleted per Task 2): `src/components/sandbox/instruments/InstrumentReadouts.tsx`
+- FOUND: commit `ca6222d` (Task 1)
+- FOUND: commit `e09b071` (Task 2)
+- FOUND: commit `6b67faa` (Task 3)
+- FOUND: commit `90281c9` (SUMMARY.md)
