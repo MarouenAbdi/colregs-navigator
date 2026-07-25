@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Design Sync (Sandbox & Gallery)
 status: "Phase 16 shipped — PR #25"
-stopped_at: Phase 17 context gathered
-last_updated: "2026-07-25T13:03:26.618Z"
+stopped_at: Phase 17 UI-SPEC approved
+last_updated: "2026-07-25T13:14:06.393Z"
 last_activity: 2026-07-25
 progress:
   total_phases: 5
@@ -100,9 +100,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-25T13:03:26.609Z
-Stopped at: Phase 17 context gathered
-Resume file: .planning/phases/17-gallery-sandbox-bridge/17-CONTEXT.md
+Last session: 2026-07-25T13:14:06.384Z
+Stopped at: Phase 17 UI-SPEC approved
+Resume file: .planning/phases/17-gallery-sandbox-bridge/17-UI-SPEC.md
 
 ## Operator Next Steps
 
