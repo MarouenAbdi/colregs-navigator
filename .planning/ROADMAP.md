@@ -168,7 +168,7 @@ Plans:
 
 **Wave 1**
 
-- [ ] 19-01-PLAN.md — Dialog primitive (dialog.tsx), verbatim TOUR_STEPS data module, and net-new radar-sweep-dot CSS
+- [x] 19-01-PLAN.md — Dialog primitive (dialog.tsx), verbatim TOUR_STEPS data module, and net-new radar-sweep-dot CSS
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -222,6 +222,6 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16 �
 | 16. Sandbox Mutation-Path Generalization | v1.4 | 2/2 | Complete    | 2026-07-25 |
 | 17. Gallery → Sandbox Bridge | v1.4 | 4/4 | Complete    | 2026-07-25 |
 | 18. On-Chart Vessel Control Overlay | v1.4 | 5/5 | Complete    | 2026-07-25 |
-| 19. Guided Tour | v1.4 | 0/4 | Not started | - |
+| 19. Guided Tour | v1.4 | 1/4 | In Progress|  |
 | 20. Reasoning-Trail & Hero Visual Sync | v1.4 | 0/TBD | Not started | - |
 </content>
