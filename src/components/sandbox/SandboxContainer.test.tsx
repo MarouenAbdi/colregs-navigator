@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
 /**
  * SandboxContainer integration tests -- end-to-end wiring proof for
- * ChartPanel + ControlPanel + the 3 split reasoning cards (VerdictBanner/
- * InstrumentReadouts/ReasoningTrail) + the applyVesselUpdate choke point.
- * Exercises default-scenario mount (D-06), live update via ControlPanel
- * (CLAS-05), the degenerate coincident-position state (Pitfall 5), Rule
- * 13(d) hysteresis threading through previousEncounterTypeRef, and the
- * Reset scenario CTA.
+ * ChartPanel (header strip, chart surface, footer strip, and the
+ * click-to-open vessel overlay) + ReasoningTrail + the applyVesselUpdate
+ * choke point. Exercises default-scenario mount (D-06), live update via
+ * the on-chart vessel overlay's speed slider (CLAS-05), the degenerate
+ * coincident-position state (Pitfall 5), Rule 13(d) hysteresis threading
+ * through previousEncounterTypeRef, and the Reset scenario CTA.
  *
  * jsdom does not implement `ResizeObserver` or the Pointer Capture methods
  * ChartPanel/useHullDrag call directly -- same test-only polyfills as
@@ -137,6 +137,20 @@ function dragHullTo(container: HTMLElement, vessel: VesselLabel, targetPosition:
   });
 }
 
+/**
+ * Opens a vessel's floating overlay via a single hull pointerdown -- D-04
+ * fires onSelect() in the same breath as setPointerCapture, so opening the
+ * overlay needs only the pointerdown, not a pointermove (unlike dragHullTo,
+ * which simulates an actual reposition).
+ */
+function openOverlay(container: HTMLElement, vessel: VesselLabel): void {
+  const hitRect = container.querySelector(`[data-testid="hull-hit-${vessel}"]`);
+  expect(hitRect).not.toBeNull();
+  act(() => {
+    hitRect?.dispatchEvent(new PointerEvent("pointerdown", { pointerId: 1, clientX: 0, clientY: 0, bubbles: true }));
+  });
+}
+
 /** Repeats `{ArrowRight}`/`{ArrowLeft}` on a focused Radix Slider thumb. */
 async function pressArrow(
   user: ReturnType<typeof userEvent.setup>,
@@ -158,8 +172,11 @@ describe("SandboxContainer", () => {
   it("loads with the default crossing scenario already classified, with no user interaction (D-06)", () => {
     render(<SandboxContainer />);
     expect(screen.getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
+    // Vessel A gives way in the default crossing scenario -- ChartFooterStrip
+    // renders its required-action text (D-03), replacing VerdictBanner's
+    // former combined one-line description.
     expect(
-      screen.getByText(/Vessel A gives way\. Give-way vessel takes early/),
+      screen.getByText("Alter course early & substantially — pass well clear astern."),
     ).toBeInTheDocument();
     // Closes out the "Chip-row removal... verify via a repo-wide usage
     // check" pitfall-checklist item at the component-test level -- the
@@ -167,15 +184,17 @@ describe("SandboxContainer", () => {
     expect(screen.queryByRole("button", { name: "Classic crossing" })).not.toBeInTheDocument();
   });
 
-  it("re-derives the classification live when a ControlPanel speed slider changes, with no submit step", async () => {
+  it("re-derives the classification live when the on-chart overlay's speed slider changes, with no submit step", async () => {
     const user = userEvent.setup();
-    render(<SandboxContainer />);
+    const { container } = render(<SandboxContainer />);
 
     const before = reasoningTrailCard().textContent;
 
+    openOverlay(container, "vesselA");
+
     // Default vesselA speed is 10kn -- 15 ArrowRight presses lands at 25kn,
     // matching the previous native-input test's "clear + type 25" target.
-    const vesselASlider = screen.getAllByRole("slider")[0] as HTMLElement;
+    const vesselASlider = screen.getByRole("slider") as HTMLElement;
     vesselASlider.focus();
     await pressArrow(user, "{ArrowRight}", 15);
 
@@ -196,7 +215,11 @@ describe("SandboxContainer", () => {
 
     expect(screen.getByText("Unable to classify")).toBeInTheDocument();
     // The last-good trail entries (from the default scenario) stay
-    // rendered underneath the degenerate note rather than going blank.
+    // rendered underneath the degenerate note rather than going blank --
+    // this "Rule 15" comes from ReasoningTrail's own entry.ruleId text, a
+    // distinct source from VerdictBanner's/ChartHeaderStrip's rule badge
+    // (both of which hide their own badge while isDegenerate), so this one
+    // assertion is correctly left unscoped.
     expect(screen.getByText("Rule 15")).toBeInTheDocument();
   });
 
@@ -208,11 +231,15 @@ describe("SandboxContainer", () => {
     // encounter (bearing well abaft vesselA's beam) -- this sets
     // previousEncounterTypeRef.current to "overtaking" via a real
     // (non-sticky) Stage 3 classification.
-    const vesselASlider = screen.getAllByRole("slider")[0] as HTMLElement;
+    openOverlay(container, "vesselA");
+    const vesselASlider = screen.getByRole("slider") as HTMLElement;
     vesselASlider.focus();
     await pressArrow(user, "{ArrowLeft}", 10); // 10kn -> 0kn
 
-    const vesselBSlider = screen.getAllByRole("slider")[1] as HTMLElement;
+    // Pressing vesselB's hull while vesselA's overlay is open switches the
+    // overlay to vesselB (D-01), not closing it.
+    openOverlay(container, "vesselB");
+    const vesselBSlider = screen.getByRole("slider") as HTMLElement;
     vesselBSlider.focus();
     await pressArrow(user, "{ArrowRight}", 5); // 10kn -> 15kn
 

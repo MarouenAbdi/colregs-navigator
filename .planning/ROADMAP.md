@@ -57,7 +57,7 @@ See `.planning/milestones/v1.3-ROADMAP.md` for full phase details (goals, succes
 
 - [x] **Phase 16: Sandbox Mutation-Path Generalization** - Generalize `handleChipSelect` into a reusable `loadScenario()` entry point and remove the 6-chip preset row entirely (completed 2026-07-25)
 - [x] **Phase 17: Gallery → Sandbox Bridge** - Gallery's "Try on Sandbox" loads a scenario directly into the homepage Sandbox with no page navigation (completed 2026-07-25)
-- [ ] **Phase 18: On-Chart Vessel Control Overlay** - Replace the side ControlPanel with click-to-open floating vessel overlays and merge the chart header/footer strips
+- [x] **Phase 18: On-Chart Vessel Control Overlay** - Replace the side ControlPanel with click-to-open floating vessel overlays and merge the chart header/footer strips (completed 2026-07-25)
 - [ ] **Phase 19: Guided Tour** - A 6-step "How to read this" modal walkthrough with full keyboard/focus handling
 - [ ] **Phase 20: Reasoning-Trail & Hero Visual Sync** - Horizontal "NAV DECISION CHAIN" trail layout and Hero preview card visual sync
 
@@ -123,12 +123,30 @@ Plans:
   3. User can click a vessel on the chart to open a floating control card (type, speed, heading) for that vessel; clicking the other vessel moves the overlay to it, and re-clicking the same vessel closes it. The side `ControlPanel` is fully removed.
   4. Human-verified: with the vessel-control overlay open, dragging and rotating either vessel still works correctly with no dead zones — this is the codebase's 3rd occurrence of the painted-element-swallows-pointer-event regression class (Phase 4, Phase 8 precedent), and must be explicitly re-verified, not assumed.
 
-**Plans**: TBD
+**Plans**: 5 plans
 **UI hint**: yes
 
 Plans:
 
-- [ ] 18-01: TBD
+**Wave 1**
+
+- [x] 18-01-PLAN.md — Interface contracts (ChartHeaderStripProps/ChartFooterStripProps/VesselOverlayCardProps) + pure derivation utilities (chart-header-risk.ts D-02, footer-action-copy.ts D-03, vessel-overlay-position.ts)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [x] 18-02-PLAN.md — New components: ChartHeaderStrip, ChartFooterStrip, VesselOverlayCard (depends on 18-01)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [x] 18-03-PLAN.md — Hook onSelect wiring (D-04) + ChartPanel.tsx selection-state/composition wiring + regression tests for D-01's close-paths and Pitfall 1's overlap case (depends on 18-02)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [x] 18-04-PLAN.md — SandboxContainer cleanup + deletion of VerdictBanner/InstrumentReadouts/ControlPanel/status-pill.ts (depends on 18-03)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [x] 18-05-PLAN.md — Human-verify all 4 Roadmap success criteria, including the critical hit-testing regression re-check (depends on 18-04)
 
 ### Phase 19: Guided Tour
 
@@ -189,7 +207,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16 �
 | 15. Deploy & Verify | v1.3 | 5/5 | Complete | 2026-07-22 |
 | 16. Sandbox Mutation-Path Generalization | v1.4 | 2/2 | Complete    | 2026-07-25 |
 | 17. Gallery → Sandbox Bridge | v1.4 | 4/4 | Complete    | 2026-07-25 |
-| 18. On-Chart Vessel Control Overlay | v1.4 | 0/TBD | Not started | - |
+| 18. On-Chart Vessel Control Overlay | v1.4 | 5/5 | Complete    | 2026-07-25 |
 | 19. Guided Tour | v1.4 | 0/TBD | Not started | - |
 | 20. Reasoning-Trail & Hero Visual Sync | v1.4 | 0/TBD | Not started | - |
 </content>

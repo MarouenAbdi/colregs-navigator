@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Design Sync (Sandbox & Gallery)
-status: "Phase 17 shipped — PR #26"
-stopped_at: Phase 17 UI-SPEC approved
-last_updated: "2026-07-25T14:53:24.211Z"
+status: "Phase 18 shipped — PR #27"
+stopped_at: Phase 18 context gathered
+last_updated: "2026-07-25T18:08:17.848Z"
 last_activity: 2026-07-25
 progress:
   total_phases: 5
-  completed_phases: 1
-  total_plans: 6
-  completed_plans: 6
-  percent: 20
+  completed_phases: 2
+  total_plans: 11
+  completed_plans: 11
+  percent: 40
 ---
 
 # Project State
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-25)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 18 — on chart vessel control overlay
+**Current focus:** Phase 19 — guided tour
 
 ## Current Position
 
-Phase: 18
+Phase: 19
 Plan: Not started
-Status: Phase 17 shipped — PR #26
+Status: Phase 18 shipped — PR #27
 Last activity: 2026-07-25
 
 Progress: [░░░░░░░░░░] 0%
@@ -36,7 +36,7 @@ Progress: [░░░░░░░░░░] 0%
 
 **Velocity:**
 
-- Total plans completed: 56 (19 v1.0 + 14 v1.1 + 18 v1.2 + 9 v1.3 [incl. 15-02, no separate SUMMARY.md — manual provisioning verified downstream], some plans span multiple waves — see milestone ROADMAPs for exact per-phase counts)
+- Total plans completed: 61 (19 v1.0 + 14 v1.1 + 18 v1.2 + 9 v1.3 [incl. 15-02, no separate SUMMARY.md — manual provisioning verified downstream], some plans span multiple waves — see milestone ROADMAPs for exact per-phase counts)
 - Average duration: - min
 - Total execution time: - hours
 
@@ -48,6 +48,7 @@ Progress: [░░░░░░░░░░] 0%
 | 15 (Deploy & Verify) | 5/5 | - | - |
 | 16 | 2 | - | - |
 | 17 | 4 | - | - |
+| 18 | 5 | - | - |
 
 **Recent Trend:**
 
@@ -101,9 +102,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-25T13:14:06.384Z
-Stopped at: Phase 17 UI-SPEC approved
-Resume file: .planning/phases/17-gallery-sandbox-bridge/17-UI-SPEC.md
+Last session: 2026-07-25T15:52:05.448Z
+Stopped at: Phase 18 context gathered
+Resume file: .planning/phases/18-on-chart-vessel-control-overlay/18-CONTEXT.md
 
 ## Operator Next Steps
 
