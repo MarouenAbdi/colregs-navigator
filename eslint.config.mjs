@@ -42,6 +42,15 @@ const eslintConfig = defineConfig([
         entryPoint: "app/globals.css",
       },
     },
+    rules: {
+      // `radar-sweep-dot` is a real, plain CSS class defined directly in
+      // app/globals.css (Phase 19 Guided Tour accent, not a Tailwind
+      // utility) -- the plugin's Tailwind-v4-compiler-backed candidate
+      // check can't generate CSS for a non-utility class name, so it
+      // otherwise false-flags this as unknown every time it's referenced
+      // from a className.
+      "better-tailwindcss/no-unknown-classes": ["error", { ignore: ["^radar-sweep-dot$"] }],
+    },
   },
   {
     // Vitest-specific correctness rules (expect-expect, no-disabled-tests,
