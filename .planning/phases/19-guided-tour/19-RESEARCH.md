@@ -338,17 +338,19 @@ describe("Guided Tour dismissal", () => {
 
 **If this table is empty:** N/A — see entries above; none are HIGH risk.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does `npx shadcn add dialog` succeed inside the execution/CI sandbox (network access to the shadcn registry)?**
    - What we know: the project's `components.json` and existing `ui/` files confirm the CLI has been used successfully before in this repo's history.
    - What's unclear: whether the specific sandboxed environment running Phase 19's implementation has outbound network access to `ui.shadcn.com`'s registry at execution time.
    - Recommendation: attempt the CLI first; if it fails (network-restricted sandbox), hand-author `dialog.tsx` directly from Pattern 2's example above, which is functionally and stylistically equivalent to what the CLI would produce for this project's `radix-nova` style.
+   - Resolved in 19-01-PLAN.md Task 1: attempt `npx shadcn add dialog`, fall back to hand-authoring from this doc's example.
 
 2. **Exact Tailwind/token translation of the design's `600px` max-width / `820px` max-height / border/shadow treatment.**
    - What we know: CONTEXT.md explicitly leaves "precise Tailwind/shadcn translation... port the *behavior and visual result*... not the design's raw hex/px literals verbatim" as Claude's discretion, same porting convention Phase 18 used.
    - What's unclear: the exact utility class values (e.g., `max-w-150` ≈ 600px at this project's `1rem=4px`-style spacing scale used elsewhere — verify against this repo's actual Tailwind config scale rather than assuming a 1:1 rem mapping).
    - Recommendation: implementer should check `app/globals.css`'s `--spacing`/`--radius` custom properties (same pattern `card.tsx` uses via `--card-spacing`) before hardcoding a `max-w-[600px]` arbitrary value, to stay consistent with the token-first convention already established.
+   - Resolved: `max-w-150` = 600px on this project's 0.25rem Tailwind v4 spacing scale.
 
 ## Environment Availability
 
