@@ -198,3 +198,26 @@
     repeating-linear-gradient(0deg, transparent 0 47px, rgba(63, 63, 70, var(--grid-opacity, 0.18)) 47px 48px),
     repeating-linear-gradient(90deg, transparent 0 47px, rgba(63, 63, 70, var(--grid-opacity, 0.18)) 47px 48px);
 }
+
+/* Phase 19 Guided Tour trigger/header accent (D-04, RESEARCH.md Pitfall 2:
+   a repo-wide grep for radar/sweep/conic-gradient/animate-spin returned
+   zero matches prior to this phase -- this is genuinely new decorative
+   CSS, not a reuse of an existing accent). A real CSS rule, not a
+   template-literal-built style string, per CLAUDE.md's "no raw CSS
+   composed as strings" convention -- consumers apply only
+   className="radar-sweep-dot". */
+@keyframes radar-sweep {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.radar-sweep-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: conic-gradient(from 0deg, transparent, var(--primary) 60%, transparent);
+  animation: radar-sweep 2s linear infinite;
+}
