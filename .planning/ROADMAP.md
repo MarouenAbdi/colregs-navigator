@@ -161,12 +161,26 @@ Plans:
   4. After the tour closes by any dismissal path, keyboard focus visibly returns to the "How to read this" trigger button — human-verified via real Tab-key navigation, not just an automated focus assertion.
   5. Human-verified: the tour modal's stacking order does not visually collide with the Phase 18 on-chart vessel overlay (explicit z-index tiers checked in a session where both could plausibly be open).
 
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
 
 Plans:
 
-- [ ] 19-01: TBD
+**Wave 1**
+
+- [ ] 19-01-PLAN.md — Dialog primitive (dialog.tsx), verbatim TOUR_STEPS data module, and net-new radar-sweep-dot CSS
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 19-02-PLAN.md — TourStepIllustration.tsx (6 per-step SVGs) + GuidedTourModal.tsx (controlled Dialog composition), depends on 19-01
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 19-03-PLAN.md — Wire "How to read this" trigger + GuidedTourModal into SandboxContainer.tsx, depends on 19-02
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 19-04-PLAN.md — Human-verify all 5 Roadmap success criteria end-to-end, depends on 19-03
 
 ### Phase 20: Reasoning-Trail & Hero Visual Sync
 
@@ -208,6 +222,6 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16 �
 | 16. Sandbox Mutation-Path Generalization | v1.4 | 2/2 | Complete    | 2026-07-25 |
 | 17. Gallery → Sandbox Bridge | v1.4 | 4/4 | Complete    | 2026-07-25 |
 | 18. On-Chart Vessel Control Overlay | v1.4 | 5/5 | Complete    | 2026-07-25 |
-| 19. Guided Tour | v1.4 | 0/TBD | Not started | - |
+| 19. Guided Tour | v1.4 | 0/4 | Not started | - |
 | 20. Reasoning-Trail & Hero Visual Sync | v1.4 | 0/TBD | Not started | - |
 </content>
