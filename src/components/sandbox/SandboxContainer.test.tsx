@@ -12,7 +12,7 @@
  * ChartPanel/useHullDrag call directly -- same test-only polyfills as
  * ChartPanel.test.tsx / useHullDrag.test.ts.
  */
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SandboxContainer } from "./SandboxContainer.js";
@@ -418,5 +418,46 @@ describe("SandboxContainer", () => {
 
     expect(screen.getByRole("heading", { name: "Crossing" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Overtaking" })).not.toBeInTheDocument();
+  });
+
+  // Guided Tour trigger wiring (TOUR-01, TOUR-02) -- integration-level smoke
+  // test complementing GuidedTourModal.test.tsx's already-thorough unit
+  // suite; only proves the trigger genuinely wires up to a real, mounted
+  // GuidedTourModal inside the full SandboxContainer tree.
+  describe("Guided Tour", () => {
+    it("renders the 'How to read this' trigger button with no dialog present", () => {
+      render(<SandboxContainer />);
+
+      expect(screen.getByRole("button", { name: "How to read this" })).toBeInTheDocument();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    it("opens the real GuidedTourModal showing the first tour step when the trigger is clicked", async () => {
+      const user = userEvent.setup();
+      render(<SandboxContainer />);
+
+      await user.click(screen.getByRole("button", { name: "How to read this" }));
+
+      const dialog = await screen.findByRole("dialog");
+      expect(within(dialog).getByText("Welcome aboard the Navigator")).toBeInTheDocument();
+    });
+
+    it("closes the tour on Escape and returns focus to the trigger button", async () => {
+      const user = userEvent.setup();
+      render(<SandboxContainer />);
+
+      const trigger = screen.getByRole("button", { name: "How to read this" });
+      await user.click(trigger);
+      await screen.findByRole("dialog");
+
+      await user.keyboard("{Escape}");
+
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      // Radix's onCloseAutoFocus/focus-trap restoration is not always
+      // synchronous with React's render commit (RESEARCH.md Pitfall 3) --
+      // wrap in waitFor rather than asserting immediately after the
+      // awaited keyboard interaction.
+      await waitFor(() => expect(trigger).toHaveFocus());
+    });
   });
 });
