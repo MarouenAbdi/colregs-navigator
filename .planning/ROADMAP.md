@@ -176,7 +176,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 19-03-PLAN.md — Wire "How to read this" trigger + GuidedTourModal into SandboxContainer.tsx, depends on 19-02
+- [x] 19-03-PLAN.md — Wire "How to read this" trigger + GuidedTourModal into SandboxContainer.tsx, depends on 19-02
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -222,6 +222,6 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16 �
 | 16. Sandbox Mutation-Path Generalization | v1.4 | 2/2 | Complete    | 2026-07-25 |
 | 17. Gallery → Sandbox Bridge | v1.4 | 4/4 | Complete    | 2026-07-25 |
 | 18. On-Chart Vessel Control Overlay | v1.4 | 5/5 | Complete    | 2026-07-25 |
-| 19. Guided Tour | v1.4 | 2/4 | In Progress|  |
+| 19. Guided Tour | v1.4 | 3/4 | In Progress|  |
 | 20. Reasoning-Trail & Hero Visual Sync | v1.4 | 0/TBD | Not started | - |
 </content>
