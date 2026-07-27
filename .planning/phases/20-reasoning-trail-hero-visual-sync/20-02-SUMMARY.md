@@ -128,6 +128,17 @@ None - no external service configuration required.
 - `ReasoningTrail.tsx` now matches the design's horizontal "NAV DECISION CHAIN" structurally and copy-wise; plan 20-05's human-browser verification (real 3/4/5-step layout at both breakpoints, real animation rendering) is the remaining gate for SBOX-09/Roadmap criteria 1-2, since this plan's automated checks cover structure/copy/DOM shape only, not real-browser visual rendering.
 - No blockers for plan 20-03/20-04 (Hero visual sync) — this plan touched only `ReasoningTrail.tsx` and its two test files, no shared modules.
 
+## Self-Check: PASSED
+
+- FOUND: `src/components/sandbox/reasoning/ReasoningTrail.tsx`
+- FOUND: `src/components/sandbox/reasoning/ReasoningTrail.test.tsx`
+- FOUND: `src/components/sandbox/SandboxContainer.test.tsx`
+- FOUND: `.planning/phases/20-reasoning-trail-hero-visual-sync/20-02-SUMMARY.md`
+- FOUND commit: `8c63654` (Task 1)
+- FOUND commit: `6e55ccd` (Task 2)
+- FOUND commit: `5182433` (Task 3)
+- FOUND commit: `fdfbe6c` (docs: summary)
+
 ---
 *Phase: 20-reasoning-trail-hero-visual-sync*
 *Completed: 2026-07-27*
