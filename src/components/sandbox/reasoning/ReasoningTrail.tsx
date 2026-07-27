@@ -8,6 +8,7 @@
  * degenerate flag (the degenerate note itself now lives in VerdictBanner).
  */
 
+import type { CSSProperties } from "react";
 import type { ReasoningTrailProps } from "../types.js";
 import { classifyingEntryIndex, ruleNumber } from "./reasoning-trail-tag.js";
 import type { ClassificationResult, ReasoningTrailEntry } from "../../../domain/colregs/types.js";
@@ -95,6 +96,37 @@ const TONE_TAG_CLASSNAME: Record<TrailTone, string> = {
   "verdict-decisive": "text-give-way bg-give-way/10",
 };
 
+// Drives every card/connector/token's `--tone-color` custom property --
+// the single source of truth `.trail-connector`/`.trail-connector-pulse`/
+// `.trail-token`/`.trail-token-sweep-ring` (app/globals.css, plan 20-01)
+// all read via `var(--tone-color)`.
+const TONE_ACCENT_VAR: Record<TrailTone, string> = {
+  geometry: "var(--geometry)",
+  rule: "var(--rule-accent)",
+  doubt: "var(--doubt)",
+  "verdict-mutual": "var(--mutual)",
+  "verdict-decisive": "var(--give-way)",
+};
+
+// The last (VERDICT) card's border/glow is the only per-card styling that
+// varies by tone AND can't be expressed as a static Tailwind class (the
+// `color-mix()` percentages are fixed, but the base color is one of only
+// two verdict tones) -- kept as a lookup map, mirroring the
+// TONE_NUMBER_CLASSNAME/TONE_TAG_CLASSNAME pattern above, rather than
+// composing the strings inline at the call site.
+const TONE_LAST_CARD_STYLE: Record<"verdict-mutual" | "verdict-decisive", CSSProperties> = {
+  "verdict-mutual": {
+    borderColor: "color-mix(in srgb, var(--mutual) 53%, transparent)",
+    boxShadow:
+      "0 0 0 1px color-mix(in srgb, var(--mutual) 19%, transparent), 0 14px 34px -14px color-mix(in srgb, var(--mutual) 41%, transparent)",
+  },
+  "verdict-decisive": {
+    borderColor: "color-mix(in srgb, var(--give-way) 53%, transparent)",
+    boxShadow:
+      "0 0 0 1px color-mix(in srgb, var(--give-way) 19%, transparent), 0 14px 34px -14px color-mix(in srgb, var(--give-way) 41%, transparent)",
+  },
+};
+
 function trailStepTag(
   entry: ReasoningTrailEntry,
   index: number,
@@ -118,20 +150,28 @@ export function ReasoningTrail({ classification }: ReasoningTrailProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <span className="
-          font-mono text-[11px] tracking-wide text-muted-foreground uppercase
-        ">
-          Reasoning Trail
-        </span>
+        <div className="flex items-center gap-2">
+          <span aria-hidden="true" className="
+            radar-sweep-dot radar-sweep-dot--lg
+          " />
+          <span className="
+            font-mono text-[11px] tracking-wide text-muted-foreground uppercase
+          ">
+            NAV DECISION CHAIN · radar acquisition
+          </span>
+        </div>
         <Badge variant="outline" className="
           font-mono text-[10px] font-normal text-muted-foreground
         ">
-          {trail.length} steps
+          {trail.length} contacts
         </Badge>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        <ol className="flex flex-row flex-wrap gap-3 p-0">
-          {trail.map((entry, index) => {
+        <ol className="
+          flex flex-col items-stretch gap-0 p-0
+          min-[900px]:flex-row
+        ">
+          {trail.flatMap((entry, index) => {
             const { tag, tone } = trailStepTag(
               entry,
               index,
@@ -139,13 +179,25 @@ export function ReasoningTrail({ classification }: ReasoningTrailProps) {
               classifyingIndex,
               classification,
             );
-            return (
+            const isLast = index === trail.length - 1;
+            const toneColor = TONE_ACCENT_VAR[tone];
+
+            const card = (
               <li
-                key={`${entry.ruleId}-${index}`}
-                className="
-                  min-w-55 flex-1 basis-55 rounded-[10px] border border-border
-                  bg-chart-surface px-[13px] py-3
-                "
+                key={`${entry.ruleId}-${index}-card`}
+                data-role="trail-card"
+                className={`
+                  relative flex flex-none flex-col gap-2 rounded-[13px] border
+                  px-[15px] pt-4 pb-[15px]
+                  min-[900px]:flex-1
+                  ${isLast ? "bg-[#101016]" : "border-border bg-chart-surface"}
+                `}
+                style={{
+                  "--tone-color": toneColor,
+                  ...(isLast
+                    ? TONE_LAST_CARD_STYLE[tone as "verdict-mutual" | "verdict-decisive"]
+                    : {}),
+                } as CSSProperties}
               >
                 <div className="mb-2 flex items-center gap-[9px]">
                   <span
@@ -180,6 +232,25 @@ export function ReasoningTrail({ classification }: ReasoningTrailProps) {
                 <FactReadout facts={entry.facts} />
               </li>
             );
+
+            if (isLast) return [card];
+
+            const connector = (
+              <li
+                key={`${entry.ruleId}-${index}-wire`}
+                aria-hidden="true"
+                className="
+                  relative flex w-full flex-[0_0_26px] items-center
+                  min-[900px]:w-auto min-[900px]:flex-[0_0_34px]
+                "
+                style={{ "--tone-color": toneColor } as CSSProperties}
+              >
+                <div className="trail-connector w-full" />
+                <div className="trail-connector-pulse" />
+              </li>
+            );
+
+            return [card, connector];
           })}
         </ol>
 
