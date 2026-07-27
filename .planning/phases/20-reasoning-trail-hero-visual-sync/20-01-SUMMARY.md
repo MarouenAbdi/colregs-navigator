@@ -90,3 +90,11 @@ None - no external service configuration required.
 ---
 *Phase: 20-reasoning-trail-hero-visual-sync*
 *Completed: 2026-07-27*
+
+## Self-Check: PASSED
+
+- FOUND: `app/globals.css`
+- FOUND: `.planning/phases/20-reasoning-trail-hero-visual-sync/20-01-SUMMARY.md`
+- FOUND: commit `38350f4` (Task 1)
+- FOUND: commit `2c207a0` (Task 2)
+- FOUND: commit `74f723d` (SUMMARY.md docs commit)
