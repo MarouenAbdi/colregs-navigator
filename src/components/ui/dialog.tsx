@@ -31,8 +31,8 @@ function DialogOverlay({
       className={cn(
         `
           fixed inset-0 z-50 bg-black/70 backdrop-blur-sm
-          data-open:animate-in data-open:fade-in-0
-          data-closed:animate-out data-closed:fade-out-0
+          data-[state=closed]:animate-out data-[state=closed]:fade-out-0
+          data-[state=open]:animate-in data-[state=open]:fade-in-0
         `,
         // D-04: Portal-rendered overlays (Select, Dialog) use z-50; nothing
         // else in this app declares an explicit z-index -- do not add one to
@@ -59,9 +59,10 @@ function DialogContent({
             fixed top-1/2 left-1/2 z-50 grid max-h-[820px] w-full max-w-150
             -translate-1/2 gap-4 rounded-2xl border border-border bg-card p-0
             shadow-lg
-            data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95
-            data-closed:animate-out data-closed:fade-out-0
-            data-closed:zoom-out-95
+            data-[state=closed]:animate-out data-[state=closed]:fade-out-0
+            data-[state=closed]:zoom-out-95
+            data-[state=open]:animate-in data-[state=open]:fade-in-0
+            data-[state=open]:zoom-in-95
           `,
           // D-04: Portal-rendered overlays (Select, Dialog) use z-50; nothing
           // else in this app declares an explicit z-index -- do not add one to
