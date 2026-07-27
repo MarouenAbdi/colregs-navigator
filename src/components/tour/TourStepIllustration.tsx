@@ -4,7 +4,10 @@
  * never via a raw-HTML injection prop (RESEARCH.md Pattern 3). Six distinct
  * sub-components, not one generic parameterized illustration -- the steps
  * are not near-identical, so CLAUDE.md's "no duplicated JSX" convention
- * does not apply here. Raw hex fill/stroke literals are the design's exact,
+ * does not apply at the step level. It does apply *within* a step where a
+ * block repeats per-vessel with only a few values differing (position,
+ * rotation, color, label) -- `VesselWedge` and `VerdictVesselRow` below
+ * extract those. Raw hex fill/stroke literals are the design's exact,
  * fixed-at-authoring-time illustration content (matching
  * `hero-preview-geometry.ts`'s own hardcoded-hex precedent), not component
  * chrome built as a JS template-literal string -- CLAUDE.md's "no raw CSS
@@ -13,6 +16,18 @@
 import { Fragment } from "react";
 
 const TOUR_VIZ_FONT_FAMILY = "'Geist Mono', monospace";
+
+// Shared per-vessel wedge glyph, parameterized on position/rotation/fill --
+// used by WelcomeIllustration's two vessels so a rotation/fill fix applies
+// to both at once instead of risking a one-copy-updated, one-copy-missed
+// edit (CLAUDE.md "no duplicated JSX" rationale).
+function VesselWedge({ x, y, rotation, fill }: { x: number; y: number; rotation: number; fill: string }) {
+  return (
+    <g transform={`translate(${x},${y}) rotate(${rotation})`}>
+      <path d="M0 -9 L6 8 L0 4 L-6 8 Z" fill={fill} />
+    </g>
+  );
+}
 
 // Step 0 -- Welcome aboard the Navigator: radar scope with two vessel
 // wedges (red/green) + a dashed relative-bearing line + a
@@ -36,12 +51,8 @@ function WelcomeIllustration() {
       <line x1={230} y1={10} x2={230} y2={166} stroke="rgba(45,212,191,.12)" />
       <line x1={120} y1={88} x2={340} y2={88} stroke="rgba(45,212,191,.12)" />
       <path d="M230 88 L230 20 A68 68 0 0 1 289 55 Z" fill="rgba(45,212,191,.14)" />
-      <g transform="translate(196,120) rotate(35)">
-        <path d="M0 -9 L6 8 L0 4 L-6 8 Z" fill="#EF4444" />
-      </g>
-      <g transform="translate(276,58) rotate(-58)">
-        <path d="M0 -9 L6 8 L0 4 L-6 8 Z" fill="#22C55E" />
-      </g>
+      <VesselWedge x={196} y={120} rotation={35} fill="#EF4444" />
+      <VesselWedge x={276} y={58} rotation={-58} fill="#22C55E" />
       <line x1={196} y1={120} x2={276} y2={58} stroke="#475569" strokeDasharray="3 3" />
       <g transform="translate(300,138)">
         <rect x={0} y={0} width={150} height={26} rx={6} fill="rgba(45,212,191,.12)" stroke="rgba(45,212,191,.35)" />
@@ -122,8 +133,45 @@ function InstrumentsIllustration() {
   );
 }
 
+// Shared per-vessel verdict row, parameterized on vertical offset,
+// wedge/badge coloring, and label/badge text -- used by VerdictIllustration's
+// two vessels for the same reason as VesselWedge above.
+function VerdictVesselRow({
+  y,
+  label,
+  wedgeFill,
+  badgeFill,
+  badgeStroke,
+  badgeTextFill,
+  badgeText,
+}: {
+  y: number;
+  label: string;
+  wedgeFill: string;
+  badgeFill: string;
+  badgeStroke: string;
+  badgeTextFill: string;
+  badgeText: string;
+}) {
+  return (
+    <g transform={`translate(16,${y})`}>
+      <rect width={428} height={42} rx={8} fill="#101014" stroke="#27272A" />
+      <g transform="translate(14,11)">
+        <path d="M0 20 L11 -4 L22 20 L11 14 Z" fill={wedgeFill} />
+      </g>
+      <text x={48} y={26} fill="#FAFAFA" fontSize={12}>
+        {label}
+      </text>
+      <rect x={300} y={9} width={116} height={24} rx={6} fill={badgeFill} stroke={badgeStroke} />
+      <text x={313} y={25} fill={badgeTextFill} fontSize={10} fontWeight={700}>
+        {badgeText}
+      </text>
+    </g>
+  );
+}
+
 // Step 3 -- Read the verdict: header verdict pill + two vessel rows with
-// GIVE WAY (amber) / STAND ON (green) badges.
+// GIVE WAY (red) / STAND ON (green) badges.
 function VerdictIllustration() {
   return (
     <svg aria-hidden="true" viewBox="0 0 460 176" width="100%" height="100%" fontFamily={TOUR_VIZ_FONT_FAMILY}>
@@ -134,32 +182,24 @@ function VerdictIllustration() {
           CROSSING · RULE 15 · VESSEL A GIVES WAY
         </text>
       </g>
-      <g transform="translate(16,62)">
-        <rect width={428} height={42} rx={8} fill="#101014" stroke="#27272A" />
-        <g transform="translate(14,11)">
-          <path d="M0 20 L11 -4 L22 20 L11 14 Z" fill="#EF4444" />
-        </g>
-        <text x={48} y={26} fill="#FAFAFA" fontSize={12}>
-          Vessel A
-        </text>
-        <rect x={300} y={9} width={116} height={24} rx={6} fill="rgba(239,68,68,.14)" stroke="rgba(239,68,68,.4)" />
-        <text x={313} y={25} fill="#EF4444" fontSize={10} fontWeight={700}>
-          GIVE WAY
-        </text>
-      </g>
-      <g transform="translate(16,114)">
-        <rect width={428} height={42} rx={8} fill="#101014" stroke="#27272A" />
-        <g transform="translate(14,11)">
-          <path d="M0 20 L11 -4 L22 20 L11 14 Z" fill="#22C55E" />
-        </g>
-        <text x={48} y={26} fill="#FAFAFA" fontSize={12}>
-          Vessel B
-        </text>
-        <rect x={300} y={9} width={116} height={24} rx={6} fill="rgba(34,197,94,.14)" stroke="rgba(34,197,94,.4)" />
-        <text x={313} y={25} fill="#22C55E" fontSize={10} fontWeight={700}>
-          STAND ON
-        </text>
-      </g>
+      <VerdictVesselRow
+        y={62}
+        label="Vessel A"
+        wedgeFill="#EF4444"
+        badgeFill="rgba(239,68,68,.14)"
+        badgeStroke="rgba(239,68,68,.4)"
+        badgeTextFill="#EF4444"
+        badgeText="GIVE WAY"
+      />
+      <VerdictVesselRow
+        y={114}
+        label="Vessel B"
+        wedgeFill="#22C55E"
+        badgeFill="rgba(34,197,94,.14)"
+        badgeStroke="rgba(34,197,94,.4)"
+        badgeTextFill="#22C55E"
+        badgeText="STAND ON"
+      />
     </svg>
   );
 }
