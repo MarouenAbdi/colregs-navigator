@@ -19,7 +19,7 @@ const TOUR_VIZ_FONT_FAMILY = "'Geist Mono', monospace";
 // "RULE 15 · CROSSING" verdict pill.
 function WelcomeIllustration() {
   return (
-    <svg viewBox="0 0 460 176" width="100%" height="100%" fontFamily={TOUR_VIZ_FONT_FAMILY}>
+    <svg aria-hidden="true" viewBox="0 0 460 176" width="100%" height="100%" fontFamily={TOUR_VIZ_FONT_FAMILY}>
       <defs>
         <radialGradient id="tour-viz-radar-gradient" cx="50%" cy="50%" r="60%">
           <stop offset="0%" stopColor="rgba(45,212,191,.10)" />
@@ -57,7 +57,7 @@ function WelcomeIllustration() {
 // labeled "DRAG HULL" and a dashed rotate-arc labeled "ROTATE BOW".
 function MoveVesselsIllustration() {
   return (
-    <svg viewBox="0 0 460 176" width="100%" height="100%" fontFamily={TOUR_VIZ_FONT_FAMILY}>
+    <svg aria-hidden="true" viewBox="0 0 460 176" width="100%" height="100%" fontFamily={TOUR_VIZ_FONT_FAMILY}>
       <rect width={460} height={176} fill="#0B0B0E" />
       <g stroke="rgba(63,63,70,.35)">
         <line x1={0} y1={44} x2={460} y2={44} />
@@ -99,7 +99,7 @@ const INSTRUMENT_TILES = [
 
 function InstrumentsIllustration() {
   return (
-    <svg viewBox="0 0 460 176" width="100%" height="100%" fontFamily={TOUR_VIZ_FONT_FAMILY}>
+    <svg aria-hidden="true" viewBox="0 0 460 176" width="100%" height="100%" fontFamily={TOUR_VIZ_FONT_FAMILY}>
       <rect width={460} height={176} fill="#0B0B0E" />
       {INSTRUMENT_TILES.map((tile, i) => {
         const hot = i >= 2;
@@ -126,7 +126,7 @@ function InstrumentsIllustration() {
 // GIVE WAY (amber) / STAND ON (green) badges.
 function VerdictIllustration() {
   return (
-    <svg viewBox="0 0 460 176" width="100%" height="100%" fontFamily={TOUR_VIZ_FONT_FAMILY}>
+    <svg aria-hidden="true" viewBox="0 0 460 176" width="100%" height="100%" fontFamily={TOUR_VIZ_FONT_FAMILY}>
       <rect width={460} height={176} fill="#0B0B0E" />
       <g transform="translate(16,20)">
         <rect width={428} height={30} rx={7} fill="rgba(45,212,191,.08)" stroke="rgba(45,212,191,.25)" />
@@ -175,7 +175,7 @@ const REASONING_NODES = [
 
 function ReasoningIllustration() {
   return (
-    <svg viewBox="0 0 460 176" width="100%" height="100%" fontFamily={TOUR_VIZ_FONT_FAMILY}>
+    <svg aria-hidden="true" viewBox="0 0 460 176" width="100%" height="100%" fontFamily={TOUR_VIZ_FONT_FAMILY}>
       <rect width={460} height={176} fill="#0B0B0E" />
       <text x={16} y={26} fill="#52525B" fontSize={9.5}>
         NAV DECISION CHAIN
@@ -223,7 +223,7 @@ const GALLERY_TILES = [
 
 function GalleryIllustration() {
   return (
-    <svg viewBox="0 0 460 176" width="100%" height="100%" fontFamily={TOUR_VIZ_FONT_FAMILY}>
+    <svg aria-hidden="true" viewBox="0 0 460 176" width="100%" height="100%" fontFamily={TOUR_VIZ_FONT_FAMILY}>
       <rect width={460} height={176} fill="#0B0B0E" />
       {GALLERY_TILES.map((tile, i) => {
         const glow = i === 0;
