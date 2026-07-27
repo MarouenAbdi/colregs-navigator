@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Design Sync (Sandbox & Gallery)
 status: "Phase 19 shipped — PR #28"
-stopped_at: Phase 19 context gathered
-last_updated: "2026-07-27T11:31:19.279Z"
+stopped_at: Phase 20 context gathered
+last_updated: "2026-07-27T14:27:23.535Z"
 last_activity: 2026-07-27
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 15
   completed_plans: 15
-  percent: 60
+  percent: 80
 ---
 
 # Project State
@@ -103,9 +103,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-26T19:39:30.275Z
-Stopped at: Phase 19 context gathered
-Resume file: .planning/phases/19-guided-tour/19-CONTEXT.md
+Last session: 2026-07-27T14:27:23.527Z
+Stopped at: Phase 20 context gathered
+Resume file: .planning/phases/20-reasoning-trail-hero-visual-sync/20-CONTEXT.md
 
 ## Operator Next Steps
 
