@@ -58,7 +58,7 @@ See `.planning/milestones/v1.3-ROADMAP.md` for full phase details (goals, succes
 - [x] **Phase 16: Sandbox Mutation-Path Generalization** - Generalize `handleChipSelect` into a reusable `loadScenario()` entry point and remove the 6-chip preset row entirely (completed 2026-07-25)
 - [x] **Phase 17: Gallery → Sandbox Bridge** - Gallery's "Try on Sandbox" loads a scenario directly into the homepage Sandbox with no page navigation (completed 2026-07-25)
 - [x] **Phase 18: On-Chart Vessel Control Overlay** - Replace the side ControlPanel with click-to-open floating vessel overlays and merge the chart header/footer strips (completed 2026-07-25)
-- [ ] **Phase 19: Guided Tour** - A 6-step "How to read this" modal walkthrough with full keyboard/focus handling
+- [x] **Phase 19: Guided Tour** - A 6-step "How to read this" modal walkthrough with full keyboard/focus handling (completed 2026-07-27)
 - [ ] **Phase 20: Reasoning-Trail & Hero Visual Sync** - Horizontal "NAV DECISION CHAIN" trail layout and Hero preview card visual sync
 
 ## Phase Details
@@ -180,7 +180,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 19-04-PLAN.md — Human-verify all 5 Roadmap success criteria end-to-end, depends on 19-03
+- [x] 19-04-PLAN.md — Human-verify all 5 Roadmap success criteria end-to-end, depends on 19-03
 
 ### Phase 20: Reasoning-Trail & Hero Visual Sync
 
@@ -222,6 +222,6 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16 �
 | 16. Sandbox Mutation-Path Generalization | v1.4 | 2/2 | Complete    | 2026-07-25 |
 | 17. Gallery → Sandbox Bridge | v1.4 | 4/4 | Complete    | 2026-07-25 |
 | 18. On-Chart Vessel Control Overlay | v1.4 | 5/5 | Complete    | 2026-07-25 |
-| 19. Guided Tour | v1.4 | 3/4 | In Progress|  |
+| 19. Guided Tour | v1.4 | 4/4 | Complete   | 2026-07-27 |
 | 20. Reasoning-Trail & Hero Visual Sync | v1.4 | 0/TBD | Not started | - |
 </content>
