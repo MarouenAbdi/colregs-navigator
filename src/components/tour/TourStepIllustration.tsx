@@ -142,8 +142,8 @@ function VerdictIllustration() {
         <text x={48} y={26} fill="#FAFAFA" fontSize={12}>
           Vessel A
         </text>
-        <rect x={300} y={9} width={116} height={24} rx={6} fill="rgba(245,158,11,.14)" stroke="rgba(245,158,11,.4)" />
-        <text x={313} y={25} fill="#F59E0B" fontSize={10} fontWeight={700}>
+        <rect x={300} y={9} width={116} height={24} rx={6} fill="rgba(239,68,68,.14)" stroke="rgba(239,68,68,.4)" />
+        <text x={313} y={25} fill="#EF4444" fontSize={10} fontWeight={700}>
           GIVE WAY
         </text>
       </g>
