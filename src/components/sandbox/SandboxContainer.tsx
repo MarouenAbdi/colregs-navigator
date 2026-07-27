@@ -12,18 +12,22 @@
  * triggered it.
  */
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { RotateCcw, Link2 } from "lucide-react";
 import { ChartPanel } from "./chart/ChartPanel.js";
 import { ReasoningTrail } from "./reasoning/ReasoningTrail.js";
 import { useSandboxState } from "./hooks/useSandboxState.js";
 import { useSandboxBridge } from "./bridge/SandboxBridgeProvider.js";
+import { GuidedTourModal } from "../tour/GuidedTourModal.js";
 import { Button } from "@/components/ui/button";
 import type { SandboxContainerProps } from "./types.js";
 
 export function SandboxContainer({ initialScenario, banner }: SandboxContainerProps = {}) {
   const sandboxState = useSandboxState(initialScenario);
   const { pendingScenario } = useSandboxBridge();
+  // Ephemeral tour-open view state -- kept local per ARCHITECTURE.md
+  // Anti-Pattern 2, never merged into useSandboxState()/sandboxState.
+  const [isTourOpen, setIsTourOpen] = useState(false);
 
   // Keyed on requestId (a monotonically-changing number), not vesselA/
   // vesselB object identity, so re-selecting the same Gallery scenario
@@ -59,6 +63,18 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
             </p>
           </div>
           <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="
+                border-primary/35 bg-primary/8 text-primary
+                hover:bg-primary/15
+              "
+              onClick={() => setIsTourOpen(true)}
+            >
+              <span className="radar-sweep-dot" aria-hidden="true" />
+              How to read this
+            </Button>
             <Button
               type="button"
               variant="outline"
@@ -103,6 +119,8 @@ export function SandboxContainer({ initialScenario, banner }: SandboxContainerPr
       <div className="mt-4">
         <ReasoningTrail classification={sandboxState.lastGoodClassification} />
       </div>
+
+      <GuidedTourModal open={isTourOpen} onOpenChange={setIsTourOpen} />
     </div>
   );
 }

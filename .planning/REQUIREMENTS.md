@@ -17,8 +17,8 @@ Requirements for this milestone. Each maps to roadmap phases. Zero change to `cl
 
 ### Guided Tour
 
-- [ ] **TOUR-01**: User can open a 6-step guided tour via a "How to read this" button, with Back/Next/Skip controls, a per-step illustration, and step-dot progress
-- [ ] **TOUR-02**: Tour dismisses via Escape, clicking outside, or Skip/Done, and returns keyboard focus to the trigger button
+- [x] **TOUR-01**: User can open a 6-step guided tour via a "How to read this" button, with Back/Next/Skip controls, a per-step illustration, and step-dot progress
+- [x] **TOUR-02**: Tour dismisses via Escape, clicking outside, or Skip/Done, and returns keyboard focus to the trigger button
 
 ### Gallery
 
@@ -58,8 +58,8 @@ Populated during roadmap creation.
 | SBOX-08 | Phase 18 | Complete |
 | SBOX-09 | Phase 20 | Pending |
 | SBOX-10 | Phase 16 | Complete |
-| TOUR-01 | Phase 19 | Pending |
-| TOUR-02 | Phase 19 | Pending |
+| TOUR-01 | Phase 19 | Complete |
+| TOUR-02 | Phase 19 | Complete |
 | GAL-05 | Phase 17 | Complete |
 | GAL-06 | Phase 17 | Complete |
 | HERO-05 | Phase 20 | Pending |

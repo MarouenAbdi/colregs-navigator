@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Design Sync (Sandbox & Gallery)
-status: "Phase 18 shipped — PR #27"
-stopped_at: Phase 18 context gathered
-last_updated: "2026-07-25T18:08:17.848Z"
-last_activity: 2026-07-25
+status: "Phase 19 shipped — PR #28"
+stopped_at: Phase 19 context gathered
+last_updated: "2026-07-27T11:31:19.279Z"
+last_activity: 2026-07-27
 progress:
   total_phases: 5
-  completed_phases: 2
-  total_plans: 11
-  completed_plans: 11
-  percent: 40
+  completed_phases: 3
+  total_plans: 15
+  completed_plans: 15
+  percent: 60
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-25)
 
 **Core value:** Given any two-vessel encounter, correctly classify it under COLREGS and clearly explain — not just assert — which vessel must give way and why.
-**Current focus:** Phase 19 — guided tour
+**Current focus:** Phase 20 — reasoning trail & hero visual sync
 
 ## Current Position
 
-Phase: 19
+Phase: 20
 Plan: Not started
-Status: Phase 18 shipped — PR #27
-Last activity: 2026-07-25
+Status: Phase 19 shipped — PR #28
+Last activity: 2026-07-27
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -36,7 +36,7 @@ Progress: [░░░░░░░░░░] 0%
 
 **Velocity:**
 
-- Total plans completed: 61 (19 v1.0 + 14 v1.1 + 18 v1.2 + 9 v1.3 [incl. 15-02, no separate SUMMARY.md — manual provisioning verified downstream], some plans span multiple waves — see milestone ROADMAPs for exact per-phase counts)
+- Total plans completed: 65 (19 v1.0 + 14 v1.1 + 18 v1.2 + 9 v1.3 [incl. 15-02, no separate SUMMARY.md — manual provisioning verified downstream], some plans span multiple waves — see milestone ROADMAPs for exact per-phase counts)
 - Average duration: - min
 - Total execution time: - hours
 
@@ -49,6 +49,7 @@ Progress: [░░░░░░░░░░] 0%
 | 16 | 2 | - | - |
 | 17 | 4 | - | - |
 | 18 | 5 | - | - |
+| 19 | 4 | - | - |
 
 **Recent Trend:**
 
@@ -102,9 +103,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-25T15:52:05.448Z
-Stopped at: Phase 18 context gathered
-Resume file: .planning/phases/18-on-chart-vessel-control-overlay/18-CONTEXT.md
+Last session: 2026-07-26T19:39:30.275Z
+Stopped at: Phase 19 context gathered
+Resume file: .planning/phases/19-guided-tour/19-CONTEXT.md
 
 ## Operator Next Steps
 
