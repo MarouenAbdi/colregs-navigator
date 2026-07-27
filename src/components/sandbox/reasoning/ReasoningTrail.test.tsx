@@ -94,9 +94,9 @@ function withDoubt(boundary: ClassificationResult["doubtBoundary"]): Classificat
 
 describe("ReasoningTrail", () => {
   it("renders all trail entries' ruleId and text, in array order, with a dynamic step-count pill", () => {
-    render(<ReasoningTrail classification={crossingClassification} />);
-    expect(screen.getByText("3 steps")).toBeInTheDocument();
-    const trailItems = screen.getAllByRole("listitem");
+    const { container } = render(<ReasoningTrail classification={crossingClassification} />);
+    expect(screen.getByText("3 contacts")).toBeInTheDocument();
+    const trailItems = Array.from(container.querySelectorAll('[data-role="trail-card"]'));
     expect(trailItems).toHaveLength(3);
     expect(trailItems[0]).toHaveTextContent("Rule 7");
     expect(trailItems[0]).toHaveTextContent("Risk of collision exists.");
@@ -114,7 +114,7 @@ describe("ReasoningTrail", () => {
 
   it("renders a dynamic 5-step count and substitutes Rule 7 only at the doubt-flagged classifying index", () => {
     render(<ReasoningTrail classification={fiveEntryDoubtClassification} />);
-    expect(screen.getByText("5 steps")).toBeInTheDocument();
+    expect(screen.getByText("5 contacts")).toBeInTheDocument();
     expect(screen.getByText("GEOMETRY")).toBeInTheDocument();
     expect(screen.getByText("RULE 13")).toBeInTheDocument();
     expect(screen.getByText("RULE 14")).toBeInTheDocument();
@@ -128,10 +128,10 @@ describe("ReasoningTrail", () => {
   });
 
   it("renders formatted fact readouts beneath each entry, and none for empty-facts entries", () => {
-    render(<ReasoningTrail classification={overtakingWithEmptyFactsEntry} />);
+    const { container } = render(<ReasoningTrail classification={overtakingWithEmptyFactsEntry} />);
     expect(screen.getByText("7.4 min")).toBeInTheDocument();
     expect(screen.getByText("0.50 nm")).toBeInTheDocument();
-    const trailItems = screen.getAllByRole("listitem");
+    const trailItems = Array.from(container.querySelectorAll('[data-role="trail-card"]'));
     const dlCount = trailItems.filter((item) => item.querySelector("dl") !== null).length;
     expect(dlCount).toBe(2);
   });
