@@ -315,17 +315,17 @@ Apply the identical structural pattern (base static styles unconditionally, `ani
 
 **If this table is empty:** N/A — see entries above.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Exact DOM/CSS technique for the two-`<li>`-per-step alternation from a single `trail.map()`**
    - What we know: The design source's raw HTML literally emits two sibling `<li>` elements per step (one `cnode`, one `cwire`), the `cwire` omitted after the last step.
    - What's unclear: This codebase currently does a straightforward `trail.map((entry, index) => <li>...)`. The cleanest idiomatic React way to interleave a second conditional sibling per iteration (an array-returning `.flatMap()`, two `.map()` passes zipped together, or a `<>` fragment per iteration) isn't specified by the design snapshot — it's an implementation-detail choice for the planner/implementer.
-   - Recommendation: Use `trail.flatMap((entry, index) => index < trail.length - 1 ? [cardEl, connectorEl] : [cardEl])` — a single pass, keys derived from `entry.ruleId`+index for the card and `entry.ruleId`+index+"-wire" for the connector, avoiding key collisions.
+   - **RESOLVED:** Recommendation: Use `trail.flatMap((entry, index) => index < trail.length - 1 ? [cardEl, connectorEl] : [cardEl])` — a single pass, keys derived from `entry.ruleId`+index for the card and `entry.ruleId`+index+"-wire" for the connector, avoiding key collisions.
 
 2. **Whether the per-token sweep ring (Pattern inside each 38px step token) should be a size/color variant of the existing `.radar-sweep-dot` class or a wholly separate class**
    - What we know: Design snapshot explicitly says the trail header's small radar-sweep dot is "same spinning-conic-gradient token used elsewhere" (i.e. reuse `.radar-sweep-dot`'s existing 8px pattern, just visually larger at 14px per the header). The *per-step-token* sweep ring, however, sits as a ring *behind* a solid-color radial-gradient disc with a number on top — structurally different from the simple dot (`.radar-sweep-dot` IS the whole visible element; the token's sweep is a sub-layer inside a bigger composite element).
    - What's unclear: Exact class/property split between the token's static radial-gradient disc, its spinning conic-gradient ring layer, and the number text z-index stack.
-   - Recommendation: Introduce `.radar-sweep-dot--lg` (or similar) for the header's 14px reuse case, and a new `.trail-token-sweep-ring` class (absolutely positioned inside the 38px token, `z-index` below the number) for the per-token case — both referencing the same `@keyframes radar-sweep` rotation, since both need only "spin 0→360deg linearly, forever, unless reduced-motion."
+   - **RESOLVED:** Recommendation: Introduce `.radar-sweep-dot--lg` (or similar) for the header's 14px reuse case, and a new `.trail-token-sweep-ring` class (absolutely positioned inside the 38px token, `z-index` below the number) for the per-token case — both referencing the same `@keyframes radar-sweep` rotation, since both need only "spin 0→360deg linearly, forever, unless reduced-motion."
 
 ## Environment Availability
 
