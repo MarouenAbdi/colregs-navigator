@@ -43,13 +43,17 @@ const eslintConfig = defineConfig([
       },
     },
     rules: {
-      // `radar-sweep-dot` is a real, plain CSS class defined directly in
-      // app/globals.css (Phase 19 Guided Tour accent, not a Tailwind
-      // utility) -- the plugin's Tailwind-v4-compiler-backed candidate
-      // check can't generate CSS for a non-utility class name, so it
-      // otherwise false-flags this as unknown every time it's referenced
+      // `radar-sweep-dot` and `hero-live-pulse` are real, plain CSS classes
+      // defined directly in app/globals.css (Phase 19 Guided Tour accent;
+      // Phase 20 plan 20-01's Hero LIVE-dot pulse, respectively -- neither
+      // is a Tailwind utility) -- the plugin's Tailwind-v4-compiler-backed
+      // candidate check can't generate CSS for a non-utility class name, so
+      // it otherwise false-flags each as unknown every time it's referenced
       // from a className.
-      "better-tailwindcss/no-unknown-classes": ["error", { ignore: ["^radar-sweep-dot$"] }],
+      "better-tailwindcss/no-unknown-classes": [
+        "error",
+        { ignore: ["^radar-sweep-dot$", "^hero-live-pulse$"] },
+      ],
     },
   },
   {

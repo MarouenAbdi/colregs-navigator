@@ -1,20 +1,21 @@
 /**
- * The Hero section's "Live classification" preview card (HERO-02): a
+ * The Hero section's illustrative encounter-preview card (HERO-02): a
  * fully static, illustrative SVG chart driven by a real
  * `classifyEncounter()`/`bearing()`/`cpa()` call against a fixed fixture
  * (`hero-preview-fixture.ts`) -- not hand-typed literals. Shares zero code
- * with the real interactive `ChartPanel.tsx` (D-03) and is
- * never wired to live Sandbox state (D-01: no pulsing dot, no
- * animated bearing line).
+ * with the real interactive `ChartPanel.tsx` (07-CONTEXT.md D-03) and is
+ * never wired to live Sandbox state -- its footer's pulsing indicator is
+ * a purely decorative, visually-distinguished echo of the real Sandbox's
+ * own live indicator (this phase's D-01/D-02), not a live data connection;
+ * the bearing line and every other readout stay non-animated.
  */
 import { classifyEncounter } from "../../domain/colregs/classify-encounter.js";
 import { bearing } from "../../domain/geometry/bearing/bearing.js";
 import { cpa } from "../../domain/geometry/cpa/cpa.js";
 import { chartToScreen } from "../../domain/geometry/screen-convert/screen-convert.js";
-import type { EncounterType, VesselLabel } from "../../domain/colregs/types.js";
+import type { EncounterType } from "../../domain/colregs/types.js";
 import { heroPreviewVesselA, heroPreviewVesselB } from "./hero-preview-fixture.js";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   HERO_CONTAINER_SIZE,
   HERO_VIEW_BOX,
@@ -27,6 +28,11 @@ import {
   bearingSectorPath,
 } from "./hero-preview-geometry.js";
 import {
+  HERO_PREVIEW_RISK_TONE_CLASSNAME,
+  HERO_PREVIEW_RISK_DOT_CLASSNAME,
+  deriveHeroPreviewRisk,
+} from "./hero-preview-risk.js";
+import {
   HULL_PATH,
   HULL_STROKE,
   HULL_STROKE_WIDTH,
@@ -38,11 +44,6 @@ const ENCOUNTER_TYPE_TITLE: Record<EncounterType, string> = {
   crossing: "Crossing",
   "head-on": "Head-on",
   overtaking: "Overtaking",
-};
-
-const VESSEL_LABEL_TEXT: Record<VesselLabel, string> = {
-  vesselA: "Vessel A",
-  vesselB: "Vessel B",
 };
 
 type VesselMarkerProps = {
@@ -78,6 +79,28 @@ function VesselMarker({ screen, heading, hullColor, label, pillText }: VesselMar
         </text>
       </g>
     </>
+  );
+}
+
+// Copies ChartFooterStrip.tsx's Tile shape verbatim (not imported --
+// HeroPreviewCard.tsx shares zero code with the Sandbox chart module tree,
+// D-03) with one deliberate deviation: the value uses this codebase's
+// existing Hero 15px value-role convention, not ChartFooterStrip.tsx's 17px.
+function Tile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="
+      rounded-lg border border-border bg-chart-surface px-[11px] py-[10px]
+    ">
+      <div className="
+        font-mono text-[9.5px] font-semibold tracking-wide text-muted-foreground
+        uppercase
+      ">
+        {label}
+      </div>
+      <div className="
+        mt-0.75 font-mono text-[15px] font-semibold text-foreground
+      ">{value}</div>
+    </div>
   );
 }
 
@@ -117,9 +140,6 @@ export function HeroPreviewCard() {
     // fixture-invariant checks above) instead of casting the null away.
     throw new Error("Hero preview fixture classified as a mutual/no-giveWay encounter -- fixture is broken");
   }
-  const giveWayLabel = VESSEL_LABEL_TEXT[classification.giveWay];
-  const verdictText = `${ENCOUNTER_TYPE_TITLE[classification.encounterType]} — ${giveWayLabel} gives way`;
-
   const vesselAPillText = classification.giveWay === "vesselA" ? "GW" : "SO";
   const vesselBPillText = classification.giveWay === "vesselB" ? "GW" : "SO";
 
@@ -128,20 +148,45 @@ export function HeroPreviewCard() {
   const headingVectorB = headingVectorEndpoint(screenB, heroPreviewVesselB.heading);
   const connectorMidpoint = midpoint(screenA, screenB);
 
+  const risk = deriveHeroPreviewRisk(cpaResult.value.dcpaNm, cpaResult.value.tcpaMinutes);
+
   return (
     <Card className="gap-3">
-      <CardHeader className="
-        flex flex-row items-center justify-between font-mono text-[10.5px]
-        font-semibold text-muted-foreground
-      ">
-        <span className="flex items-center gap-1.75">
-          {/* Static, non-pulsing dot per D-01 -- no animation classes. */}
-          <span className="size-1.5 rounded-full bg-accent" aria-hidden="true" />
-          <span className="text-foreground">Live classification</span>
-        </span>
-        <span>BRG-ring · 12 NM</span>
-      </CardHeader>
       <CardContent className="flex flex-col">
+        <div className="
+          flex items-center gap-3 border-b border-border px-4 py-3
+        ">
+          <div className="flex min-w-0 items-center gap-2">
+            {/* Hardcoded per this fixture's invariant Rule 15/crossing
+                verdict (unchanged from the prior below-chart badge) --
+                never derived, since this fixture never produces another
+                rule outcome. */}
+            <span className="
+              w-fit shrink-0 rounded-md bg-rule-accent px-2 py-0.5 font-mono
+              text-[11px] font-semibold text-background
+            ">
+              Rule 15
+            </span>
+            <h3 className="truncate text-lg font-bold text-foreground">
+              {ENCOUNTER_TYPE_TITLE[classification.encounterType]}
+            </h3>
+          </div>
+
+          <div className="flex-1" />
+
+          <div className={`
+            flex max-w-[46%] items-center gap-[7px] rounded-md border px-[11px]
+            py-[6px] text-[12.5px]
+            ${HERO_PREVIEW_RISK_TONE_CLASSNAME[risk.tier]}
+          `}>
+            <span aria-hidden="true" className={`
+              size-2 shrink-0 rounded-full
+              ${HERO_PREVIEW_RISK_DOT_CLASSNAME[risk.tier]}
+            `} />
+            <span className="truncate">{risk.text}</span>
+          </div>
+        </div>
+
         <div className="
           overflow-hidden rounded-md border border-border bg-[#0B0B0E]
         ">
@@ -250,46 +295,29 @@ export function HeroPreviewCard() {
         </div>
 
         <div className="
-          mt-3 flex items-center gap-2.5 rounded-md border border-primary/30
-          bg-primary/10 px-3 py-2.5
+          mt-3 flex flex-wrap items-center gap-[22px] rounded-md border
+          border-border bg-chart-surface px-[18px] py-[13px] font-mono
         ">
-          <Badge className="
-            h-auto bg-primary px-1.75 py-0.75 text-[10px]
-            text-primary-foreground
-          ">Rule 15</Badge>
-          <span className="text-[15px] font-semibold text-foreground">{verdictText}</span>
-        </div>
-
-        <div className="mt-2 grid grid-cols-3 gap-2">
-          <div className="rounded-md border border-border px-2.5 py-2.25">
-            <div className="
-              font-mono text-[9.5px] font-semibold tracking-wide
-              text-muted-foreground uppercase
-            ">RANGE</div>
-            <div className="
-              mt-0.75 font-mono text-[15px] font-semibold text-foreground
-            ">{`${range.toFixed(2)} NM`}</div>
+          <div className="
+            flex items-center gap-1.5 text-[11px] font-semibold tracking-wide
+            text-primary uppercase
+          ">
+            {/*
+              D-02: bg-primary/text-primary + hero-live-pulse (plan 20-01's
+              CSS, 2.8s ease-in-out), deliberately NOT bg-rule-accent/
+              text-rule-accent + ChartFooterStrip.tsx's own faster pulse
+              class -- the real Sandbox's LIVE dot must never be mistaken
+              for this static card's.
+            */}
+            <span aria-hidden="true" className="
+              hero-live-pulse size-1.5 rounded-full bg-primary
+            " />
+            LIVE
           </div>
-          <div className="rounded-md border border-border px-2.5 py-2.25">
-            <div className="
-              font-mono text-[9.5px] font-semibold tracking-wide
-              text-muted-foreground uppercase
-            ">BEARING</div>
-            <div className="
-              mt-0.75 font-mono text-[15px] font-semibold text-foreground
-            ">
-              {`${Math.round(bearingDegrees).toString().padStart(3, "0")}°`}
-            </div>
-          </div>
-          <div className="rounded-md border border-border px-2.5 py-2.25">
-            <div className="
-              font-mono text-[9.5px] font-semibold tracking-wide
-              text-muted-foreground uppercase
-            ">CPA</div>
-            <div className="
-              mt-0.75 font-mono text-[15px] font-semibold text-foreground
-            ">{`${cpaResult.value.dcpaNm.toFixed(2)} NM`}</div>
-          </div>
+          <Tile label="RANGE" value={`${range.toFixed(2)} NM`} />
+          <Tile label="BEARING A→B" value={`${Math.round(bearingDegrees).toString().padStart(3, "0")}°`} />
+          <Tile label="CPA" value={`${cpaResult.value.dcpaNm.toFixed(2)} NM`} />
+          <Tile label="TCPA" value={`${cpaResult.value.tcpaMinutes.toFixed(1)} min`} />
         </div>
       </CardContent>
     </Card>
