@@ -194,12 +194,27 @@ Plans:
   3. The Hero preview card's bezel accents, radar sweep overlay, and readout styling visually match the updated design file, while the card remains fully static/fixture-driven with unchanged classification values.
   4. Human-verified: no regression to Hero's fixture-driven classification values or to any other Sandbox content during this pass.
 
-**Plans**: TBD
+**Plans**: 5 plans
 **UI hint**: yes
 
 Plans:
 
-- [ ] 20-01: TBD
+**Wave 1**
+
+- [ ] 20-01-PLAN.md — CSS keyframes/classes for trail connector flow/pulse/token-sweep + Hero radar-sweep overlay + Hero LIVE pulse, all prefers-reduced-motion-gated (app/globals.css only)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 20-02-PLAN.md — Restructure ReasoningTrail.tsx into the horizontal two-list-item-per-step "NAV DECISION CHAIN" + update ReasoningTrail.test.tsx, depends on 20-01
+- [ ] 20-03-PLAN.md — Extend hero-preview-geometry.ts (3-ring/compass constants) + hero-preview-risk.ts (D-03 copy) + restructure HeroPreviewCard.tsx's header/footer strips, depends on 20-01
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 20-04-PLAN.md — Extend Hero's bezel SVG (3rd ring, compass ticks, crosshair, cardinal/range labels, center hub) + radar-sweep overlay div, depends on 20-03
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 20-05-PLAN.md — Human-verify all 4 Roadmap success criteria end-to-end, depends on 20-02 and 20-04
 
 ## Progress
 
@@ -223,5 +238,5 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16 �
 | 17. Gallery → Sandbox Bridge | v1.4 | 4/4 | Complete    | 2026-07-25 |
 | 18. On-Chart Vessel Control Overlay | v1.4 | 5/5 | Complete    | 2026-07-25 |
 | 19. Guided Tour | v1.4 | 4/4 | Complete    | 2026-07-27 |
-| 20. Reasoning-Trail & Hero Visual Sync | v1.4 | 0/TBD | Not started | - |
+| 20. Reasoning-Trail & Hero Visual Sync | v1.4 | 0/5 | Not started | - |
 </content>
