@@ -62,11 +62,12 @@ None of these are new conventions — they extend the same "reproduce the design
 | Micro label (mono, tracked, uppercase — contact labels, tile labels, tags) | 9.5px | 600 (semibold) | 1.2 |
 | Body (secondary/muted text, fact readouts, footer role-action text) | 12.5px | 400 (regular) | 1.5 |
 | Value / readout (mono — RANGE/BEARING/CPA/TCPA values, rule badges) | 15px | 600 (semibold) | 1.2 |
-| Heading (card/strip title — e.g. "Crossing", "Head-on") | 18px (`text-lg`) | 700 (bold) | 1.2 |
 
-**Declared working weights: 400 (regular) and 600 (semibold).** 700 (bold) is an existing, already-shipped exception reserved exclusively for the header-strip title (`text-lg font-bold`) — inherited unchanged from Phase 18's `ChartHeaderStrip.tsx`, which this phase's Hero header strip must mirror per D-03. This phase introduces no new weight; it reuses the exact 3-weight pattern (400/600/700) already locked across every Sandbox chart strip since Phase 18.
+**Declared working weights for this phase: 400 (regular) and 600 (semibold) — 2 weights only.** This is the complete type-scale contract this phase is accountable for; no role above requires or introduces a third weight.
 
-Font-size micro-variance note: exact sizes in the shipped components range from 8.5px (contact label) to 17px (footer tile value) — the four roles above are the load-bearing categories; do not introduce a fifth arbitrary size not derivable from one of these four roles or the Exceptions list above.
+**Out-of-scope legacy usage (excluded from this phase's declared type scale, not a 3rd weight):** The header-strip title (e.g. "Crossing", "Head-on") renders at 18px (`text-lg`) / weight 700 (`font-bold`) — this markup is inherited byte-for-byte and unmodified from Phase 18's `ChartHeaderStrip.tsx`. This phase's Hero header strip mirrors that existing component per D-03 without touching its size, weight, or line-height in any way. It is noted here purely for traceability (so a reviewer knows the 700-weight text on screen is pre-existing, not new); it is not a role this phase declares, modifies, or is graded against under Dimension 4.
+
+Font-size micro-variance note: exact sizes in the shipped components range from 8.5px (contact label) to 17px (footer tile value) — the three roles above are the load-bearing categories this phase touches; do not introduce a fourth arbitrary size not derivable from one of these three roles or the Exceptions list above.
 
 ---
 
@@ -92,6 +93,17 @@ Font-size micro-variance note: exact sizes in the shipped components range from 
 This maps 1:1 onto the design's `dotFor()` categories (`geo/rule/gw/so/mut/doubt`) per `20-DESIGN-SNAPSHOT.md` — no new tone category is introduced.
 
 Accent reserved for: rule/step-number badges, LIVE pulse dots (Sandbox real + Hero distinguished variant), radar-sweep overlays and per-token sweep rings, the trail's dashed connector fill color (per-step tone), corner-bracket accents on step cards, and the header-strip rule chip. Never applied to plain informational text, borders-only decoration unrelated to an instrument reading, or any element outside this explicit list.
+
+---
+
+## Focal Point
+
+*(Addendum — Dimension 2/Visuals explicit focal-point declaration, one per surface touched by this phase.)*
+
+| Surface | Primary focal point | Secondary |
+|---------|----------------------|-----------|
+| Trail | The final (verdict) step card's glow/border/connector (color per tone — `--give-way` red for a decisive give-way vessel, `--mutual` gray for no-single-give-way) draws the eye first: it carries the highest color-saturation delta of any card in the chain and sits at the natural reading-end of the top-to-bottom trail. | The dashed connector's dash-flow (`conduit`) and traveling-pulse (`travel`) animations, read in the direction of the reasoning chain (top → bottom), reinforcing that the verdict card is the destination the eye is being led toward. |
+| Hero | The header strip's rule chip + risk pill strip (top of card, first thing scanned on load — static, highest-contrast text/badge cluster). | The radar-sweep overlay and compass/range-ring chart geometry are ambient/secondary motion, not competing for first-glance attention. |
 
 ---
 
