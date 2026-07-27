@@ -30,4 +30,26 @@ describe("Hero", () => {
     // computed `range` value, not independently hand-typed literals.
     expect(screen.getAllByText("2.99 NM").length).toBeGreaterThan(0);
   });
+
+  it("renders the header strip's risk pill and the footer's BEARING A->B/TCPA tiles, with the old eyebrow/verdict-banner text fully removed (D-03, D-04)", () => {
+    render(<Hero />);
+
+    // Header strip risk pill -- deriveHeroPreviewRisk() resolves this
+    // fixture's dcpaNm (1.18 NM, over the 1.0 "watch" threshold) to the
+    // "ok" tier's exact text template.
+    expect(
+      screen.getByText("Passing clear — CPA 1.18 NM on present courses."),
+    ).toBeInTheDocument();
+
+    // Footer strip's net-new TCPA tile (this fixture's tcpaMinutes ~12.34
+    // -> "12.3 min").
+    expect(screen.getByText("TCPA")).toBeInTheDocument();
+    expect(screen.getByText("12.3 min")).toBeInTheDocument();
+    expect(screen.getByText("BEARING A→B")).toBeInTheDocument();
+
+    // D-04: the old CardHeader eyebrow and below-chart verdict banner are
+    // fully removed, not relocated.
+    expect(screen.queryByText("Live classification")).not.toBeInTheDocument();
+    expect(screen.queryByText(/BRG-ring/)).not.toBeInTheDocument();
+  });
 });
