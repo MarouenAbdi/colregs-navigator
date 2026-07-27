@@ -219,5 +219,13 @@
   height: 8px;
   border-radius: 9999px;
   background: conic-gradient(from 0deg, transparent, var(--primary) 60%, transparent);
-  animation: radar-sweep 2s linear infinite;
+}
+
+/* Respect users who've opted out of animation (same precedent as the
+   #sandbox/#gallery smooth-scroll rule above) -- the sweep is decorative
+   and loops indefinitely, so it must not run unconditionally. */
+@media (prefers-reduced-motion: no-preference) {
+  .radar-sweep-dot {
+    animation: radar-sweep 2s linear infinite;
+  }
 }
