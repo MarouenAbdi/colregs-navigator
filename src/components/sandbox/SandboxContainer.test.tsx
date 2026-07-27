@@ -163,7 +163,7 @@ async function pressArrow(
 }
 
 function reasoningTrailCard(): HTMLElement {
-  const card = screen.getByText("Reasoning Trail").closest('[data-slot="card"]');
+  const card = screen.getByText(/NAV DECISION CHAIN/).closest('[data-slot="card"]');
   expect(card).not.toBeNull();
   return card as HTMLElement;
 }
