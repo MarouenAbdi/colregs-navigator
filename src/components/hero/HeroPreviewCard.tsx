@@ -20,8 +20,15 @@ import {
   HERO_CONTAINER_SIZE,
   HERO_VIEW_BOX,
   HERO_CHART_CENTER,
-  HERO_OUTER_RING_RADIUS_PX,
-  HERO_INNER_RING_RADIUS_PX,
+  HERO_RANGE_RING_RADII_PX,
+  HERO_COMPASS_RING_RADIUS_PX,
+  HERO_COMPASS_MINOR_STROKE_WIDTH_PX,
+  HERO_COMPASS_MINOR_DASHARRAY,
+  HERO_COMPASS_MAJOR_STROKE_WIDTH_PX,
+  HERO_COMPASS_MAJOR_DASHARRAY,
+  HERO_CENTER_HUB_RADIUS_PX,
+  HERO_CARDINAL_LABEL_OFFSET_PX,
+  HERO_RANGE_LABEL_TEXT,
   VESSEL_A_HULL_COLOR,
   VESSEL_B_HULL_COLOR,
   CONNECTOR_STROKE,
@@ -188,7 +195,7 @@ export function HeroPreviewCard() {
         </div>
 
         <div className="
-          overflow-hidden rounded-md border border-border bg-[#0B0B0E]
+          relative overflow-hidden rounded-md border border-border bg-[#0B0B0E]
         ">
           <svg viewBox="0 0 320 200" width="100%" height="auto" role="img" aria-label="Illustrative encounter preview chart">
             <defs>
@@ -200,7 +207,7 @@ export function HeroPreviewCard() {
                 gradientUnits="userSpaceOnUse"
                 cx={HERO_CHART_CENTER.screenX}
                 cy={HERO_CHART_CENTER.screenY}
-                r={HERO_OUTER_RING_RADIUS_PX}
+                r={HERO_RANGE_RING_RADII_PX[2]}
               >
                 <stop offset="0%" stopColor="#2dd4bf" stopOpacity={0.35} />
                 <stop offset="100%" stopColor="#2dd4bf" stopOpacity={0} />
@@ -212,7 +219,7 @@ export function HeroPreviewCard() {
             <circle
               cx={HERO_CHART_CENTER.screenX}
               cy={HERO_CHART_CENTER.screenY}
-              r={HERO_OUTER_RING_RADIUS_PX}
+              r={HERO_RANGE_RING_RADII_PX[0]}
               stroke="rgba(45,212,191,0.16)"
               fill="none"
               strokeWidth={1}
@@ -220,10 +227,132 @@ export function HeroPreviewCard() {
             <circle
               cx={HERO_CHART_CENTER.screenX}
               cy={HERO_CHART_CENTER.screenY}
-              r={HERO_INNER_RING_RADIUS_PX}
+              r={HERO_RANGE_RING_RADII_PX[1]}
               stroke="rgba(45,212,191,0.16)"
               fill="none"
               strokeWidth={1}
+            />
+            <circle
+              cx={HERO_CHART_CENTER.screenX}
+              cy={HERO_CHART_CENTER.screenY}
+              r={HERO_RANGE_RING_RADII_PX[2]}
+              stroke="rgba(45,212,191,0.16)"
+              fill="none"
+              strokeWidth={1}
+            />
+
+            {/* Decorative bezel background -- full N-S/E-W crosshair, dashed
+                compass-tick ring, cardinal/range labels, center hub -- sits
+                behind the sector wedge and vessel markers so it never
+                occludes the classification-driven elements. */}
+            <line
+              x1={0}
+              y1={HERO_CHART_CENTER.screenY}
+              x2={320}
+              y2={HERO_CHART_CENTER.screenY}
+              stroke="#3F3F46"
+              strokeOpacity={0.7}
+              strokeWidth={1}
+            />
+            <line
+              x1={HERO_CHART_CENTER.screenX}
+              y1={0}
+              x2={HERO_CHART_CENTER.screenX}
+              y2={200}
+              stroke="#3F3F46"
+              strokeOpacity={0.7}
+              strokeWidth={1}
+            />
+
+            <circle
+              cx={HERO_CHART_CENTER.screenX}
+              cy={HERO_CHART_CENTER.screenY}
+              r={HERO_COMPASS_RING_RADIUS_PX}
+              fill="none"
+              stroke="rgba(45,212,191,0.32)"
+              strokeWidth={HERO_COMPASS_MINOR_STROKE_WIDTH_PX}
+              strokeDasharray={HERO_COMPASS_MINOR_DASHARRAY}
+            />
+            <circle
+              cx={HERO_CHART_CENTER.screenX}
+              cy={HERO_CHART_CENTER.screenY}
+              r={HERO_COMPASS_RING_RADIUS_PX}
+              fill="none"
+              stroke="rgba(45,212,191,0.5)"
+              strokeWidth={HERO_COMPASS_MAJOR_STROKE_WIDTH_PX}
+              strokeDasharray={HERO_COMPASS_MAJOR_DASHARRAY}
+            />
+
+            <text
+              x={HERO_CHART_CENTER.screenX}
+              y={HERO_CHART_CENTER.screenY - HERO_CARDINAL_LABEL_OFFSET_PX}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="#2dd4bf"
+              fontSize={11}
+              fontWeight={700}
+              className="font-mono"
+            >
+              N
+            </text>
+            <text
+              x={HERO_CHART_CENTER.screenX}
+              y={HERO_CHART_CENTER.screenY + HERO_CARDINAL_LABEL_OFFSET_PX}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="#2dd4bf"
+              fontSize={11}
+              fontWeight={700}
+              className="font-mono"
+            >
+              S
+            </text>
+            <text
+              x={HERO_CHART_CENTER.screenX + HERO_CARDINAL_LABEL_OFFSET_PX}
+              y={HERO_CHART_CENTER.screenY}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="#2dd4bf"
+              fontSize={11}
+              fontWeight={700}
+              className="font-mono"
+            >
+              E
+            </text>
+            <text
+              x={HERO_CHART_CENTER.screenX - HERO_CARDINAL_LABEL_OFFSET_PX}
+              y={HERO_CHART_CENTER.screenY}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="#2dd4bf"
+              fontSize={11}
+              fontWeight={700}
+              className="font-mono"
+            >
+              W
+            </text>
+
+            {HERO_RANGE_LABEL_TEXT.map((label, i) => (
+              <text
+                key={label}
+                x={HERO_CHART_CENTER.screenX + 4}
+                y={HERO_CHART_CENTER.screenY - HERO_RANGE_RING_RADII_PX[i]}
+                textAnchor="start"
+                fill="#52525B"
+                fontSize={9}
+                className="font-mono"
+              >
+                {label}
+              </text>
+            ))}
+
+            <circle
+              cx={HERO_CHART_CENTER.screenX}
+              cy={HERO_CHART_CENTER.screenY}
+              r={HERO_CENTER_HUB_RADIUS_PX}
+              fill="#0B0B0E"
+              stroke="#2dd4bf"
+              strokeWidth={1.5}
             />
 
             <path d={sectorPath} fill="url(#heroSectorGradient)" />
@@ -232,7 +361,7 @@ export function HeroPreviewCard() {
               x1={HERO_CHART_CENTER.screenX}
               y1={HERO_CHART_CENTER.screenY}
               x2={HERO_CHART_CENTER.screenX}
-              y2={HERO_CHART_CENTER.screenY - HERO_OUTER_RING_RADIUS_PX}
+              y2={HERO_CHART_CENTER.screenY - HERO_RANGE_RING_RADII_PX[2]}
               stroke="rgba(45,212,191,0.16)"
               strokeWidth={1}
             />
@@ -292,6 +421,9 @@ export function HeroPreviewCard() {
               pillText={vesselBPillText}
             />
           </svg>
+          <div className="hero-radar-sweep" aria-hidden="true">
+            <div className="hero-radar-sweep-inner" />
+          </div>
         </div>
 
         <div className="
