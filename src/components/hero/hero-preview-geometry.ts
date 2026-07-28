@@ -31,15 +31,7 @@ export const HERO_CHART_CENTER = {
   screenY: HERO_CONTAINER_SIZE.height / 2,
 };
 
-// The mock's two range rings are hardcoded at r=115/r=60 on its 480px-wide
-// canvas -- reproduced as the same fraction of this card's width.
-// Kept in place (not removed) until plan 20-04's Task 1 migrates
-// HeroPreviewCard.tsx's remaining 4 call sites off these two constants --
-// removing them here would leave the repo non-compiling between plans.
-export const HERO_OUTER_RING_RADIUS_PX = HERO_CONTAINER_SIZE.width * (115 / 480);
-export const HERO_INNER_RING_RADIUS_PX = HERO_CONTAINER_SIZE.width * (60 / 480);
-
-// The design's updated bezel replaces the 2-ring layout above with 3 range
+// The design's updated bezel replaces the mock's original 2-ring layout with 3 range
 // rings at r=42/84/126 on its 480-wide canvas -- reproduced as the same
 // fraction of this card's width (28px/56px/84px at this codebase's 320px).
 export const HERO_RANGE_RING_RADII_PX: readonly [number, number, number] = [
