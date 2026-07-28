@@ -195,7 +195,7 @@ export function HeroPreviewCard() {
         </div>
 
         <div className="
-          overflow-hidden rounded-md border border-border bg-[#0B0B0E]
+          relative overflow-hidden rounded-md border border-border bg-[#0B0B0E]
         ">
           <svg viewBox="0 0 320 200" width="100%" height="auto" role="img" aria-label="Illustrative encounter preview chart">
             <defs>
@@ -421,6 +421,9 @@ export function HeroPreviewCard() {
               pillText={vesselBPillText}
             />
           </svg>
+          <div className="hero-radar-sweep" aria-hidden="true">
+            <div className="hero-radar-sweep-inner" />
+          </div>
         </div>
 
         <div className="

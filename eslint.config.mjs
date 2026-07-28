@@ -43,13 +43,14 @@ const eslintConfig = defineConfig([
       },
     },
     rules: {
-      // `radar-sweep-dot`(`--lg`), the `trail-*` family, and `hero-live-pulse`
-      // are real, plain CSS classes defined directly in app/globals.css
-      // (Phase 19 Guided Tour accent; Phase 20 Reasoning Trail connector/
-      // token layers and Hero LIVE-dot pulse, respectively -- none are
-      // Tailwind utilities) -- the plugin's Tailwind-v4-compiler-backed
-      // candidate check can't generate CSS for a non-utility class name, so
-      // it otherwise false-flags these as unknown every time they're
+      // `radar-sweep-dot`(`--lg`), the `trail-*` family, `hero-live-pulse`,
+      // and `hero-radar-sweep(-inner)` are real, plain CSS classes defined
+      // directly in app/globals.css (Phase 19 Guided Tour accent; Phase 20
+      // Reasoning Trail connector/token layers, Hero LIVE-dot pulse, and
+      // Hero bezel radar-sweep overlay, respectively -- none are Tailwind
+      // utilities) -- the plugin's Tailwind-v4-compiler-backed candidate
+      // check can't generate CSS for a non-utility class name, so it
+      // otherwise false-flags these as unknown every time they're
       // referenced from a className.
       "better-tailwindcss/no-unknown-classes": [
         "error",
@@ -59,6 +60,7 @@ const eslintConfig = defineConfig([
             "^trail-connector(-pulse)?$",
             "^trail-token(-sweep-ring)?$",
             "^hero-live-pulse$",
+            "^hero-radar-sweep(-inner)?$",
           ],
         },
       ],
