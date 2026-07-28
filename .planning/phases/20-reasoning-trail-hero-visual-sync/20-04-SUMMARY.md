@@ -105,3 +105,10 @@ None - no external service configuration required.
 ---
 *Phase: 20-reasoning-trail-hero-visual-sync*
 *Completed: 2026-07-28*
+
+## Self-Check: PASSED
+
+All modified files confirmed present in the worktree: `HeroPreviewCard.tsx`,
+`hero-preview-geometry.ts`, `eslint.config.mjs`, `20-04-SUMMARY.md`.
+All 3 task/SUMMARY commits confirmed present in `git log`: `811979b`,
+`48f4a20`, `2228c54` (this SUMMARY commit).
