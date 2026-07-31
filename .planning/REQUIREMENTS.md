@@ -12,7 +12,7 @@ Requirements for this milestone. Each maps to roadmap phases. Zero change to `cl
 - [x] **SBOX-06**: Chart header strip merges the rule badge, encounter title, and risk badge into one command strip atop the chart (replaces the separate `VerdictBanner` card)
 - [x] **SBOX-07**: Chart footer strip merges the LIVE/RANGE/BEARING/CPA/TCPA readouts and each vessel's required-action text into one strip below the chart (replaces the separate `InstrumentReadouts` card)
 - [x] **SBOX-08**: User can click a vessel on the chart to open an on-chart floating control card (type, speed, heading) for that vessel, replacing the always-visible side `ControlPanel`
-- [ ] **SBOX-09**: Reasoning trail renders as a horizontal sequence of connected step cards ("NAV DECISION CHAIN"), replacing the vertical list
+- [x] **SBOX-09**: Reasoning trail renders as a horizontal sequence of connected step cards ("NAV DECISION CHAIN"), replacing the vertical list
 - [x] **SBOX-10**: The inline 6-chip preset row is removed from the Sandbox; scenario loading happens only via the Gallery's "Try on Sandbox" action
 
 ### Guided Tour
@@ -27,7 +27,7 @@ Requirements for this milestone. Each maps to roadmap phases. Zero change to `cl
 
 ### Hero
 
-- [ ] **HERO-05**: Hero's live-classification preview card visual details (bezel accents, radar sweep overlay, readout styling) are synced to the updated design file; the card remains fully static/fixture-driven
+- [x] **HERO-05**: Hero's live-classification preview card visual details (bezel accents, radar sweep overlay, readout styling) are synced to the updated design file; the card remains fully static/fixture-driven
 
 ## v2 Requirements
 
@@ -56,13 +56,13 @@ Populated during roadmap creation.
 | SBOX-06 | Phase 18 | Complete |
 | SBOX-07 | Phase 18 | Complete |
 | SBOX-08 | Phase 18 | Complete |
-| SBOX-09 | Phase 20 | Pending |
+| SBOX-09 | Phase 20 | Complete |
 | SBOX-10 | Phase 16 | Complete |
 | TOUR-01 | Phase 19 | Complete |
 | TOUR-02 | Phase 19 | Complete |
 | GAL-05 | Phase 17 | Complete |
 | GAL-06 | Phase 17 | Complete |
-| HERO-05 | Phase 20 | Pending |
+| HERO-05 | Phase 20 | Complete |
 
 **Coverage:**
 - v1 requirements: 10 total

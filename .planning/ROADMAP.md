@@ -238,5 +238,5 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16 �
 | 17. Gallery → Sandbox Bridge | v1.4 | 4/4 | Complete    | 2026-07-25 |
 | 18. On-Chart Vessel Control Overlay | v1.4 | 5/5 | Complete    | 2026-07-25 |
 | 19. Guided Tour | v1.4 | 4/4 | Complete    | 2026-07-27 |
-| 20. Reasoning-Trail & Hero Visual Sync | v1.4 | 5/5 | Complete   | 2026-07-31 |
+| 20. Reasoning-Trail & Hero Visual Sync | v1.4 | 5/5 | Complete    | 2026-07-31 |
 </content>
