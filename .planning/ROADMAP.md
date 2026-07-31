@@ -59,7 +59,7 @@ See `.planning/milestones/v1.3-ROADMAP.md` for full phase details (goals, succes
 - [x] **Phase 17: Gallery → Sandbox Bridge** - Gallery's "Try on Sandbox" loads a scenario directly into the homepage Sandbox with no page navigation (completed 2026-07-25)
 - [x] **Phase 18: On-Chart Vessel Control Overlay** - Replace the side ControlPanel with click-to-open floating vessel overlays and merge the chart header/footer strips (completed 2026-07-25)
 - [x] **Phase 19: Guided Tour** - A 6-step "How to read this" modal walkthrough with full keyboard/focus handling (completed 2026-07-27)
-- [ ] **Phase 20: Reasoning-Trail & Hero Visual Sync** - Horizontal "NAV DECISION CHAIN" trail layout and Hero preview card visual sync
+- [x] **Phase 20: Reasoning-Trail & Hero Visual Sync** - Horizontal "NAV DECISION CHAIN" trail layout and Hero preview card visual sync (completed 2026-07-31)
 
 ## Phase Details
 
@@ -214,7 +214,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 20-05-PLAN.md — Human-verify all 4 Roadmap success criteria end-to-end, depends on 20-02 and 20-04
+- [x] 20-05-PLAN.md — Human-verify all 4 Roadmap success criteria end-to-end, depends on 20-02 and 20-04
 
 ## Progress
 
@@ -238,5 +238,5 @@ Phases execute in numeric order: 10 → 11 → 12 → 13 → 14 → 15 → 16 �
 | 17. Gallery → Sandbox Bridge | v1.4 | 4/4 | Complete    | 2026-07-25 |
 | 18. On-Chart Vessel Control Overlay | v1.4 | 5/5 | Complete    | 2026-07-25 |
 | 19. Guided Tour | v1.4 | 4/4 | Complete    | 2026-07-27 |
-| 20. Reasoning-Trail & Hero Visual Sync | v1.4 | 4/5 | In Progress|  |
+| 20. Reasoning-Trail & Hero Visual Sync | v1.4 | 5/5 | Complete   | 2026-07-31 |
 </content>
