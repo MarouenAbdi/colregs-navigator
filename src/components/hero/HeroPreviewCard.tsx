@@ -1,31 +1,44 @@
 /**
- * The Hero section's "Live classification" preview card (HERO-02): a
+ * The Hero section's illustrative encounter-preview card (HERO-02): a
  * fully static, illustrative SVG chart driven by a real
  * `classifyEncounter()`/`bearing()`/`cpa()` call against a fixed fixture
  * (`hero-preview-fixture.ts`) -- not hand-typed literals. Shares zero code
- * with the real interactive `ChartPanel.tsx` (D-03) and is
- * never wired to live Sandbox state (D-01: no pulsing dot, no
- * animated bearing line).
+ * with the real interactive `ChartPanel.tsx` (07-CONTEXT.md D-03) and is
+ * never wired to live Sandbox state -- its footer's pulsing indicator is
+ * a purely decorative, visually-distinguished echo of the real Sandbox's
+ * own live indicator (this phase's D-01/D-02), not a live data connection;
+ * the bearing line and every other readout stay non-animated.
  */
 import { classifyEncounter } from "../../domain/colregs/classify-encounter.js";
 import { bearing } from "../../domain/geometry/bearing/bearing.js";
 import { cpa } from "../../domain/geometry/cpa/cpa.js";
 import { chartToScreen } from "../../domain/geometry/screen-convert/screen-convert.js";
-import type { EncounterType, VesselLabel } from "../../domain/colregs/types.js";
+import type { EncounterType } from "../../domain/colregs/types.js";
 import { heroPreviewVesselA, heroPreviewVesselB } from "./hero-preview-fixture.js";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   HERO_CONTAINER_SIZE,
   HERO_VIEW_BOX,
   HERO_CHART_CENTER,
-  HERO_OUTER_RING_RADIUS_PX,
-  HERO_INNER_RING_RADIUS_PX,
+  HERO_RANGE_RING_RADII_PX,
+  HERO_COMPASS_RING_RADIUS_PX,
+  HERO_COMPASS_MINOR_STROKE_WIDTH_PX,
+  HERO_COMPASS_MINOR_DASHARRAY,
+  HERO_COMPASS_MAJOR_STROKE_WIDTH_PX,
+  HERO_COMPASS_MAJOR_DASHARRAY,
+  HERO_CENTER_HUB_RADIUS_PX,
+  HERO_CARDINAL_LABEL_OFFSET_PX,
+  HERO_RANGE_LABEL_TEXT,
   VESSEL_A_HULL_COLOR,
   VESSEL_B_HULL_COLOR,
   CONNECTOR_STROKE,
   bearingSectorPath,
 } from "./hero-preview-geometry.js";
+import {
+  HERO_PREVIEW_RISK_TONE_CLASSNAME,
+  HERO_PREVIEW_RISK_DOT_CLASSNAME,
+  deriveHeroPreviewRisk,
+} from "./hero-preview-risk.js";
 import {
   HULL_PATH,
   HULL_STROKE,
@@ -38,11 +51,6 @@ const ENCOUNTER_TYPE_TITLE: Record<EncounterType, string> = {
   crossing: "Crossing",
   "head-on": "Head-on",
   overtaking: "Overtaking",
-};
-
-const VESSEL_LABEL_TEXT: Record<VesselLabel, string> = {
-  vesselA: "Vessel A",
-  vesselB: "Vessel B",
 };
 
 type VesselMarkerProps = {
@@ -78,6 +86,28 @@ function VesselMarker({ screen, heading, hullColor, label, pillText }: VesselMar
         </text>
       </g>
     </>
+  );
+}
+
+// Copies ChartFooterStrip.tsx's Tile shape verbatim (not imported --
+// HeroPreviewCard.tsx shares zero code with the Sandbox chart module tree,
+// D-03) with one deliberate deviation: the value uses this codebase's
+// existing Hero 15px value-role convention, not ChartFooterStrip.tsx's 17px.
+function Tile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="
+      rounded-lg border border-border bg-chart-surface px-[11px] py-[10px]
+    ">
+      <div className="
+        font-mono text-[9.5px] font-semibold tracking-wide text-muted-foreground
+        uppercase
+      ">
+        {label}
+      </div>
+      <div className="
+        mt-0.75 font-mono text-[15px] font-semibold text-foreground
+      ">{value}</div>
+    </div>
   );
 }
 
@@ -117,9 +147,6 @@ export function HeroPreviewCard() {
     // fixture-invariant checks above) instead of casting the null away.
     throw new Error("Hero preview fixture classified as a mutual/no-giveWay encounter -- fixture is broken");
   }
-  const giveWayLabel = VESSEL_LABEL_TEXT[classification.giveWay];
-  const verdictText = `${ENCOUNTER_TYPE_TITLE[classification.encounterType]} — ${giveWayLabel} gives way`;
-
   const vesselAPillText = classification.giveWay === "vesselA" ? "GW" : "SO";
   const vesselBPillText = classification.giveWay === "vesselB" ? "GW" : "SO";
 
@@ -128,22 +155,47 @@ export function HeroPreviewCard() {
   const headingVectorB = headingVectorEndpoint(screenB, heroPreviewVesselB.heading);
   const connectorMidpoint = midpoint(screenA, screenB);
 
+  const risk = deriveHeroPreviewRisk(cpaResult.value.dcpaNm, cpaResult.value.tcpaMinutes);
+
   return (
     <Card className="gap-3">
-      <CardHeader className="
-        flex flex-row items-center justify-between font-mono text-[10.5px]
-        font-semibold text-muted-foreground
-      ">
-        <span className="flex items-center gap-1.75">
-          {/* Static, non-pulsing dot per D-01 -- no animation classes. */}
-          <span className="size-1.5 rounded-full bg-accent" aria-hidden="true" />
-          <span className="text-foreground">Live classification</span>
-        </span>
-        <span>BRG-ring · 12 NM</span>
-      </CardHeader>
       <CardContent className="flex flex-col">
         <div className="
-          overflow-hidden rounded-md border border-border bg-[#0B0B0E]
+          flex items-center gap-3 border-b border-border px-4 py-3
+        ">
+          <div className="flex min-w-0 items-center gap-2">
+            {/* Hardcoded per this fixture's invariant Rule 15/crossing
+                verdict (unchanged from the prior below-chart badge) --
+                never derived, since this fixture never produces another
+                rule outcome. */}
+            <span className="
+              w-fit shrink-0 rounded-md bg-rule-accent px-2 py-0.5 font-mono
+              text-[11px] font-semibold text-background
+            ">
+              Rule 15
+            </span>
+            <h3 className="truncate text-lg font-bold text-foreground">
+              {ENCOUNTER_TYPE_TITLE[classification.encounterType]}
+            </h3>
+          </div>
+
+          <div className="flex-1" />
+
+          <div className={`
+            flex max-w-[46%] items-center gap-[7px] rounded-md border px-[11px]
+            py-[6px] text-[12.5px]
+            ${HERO_PREVIEW_RISK_TONE_CLASSNAME[risk.tier]}
+          `}>
+            <span aria-hidden="true" className={`
+              size-2 shrink-0 rounded-full
+              ${HERO_PREVIEW_RISK_DOT_CLASSNAME[risk.tier]}
+            `} />
+            <span className="truncate">{risk.text}</span>
+          </div>
+        </div>
+
+        <div className="
+          relative overflow-hidden rounded-md border border-border bg-[#0B0B0E]
         ">
           <svg viewBox="0 0 320 200" width="100%" height="auto" role="img" aria-label="Illustrative encounter preview chart">
             <defs>
@@ -155,7 +207,7 @@ export function HeroPreviewCard() {
                 gradientUnits="userSpaceOnUse"
                 cx={HERO_CHART_CENTER.screenX}
                 cy={HERO_CHART_CENTER.screenY}
-                r={HERO_OUTER_RING_RADIUS_PX}
+                r={HERO_RANGE_RING_RADII_PX[2]}
               >
                 <stop offset="0%" stopColor="#2dd4bf" stopOpacity={0.35} />
                 <stop offset="100%" stopColor="#2dd4bf" stopOpacity={0} />
@@ -167,7 +219,7 @@ export function HeroPreviewCard() {
             <circle
               cx={HERO_CHART_CENTER.screenX}
               cy={HERO_CHART_CENTER.screenY}
-              r={HERO_OUTER_RING_RADIUS_PX}
+              r={HERO_RANGE_RING_RADII_PX[0]}
               stroke="rgba(45,212,191,0.16)"
               fill="none"
               strokeWidth={1}
@@ -175,10 +227,132 @@ export function HeroPreviewCard() {
             <circle
               cx={HERO_CHART_CENTER.screenX}
               cy={HERO_CHART_CENTER.screenY}
-              r={HERO_INNER_RING_RADIUS_PX}
+              r={HERO_RANGE_RING_RADII_PX[1]}
               stroke="rgba(45,212,191,0.16)"
               fill="none"
               strokeWidth={1}
+            />
+            <circle
+              cx={HERO_CHART_CENTER.screenX}
+              cy={HERO_CHART_CENTER.screenY}
+              r={HERO_RANGE_RING_RADII_PX[2]}
+              stroke="rgba(45,212,191,0.16)"
+              fill="none"
+              strokeWidth={1}
+            />
+
+            {/* Decorative bezel background -- full N-S/E-W crosshair, dashed
+                compass-tick ring, cardinal/range labels, center hub -- sits
+                behind the sector wedge and vessel markers so it never
+                occludes the classification-driven elements. */}
+            <line
+              x1={0}
+              y1={HERO_CHART_CENTER.screenY}
+              x2={320}
+              y2={HERO_CHART_CENTER.screenY}
+              stroke="#3F3F46"
+              strokeOpacity={0.7}
+              strokeWidth={1}
+            />
+            <line
+              x1={HERO_CHART_CENTER.screenX}
+              y1={0}
+              x2={HERO_CHART_CENTER.screenX}
+              y2={200}
+              stroke="#3F3F46"
+              strokeOpacity={0.7}
+              strokeWidth={1}
+            />
+
+            <circle
+              cx={HERO_CHART_CENTER.screenX}
+              cy={HERO_CHART_CENTER.screenY}
+              r={HERO_COMPASS_RING_RADIUS_PX}
+              fill="none"
+              stroke="rgba(45,212,191,0.32)"
+              strokeWidth={HERO_COMPASS_MINOR_STROKE_WIDTH_PX}
+              strokeDasharray={HERO_COMPASS_MINOR_DASHARRAY}
+            />
+            <circle
+              cx={HERO_CHART_CENTER.screenX}
+              cy={HERO_CHART_CENTER.screenY}
+              r={HERO_COMPASS_RING_RADIUS_PX}
+              fill="none"
+              stroke="rgba(45,212,191,0.5)"
+              strokeWidth={HERO_COMPASS_MAJOR_STROKE_WIDTH_PX}
+              strokeDasharray={HERO_COMPASS_MAJOR_DASHARRAY}
+            />
+
+            <text
+              x={HERO_CHART_CENTER.screenX}
+              y={HERO_CHART_CENTER.screenY - HERO_CARDINAL_LABEL_OFFSET_PX}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="#2dd4bf"
+              fontSize={11}
+              fontWeight={700}
+              className="font-mono"
+            >
+              N
+            </text>
+            <text
+              x={HERO_CHART_CENTER.screenX}
+              y={HERO_CHART_CENTER.screenY + HERO_CARDINAL_LABEL_OFFSET_PX}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="#2dd4bf"
+              fontSize={11}
+              fontWeight={700}
+              className="font-mono"
+            >
+              S
+            </text>
+            <text
+              x={HERO_CHART_CENTER.screenX + HERO_CARDINAL_LABEL_OFFSET_PX}
+              y={HERO_CHART_CENTER.screenY}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="#2dd4bf"
+              fontSize={11}
+              fontWeight={700}
+              className="font-mono"
+            >
+              E
+            </text>
+            <text
+              x={HERO_CHART_CENTER.screenX - HERO_CARDINAL_LABEL_OFFSET_PX}
+              y={HERO_CHART_CENTER.screenY}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="#2dd4bf"
+              fontSize={11}
+              fontWeight={700}
+              className="font-mono"
+            >
+              W
+            </text>
+
+            {HERO_RANGE_LABEL_TEXT.map((label, i) => (
+              <text
+                key={label}
+                x={HERO_CHART_CENTER.screenX + 4}
+                y={HERO_CHART_CENTER.screenY - HERO_RANGE_RING_RADII_PX[i]}
+                textAnchor="start"
+                fill="#52525B"
+                fontSize={9}
+                className="font-mono"
+              >
+                {label}
+              </text>
+            ))}
+
+            <circle
+              cx={HERO_CHART_CENTER.screenX}
+              cy={HERO_CHART_CENTER.screenY}
+              r={HERO_CENTER_HUB_RADIUS_PX}
+              fill="#0B0B0E"
+              stroke="#2dd4bf"
+              strokeWidth={1.5}
             />
 
             <path d={sectorPath} fill="url(#heroSectorGradient)" />
@@ -187,7 +361,7 @@ export function HeroPreviewCard() {
               x1={HERO_CHART_CENTER.screenX}
               y1={HERO_CHART_CENTER.screenY}
               x2={HERO_CHART_CENTER.screenX}
-              y2={HERO_CHART_CENTER.screenY - HERO_OUTER_RING_RADIUS_PX}
+              y2={HERO_CHART_CENTER.screenY - HERO_RANGE_RING_RADII_PX[2]}
               stroke="rgba(45,212,191,0.16)"
               strokeWidth={1}
             />
@@ -247,49 +421,35 @@ export function HeroPreviewCard() {
               pillText={vesselBPillText}
             />
           </svg>
+          <div className="hero-radar-sweep" aria-hidden="true">
+            <div className="hero-radar-sweep-inner" />
+          </div>
         </div>
 
         <div className="
-          mt-3 flex items-center gap-2.5 rounded-md border border-primary/30
-          bg-primary/10 px-3 py-2.5
+          mt-3 flex flex-wrap items-center gap-[22px] rounded-md border
+          border-border bg-chart-surface px-[18px] py-[13px] font-mono
         ">
-          <Badge className="
-            h-auto bg-primary px-1.75 py-0.75 text-[10px]
-            text-primary-foreground
-          ">Rule 15</Badge>
-          <span className="text-[15px] font-semibold text-foreground">{verdictText}</span>
-        </div>
-
-        <div className="mt-2 grid grid-cols-3 gap-2">
-          <div className="rounded-md border border-border px-2.5 py-2.25">
-            <div className="
-              font-mono text-[9.5px] font-semibold tracking-wide
-              text-muted-foreground uppercase
-            ">RANGE</div>
-            <div className="
-              mt-0.75 font-mono text-[15px] font-semibold text-foreground
-            ">{`${range.toFixed(2)} NM`}</div>
+          <div className="
+            flex items-center gap-1.5 text-[11px] font-semibold tracking-wide
+            text-primary uppercase
+          ">
+            {/*
+              D-02: bg-primary/text-primary + hero-live-pulse (plan 20-01's
+              CSS, 2.8s ease-in-out), deliberately NOT bg-rule-accent/
+              text-rule-accent + ChartFooterStrip.tsx's own faster pulse
+              class -- the real Sandbox's LIVE dot must never be mistaken
+              for this static card's.
+            */}
+            <span aria-hidden="true" className="
+              hero-live-pulse size-1.5 rounded-full bg-primary
+            " />
+            LIVE
           </div>
-          <div className="rounded-md border border-border px-2.5 py-2.25">
-            <div className="
-              font-mono text-[9.5px] font-semibold tracking-wide
-              text-muted-foreground uppercase
-            ">BEARING</div>
-            <div className="
-              mt-0.75 font-mono text-[15px] font-semibold text-foreground
-            ">
-              {`${Math.round(bearingDegrees).toString().padStart(3, "0")}°`}
-            </div>
-          </div>
-          <div className="rounded-md border border-border px-2.5 py-2.25">
-            <div className="
-              font-mono text-[9.5px] font-semibold tracking-wide
-              text-muted-foreground uppercase
-            ">CPA</div>
-            <div className="
-              mt-0.75 font-mono text-[15px] font-semibold text-foreground
-            ">{`${cpaResult.value.dcpaNm.toFixed(2)} NM`}</div>
-          </div>
+          <Tile label="RANGE" value={`${range.toFixed(2)} NM`} />
+          <Tile label="BEARING A→B" value={`${Math.round(bearingDegrees).toString().padStart(3, "0")}°`} />
+          <Tile label="CPA" value={`${cpaResult.value.dcpaNm.toFixed(2)} NM`} />
+          <Tile label="TCPA" value={`${cpaResult.value.tcpaMinutes.toFixed(1)} min`} />
         </div>
       </CardContent>
     </Card>
