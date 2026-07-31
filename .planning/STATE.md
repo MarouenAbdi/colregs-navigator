@@ -104,12 +104,13 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-27T15:13:47.759Z
-Stopped at: Phase 20 UI-SPEC approved
-Resume file: .planning/phases/20-reasoning-trail-hero-visual-sync/20-UI-SPEC.md
+Last session: 2026-07-31
+Stopped at: Phase 20 shipped — PR #29 (https://github.com/MarouenAbdi/colregs-navigator/pull/29)
+Resume file: none — milestone v1.4 complete pending PR #29 merge
 
 ## Operator Next Steps
 
-- Run `/gsd:execute-phase 16` to execute Sandbox Mutation-Path Generalization
+- Review and merge PR #29 (Phase 20: Reasoning-Trail & Hero Visual Sync)
+- Run `/gsd:complete-milestone` to archive v1.4 and prepare for the next milestone
 
 </content>
